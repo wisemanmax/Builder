@@ -601,6 +601,12 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
       <button class="vbar-btn primary" id="vbar-edit">✏️ Edit</button>
     </div>
   </div>
+  <!-- Preview-mode approval bar — shown only when reviewing before merge -->
+  <div id="vbar-approve-row" style="display:none;align-items:center;gap:8px;padding:10px 14px;background:rgba(61,90,254,.1);border-bottom:1.5px solid rgba(61,90,254,.25);flex-shrink:0">
+    <span style="flex:1;font-size:11px;color:rgba(255,255,255,.6)">Review the app, then approve or request changes</span>
+    <button id="vbar-req-changes" style="padding:7px 13px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">✏️ Changes</button>
+    <button id="vbar-approve" style="padding:7px 14px;border-radius:9px;background:linear-gradient(135deg,#FF3CAC,#784BA0);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(255,60,172,.35)">🔀 Approve & Merge</button>
+  </div>
   <iframe id="viewer-iframe" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
 </div>
 
@@ -1107,23 +1113,44 @@ function runLocalChecks(code){
 // Apps are previewed at Step 6 but not saved until Step 8 (after approval).
 // This cache lets the Full Screen viewer work before the app is in ST.apps.
 const _previewCache={};
+let _previewPid=null; // pid of pipeline waiting on approval, or null
+
 function setPreview(id,code){_previewCache[id]=code;}
 function clearPreview(id){delete _previewCache[id];}
-window.openPreview=function(id){
-  // Try preview cache first (pre-save), fall back to saved app
-  const code=_previewCache[id];
-  if(code){
-    // Open viewer directly with cached code
-    $('vbar-name').textContent='Preview';
-    $('vbar-url').textContent='Not yet merged to GitHub';
-    $('vbar-url').dataset.url='';
-    $('viewer-iframe').removeAttribute('src');
-    $('viewer-iframe').srcdoc=code;
-    closeBuilder();closeProject();
-    showScreen('viewer');
+
+// Called from the preview card "Full Screen" button inside a running pipeline.
+// MUST NOT call closeBuilder() — that would kill the pending approval gate.
+window.openPreview=function(id,pid){
+  const code=_previewCache[id]||ST.apps.find(a=>a.id===id)?.code;
+  if(!code){toast('Preview not available',2000);return;}
+
+  _previewPid=pid||null;
+
+  // Set up viewer
+  $('vbar-name').textContent='🔍 Preview — Reviewing';
+  $('vbar-url').textContent='Not merged yet — reviewing before approve';
+  $('vbar-url').dataset.url='';
+  $('viewer-iframe').removeAttribute('src');
+  $('viewer-iframe').srcdoc=code;
+
+  // Show/hide the right buttons
+  const approveRow=$('vbar-approve-row');
+  const normalBtns=$('vbar-btns');
+  if(_previewPid){
+    // Pipeline preview mode — show approval bar, hide normal buttons
+    approveRow.style.display='flex';
+    normalBtns.style.display='none';
+    $('vback').title='Back to chat history';
   }else{
-    openApp(id);
+    // Normal app view — hide approval bar, show normal buttons
+    approveRow.style.display='none';
+    normalBtns.style.display='flex';
+    $('vback').title='';
   }
+
+  // Do NOT call closeBuilder — the pipeline is still running, paused at step 7.
+  // Just navigate to the viewer screen on top of everything.
+  showScreen('viewer');
 };
 // Keyed by pipeline ID so concurrent pipelines don't collide
 const _approvalGates={};
@@ -1134,10 +1161,12 @@ function waitForApproval(pid){
   });
 }
 function approveAndMerge(pid){
+  _previewPid=null; // clear preview mode regardless of how approval was triggered
   _approvalGates[pid]?.resolve('approved');
   delete _approvalGates[pid];
 }
 function requestChanges(pid){
+  _previewPid=null;
   _approvalGates[pid]?.reject(new Error('CHANGES_REQUESTED'));
   delete _approvalGates[pid];
 }
@@ -1227,13 +1256,14 @@ function openBuilder(editId){
 }
 function closeBuilder(){
   $('builder-sheet').classList.remove('open');
-  // If a pipeline is paused at the approval gate, cancel it so the UI unlocks.
-  // Reject all pending gates with a special error that the pipeline catch can ignore.
+  // If we're in preview mode the user navigated to the viewer intentionally —
+  // the pipeline is still alive and waiting. Don't cancel it.
+  if(_previewPid)return;
+  // Otherwise, if a pipeline is paused at the approval gate, cancel it so the UI unlocks.
   Object.keys(_approvalGates).forEach(pid=>{
     _approvalGates[pid]?.reject(new Error('BUILDER_CLOSED'));
     delete _approvalGates[pid];
   });
-  // Ensure the send button is always re-enabled when the sheet closes
   ST._building=false;
   const sb=$('send-btn');if(sb)sb.disabled=false;
 }
@@ -1292,7 +1322,7 @@ function addMsg(cfg){
       var bugs=cfg.bugs||[];
       row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gg);font-family:var(--fh);font-size:10px;font-weight:800">G</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge">G</div><div class="audit-title">GPT-4o Audit Report</div><span class="ab '+(bugs.length?'bugs':'clean')+'">'+(bugs.length?bugs.length+' Bug'+(bugs.length!==1?'s':''):'&#x2713; Clean')+'</span></div>'+(bugs.length?bugs.map(function(b){return '<div class="ai"><span class="sev '+(b.severity||'low')+'">'+esc(b.severity||'low')+'</span><div class="aitxt"><strong>'+esc(b.issue||'')+'</strong>'+(b.location?'<span style="font-size:9px;color:rgba(255,255,255,.28)">'+esc(b.location)+'</span>':'')+'</div></div>';}).join(''):'<div class="audit-clean">&#x2705; No bugs found &#x2014; code looks clean!</div>')+'</div></div></div>';
     }else if(cfg.type==='preview-card'){
-      row.innerHTML='<div class="awrap"><div class="aav">👁</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview &#x2014; '+esc(cfg.appName||'App')+'</div><span class="pcc-branch">'+esc(cfg.branch||'local')+'</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="'+escAttr(cfg.code||'')+'"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\''+cfg.appId+'\')">&#x1F50D; Full Screen</button></div></div></div></div></div>';
+      row.innerHTML='<div class="awrap"><div class="aav">👁</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview &#x2014; '+esc(cfg.appName||'App')+'</div><span class="pcc-branch">'+esc(cfg.branch||'local')+'</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="'+escAttr(cfg.code||'')+'"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\''+esc(cfg.appId||'')+'\',\''+esc(cfg.pid||'')+'\');">🔍 Full Screen</button></div></div></div></div></div>';
     }else if(cfg.type==='approval'){
       row.id=cfg.id;
       // Use data-* attributes — avoids fragile nested quote escaping in inline onclick
@@ -1411,7 +1441,13 @@ async function runPipeline(prompt,existingApp){
         bugs=await callGPT(v1);
         updatePS(pid,3,'done',bugs.length?('Found '+bugs.length+' issue'+(bugs.length!==1?'s':'')):'Code is clean \u2713');
         addMsg({role:'asst',type:'audit',bugs});
-      }catch(e){updatePS(pid,3,'error','Audit error \u2014 skipping');bugs=[];}
+      }catch(e){
+        // Show the real error so user can diagnose (key issue, quota, CORS, etc.)
+        const auditErr=scrubKeys(e?.message||String(e));
+        updatePS(pid,3,'error','Audit failed: '+auditErr);
+        toast('GPT audit failed: '+auditErr,5000);
+        bugs=[];
+      }
     }else{
       updatePS(pid,3,'skip',ST.gptKey?'Audit disabled in settings':'No OpenAI key \u2014 skipped');
     }
@@ -1452,7 +1488,7 @@ async function runPipeline(prompt,existingApp){
     /* STEP 6 — Preview */
     updatePS(pid,6,'done','Preview ready');
     setPreview(appId,v2); // cache for Full Screen before app is saved
-    addMsg({role:'asst',type:'preview-card',code:v2,appName,branch:branchName||'local',appId});
+    addMsg({role:'asst',type:'preview-card',code:v2,appName,branch:branchName||'local',appId,pid});
 
     /* STEP 7 — Final Validation (PAUSE) */
     updatePS(pid,7,'wait','Waiting for your approval\u2026');
@@ -1862,10 +1898,46 @@ function init(){
   $('emoji-overlay').addEventListener('click',e=>{if(e.target.id==='emoji-overlay')$('emoji-overlay').classList.remove('on');});
 
   // ── Viewer ──
-  $('vback').addEventListener('click',()=>{showScreen('home');renderGrid();});
+  $('vback').addEventListener('click',()=>{
+    if(_previewPid){
+      // In pipeline preview mode — go back to builder chat, keep pipeline alive
+      _previewPid=null;
+      $('vbar-approve-row').style.display='none';
+      $('vbar-btns').style.display='flex';
+      showScreen('home'); // builder sheet is still open on top
+      // Re-open builder sheet (it was never closed during preview mode)
+      $('builder-sheet').classList.add('open');
+    }else{
+      showScreen('home');renderGrid();
+    }
+  });
+  $('vbar-approve').addEventListener('click',function(){
+    if(!_previewPid)return;
+    const pid=_previewPid;
+    _previewPid=null;
+    this.disabled=true;$('vbar-req-changes').disabled=true;
+    this.textContent='Merging…';
+    approveAndMerge(pid);
+    // Return to builder to watch the merge step complete
+    $('vbar-approve-row').style.display='none';
+    $('vbar-btns').style.display='flex';
+    $('builder-sheet').classList.add('open');
+    showScreen('home');
+  });
+  $('vbar-req-changes').addEventListener('click',function(){
+    if(!_previewPid)return;
+    const pid=_previewPid;
+    _previewPid=null;
+    this.disabled=true;$('vbar-approve').disabled=true;
+    requestChanges(pid);
+    $('vbar-approve-row').style.display='none';
+    $('vbar-btns').style.display='flex';
+    $('builder-sheet').classList.add('open');
+    showScreen('home');
+  });
   $('vbar-edit').addEventListener('click',()=>{
     if(ST.viewingApp){
-      const eid=ST.viewingApp.id; // capture before timeout
+      const eid=ST.viewingApp.id;
       showScreen('home');renderGrid();
       setTimeout(()=>openBuilder(eid),80);
     }
