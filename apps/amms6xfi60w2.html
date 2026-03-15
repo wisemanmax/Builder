@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TI-84 Calculator</title>
+    <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;TI-84 Calculator&quot;,&quot;short_name&quot;:&quot;TI-84&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#1a1a1a&quot;,&quot;theme_color&quot;:&quot;#2563eb&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%23000' width='192' height='192' rx='20'/%3E%3Ctext x='96' y='120' font-family='Arial' font-size='60' fill='%23fff' text-anchor='middle'%3ETI%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --bg-calculator: #333;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --screen-bg: #0d3b0d;
+            --screen-text: #00ff00;
+            --btn-primary: #4a4a4a;
+            --btn-hover: #5a5a5a;
+            --btn-function: #2563eb;
+            --btn-function-hover: #3b82f6;
+            --btn-special: #dc2626;
+            --btn-special-hover: #ef4444;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: var(--bg-calculator);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        .calculator::before {
+            content: 'TI-84 Plus';
+            position: absolute;
+            top: 10px;
+            left: 30px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .screen-container {
+            background: #222;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 30px 0 20px 0;
+            border: 2px solid #555;
+        }
+
+        .screen {
+            background: var(--screen-bg);
+            color: var(--screen-text);
+            min-height: 80px;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: 400;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid #0a2a0a;
+            position: relative;
+            overflow-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .screen .expression {
+            font-size: 14px;
+            color: #66ff66;
+            margin-bottom: 5px;
+        }
+
+        .screen .result {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .screen .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 20px;
+            background: var(--screen-text);
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .btn {
+            background: var(--btn-primary);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 8px;
+            padding: 15px 8px;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: var(--btn-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn.function {
+            background: var(--btn-function);
+            color: white;
+        }
+
+        .btn.function:hover {
+            background: var(--btn-function-hover);
+        }
+
+        .btn.special {
+            background: var(--btn-special);
+            color: white;
+        }
+
+        .btn.special:hover {
+            background: var(--btn-special-hover);
+        }
+
+        .btn.wide {
+            grid-column: span 2;
+        }
+
+        .btn.secondary {
+            font-size: 10px;
+            background: #666;
+        }
+
+        .btn.secondary:hover {
+            background: #777;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .btn {
+                padding: 12px 6px;
+                font-size: 12px;
+                min-height: 45px;
+            }
+            
+            .screen {
+                min-height: 70px;
+                font-size: 16px;
+            }
+            
+            .screen .result {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="screen-container">
+            <div class="screen">
+                <div class="expression" id="expression"></div>
+                <div class="result" id="result">0<span class="cursor"></span></div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <!-- Row 1 -->
+            <button class="btn secondary" onclick="insertFunction('2nd')">2nd</button>
+            <button class="btn secondary" onclick="insertFunction('MODE')">MODE</button>
+            <button class="btn secondary" onclick="deleteChar()">DEL</button>
+            <button class="btn secondary" onclick="insertFunction('α-LOCK')">α-LOCK</button>
+            <button class="btn special" onclick="clearAll()">CLEAR</button>
+            
+            <!-- Row 2 -->
+            <button class="btn function" onclick="insertFunction('x⁻¹')">x⁻¹</button>
+            <button class="btn function" onclick="insertFunction('sin(')">SIN</button>
+            <button class="btn function" onclick="insertFunction('cos(')">COS</button>
+            <button class="btn function" onclick="insertFunction('tan(')">TAN</button>
+            <button class="btn function" onclick="insertOperator('^')">^</button>
+            
+            <!-- Row 3 -->
+            <button class="btn function" onclick="insertFunction('x²')">x²</button>
+            <button class="btn function" onclick="insertOperator(',')">,</button>
+            <button class="btn function" onclick="insertOperator('(')">(</button>
+            <button class="btn function" onclick="insertOperator(')')">)</button>
+            <button class="btn function" onclick="insertOperator('÷')">÷</button>
+            
+            <!-- Row 4 -->
+            <button class="btn function" onclick="insertFunction('log(')">LOG</button>
+            <button class="btn" onclick="insertNumber('7')">7</button>
+            <button class="btn" onclick="insertNumber('8')">8</button>
+            <button class="btn" onclick="insertNumber('9')">9</button>
+            <button class="btn function" onclick="insertOperator('×')">×</button>
+            
+            <!-- Row 5 -->
+            <button class="btn function" onclick="insertFunction('ln(')">LN</button>
+            <button class="btn" onclick="insertNumber('4')">4</button>
+            <button class="btn" onclick="insertNumber('5')">5</button>
+            <button class="btn" onclick="insertNumber('6')">6</button>
+            <button class="btn function" onclick="insertOperator('-')">−</button>
+            
+            <!-- Row 6 -->
+            <button class="btn function" onclick="insertFunction('STO→')">STO→</button>
+            <button class="btn" onclick="insertNumber('1')">1</button>
+            <button class="btn" onclick="insertNumber('2')">2</button>
+            <button class="btn" onclick="insertNumber('3')">3</button>
+            <button class="btn function" onclick="insertOperator('+')">+</button>
+            
+            <!-- Row 7 -->
+            <button class="btn secondary" onclick="toggleSign()">ON</button>
+            <button class="btn wide" onclick="insertNumber('0')">0</button>
+            <button class="btn" onclick="insertOperator('.')">.</button>
+            <button class="btn special" onclick="calculate()">ENTER</button>
+        </div>
+    </div>
+
+    <script>
+        let currentInput = '0';
+        let expression = '';
+        let result = '0';
+        let justCalculated = false;
+        let memory = 0;
+
+        const expressionElement = document.getElementById('expression');
+        const resultElement = document.getElementById('result');
+
+        function updateDisplay() {
+            if (expression) {
+                expressionElement.textContent = expression;
+            } else {
+                expressionElement.textContent = '';
+            }
+            resultElement.innerHTML = currentInput + '<span class="cursor"></span>';
+        }
+
+        function insertNumber(num) {
+            if (justCalculated) {
+                currentInput = num;
+                expression = '';
+                justCalculated = false;
+            } else if (currentInput === '0') {
+                currentInput = num;
+            } else {
+                currentInput += num;
+            }
+            updateDisplay();
+        }
+
+        function insertOperator(op) {
+            if (justCalculated) {
+                expression = currentInput + ' ' + op + ' ';
+                currentInput = '0';
+                justCalculated = false;
+            } else {
+                if (currentInput !== '0') {
+                    expression += currentInput + ' ' + op + ' ';
+                    currentInput = '0';
+                }
+            }
+            updateDisplay();
+        }
+
+        function insertFunction(func) {
+            if (justCalculated) {
+                justCalculated = false;
+            }
+            
+            switch(func) {
+                case 'sin(':
+                case 'cos(':
+                case 'tan(':
+                case 'log(':
+                case 'ln(':
+                    if (currentInput === '0') {
+                        currentInput = func;
+                    } else {
+                        currentInput += func;
+                    }
+                    break;
+                case 'x²':
+                    if (currentInput !== '0') {
+                        try {
+                            const val = parseFloat(currentInput);
+                            currentInput = String(val * val);
+                        } catch (e) {
+                            currentInput = 'Error';
+                        }
+                    }
+                    break;
+                case 'x⁻¹':
+                    if (currentInput !== '0') {
+                        try {
+                            const val = parseFloat(currentInput);
+                            if (val !== 0) {
+                                currentInput = String(1 / val);
+                            } else {
+                                currentInput = 'Error';
+                            }
+                        } catch (e) {
+                            currentInput = 'Error';
+                        }
+                    }
+                    break;
+                default:
+                    // For functions like 2nd, MODE, etc. - just visual feedback
+                    break;
+            }
+            updateDisplay();
+        }
+
+        function deleteChar() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            updateDisplay();
+        }
+
+        function clearAll() {
+            currentInput = '0';
+            expression = '';
+            result = '0';
+            justCalculated = false;
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            if (currentInput !== '0' && currentInput !== 'Error') {
+                if (currentInput.startsWith('-')) {
+                    currentInput = currentInput.slice(1);
+                } else {
+                    currentInput = '-' + currentInput;
+                }
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            let fullExpression = expression + currentInput;
+            
+            if (!fullExpression || fullExpression === '0') {
+                return;
+            }
+
+            try {
+                // Replace display operators with JavaScript operators
+                fullExpression = fullExpression
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/−/g, '-')
+                    .replace(/\^/g, '**');
+
+                // Handle basic trigonometric functions
+                fullExpression = fullExpression
+                    .replace(/sin\(/g, 'Math.sin(')
+                    .replace(/cos\(/g, 'Math.cos(')
+                    .replace(/tan\(/g, 'Math.tan(')
+                    .replace(/log\(/g, 'Math.log10(')
+                    .replace(/ln\(/g, 'Math.log(');
+
+                // Evaluate the expression
+                const evalResult = Function('"use strict"; return (' + fullExpression + ')')();
+                
+                if (isFinite(evalResult)) {
+                    currentInput = String(Math.round(evalResult * 1000000000) / 1000000000);
+                    expression = '';
+                    justCalculated = true;
+                } else {
+                    currentInput = 'Error';
+                }
+            } catch (error) {
+                currentInput = 'Error';
+                expression = '';
+            }
+            
+            updateDisplay();
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+            
+            if (key >= '0' && key <= '9') {
+                insertNumber(key);
+            } else if (key === '.') {
+                insertOperator('.');
+            } else if (key === '+') {
+                insertOperator('+');
+            } else if (key === '-') {
+                insertOperator('−');
+            } else if (key === '*') {
+                insertOperator('×');
+            } else if (key === '/') {
+                insertOperator('÷');
+                event.preventDefault();
+            } else if (key === 'Enter' || key === '=') {
+                calculate();
+                event.preventDefault();
+            } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                clearAll();
+            } else if (key === 'Backspace') {
+                deleteChar();
+                event.preventDefault();
+            } else if (key === '(') {
+                insertOperator('(');
+            } else if (key === ')') {
+                insertOperator(')');
+            } else if (key === '^') {
+                insertOperator('^');
+            }
+        });
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript,const CACHE_NAME="ti84-calc-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>{if(response){return response}return fetch(event.request)}))});')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                })
+                .catch(function(error) {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+        }
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
