@@ -883,7 +883,6 @@ function _validateKeyedRequest(url,opts){
 window.fetch=function(url,opts={}){
   try{_validateKeyedRequest(url,opts);}catch(e){return Promise.reject(e);}
   return _nativeFetch.apply(this,arguments);
-  return _nativeFetch.apply(this,arguments);
 };
 
 /* ════════ KEY SUMMARY (for Settings display) ════════ */
@@ -1120,6 +1119,11 @@ window.openPreview=function(id,pid){
 
   _previewPid=pid||null;
 
+  // Re-enable approval buttons in case they were disabled by a previous session
+  const approveBtn=$('vbar-approve'),changesBtn=$('vbar-req-changes');
+  if(approveBtn){approveBtn.disabled=false;approveBtn.textContent='🔀 Approve & Merge';}
+  if(changesBtn){changesBtn.disabled=false;}
+
   // Set up viewer
   $('vbar-name').textContent='🔍 Preview — Reviewing';
   $('vbar-url').textContent='Not merged yet — reviewing before approve';
@@ -1131,19 +1135,16 @@ window.openPreview=function(id,pid){
   const approveRow=$('vbar-approve-row');
   const normalBtns=$('vbar-btns');
   if(_previewPid){
-    // Pipeline preview mode — show approval bar, hide normal buttons
     approveRow.style.display='flex';
     normalBtns.style.display='none';
     $('vback').title='Back to chat history';
   }else{
-    // Normal app view — hide approval bar, show normal buttons
     approveRow.style.display='none';
     normalBtns.style.display='flex';
     $('vback').title='';
   }
 
   // Do NOT call closeBuilder — the pipeline is still running, paused at step 7.
-  // Just navigate to the viewer screen on top of everything.
   showScreen('viewer');
 };
 // Keyed by pipeline ID so concurrent pipelines don't collide
@@ -1678,6 +1679,11 @@ function openApp(id){
   $('vbar-url').dataset.url=url||'';
   $('viewer-iframe').removeAttribute('src');
   $('viewer-iframe').srcdoc=app.code||'<html><body style="background:#111;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>No app code found.</p></body></html>';
+  // Always show normal viewer controls, clear any stale preview-mode state
+  _previewPid=null;
+  $('vbar-approve-row').style.display='none';
+  $('vbar-btns').style.display='flex';
+  $('vback').title='';
   closeBuilder();
   closeProject();
   showScreen('viewer');
@@ -1929,7 +1935,8 @@ function init(){
       _previewPid=null;
       $('vbar-approve-row').style.display='none';
       $('vbar-btns').style.display='flex';
-      showScreen('home'); // builder sheet is still open on top
+      renderGrid(); // refresh home screen behind the builder sheet
+      showScreen('home');
       // Re-open builder sheet (it was never closed during preview mode)
       $('builder-sheet').classList.add('open');
     }else{
