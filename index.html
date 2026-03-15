@@ -12,16 +12,18 @@
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self' 'unsafe-inline' data: blob:;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
   connect-src
     https://api.anthropic.com
     https://api.openai.com
     https://api.github.com
+    https://raw.githubusercontent.com
     https://*.supabase.co
     https://fonts.googleapis.com
     https://fonts.gstatic.com;
   font-src https://fonts.gstatic.com data:;
   img-src 'self' data: blob:;
-  frame-src 'self' blob: data:;
+  frame-src 'self' blob: data: https:;
 ">
 <title>The Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -337,9 +339,9 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .btn-full:active{transform:scale(.97)}
 
 /* ══════════════════════════════
-   VIEWER (full screen)
+   STUDIO (split preview + editor)
 ══════════════════════════════ */
-#s-viewer{z-index:60;background:#000}
+#s-viewer{z-index:60;background:#080812;flex-direction:column}
 .vbar{display:flex;align-items:center;gap:9px;padding:50px 13px 10px;background:rgba(0,0,0,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
 .vback{width:34px;height:34px;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .vback:hover{background:rgba(255,255,255,.14)}
@@ -351,7 +353,45 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .vbar-btn{padding:7px 12px;border-radius:9px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s}
 .vbar-btn:hover{background:rgba(255,255,255,.14);color:#fff}
 .vbar-btn.primary{background:var(--g1);border-color:transparent;color:#fff}
-#viewer-iframe{flex:1;width:100%;border:none}
+
+/* Studio split body */
+#studio-body{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#studio-preview{flex:1;min-height:80px;position:relative;overflow:hidden}
+#studio-preview.fullscreen{flex:1}
+#viewer-iframe{width:100%;height:100%;border:none;display:block}
+
+/* Studio inline editor (bottom panel) */
+#studio-editor{height:220px;background:#111120;border-top:2px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0;transition:height .22s cubic-bezier(.4,0,.2,1)}
+#studio-editor.collapsed{height:44px;overflow:hidden}
+#studio-editor.fullscreen-mode{height:0;overflow:hidden;pointer-events:none}
+.se-drag{height:5px;background:transparent;cursor:ns-resize;flex-shrink:0;position:relative;touch-action:none}
+.se-drag::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:3px;border-radius:2px;background:rgba(255,255,255,.18)}
+.se-header{padding:8px 14px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;cursor:pointer;user-select:none}
+.se-header-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.07em;text-transform:uppercase}
+.se-header-btns{display:flex;gap:5px}
+.se-hbtn{padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--fh);transition:all .15s;white-space:nowrap}
+.se-hbtn:hover{background:rgba(255,255,255,.1);color:#fff}
+.se-hbtn.active{background:var(--g1);border-color:transparent;color:#fff}
+.se-input-row{flex:1;display:flex;align-items:flex-end;gap:8px;padding:0 13px 13px;min-height:0;padding-bottom:max(13px,env(safe-area-inset-bottom,13px))}
+#se-textarea{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 13px;color:#fff;font-family:var(--fb);font-size:14px;resize:none;outline:none;min-height:42px;max-height:100px;overflow-y:auto;transition:border-color .2s;line-height:1.5}
+#se-textarea:focus{border-color:rgba(255,60,172,.5)}
+#se-textarea::placeholder{color:rgba(255,255,255,.25)}
+.se-send{width:38px;height:38px;border-radius:11px;border:none;background:var(--g1);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(255,60,172,.38);flex-shrink:0;transition:transform .15s,opacity .15s}
+.se-send:hover{transform:scale(1.08)}
+.se-send:active{transform:scale(.91)}
+.se-send:disabled{opacity:.28;cursor:not-allowed;transform:none!important}
+
+/* SQL schema card */
+.schema-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(0,229,255,.2);border-radius:4px 14px 14px 14px;overflow:hidden}
+.schema-hdr{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(0,229,255,.05)}
+.schema-title{flex:1;font-size:11px;font-weight:700;color:rgba(255,255,255,.9)}
+.schema-copy{padding:4px 10px;border-radius:7px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cy);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--fh)}
+.schema-sql{padding:11px 13px;font-family:var(--fm);font-size:10px;color:var(--cy);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+
+/* Self-update card in settings */
+.update-card{background:rgba(180,79,255,.06);border:1.5px solid rgba(180,79,255,.25);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.update-info{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7}
+
 
 /* ══════════════════════════════
    SETTINGS SHEET
@@ -588,7 +628,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
   </div>
 </div>
 
-<!-- ══ VIEWER ══ -->
+<!-- ══ STUDIO (split preview + inline editor) ══ -->
 <div class="screen" id="s-viewer">
   <div class="vbar">
     <button class="vback" id="vback">←</button>
@@ -596,18 +636,38 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
       <div class="vbar-name" id="vbar-name">App</div>
       <div class="vbar-url" id="vbar-url" onclick="copyViewerUrl()">—</div>
     </div>
-    <div class="vbar-btns">
-      <button class="vbar-btn" id="vbar-proj">📋 Project</button>
-      <button class="vbar-btn primary" id="vbar-edit">✏️ Edit</button>
+    <div class="vbar-btns" id="vbar-btns">
+      <button class="vbar-btn" id="vbar-proj">📋</button>
+      <button class="vbar-btn" id="vbar-fs-toggle" title="Full screen preview">⛶</button>
     </div>
   </div>
-  <!-- Preview-mode approval bar — shown only when reviewing before merge -->
+  <!-- Approval bar — pipeline review mode only -->
   <div id="vbar-approve-row" style="display:none;align-items:center;gap:8px;padding:10px 14px;background:rgba(61,90,254,.1);border-bottom:1.5px solid rgba(61,90,254,.25);flex-shrink:0">
     <span style="flex:1;font-size:11px;color:rgba(255,255,255,.6)">Review the app, then approve or request changes</span>
     <button id="vbar-req-changes" style="padding:7px 13px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">✏️ Changes</button>
     <button id="vbar-approve" style="padding:7px 14px;border-radius:9px;background:linear-gradient(135deg,#FF3CAC,#784BA0);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(255,60,172,.35)">🔀 Approve & Merge</button>
   </div>
-  <iframe id="viewer-iframe" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+  <!-- Studio split body -->
+  <div id="studio-body">
+    <div id="studio-preview">
+      <iframe id="viewer-iframe" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock"></iframe>
+    </div>
+    <div id="studio-editor">
+      <div class="se-drag" id="se-drag"></div>
+      <div class="se-header" id="se-header-toggle">
+        <span class="se-header-title">✏️ Edit App</span>
+        <div class="se-header-btns">
+          <button class="se-hbtn" id="se-proj-btn">📋 Project</button>
+          <button class="se-hbtn" id="se-liveurl-btn" style="display:none">🌐 Live URL</button>
+          <button class="se-hbtn" id="se-collapse-btn">▼ Hide</button>
+        </div>
+      </div>
+      <div class="se-input-row">
+        <textarea id="se-textarea" rows="1" placeholder="Describe a change — I'll rebuild with your update…"></textarea>
+        <button class="se-send" id="se-send">↑</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ SETTINGS ══ -->
@@ -635,7 +695,8 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
       <span class="ssec">Pipeline</span>
       <div class="sscard">
         <div class="ssrow"><div class="ssrl"><div class="sl">GPT-4o Audit Step</div><div class="ss">Scan for bugs between builds</div></div><div class="pill" id="s-audit-pill"></div></div>
-        <div class="ssrow"><div class="ssrl"><div class="sl">Supabase Cloud Sync</div><div class="ss">Cross-device backup</div></div><div class="pill" id="s-sync-pill"></div></div>
+        <div class="ssrow"><div class="ssrl"><div class="sl">🗄️ Supabase Backend Step</div><div class="ss">Auto-generate tables + RLS for each app</div></div><div class="pill" id="s-backend-pill"></div></div>
+        <div class="ssrow"><div class="ssrl"><div class="sl">Supabase Cloud Sync</div><div class="ss">Cross-device backup of your apps list</div></div><div class="pill" id="s-sync-pill"></div></div>
         <div id="s-sb-exp" style="display:none;flex-direction:column;gap:9px">
           <input class="fi fi-mono" type="text" id="s-sb-url" placeholder="Supabase URL">
           <input class="fi fi-mono" type="password" id="s-sb-anon" placeholder="Supabase Anon Key">
@@ -652,6 +713,12 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
       <div class="sscard">
         <button class="dbtn" id="s-clear">🗑️ Delete All Apps Locally</button>
         <button class="dbtn" id="s-signout">🚪 Sign Out &amp; Clear All Keys</button>
+      </div>
+      <span class="ssec">🔧 Update The Builder</span>
+      <div class="update-card">
+        <div class="update-info">Describe an improvement and Claude will update The Builder itself — rewriting this app's code, pushing to GitHub, and reloading.</div>
+        <div class="fl"><label>Describe the improvement</label><textarea class="fi" id="s-self-update-input" rows="3" style="resize:vertical;min-height:72px" placeholder="e.g. Add a dark/light theme toggle to the home screen…"></textarea></div>
+        <button class="btn-p" id="s-self-update-btn" style="background:var(--g6);box-shadow:0 6px 20px rgba(180,79,255,.35)">🔧 Update The Builder</button>
       </div>
     </div>
     <div class="ssfooter">The Builder · Claude + GPT-4o + GitHub Pages · PWA</div>
@@ -730,9 +797,23 @@ STRICT RULES:
 3. ZERO external dependencies — no CDN scripts/links. You may use @import in CSS for Google Fonts only.
 4. Must work as a standalone HTML file
 5. Begin response with <!DOCTYPE html> and nothing else
+6. Use localStorage for all data persistence — the app runs in an iframe with allow-scripts, so localStorage works perfectly
+7. Do NOT use: alert(), confirm(), prompt(), window.open(), location.href changes, or cookies — these are blocked in the sandbox
+8. DO use: localStorage, fetch() to public APIs (no auth needed), CSS animations, inline SVG, canvas
 DESIGN: Dark theme by default. Google Fonts via @import. CSS variables. Smooth animations. Realistic sample data. Mobile-responsive. Looks like a shipped product.`;
 const SYS_FIX=`You are an expert web developer doing a targeted bug fix pass. Receive HTML code + bug list. Fix every listed issue. Do NOT change anything not broken. Keep design identical. Return ONLY fixed raw HTML starting with <!DOCTYPE html>.`;
 const SYS_AUDIT=`You are a senior code reviewer auditing a single-file HTML app. Return a JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]. Only report REAL bugs. If clean return []. Return ONLY the raw JSON array.`;
+const SYS_BACKEND=`You are a backend architect. Given a single-file HTML app, analyze what persistent data it manages and generate a Supabase (PostgreSQL) backend for it.
+Return ONLY a JSON object (no markdown, no explanation):
+{
+  "tables": [{"name":"table_name","sql":"CREATE TABLE IF NOT EXISTS ... (with RLS enabled);","description":"what it stores"}],
+  "rls": ["ALTER TABLE x ENABLE ROW LEVEL SECURITY;", "CREATE POLICY ..."],
+  "injectedHTML": "the COMPLETE original HTML with Supabase JS client injected — add <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script> in <head>, replace hardcoded data with Supabase CRUD calls, add SUPABASE_URL and SUPABASE_ANON_KEY as const at top of script"
+}
+Use the placeholder values 'YOUR_SUPABASE_URL' and 'YOUR_SUPABASE_ANON_KEY' in the injected code.`;
+const SYS_SELFUPDATE=`You are improving a PWA app called "The Builder". You will receive the complete current HTML source and a description of the improvement to make.
+Return ONLY the complete improved HTML starting with <!DOCTYPE html> — no markdown, no explanation, no code fences.
+Rules: Keep all existing functionality. Apply ONLY the requested improvement. Do not rewrite things that are not related to the request.`;
 
 /* ════════ STATE ════════ */
 const ST={
@@ -740,8 +821,10 @@ const ST={
   key:'',gptKey:'',
   ghToken:'',ghUser:'',ghRepo:'',
   sbUrl:'',sbAnon:'',sbEnabled:false,auditEnabled:true,
+  backendEnabled:false, // add Supabase backend step to each build
   activeAppId:null,pendingIcon:'🎯',pendingColor:0,
   viewingApp:null,projectAppId:null,_building:false,
+  _studioFullscreen:false, // true = preview takes full height
 };
 
 /* ════════ UTILS ════════ */
@@ -792,6 +875,7 @@ const KEY_STORE={
   SB_ANON:'bldr_sbAnon',
   SB_ON:  'bldr_sbOn',
   AUDIT:  'bldr_audit',
+  BACKEND:'bldr_backend',
 };
 
 // Returns a redacted version of a key for display (e.g. "sk-ant-••••••••1A2B")
@@ -821,6 +905,7 @@ function hydrate(){
   ST.sbAnon =localStorage.getItem(KEY_STORE.SB_ANON)||'';
   ST.sbEnabled  =localStorage.getItem(KEY_STORE.SB_ON)==='true';
   ST.auditEnabled=localStorage.getItem(KEY_STORE.AUDIT)!=='false';
+  ST.backendEnabled=localStorage.getItem(KEY_STORE.BACKEND)==='true';
 }
 
 function saveKeys(){
@@ -835,6 +920,7 @@ function saveKeys(){
   localStorage.setItem(KEY_STORE.SB_ANON, ST.sbAnon);
   localStorage.setItem(KEY_STORE.SB_ON,   String(ST.sbEnabled));
   localStorage.setItem(KEY_STORE.AUDIT,   String(ST.auditEnabled));
+  localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled));
 }
 
 function fmtDate(iso){if(!iso)return'—';try{return new Date(iso).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return iso;}}
@@ -1282,8 +1368,8 @@ function resetChat(){
 /* ════════ MESSAGES ════════ */
 function scrollBot(){const el=$('chat-scroll');setTimeout(()=>el.scrollTo({top:el.scrollHeight,behavior:'smooth'}),60);}
 
-const PIPE_NAMES=['Create Branch','Claude · Build','Automated Checks','GPT-4o · Audit','Claude · Fix','Push to Branch','Preview','Final Validation','Merge to Main'];
-const PIPE_ICONS=['🌿','🔨','📋','🔍','🛠','⬆️','👁','✅','🔀'];
+const PIPE_NAMES=['Create Branch','Claude · Build','Automated Checks','GPT-4o · Audit','Claude · Fix','🗄 Backend Setup','Push to Branch','Preview','Final Validation','Merge to Main'];
+const PIPE_ICONS=['🌿','🔨','📋','🔍','🛠','🗄️','⬆️','👁','✅','🔀'];
 
 function addMsg(cfg){
   const s=$('chat-scroll');
@@ -1345,6 +1431,20 @@ function addMsg(cfg){
           });
         },0);
       })(row);
+    }else if(cfg.type==='schema'){
+      // Supabase schema card — shows SQL and copy button
+      var sqlText=cfg.sql||'';
+      var tables=cfg.tables||[];
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#10A37F,#00C48C);font-size:13px">🗄️</div>'
+        +'<div style="flex:1;min-width:0"><div class="schema-card">'
+        +'<div class="schema-hdr"><div class="schema-title">Supabase Backend — '+tables.length+' Table'+(tables.length!==1?'s':'')+' Generated</div>'
+        +'<button class="schema-copy" onclick="copyToClipboard(this.dataset.sql,\'SQL\');" data-sql="'+escAttr(sqlText)+'">Copy SQL</button></div>'
+        +'<div class="schema-sql">'+esc(sqlText)+'</div>'
+        +'<div style="padding:8px 13px 10px;font-size:11px;color:rgba(255,255,255,.45);line-height:1.7">'
+        +'▶ Run this SQL in your <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--cy)">Supabase SQL Editor</a><br>'
+        +'▶ Replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY in the app with your actual values'
+        +'</div></div></div></div>';
+
     }else if(cfg.type==='merge-status'){
       row.id=cfg.mergeId;
       var spinning=cfg.status==='merging';
@@ -1468,29 +1568,57 @@ async function runPipeline(prompt,existingApp){
       updatePS(pid,4,'done',canAudit?'No fixes needed \u2713':'Skipped');
     }
 
-    /* STEP 5 — Push to Branch */
+    /* STEP 5 — Supabase Backend */
+    if(ST.backendEnabled&&ST.sbUrl){
+      updatePS(pid,5,'active','Generating Supabase backend schema\u2026');
+      try{
+        const backendRaw=await callClaudeRaw(SYS_BACKEND,'App code:\n\n'+v2.slice(0,60000),4000);
+        let backend;
+        try{
+          backend=JSON.parse(backendRaw);
+        }catch{
+          throw new Error('Backend response was not valid JSON — Claude may have added extra text. Try rebuilding.');
+        }
+        if(!backend||typeof backend!=='object'){throw new Error('Unexpected backend response structure');}
+        const tables=backend.tables||[];
+        const allSql=[...tables.map(t=>t.sql||''),...(backend.rls||[])].filter(Boolean).join('\n\n');
+        updatePS(pid,5,'done',tables.length+' table'+(tables.length!==1?'s':'')+' designed \u2713');
+        addMsg({role:'asst',type:'schema',sql:allSql,tables});
+        // Guard: only use injectedHTML if it's actual complete HTML (not truncated)
+        if(backend.injectedHTML&&backend.injectedHTML.includes('<!DOCTYPE')&&backend.injectedHTML.length>500){
+          v2=backend.injectedHTML;
+        }
+      }catch(e){
+        updatePS(pid,5,'warn','Backend gen skipped: '+scrubKeys(e.message||String(e)));
+        // Non-fatal — continue pipeline with existing v2
+      }
+    }else{
+      updatePS(pid,5,'skip',ST.backendEnabled?'Add Supabase URL in Settings to enable':'Backend off — toggle in Settings');
+    }
+
+    /* STEP 6 — Push to Branch */
     if(hasGitHub){
-      updatePS(pid,5,'active','Pushing to '+branchName+'\u2026');
+      updatePS(pid,6,'active','Pushing to '+branchName+'\u2026');
       try{
         const appPath='apps/'+appId+'.html';
         const existingSha=await ghGetFileSha(appPath,branchName);
         await ghPushFile(appPath,v2,(existingApp?'Update':'Add')+' '+appName+' [branch]',branchName,existingSha);
-        updatePS(pid,5,'done','Pushed to branch \u2713');
+        updatePS(pid,6,'done','Pushed to branch \u2713');
       }catch(e){
-        updatePS(pid,5,'error',e.message);
+        updatePS(pid,6,'error',e.message);
         throw new Error('Branch push failed: '+e.message);
       }
     }else{
-      updatePS(pid,5,'skip','Local-only \u2014 no push needed');
+      updatePS(pid,6,'skip','Local-only \u2014 no push needed');
     }
 
-    /* STEP 6 — Preview */
-    updatePS(pid,6,'done','Preview ready');
-    setPreview(appId,v2); // cache for Full Screen before app is saved
+    /* STEP 7 — Preview */
+    updatePS(pid,7,'done','Preview ready');
+    setPreview(appId,v2);
     addMsg({role:'asst',type:'preview-card',code:v2,appName,branch:branchName||'local',appId,pid});
 
-    /* STEP 7 — Final Validation (PAUSE) */
-    updatePS(pid,7,'wait','Waiting for your approval\u2026');
+    /* STEP 8 — Final Validation (PAUSE) */
+    updatePS(pid,8,'wait','Waiting for your approval\u2026');
     const approvalMsgId='appr-'+Date.now();
     addMsg({role:'asst',type:'approval',id:approvalMsgId,pid,branch:branchName||'local'});
 
@@ -1499,15 +1627,14 @@ async function runPipeline(prompt,existingApp){
       decision=await waitForApproval(pid);
     }catch(e){
       if(e.message==='BUILDER_CLOSED'){
-        // User closed the sheet — save work locally, clean up silently
         clearPreview(appId);
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
         ST.activeAppId=appId;
         renderGrid();
-        return; // finally{} runs, resets ST._building + send-btn
+        return;
       }
       if(e.message==='CHANGES_REQUESTED'){
-        updatePS(pid,7,'error','Changes requested');
+        updatePS(pid,8,'error','Changes requested');
         clearPreview(appId);
         addMsg({role:'asst',type:'text',text:'No problem! Describe what you want changed and I\'ll do a new build with your feedback.'});
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
@@ -1519,20 +1646,20 @@ async function runPipeline(prompt,existingApp){
       }
       throw e;
     }
-    updatePS(pid,7,'done','Approved \u2713');
+    updatePS(pid,8,'done','Approved \u2713');
 
-    /* STEP 8 — Merge to Main */
+    /* STEP 9 — Merge to Main */
     const mergeStatusId='merge-'+Date.now();
     if(hasGitHub){
-      updatePS(pid,8,'active','Merging to main\u2026');
+      updatePS(pid,9,'active','Merging to main\u2026');
       addMsg({role:'asst',type:'merge-status',mergeId:mergeStatusId,status:'merging'});
       try{
         await ghMergeBranch(branchName,appName);
         await ghPushManifest('main').catch(()=>{});
-        ghDeleteBranch(branchName); // async cleanup
+        ghDeleteBranch(branchName);
 
         const liveUrl=ghPageUrl(appId);
-        updatePS(pid,8,'done','Merged & deploying \u2713');
+        updatePS(pid,9,'done','Merged & deploying \u2713');
         const mc=$(mergeStatusId);
         if(mc){
           const card=mc.querySelector('.merge-card');
@@ -1543,14 +1670,14 @@ async function runPipeline(prompt,existingApp){
         toast('🚀 '+appName+' is deploying to GitHub Pages!',3500);
       }catch(e){
         const safeE=scrubKeys(e.message||String(e));
-        updatePS(pid,8,'error',safeE);
+        updatePS(pid,9,'error',safeE);
         clearPreview(appId);
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
-        addMsg({role:'asst',type:'text',html:'Merge failed: <strong>'+esc(safeE)+'</strong>. App saved locally. You can retry by pushing the branch manually on GitHub or updating settings.'});
+        addMsg({role:'asst',type:'text',html:'Merge failed: <strong>'+esc(safeE)+'</strong>. App saved locally.'});
         toast('Merge failed — saved locally',5000);
       }
     }else{
-      updatePS(pid,8,'done','Saved locally \u2713');
+      updatePS(pid,9,'done','Saved locally \u2713');
       _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
       clearPreview(appId);
       toast('\u2705 '+appName+' saved!',2800);
@@ -1564,7 +1691,12 @@ async function runPipeline(prompt,existingApp){
     const finalApp=ST.apps.find(a=>a.id===appId);
     const g=grad(appCi);
     addMsg({role:'asst',type:'text',
-      html:'<strong>'+esc(finalApp?.name||appName)+'</strong> '+(hasGitHub?'is live on GitHub Pages':'has been saved')+' 🎉<br><br><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px"><button onclick="openApp(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:'+g+';border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">🚀 Open</button>'+(hasGitHub&&finalApp?.ghPushed?'<a href="'+ghPageUrl(appId)+'" target="_blank" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center">🌐 Live URL</a>':'')+'<button onclick="openProjectSheet(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">📋 Project</button></div>'
+      html:'<strong>'+esc(finalApp?.name||appName)+'</strong> '+(hasGitHub?'is live on GitHub Pages':'has been saved')+' 🎉<br><br>'
+        +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px">'
+        +'<button onclick="openApp(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:'+g+';border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">🚀 Open in Studio</button>'
+        +(hasGitHub&&finalApp?.ghPushed?'<a href="'+ghPageUrl(appId)+'" target="_blank" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center">🌐 Live URL</a>':'')
+        +'<button onclick="openProjectSheet(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">📋 Project</button>'
+        +'</div>'
     });
 
   }catch(err){
@@ -1575,6 +1707,50 @@ async function runPipeline(prompt,existingApp){
   }finally{
     ST._building=false;
     const sb=$('send-btn');if(sb)sb.disabled=false;
+  }
+}
+
+/* ════════ SELF-UPDATE THE BUILDER ════════ */
+async function selfUpdateBuilder(improvement){
+  if(!ST.key){toast('Anthropic API key required',3000);return;}
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo){toast('GitHub credentials required to push updated Builder',3500);return;}
+  if(!improvement.trim()){toast('Describe the improvement first',2500);return;}
+
+  const btn=$('s-self-update-btn');
+  if(btn){btn.disabled=true;btn.textContent='🔄 Updating…';}
+  toast('Fetching current Builder source…',2000);
+
+  try{
+    // Fetch current index.html from GitHub (raw content)
+    // raw.githubusercontent.com is allowed in CSP connect-src
+    const rawUrl=`https://raw.githubusercontent.com/${ST.ghUser}/${ST.ghRepo}/main/index.html`;
+    const srcRes=await _nativeFetch(rawUrl);
+    if(!srcRes.ok)throw new Error('Could not fetch current Builder source (HTTP '+srcRes.status+'). Check index.html exists on main branch.');
+    const currentSrc=await srcRes.text();
+    if(!currentSrc.includes('<!DOCTYPE'))throw new Error('Fetched file doesn\'t look like The Builder. Check index.html is in repo root.');
+
+    toast('Claude is writing the improvement…',3000);
+
+    // Ask Claude to improve the source
+    const improved=await callClaude(SYS_SELFUPDATE,
+      'CURRENT BUILDER SOURCE:\n\n'+currentSrc.slice(0,80000)+'\n\nIMPROVEMENT REQUESTED:\n'+improvement
+    );
+
+    toast('Pushing updated Builder to GitHub…',2500);
+
+    // Push as index.html on main (direct push, no branch needed — it's the app itself)
+    const existingSha=await ghGetFileSha('index.html','main');
+    await ghPushFile('index.html',improved,'🔧 Self-update: '+improvement.slice(0,80),existingSha);
+
+    toast('✅ Builder updated! Reloading in 5s…',5000);
+    // Reload after delay to allow GitHub Pages to start deploying
+    setTimeout(()=>location.reload(),5000);
+
+  }catch(e){
+    const msg=scrubKeys(e.message||String(e));
+    toast('Self-update failed: '+msg,6000);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🔧 Update The Builder';}
   }
 }
 
@@ -1646,6 +1822,28 @@ async function callClaude(sys,msg){
   return code;
 }
 
+// Like callClaude but for non-HTML responses (JSON, text) — no HTML validation
+async function callClaudeRaw(sys,msg,maxTokens=4000){
+  let r;
+  try{
+    r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system:sys,messages:[{role:'user',content:msg}]}),
+    },60000);
+  }catch(e){
+    throw new Error(classifyFetchError(e,'Claude'));
+  }
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error('Claude: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
+  }
+  const d=await r.json();
+  let raw=d.content?.[0]?.text||'';
+  // Strip markdown fences if present
+  return raw.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
+}
+
 async function callGPT(code){
   let r;
   try{
@@ -1667,26 +1865,100 @@ async function callGPT(code){
   try{const p=JSON.parse(raw);return Array.isArray(p)?p:[];}catch{return[];}
 }
 
-/* ════════ APP ACTIONS ════════ */
+/* ════════ APP ACTIONS — STUDIO ════════ */
 function openApp(id){
   const app=ST.apps.find(a=>a.id===id);if(!app)return;
   ST.viewingApp=app;
+  ST.activeAppId=id; // keep active so studio editor can rebuild
+
+  // Vbar
   $('vbar-name').textContent=app.icon+' '+app.name;
   const url=ghPageUrl(id);
-  // Always use srcdoc for immediate reliable display — GitHub Pages takes 30-120s to deploy.
-  // The live URL is shown as a tappable link, not loaded in the iframe directly.
-  $('vbar-url').textContent=url?url:'Saved locally — no GitHub URL yet';
+  $('vbar-url').textContent=url||'Saved locally — no live URL';
   $('vbar-url').dataset.url=url||'';
+
+  // iframe — always use srcdoc for instant display
   $('viewer-iframe').removeAttribute('src');
-  $('viewer-iframe').srcdoc=app.code||'<html><body style="background:#111;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>No app code found.</p></body></html>';
-  // Always show normal viewer controls, clear any stale preview-mode state
+  $('viewer-iframe').srcdoc=app.code||'<html><body style="background:#111;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>No code found.</p></body></html>';
+
+  // Studio editor
+  $('se-textarea').value='';
+  autoResizeSe($('se-textarea'));
+
+  // Show live URL button if available
+  const liveBtn=$('se-liveurl-btn');
+  if(liveBtn){liveBtn.style.display=url?'block':'none';liveBtn.onclick=()=>copyToClipboard(url,'URL');}
+
+  // Reset viewer to normal mode (not preview-approval mode)
   _previewPid=null;
   $('vbar-approve-row').style.display='none';
   $('vbar-btns').style.display='flex';
   $('vback').title='';
+
+  // Restore non-fullscreen mode if it was left fullscreen from a prior session
+  if(ST._studioFullscreen)studioSetFullscreen(false);
+
   closeBuilder();
   closeProject();
   showScreen('viewer');
+}
+
+function autoResizeSe(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+
+function studioSetFullscreen(full){
+  ST._studioFullscreen=full;
+  const ed=$('studio-editor');
+  const btn=$('vbar-fs-toggle');
+  if(full){
+    ed.classList.add('fullscreen-mode');
+    if(btn)btn.textContent='⊡';
+    if(btn)btn.title='Exit full screen';
+  }else{
+    ed.classList.remove('fullscreen-mode');
+    if(btn)btn.textContent='⛶';
+    if(btn)btn.title='Full screen preview';
+  }
+}
+
+async function studioSend(){
+  const text=$('se-textarea').value.trim();
+  if(!text)return;
+  if(ST._building){
+    toast('A build is already running — wait for it to finish',3000);
+    return;
+  }
+  if(!ST.key){toast('Add your Anthropic API key in ⚙️ Settings first',4000);return;}
+  const app=ST.apps.find(a=>a.id===ST.activeAppId);
+  if(!app){toast('No app selected — go back and open an app first',3000);return;}
+
+  $('se-textarea').value='';
+  autoResizeSe($('se-textarea'));
+  $('se-send').disabled=true;
+
+  // Open builder sheet WITHOUT resetting chat if already focused on this app.
+  // openBuilder always calls resetChat(), which destroys pipeline history.
+  // Instead: only do a full reset if switching to a different app.
+  const sheetAlreadyReady=(ST.activeAppId===app.id&&$('bs-title').textContent.includes(app.name));
+  if(!sheetAlreadyReady){
+    // Different app or first time — do the full open (sets title, sub, etc.)
+    $('bs-title').textContent='Editing: '+app.name;
+    $('bs-sub').textContent='Describe changes — new branch → checks → fix → preview → merge';
+    $('bs-proj-btn').style.display='flex';
+    ST.pendingIcon=app.icon||'🎯';
+    ST.pendingColor=app.ci??0;
+    $('emoji-pick-btn').textContent=ST.pendingIcon;
+    // Only reset chat if it's truly a fresh context
+    if($('bs-title').textContent!=='Editing: '+app.name){resetChat();}
+  }
+  // Just open the sheet — keep existing chat messages
+  $('builder-sheet').classList.add('open');
+
+  setTimeout(()=>{
+    addMsg({role:'user',text});
+    runPipeline(text,app).finally(()=>{
+      $('se-send').disabled=false;
+    });
+  },80);
 }
 
 function openCurrentInViewer(){
@@ -1735,7 +2007,13 @@ function delApp(id){
   persist();
   renderGrid();
   if(ST.activeAppId===id)ST.activeAppId=null;
-  if(ST.viewingApp?.id===id)ST.viewingApp=null;
+  if(ST.viewingApp?.id===id){
+    ST.viewingApp=null;
+    // If we're currently in the Studio viewing this app, go back to home
+    if($('s-viewer').classList.contains('active')){
+      showScreen('home');renderGrid();
+    }
+  }
   if(ST.projectAppId===id){ST.projectAppId=null;closeProject();}
   toast('App deleted locally');
 }
@@ -1786,8 +2064,8 @@ function openSettings(){
   $('s-sb-url').value=ST.sbUrl;$('s-sb-anon').value=ST.sbAnon;
   $('s-audit-pill').classList.toggle('on',ST.auditEnabled);
   $('s-sync-pill').classList.toggle('on',ST.sbEnabled);
+  const bp=$('s-backend-pill');if(bp)bp.classList.toggle('on',ST.backendEnabled);
   $('s-sb-exp').style.display=ST.sbEnabled?'flex':'none';
-  // Render key safety status (shows redacted keys + storage guarantee)
   const ksc=$('key-safety-card');
   if(ksc)ksc.innerHTML=keyStatusHTML();
   $('settings-overlay').classList.add('on');
@@ -1928,53 +2206,94 @@ function init(){
   $('emoji-pick-btn').addEventListener('click',()=>$('emoji-overlay').classList.add('on'));
   $('emoji-overlay').addEventListener('click',e=>{if(e.target.id==='emoji-overlay')$('emoji-overlay').classList.remove('on');});
 
-  // ── Viewer ──
+  // ── Viewer / Studio ──
   $('vback').addEventListener('click',()=>{
     if(_previewPid){
-      // In pipeline preview mode — go back to builder chat, keep pipeline alive
       _previewPid=null;
       $('vbar-approve-row').style.display='none';
       $('vbar-btns').style.display='flex';
-      renderGrid(); // refresh home screen behind the builder sheet
+      renderGrid();
       showScreen('home');
-      // Re-open builder sheet (it was never closed during preview mode)
       $('builder-sheet').classList.add('open');
     }else{
+      // If came from studio, go back to home with grid
       showScreen('home');renderGrid();
     }
   });
   $('vbar-approve').addEventListener('click',function(){
     if(!_previewPid)return;
-    const pid=_previewPid;
-    _previewPid=null;
-    this.disabled=true;$('vbar-req-changes').disabled=true;
-    this.textContent='Merging…';
+    const pid=_previewPid;_previewPid=null;
+    this.disabled=true;$('vbar-req-changes').disabled=true;this.textContent='Merging…';
     approveAndMerge(pid);
-    // Return to builder to watch the merge step complete
-    $('vbar-approve-row').style.display='none';
-    $('vbar-btns').style.display='flex';
-    $('builder-sheet').classList.add('open');
-    showScreen('home');
+    $('vbar-approve-row').style.display='none';$('vbar-btns').style.display='flex';
+    $('builder-sheet').classList.add('open');showScreen('home');
   });
   $('vbar-req-changes').addEventListener('click',function(){
     if(!_previewPid)return;
-    const pid=_previewPid;
-    _previewPid=null;
+    const pid=_previewPid;_previewPid=null;
     this.disabled=true;$('vbar-approve').disabled=true;
     requestChanges(pid);
-    $('vbar-approve-row').style.display='none';
-    $('vbar-btns').style.display='flex';
-    $('builder-sheet').classList.add('open');
-    showScreen('home');
-  });
-  $('vbar-edit').addEventListener('click',()=>{
-    if(ST.viewingApp){
-      const eid=ST.viewingApp.id;
-      showScreen('home');renderGrid();
-      setTimeout(()=>openBuilder(eid),80);
-    }
+    $('vbar-approve-row').style.display='none';$('vbar-btns').style.display='flex';
+    $('builder-sheet').classList.add('open');showScreen('home');
   });
   $('vbar-proj').addEventListener('click',()=>{if(ST.viewingApp)openProjectSheet(ST.viewingApp.id);});
+
+  // Full-screen toggle
+  $('vbar-fs-toggle').addEventListener('click',()=>studioSetFullscreen(!ST._studioFullscreen));
+
+  // Studio editor - collapse/expand
+  $('se-header-toggle').addEventListener('click',e=>{
+    if(e.target.closest('.se-hbtn'))return; // don't collapse if a button was clicked
+    const ed=$('studio-editor');
+    const isCollapsed=ed.classList.toggle('collapsed');
+    $('se-collapse-btn').textContent=isCollapsed?'▲ Show':'▼ Hide';
+  });
+  $('se-collapse-btn').addEventListener('click',e=>{
+    e.stopPropagation();
+    const ed=$('studio-editor');
+    const isCollapsed=ed.classList.toggle('collapsed');
+    $('se-collapse-btn').textContent=isCollapsed?'▲ Show':'▼ Hide';
+  });
+
+  // Studio editor - project button
+  $('se-proj-btn').addEventListener('click',()=>{if(ST.viewingApp)openProjectSheet(ST.viewingApp.id);});
+
+  // Studio editor - textarea auto-resize + send
+  const seInp=$('se-textarea');
+  seInp.addEventListener('input',()=>autoResizeSe(seInp));
+  seInp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();studioSend();}});
+  $('se-send').addEventListener('click',studioSend);
+
+  // Studio editor - drag handle to resize
+  (function(){
+    const handle=$('se-drag'),editor=$('studio-editor'),body=$('studio-body');
+    let startY=0,startH=0,dragging=false;
+    function onStart(clientY){
+      dragging=true;startY=clientY;startH=editor.offsetHeight;
+      // Disable CSS transition during drag for instant response
+      editor.style.transition='none';
+    }
+    function onMove(clientY){
+      if(!dragging)return;
+      const delta=startY-clientY;
+      const newH=Math.max(52,Math.min(startH+delta,body.offsetHeight-80));
+      editor.style.height=newH+'px';
+      editor.classList.remove('collapsed');
+      $('se-collapse-btn').textContent='▼ Hide';
+    }
+    function onEnd(){
+      if(!dragging)return;
+      dragging=false;
+      // Re-enable transition after drag ends
+      editor.style.transition='';
+    }
+    handle.addEventListener('touchstart',e=>{if(e.touches[0])onStart(e.touches[0].clientY);},{passive:true});
+    handle.addEventListener('touchmove',e=>{if(e.touches[0]){onMove(e.touches[0].clientY);e.preventDefault();}},{passive:false});
+    handle.addEventListener('touchend',onEnd,{passive:true});
+    handle.addEventListener('mousedown',e=>{onStart(e.clientY);});
+    document.addEventListener('mousemove',e=>{if(dragging)onMove(e.clientY);});
+    document.addEventListener('mouseup',onEnd);
+  })();
 
   // ── Project sheet ──
   $('project-sheet').addEventListener('click',e=>{if(e.target.id==='project-sheet')closeProject();});
@@ -2018,6 +2337,27 @@ function init(){
     toast('Supabase credentials saved ✓');
   });
   $('s-pull').addEventListener('click',pullFromSupabase);
+
+  // Backend toggle (adds Supabase schema step to every build)
+  const backendPill=$('s-backend-pill');
+  if(backendPill){
+    backendPill.classList.toggle('on',ST.backendEnabled);
+    backendPill.addEventListener('click',()=>{
+      ST.backendEnabled=!ST.backendEnabled;
+      saveKeys();
+      backendPill.classList.toggle('on',ST.backendEnabled);
+      toast(ST.backendEnabled?'Backend step enabled — Supabase schema will be generated':'Backend step disabled');
+    });
+  }
+
+  // Self-update button
+  $('s-self-update-btn').addEventListener('click',()=>{
+    const improvement=$('s-self-update-input').value.trim();
+    if(!improvement){toast('Describe the improvement first',2500);return;}
+    if(!confirm('Claude will update The Builder itself and reload the page. Continue?'))return;
+    selfUpdateBuilder(improvement);
+  });
+
   $('s-clear').addEventListener('click',()=>{if(!confirm('Delete all apps locally?'))return;ST.apps=[];persist();renderGrid();toast('All apps cleared locally');});
   $('s-signout').addEventListener('click',()=>{if(!confirm('Sign out and clear all keys?'))return;localStorage.clear();location.reload();});
 
