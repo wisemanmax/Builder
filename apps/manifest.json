@@ -1,0 +1,53 @@
+[
+  {
+    "id": "amms7n7wdwfl",
+    "name": "Weather Tells Day",
+    "icon": "🎯",
+    "ci": 5,
+    "url": "https://Wisemanmax.github.io/Builder/apps/amms7n7wdwfl.html",
+    "path": "apps/amms7n7wdwfl.html",
+    "prompts": [
+      {
+        "ts": "2026-03-15T20:33:41.125Z",
+        "type": "initial",
+        "text": "Build me a weather app that tells a 7 day forecast and updates based on zipcode you put in. Make it advanced like the we"
+      }
+    ],
+    "createdAt": "2026-03-15T20:33:41.125Z",
+    "updatedAt": "2026-03-15T20:33:41.125Z"
+  },
+  {
+    "id": "amms74geu1cq",
+    "name": "Personal Budget Tracker",
+    "icon": "🎯",
+    "ci": 3,
+    "url": "https://Wisemanmax.github.io/Builder/apps/amms74geu1cq.html",
+    "path": "apps/amms74geu1cq.html",
+    "prompts": [
+      {
+        "ts": "2026-03-15T20:19:15.038Z",
+        "type": "initial",
+        "text": "A personal budget tracker with expense categories, monthly limits, and charts"
+      }
+    ],
+    "createdAt": "2026-03-15T20:19:15.038Z",
+    "updatedAt": "2026-03-15T20:19:15.038Z"
+  },
+  {
+    "id": "amms6xfi60w2",
+    "name": "Simple Ti-84 Calculator",
+    "icon": "🎯",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/amms6xfi60w2.html",
+    "path": "apps/amms6xfi60w2.html",
+    "prompts": [
+      {
+        "ts": "2026-03-15T20:13:04.888Z",
+        "type": "initial",
+        "text": "Create a simple ti-84 calculator PWA"
+      }
+    ],
+    "createdAt": "2026-03-15T20:13:04.888Z",
+    "updatedAt": "2026-03-15T20:13:04.888Z"
+  }
+]
