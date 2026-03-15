@@ -856,39 +856,33 @@ const APPROVED_KEY_DOMAINS=[
 ];
 
 const _nativeFetch=window.fetch;
-window.fetch=function(url,opts={}){
-  const urlStr=String(url);
-  const headersObj=opts.headers||{};
 
-  // Only check headers — keys legitimately appear in Supabase JSON body as 'apikey'
-  // and in GitHub request bodies as part of the Authorization flow.
-  // Header check is sufficient to catch any accidental leak to a wrong domain.
+// Shared validation — called by both the fetch wrapper and fetchWithTimeout
+function _validateKeyedRequest(url,opts){
+  const headersObj=(opts&&opts.headers)||{};
   const sensitiveValues=[ST.key,ST.gptKey,ST.ghToken,ST.sbAnon].filter(v=>v&&v.length>8);
   const hasKeyInHeaders=sensitiveValues.some(v=>
     Object.values(headersObj).some(h=>String(h).includes(v))
   );
-
-  if(hasKeyInHeaders){
-    // Verify destination is an approved domain
-    let destOk=false;
-    try{
-      const dest=new URL(urlStr);
-      destOk=APPROVED_KEY_DOMAINS.some(d=>dest.hostname===d||dest.hostname.endsWith('.'+d));
-      // Also allow the user's specific Supabase domain
-      if(!destOk&&ST.sbUrl){
-        try{
-          const sbHost=new URL(ST.sbUrl).hostname;
-          destOk=dest.hostname===sbHost;
-        }catch{}
-      }
-    }catch{destOk=false;}
-
-    if(!destOk){
-      const err=new Error('[KEY GUARD] Blocked: credentials sent to unexpected domain: '+urlStr.split('?')[0]);
-      console.error(err.message);
-      return Promise.reject(err);
+  if(!hasKeyInHeaders)return; // no key material, no check needed
+  let destOk=false;
+  try{
+    const dest=new URL(String(url));
+    destOk=APPROVED_KEY_DOMAINS.some(d=>dest.hostname===d||dest.hostname.endsWith('.'+d));
+    if(!destOk&&ST.sbUrl){
+      try{const sbHost=new URL(ST.sbUrl).hostname;destOk=dest.hostname===sbHost;}catch{}
     }
+  }catch{destOk=false;}
+  if(!destOk){
+    const err=new Error('[KEY GUARD] Blocked: credentials sent to unexpected domain: '+String(url).split('?')[0]);
+    console.error(err.message);
+    throw err;
   }
+}
+
+window.fetch=function(url,opts={}){
+  try{_validateKeyedRequest(url,opts);}catch(e){return Promise.reject(e);}
+  return _nativeFetch.apply(this,arguments);
   return _nativeFetch.apply(this,arguments);
 };
 
@@ -1414,13 +1408,17 @@ async function runPipeline(prompt,existingApp){
 
     /* STEP 1 — Claude builds */
     updatePS(pid,1,'active','Claude is writing your app\u2026');
-    // Truncate existing code to 60KB to avoid hitting API context limits
-    const existingCodeSlice=existingApp?.code
-      ?(existingApp.code.length>61440?existingApp.code.slice(0,61440)+'\n\n<!-- [code truncated for context window] -->' : existingApp.code)
-      :null;
-    const userMsg=existingCodeSlice
-      ?'Existing code:\n\n'+existingCodeSlice+'\n\nChange request: '+prompt
-      :'Build this app: '+prompt;
+    let userMsg;
+    if(existingApp){
+      // For edits: describe the app from its prompt history rather than sending
+      // the full HTML code. This keeps the request body small (avoids iOS "Load failed")
+      // and lets Claude regenerate a clean version incorporating the changes.
+      const prevPrompts=(existingApp.prompts||[]).map(p=>p.text).join('\n→ ');
+      const appDesc=prevPrompts||existingApp.desc||existingApp.name||'an existing app';
+      userMsg='Rebuild this app from scratch with the following change:\n\nOriginal app: '+appDesc+'\n\nChange request: '+prompt+'\n\nRebuild the complete app with this change applied. Keep all original functionality, just apply the requested change.';
+    }else{
+      userMsg='Build this app: '+prompt;
+    }
     const v1=await callClaude(SYS_BUILD,userMsg);
     updatePS(pid,1,'done','Build complete \u2713');
 
@@ -1600,20 +1598,42 @@ function _saveAppLocally(id,name,icon,ci,code,prompt,existingApp,ghPushed){
 }
 
 /* ════════ AI CALLS ════════ */
-// Shared timeout helper — rejects after `ms` milliseconds
+// iOS Safari has known issues with AbortController + fetch when opts are spread.
+// We use a race-based timeout instead — no signal passed to fetch at all.
+// This avoids the "Load failed" WebKit bug where signal in spread opts causes
+// the request to silently abort before it even starts.
+// We call _nativeFetch directly to avoid any wrapper overhead on AI calls,
+// but still run the key guard validation.
 function fetchWithTimeout(url,opts,ms=120000){
-  const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(),ms);
-  return fetch(url,{...opts,signal:ctrl.signal})
-    .finally(()=>clearTimeout(timer));
+  _validateKeyedRequest(url,opts); // enforce key safety even though we bypass window.fetch
+  const req=_nativeFetch.call(window,url,opts);
+  const timeout=new Promise((_,reject)=>
+    setTimeout(()=>reject(new Error('Request timed out after '+(ms/1000)+'s — check your network connection')),ms)
+  );
+  return Promise.race([req,timeout]);
+}
+
+// Translate raw network errors into actionable messages
+function classifyFetchError(e,api){
+  const msg=String(e?.message||e||'');
+  if(msg.includes('timed out'))return api+': Request timed out. Check your internet connection and try again.';
+  if(msg.toLowerCase().includes('load failed')||msg.toLowerCase().includes('failed to fetch')||msg.toLowerCase().includes('networkerror'))
+    return api+': Network error — check your internet connection. On iOS, large requests can fail; try a shorter prompt.';
+  if(msg.includes('abort'))return api+': Request was cancelled.';
+  return api+': '+msg;
 }
 
 async function callClaude(sys,msg){
-  const r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,system:sys,messages:[{role:'user',content:msg}]}),
-  },120000);
+  let r;
+  try{
+    r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,system:sys,messages:[{role:'user',content:msg}]}),
+    },120000);
+  }catch(e){
+    throw new Error(classifyFetchError(e,'Claude'));
+  }
   if(!r.ok){
     const e=await r.json().catch(()=>({}));
     throw new Error('Claude: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
@@ -1621,16 +1641,21 @@ async function callClaude(sys,msg){
   const d=await r.json();
   let code=d.content?.[0]?.text||'';
   code=code.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
-  if(!code.includes('<html')&&!code.includes('<!DOCTYPE'))throw new Error('Unexpected Claude response — please try again');
+  if(!code.includes('<html')&&!code.includes('<!DOCTYPE'))throw new Error('Claude returned an unexpected response format — please try again');
   return code;
 }
 
 async function callGPT(code){
-  const r=await fetchWithTimeout('https://api.openai.com/v1/chat/completions',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+ST.gptKey},
-    body:JSON.stringify({model:'gpt-4o',max_tokens:2000,temperature:0.1,messages:[{role:'system',content:SYS_AUDIT},{role:'user',content:'Audit:\n\n'+code.slice(0,20000)}]}),
-  },60000);
+  let r;
+  try{
+    r=await fetchWithTimeout('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+ST.gptKey},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:2000,temperature:0.1,messages:[{role:'system',content:SYS_AUDIT},{role:'user',content:'Audit:\n\n'+code.slice(0,20000)}]}),
+    },60000);
+  }catch(e){
+    throw new Error(classifyFetchError(e,'GPT'));
+  }
   if(!r.ok){
     const e=await r.json().catch(()=>({}));
     throw new Error('GPT: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
