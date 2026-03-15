@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="The Builder">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#080812">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 180 180%22%3E%3Crect width=%22180%22 height=%22180%22 rx=%2240%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%2290%22 y=%22120%22 font-size=%2290%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
 <!-- Content Security Policy: keys only ever leave the device to these three endpoints -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self' 'unsafe-inline' data: blob:;
@@ -650,7 +652,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
   <!-- Studio split body -->
   <div id="studio-body">
     <div id="studio-preview">
-      <iframe id="viewer-iframe" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock"></iframe>
+      <iframe id="viewer-iframe" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock allow-same-origin"></iframe>
     </div>
     <div id="studio-editor">
       <div class="se-drag" id="se-drag"></div>
@@ -761,22 +763,10 @@ window.onerror=function(m,s){if(String(m).includes('Script error')||String(s||''
 var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 var isSafari=!window.chrome&&/safari/i.test(navigator.userAgent);
 
-// Manifest blob — skip on iOS (uses apple-mobile-web-app meta tags instead)
-if(!isIOS){
+// Service Worker — register from real file (blob: URLs are rejected by browsers)
+if('serviceWorker' in navigator){
   try{
-    var _mf={name:'The Builder',short_name:'The Builder',description:'Build · Push · Deploy',start_url:'./index.html',display:'standalone',orientation:'portrait',background_color:'#080812',theme_color:'#080812',icons:[{src:'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22115%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%22256%22 y=%22335%22 font-size=%22256%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E',sizes:'512x512',type:'image/svg+xml',purpose:'any'},{src:'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22115%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%22256%22 y=%22335%22 font-size=%22256%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E',sizes:'512x512',type:'image/svg+xml',purpose:'maskable'}]};
-    var _mb=new Blob([JSON.stringify(_mf)],{type:'application/json'});
-    var _ml=document.createElement('link');_ml.rel='manifest';_ml.href=URL.createObjectURL(_mb);
-    document.head.appendChild(_ml);
-  }catch(e){}
-}
-
-// Service Worker — Chrome/Edge only (Safari/iOS does not support blob: SW)
-if(!isIOS&&!isSafari&&'serviceWorker' in navigator){
-  try{
-    var _swc="self.addEventListener('install',function(e){self.skipWaiting();});self.addEventListener('activate',function(e){e.waitUntil(clients.claim());});";
-    var _swb=new Blob([_swc],{type:'application/javascript'});
-    navigator.serviceWorker.register(URL.createObjectURL(_swb),{scope:'./'}).catch(function(){});
+    navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(function(){});
   }catch(e){}
 }
 
@@ -1740,7 +1730,7 @@ async function selfUpdateBuilder(improvement){
 
     // Push as index.html on main (direct push, no branch needed — it's the app itself)
     const existingSha=await ghGetFileSha('index.html','main');
-    await ghPushFile('index.html',improved,'🔧 Self-update: '+improvement.slice(0,80),existingSha);
+    await ghPushFile('index.html',improved,'🔧 Self-update: '+improvement.slice(0,80),'main',existingSha);
 
     toast('✅ Builder updated! Reloading in 5s…',5000);
     // Reload after delay to allow GitHub Pages to start deploying
@@ -1783,10 +1773,11 @@ function _saveAppLocally(id,name,icon,ci,code,prompt,existingApp,ghPushed){
 // but still run the key guard validation.
 function fetchWithTimeout(url,opts,ms=120000){
   _validateKeyedRequest(url,opts); // enforce key safety even though we bypass window.fetch
-  const req=_nativeFetch.call(window,url,opts);
-  const timeout=new Promise((_,reject)=>
-    setTimeout(()=>reject(new Error('Request timed out after '+(ms/1000)+'s — check your network connection')),ms)
-  );
+  let timer;
+  const req=_nativeFetch.call(window,url,opts).then(r=>{clearTimeout(timer);return r;},e=>{clearTimeout(timer);throw e;});
+  const timeout=new Promise((_,reject)=>{
+    timer=setTimeout(()=>reject(new Error('Request timed out after '+(ms/1000)+'s — check your network connection')),ms);
+  });
   return Promise.race([req,timeout]);
 }
 
@@ -1947,8 +1938,6 @@ async function studioSend(){
     ST.pendingIcon=app.icon||'🎯';
     ST.pendingColor=app.ci??0;
     $('emoji-pick-btn').textContent=ST.pendingIcon;
-    // Only reset chat if it's truly a fresh context
-    if($('bs-title').textContent!=='Editing: '+app.name){resetChat();}
   }
   // Just open the sheet — keep existing chat messages
   $('builder-sheet').classList.add('open');
