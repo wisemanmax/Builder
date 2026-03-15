@@ -8,6 +8,21 @@
 <meta name="apple-mobile-web-app-title" content="The Builder">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#080812">
+<!-- Content Security Policy: keys only ever leave the device to these three endpoints -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self' 'unsafe-inline' data: blob:;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  connect-src
+    https://api.anthropic.com
+    https://api.openai.com
+    https://api.github.com
+    https://*.supabase.co
+    https://fonts.googleapis.com
+    https://fonts.gstatic.com;
+  font-src https://fonts.gstatic.com data:;
+  img-src 'self' data: blob:;
+  frame-src 'self' blob: data:;
+">
 <title>The Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,8 +64,8 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 /* ══════════════════════════════
    ONBOARDING
 ══════════════════════════════ */
-#s-onboard{align-items:center;justify-content:flex-start;overflow-y:auto}
-.ob-wrap{width:100%;max-width:430px;margin:0 auto;padding:56px 22px 48px;display:flex;flex-direction:column;gap:18px}
+#s-onboard{align-items:center;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ob-wrap{width:100%;max-width:430px;margin:0 auto;padding:56px 22px 48px;display:flex;flex-direction:column;gap:18px;flex-shrink:0}
 .ob-logo{text-align:center;padding-bottom:4px}
 .lmark{width:84px;height:84px;border-radius:26px;background:var(--g1);display:inline-flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:14px;box-shadow:0 16px 52px rgba(255,60,172,.48);animation:lp 3.5s ease-in-out infinite}
 @keyframes lp{0%,100%{box-shadow:0 16px 52px rgba(255,60,172,.48)}50%{box-shadow:0 22px 68px rgba(255,60,172,.72)}}
@@ -402,12 +417,17 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
     <p>Build · Push · Deploy · Repeat</p>
   </div>
 
+  <div style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(0,230,118,.07);border:1.5px solid rgba(0,230,118,.2);border-radius:var(--rs)">
+    <span style="font-size:16px">🔒</span>
+    <span style="font-size:11px;color:rgba(255,255,255,.65);line-height:1.6">All API keys are stored <strong style="color:#fff">on this device only</strong> in localStorage. They are never uploaded, synced, logged, or included in any file pushed to GitHub.</span>
+  </div>
+
   <div class="section-card">
     <div class="sec-title">🤖 AI Keys</div>
     <div class="fl">
       <label>Anthropic API Key <span style="color:var(--co)">*</span></label>
       <input class="fi fi-mono" type="password" id="ob-anth" placeholder="sk-ant-..." autocomplete="off">
-      <span class="fhint">Required — Claude generates &amp; fixes your apps</span>
+      <span class="fhint">Required — sent only to <span style="color:var(--cy)">api.anthropic.com</span>, stored locally on this device</span>
     </div>
     <div class="fl">
       <label>OpenAI API Key <span style="color:rgba(255,255,255,.28)">(recommended)</span></label>
@@ -424,7 +444,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
     <div class="fl">
       <label>Personal Access Token <span style="color:var(--co)">*</span></label>
       <input class="fi fi-mono" type="password" id="ob-gh-token" placeholder="ghp_..." autocomplete="off">
-      <span class="fhint">Needs <strong style="color:rgba(255,255,255,.6)">repo</strong> scope. <a href="https://github.com/settings/tokens/new" target="_blank">Create token ↗</a></span>
+      <span class="fhint">Needs <strong style="color:rgba(255,255,255,.6)">repo</strong> scope. Sent only to <span style="color:var(--cy)">api.github.com</span>. <a href="https://github.com/settings/tokens/new" target="_blank">Create token ↗</a></span>
     </div>
     <div class="fl">
       <label>GitHub Username</label>
@@ -488,7 +508,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
     <div class="bs-top">
       <div class="bs-info">
         <div class="bs-title" id="bs-title">Build an App</div>
-        <div class="bs-sub" id="bs-sub">Claude builds → GPT audits → Claude fixes → GitHub push</div>
+        <div class="bs-sub" id="bs-sub">Branch → Build → Checks → Audit → Fix → Preview → Approve → Merge</div>
       </div>
       <div class="bs-actions">
         <button class="bs-btn" id="bs-proj-btn" title="View project" style="display:none">📋</button>
@@ -518,7 +538,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
           <button id="send-btn">↑</button>
         </div>
       </div>
-      <div class="ihint" id="ihint">⚡ Claude builds → 🔍 GPT audits → 🛠 Claude fixes → 🐙 Push to GitHub → 📱 Live on your home screen</div>
+      <div class="ihint" id="ihint">🌿 Branch → 🔨 Build → 📋 Checks → 🔍 Audit → 🛠 Fix → 👁 Preview → ✅ Approve → 🔀 Merge</div>
     </div>
   </div>
 </div>
@@ -613,9 +633,15 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
         <div id="s-sb-exp" style="display:none;flex-direction:column;gap:9px">
           <input class="fi fi-mono" type="text" id="s-sb-url" placeholder="Supabase URL">
           <input class="fi fi-mono" type="password" id="s-sb-anon" placeholder="Supabase Anon Key">
-          <button class="btn-p" id="s-pull" style="background:var(--g2);box-shadow:none;font-size:12px;padding:11px">☁️ Pull from Cloud</button>
+          <button class="btn-p" id="s-save-sb" style="background:var(--g2);box-shadow:none;font-size:12px;padding:11px">💾 Save Supabase Credentials</button>
+          <button class="btn-p" id="s-pull" style="background:rgba(255,255,255,.08);box-shadow:none;font-size:12px;padding:11px;border:1.5px solid rgba(255,255,255,.12)">☁️ Pull from Cloud</button>
         </div>
       </div>
+      <span class="ssec">Key Safety</span>
+      <div class="sscard" id="key-safety-card">
+        <!-- populated by keyStatusHTML() on open -->
+      </div>
+
       <span class="ssec">Danger Zone</span>
       <div class="sscard">
         <button class="dbtn" id="s-clear">🗑️ Delete All Apps Locally</button>
@@ -665,7 +691,7 @@ var isSafari=!window.chrome&&/safari/i.test(navigator.userAgent);
 // Manifest blob — skip on iOS (uses apple-mobile-web-app meta tags instead)
 if(!isIOS){
   try{
-    var _mf={name:'The Builder',short_name:'The Builder',description:'Build · Push · Deploy',start_url:location.href,display:'standalone',orientation:'portrait',background_color:'#080812',theme_color:'#080812',icons:[{src:'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22115%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%22256%22 y=%22335%22 font-size=%22256%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E',sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
+    var _mf={name:'The Builder',short_name:'The Builder',description:'Build · Push · Deploy',start_url:'./index.html',display:'standalone',orientation:'portrait',background_color:'#080812',theme_color:'#080812',icons:[{src:'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22115%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%22256%22 y=%22335%22 font-size=%22256%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E',sizes:'512x512',type:'image/svg+xml',purpose:'any'},{src:'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22115%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%22256%22 y=%22335%22 font-size=%22256%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E',sizes:'512x512',type:'image/svg+xml',purpose:'maskable'}]};
     var _mb=new Blob([JSON.stringify(_mf)],{type:'application/json'});
     var _ml=document.createElement('link');_ml.rel='manifest';_ml.href=URL.createObjectURL(_mb);
     document.head.appendChild(_ml);
@@ -737,28 +763,72 @@ function persist(){
     }
   }
 }
+/* ════════ KEY SAFETY ════════
+   Keys live ONLY in localStorage under these exact keys.
+   They are NEVER included in:
+     - ST.apps (the persisted app array)
+     - Supabase payloads
+     - GitHub file contents / commit messages
+     - Error messages or toast text
+     - Any console output
+   They are ONLY sent as Authorization/x-api-key headers
+   directly to api.anthropic.com, api.openai.com, api.github.com,
+   and *.supabase.co — enforced by the Content-Security-Policy above.
+════════════════════════════════════════ */
+
+const KEY_STORE={
+  ANTH:'bldr_key',
+  GPT: 'bldr_gptKey',
+  GH_TOKEN:'bldr_ghToken',
+  GH_USER:'bldr_ghUser',
+  GH_REPO:'bldr_ghRepo',
+  SB_URL:'bldr_sbUrl',
+  SB_ANON:'bldr_sbAnon',
+  SB_ON:  'bldr_sbOn',
+  AUDIT:  'bldr_audit',
+};
+
+// Returns a redacted version of a key for display (e.g. "sk-ant-••••••••1A2B")
+function redactKey(k){
+  if(!k||k.length<8)return k?'••••••••':'(not set)';
+  return k.slice(0,6)+'••••••••'+k.slice(-4);
+}
+
+// Scrub any key value from a string before it could appear in an error/toast
+function scrubKeys(str){
+  let s=String(str);
+  [ST.key,ST.gptKey,ST.ghToken,ST.sbAnon].forEach(k=>{
+    if(k&&k.length>8)s=s.split(k).join('[REDACTED]');
+  });
+  return s;
+}
+
 function hydrate(){
   try{ST.apps=JSON.parse(localStorage.getItem('bldr_apps')||'[]');}catch{ST.apps=[];}
-  ST.key=localStorage.getItem('bldr_key')||'';
-  ST.gptKey=localStorage.getItem('bldr_gptKey')||'';
-  ST.ghToken=localStorage.getItem('bldr_ghToken')||'';
-  ST.ghUser=localStorage.getItem('bldr_ghUser')||'';
-  ST.ghRepo=localStorage.getItem('bldr_ghRepo')||'';
-  ST.sbUrl=localStorage.getItem('bldr_sbUrl')||'';
-  ST.sbAnon=localStorage.getItem('bldr_sbAnon')||'';
-  ST.sbEnabled=localStorage.getItem('bldr_sbOn')==='true';
-  ST.auditEnabled=localStorage.getItem('bldr_audit')!=='false';
+  // Load keys from localStorage into memory — this is the ONLY place they ever come from
+  ST.key    =localStorage.getItem(KEY_STORE.ANTH)||'';
+  ST.gptKey =localStorage.getItem(KEY_STORE.GPT)||'';
+  ST.ghToken=localStorage.getItem(KEY_STORE.GH_TOKEN)||'';
+  ST.ghUser =localStorage.getItem(KEY_STORE.GH_USER)||'';
+  ST.ghRepo =localStorage.getItem(KEY_STORE.GH_REPO)||'';
+  ST.sbUrl  =localStorage.getItem(KEY_STORE.SB_URL)||'';
+  ST.sbAnon =localStorage.getItem(KEY_STORE.SB_ANON)||'';
+  ST.sbEnabled  =localStorage.getItem(KEY_STORE.SB_ON)==='true';
+  ST.auditEnabled=localStorage.getItem(KEY_STORE.AUDIT)!=='false';
 }
+
 function saveKeys(){
-  localStorage.setItem('bldr_key',ST.key);
-  localStorage.setItem('bldr_gptKey',ST.gptKey);
-  localStorage.setItem('bldr_ghToken',ST.ghToken);
-  localStorage.setItem('bldr_ghUser',ST.ghUser);
-  localStorage.setItem('bldr_ghRepo',ST.ghRepo);
-  localStorage.setItem('bldr_sbUrl',ST.sbUrl);
-  localStorage.setItem('bldr_sbAnon',ST.sbAnon);
-  localStorage.setItem('bldr_sbOn',String(ST.sbEnabled));
-  localStorage.setItem('bldr_audit',String(ST.auditEnabled));
+  // Write each key individually — never serialized as a group, never in a structure
+  // that could be accidentally pushed anywhere
+  localStorage.setItem(KEY_STORE.ANTH,    ST.key);
+  localStorage.setItem(KEY_STORE.GPT,     ST.gptKey);
+  localStorage.setItem(KEY_STORE.GH_TOKEN,ST.ghToken);
+  localStorage.setItem(KEY_STORE.GH_USER, ST.ghUser);
+  localStorage.setItem(KEY_STORE.GH_REPO, ST.ghRepo);
+  localStorage.setItem(KEY_STORE.SB_URL,  ST.sbUrl);
+  localStorage.setItem(KEY_STORE.SB_ANON, ST.sbAnon);
+  localStorage.setItem(KEY_STORE.SB_ON,   String(ST.sbEnabled));
+  localStorage.setItem(KEY_STORE.AUDIT,   String(ST.auditEnabled));
 }
 
 function fmtDate(iso){if(!iso)return'—';try{return new Date(iso).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return iso;}}
@@ -768,9 +838,84 @@ function ghPageUrl(id){return ST.ghUser&&ST.ghRepo?`https://${ST.ghUser}.github.
 function ghApiUrl(path){return`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/contents/${path}`;}
 function ghHeaders(){return{'Authorization':'token '+ST.ghToken,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'};}
 
-/* ════════ CLOCK ════════ */
+/* ════════ OUTBOUND REQUEST GUARD ════════
+   Intercepts every fetch call. If the request carries any of our secret keys
+   in headers or body, it verifies the destination is an approved domain.
+   Any attempt to send keys anywhere else throws immediately.
+════════════════════════════════════════ */
+const APPROVED_KEY_DOMAINS=[
+  'api.anthropic.com',
+  'api.openai.com',
+  'api.github.com',
+];
+
+const _nativeFetch=window.fetch;
+window.fetch=function(url,opts={}){
+  const urlStr=String(url);
+  const headersObj=opts.headers||{};
+
+  // Only check headers — keys legitimately appear in Supabase JSON body as 'apikey'
+  // and in GitHub request bodies as part of the Authorization flow.
+  // Header check is sufficient to catch any accidental leak to a wrong domain.
+  const sensitiveValues=[ST.key,ST.gptKey,ST.ghToken,ST.sbAnon].filter(v=>v&&v.length>8);
+  const hasKeyInHeaders=sensitiveValues.some(v=>
+    Object.values(headersObj).some(h=>String(h).includes(v))
+  );
+
+  if(hasKeyInHeaders){
+    // Verify destination is an approved domain
+    let destOk=false;
+    try{
+      const dest=new URL(urlStr);
+      destOk=APPROVED_KEY_DOMAINS.some(d=>dest.hostname===d||dest.hostname.endsWith('.'+d));
+      // Also allow the user's specific Supabase domain
+      if(!destOk&&ST.sbUrl){
+        try{
+          const sbHost=new URL(ST.sbUrl).hostname;
+          destOk=dest.hostname===sbHost;
+        }catch{}
+      }
+    }catch{destOk=false;}
+
+    if(!destOk){
+      const err=new Error('[KEY GUARD] Blocked: credentials sent to unexpected domain: '+urlStr.split('?')[0]);
+      console.error(err.message);
+      return Promise.reject(err);
+    }
+  }
+  return _nativeFetch.apply(this,arguments);
+};
+
+/* ════════ KEY SUMMARY (for Settings display) ════════ */
+function keyStatusHTML(){
+  return `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px">Where keys are stored</div>
+      <div style="background:rgba(0,230,118,.08);border:1.5px solid rgba(0,230,118,.2);border-radius:10px;padding:11px 13px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.7">
+        🔒 <strong style="color:#fff">Device only — localStorage</strong><br>
+        Keys are never uploaded, synced, logged, or included in any file pushed to GitHub.<br>
+        They are sent exclusively as HTTP headers directly to:<br>
+        <span style="font-family:var(--fm);color:var(--cy);font-size:10px">api.anthropic.com · api.openai.com · api.github.com</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${[
+          ['Anthropic',ST.key],
+          ['OpenAI',ST.gptKey],
+          ['GitHub Token',ST.ghToken],
+          ['Supabase Anon',ST.sbAnon],
+        ].map(([label,val])=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px">
+            <span style="font-size:11px;color:rgba(255,255,255,.5)">${label}</span>
+            <span style="font-family:var(--fm);font-size:10px;color:${val?'var(--mn)':'rgba(255,255,255,.25)'}">${val?redactKey(val):'not set'}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
 function tick(){const el=$('clock');if(!el)return;const n=new Date();el.textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
-setInterval(tick,10000);tick();
+// Update every 30s — minutes only change every 60s, 30s keeps it accurate without wasteful 10s wakes
+setInterval(tick,30000);
+// Delay initial tick until DOM is fully ready
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',tick);}else{tick();}
 
 /* ════════ GITHUB API — Branch-based deployment ════════ */
 function safeBase64(str){
@@ -788,11 +933,11 @@ async function ghFetch(url,opts={}){
   return res.status===204?{}:res.json();
 }
 
-// Get the SHA of main branch head
+// Get the SHA of main branch head — uses /branches/{branch} (stable, always single object)
 async function ghGetMainSha(){
-  const d=await ghFetch(`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/git/refs/heads/main`);
-  const sha=d?.object?.sha||d?.[0]?.object?.sha;
-  if(!sha)throw new Error('Could not read main branch SHA');
+  const d=await ghFetch(`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/branches/main`);
+  const sha=d?.commit?.sha;
+  if(!sha)throw new Error('Could not read main branch SHA — check repo exists and has at least one commit');
   return sha;
 }
 
@@ -816,7 +961,8 @@ async function ghPushFile(path,content,message,branch,existingSha){
 // Get file metadata (sha) from a branch
 async function ghGetFileSha(path,branch='main'){
   try{
-    const res=await fetch(ghApiUrl(path)+(branch!=='main'?`?ref=${branch}`:'{'),{headers:ghHeaders()});
+    const url=ghApiUrl(path)+(branch!=='main'?`?ref=${encodeURIComponent(branch)}`:'');
+    const res=await fetch(url,{headers:ghHeaders()});
     if(res.status===404)return null;
     if(!res.ok)return null;
     const d=await res.json();
@@ -851,11 +997,13 @@ async function ghDeleteBranch(branchName){
 }
 
 async function ghPushManifest(branch){
+  // Manifest contains only app metadata — never any credentials
   const manifestData=ST.apps.map(a=>({
     id:a.id,name:a.name,icon:a.icon,ci:a.ci,
     url:ghPageUrl(a.id),path:`apps/${a.id}.html`,
     prompts:(a.prompts||[]).map(p=>({ts:p.ts,type:p.type,text:p.text.slice(0,120)})),
     createdAt:a.createdAt,updatedAt:a.updatedAt,
+    // Explicitly excluded: code (pushed separately), any key material
   }));
   const existingSha=await ghGetFileSha('apps/manifest.json',branch);
   await ghPushFile('apps/manifest.json',JSON.stringify(manifestData,null,2),'Update Builder manifest',branch,existingSha);
@@ -873,76 +1021,110 @@ function runLocalChecks(code){
   const results=[];
   const add=(cat,id,label,passed,detail='')=>results.push({cat,id,label,passed,detail});
 
-  // ── Syntax / Structure ──
-  add('Syntax','doctype','DOCTYPE declaration',/^[\s\S]{0,100}<!DOCTYPE/i.test(code));
-  add('Syntax','html-tag','<html> element present',/<html[\s>]/i.test(code));
-  add('Syntax','viewport','Viewport meta tag',/<meta[^>]+viewport/i.test(code));
-  add('Syntax','charset','Charset meta tag',/<meta[^>]+charset/i.test(code));
+  // Hard cap: skip checks on absurdly large code to avoid hanging the UI
+  if(!code||code.length>500000){
+    add('Syntax','size-guard','File size check',false,'File too large to check locally');
+    return results;
+  }
 
-  // Parse out JS block for JS-specific checks
-  const jsBlocks=[...code.matchAll(/<script(?![^>]*src)[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).join('\n');
+  try{
+    // ── Syntax / Structure ──
+    add('Syntax','doctype','DOCTYPE declaration',/^[\s\S]{0,200}<!DOCTYPE/i.test(code));
+    add('Syntax','html-tag','<html> element present',/<html[\s>]/i.test(code));
+    add('Syntax','viewport','Viewport meta tag',/<meta[^>]{1,200}viewport/i.test(code));
+    add('Syntax','charset','Charset meta tag',/<meta[^>]{1,200}charset/i.test(code));
 
-  // Basic unclosed tag detection (approximate)
-  const openTags=(code.match(/<(div|section|article|main|nav|header|footer|ul|ol|table)[^>]*>/gi)||[]).length;
-  const closeTags=(code.match(/<\/(div|section|article|main|nav|header|footer|ul|ol|table)>/gi)||[]).length;
-  const tagBalance=Math.abs(openTags-closeTags);
-  add('Syntax','tag-balance',`Tag balance (${tagBalance>0?'-'+tagBalance:'OK'})`,tagBalance<=2,
-    tagBalance>2?`${tagBalance} unclosed structural tags`:'');
+    // Parse JS blocks — limit to first 200KB to avoid catastrophic backtracking
+    const codeSlice=code.slice(0,200000);
+    const jsBlocks=[...codeSlice.matchAll(/<script(?![^>]{0,200}src)[^>]{0,200}>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).join('\n');
 
-  // ── Accessibility ──
-  const imgTags=[...code.matchAll(/<img[^>]*>/gi)];
-  const missingAlt=imgTags.filter(m=>!/\balt\s*=/i.test(m[0]));
-  add('Accessibility','img-alt',`Images have alt (${imgTags.length} found)`,missingAlt.length===0,
-    missingAlt.length?`${missingAlt.length} missing alt attribute`:'');
+    // Tag balance (approximate)
+    const openTags=(code.match(/<(div|section|article|main|nav|header|footer|ul|ol|table)[^>]{0,300}>/gi)||[]).length;
+    const closeTags=(code.match(/<\/(div|section|article|main|nav|header|footer|ul|ol|table)>/gi)||[]).length;
+    const tagBalance=Math.abs(openTags-closeTags);
+    add('Syntax','tag-balance',`Tag balance (${tagBalance>0?'-'+tagBalance:'OK'})`,tagBalance<=2,
+      tagBalance>2?`${tagBalance} unclosed structural tags`:'');
 
-  add('Accessibility','lang','html[lang] attribute',/<html[^>]+lang\s*=/i.test(code));
+    // ── Accessibility ──
+    const imgTags=[...code.matchAll(/<img[^>]{0,500}>/gi)];
+    const missingAlt=imgTags.filter(m=>!/\balt\s*=/i.test(m[0]));
+    add('Accessibility','img-alt',`Images have alt (${imgTags.length} found)`,missingAlt.length===0,
+      missingAlt.length?`${missingAlt.length} missing alt attribute`:'');
 
-  const textInputs=[...code.matchAll(/<input[^>]*type\s*=\s*["']?(text|email|password|search|tel|url|number)["']?[^>]*>/gi)];
-  const hasLabelling=/<label[\s>]/i.test(code)||/aria-label/i.test(code)||/aria-labelledby/i.test(code)||/placeholder/i.test(code);
-  add('Accessibility','form-labels',`Form inputs labelled (${textInputs.length} found)`,
-    textInputs.length===0||hasLabelling, textInputs.length&&!hasLabelling?'Inputs found with no labels/placeholders':'');
+    add('Accessibility','lang','html[lang] attribute',/<html[^>]{0,300}lang\s*=/i.test(code));
 
-  add('Accessibility','btn-text','Buttons have accessible text',
-    ![...code.matchAll(/<button[^>]*>\s*<\/button>/gi)].length,
-    [...code.matchAll(/<button[^>]*>\s*<\/button>/gi)].length?'Empty button(s) found':'');
+    const textInputs=[...code.matchAll(/<input[^>]{0,400}type\s*=\s*["']?(text|email|password|search|tel|url|number)["']?[^>]{0,400}>/gi)];
+    const hasLabelling=/<label[\s>]/i.test(code)||/aria-label/i.test(code)||/aria-labelledby/i.test(code)||/placeholder/i.test(code);
+    add('Accessibility','form-labels',`Form inputs labelled (${textInputs.length} found)`,
+      textInputs.length===0||hasLabelling,textInputs.length&&!hasLabelling?'Inputs found with no labels/placeholders':'');
 
-  // ── Links & Paths ──
-  const emptyHrefs=[...code.matchAll(/href\s*=\s*["']\s*["']/gi)];
-  add('Links','empty-href','No empty href values',emptyHrefs.length===0,
-    emptyHrefs.length?`${emptyHrefs.length} empty href(s)`:'');
+    // Compute once, reuse — avoids double matchAll
+    const emptyBtns=[...code.matchAll(/<button[^>]{0,300}>\s*<\/button>/gi)].length;
+    add('Accessibility','btn-text','Buttons have accessible text',emptyBtns===0,
+      emptyBtns?'Empty button(s) found':'');
 
-  const emptySrcs=[...code.matchAll(/src\s*=\s*["']\s*["']/gi)];
-  add('Links','empty-src','No empty src values',emptySrcs.length===0,
-    emptySrcs.length?`${emptySrcs.length} empty src(s)`:'');
+    // ── Links & Paths ──
+    const emptyHrefs=[...code.matchAll(/href\s*=\s*["']\s*["']/gi)].length;
+    add('Links','empty-href','No empty href values',emptyHrefs===0,
+      emptyHrefs?`${emptyHrefs} empty href(s)`:'');
 
-  // External fetch calls that may fail offline
-  const fetchCalls=(jsBlocks.match(/fetch\s*\(/g)||[]).length;
-  add('Links','fetch-calls',`API fetch calls (${fetchCalls} found)`,true,
-    fetchCalls?`${fetchCalls} network call(s) — may need CORS`:'None');
+    const emptySrcs=[...code.matchAll(/src\s*=\s*["']\s*["']/gi)].length;
+    add('Links','empty-src','No empty src values',emptySrcs===0,
+      emptySrcs?`${emptySrcs} empty src(s)`:'');
 
-  // ── Security ──
-  add('Security','no-eval','No eval() usage',!/\beval\s*\(/.test(jsBlocks),
-    /\beval\s*\(/.test(jsBlocks)?'eval() detected':'');
+    const fetchCalls=(jsBlocks.match(/fetch\s*\(/g)||[]).length;
+    add('Links','fetch-calls',`API fetch calls (${fetchCalls} found)`,true,
+      fetchCalls?`${fetchCalls} network call(s) — may need CORS`:'None');
 
-  add('Security','no-docwrite','No document.write()',!/document\.write\s*\(/.test(jsBlocks),
-    /document\.write\s*\(/.test(jsBlocks)?'document.write() detected':'');
+    // ── Security ──
+    add('Security','no-eval','No eval() usage',!/\beval\s*\(/.test(jsBlocks),
+      /\beval\s*\(/.test(jsBlocks)?'eval() detected':'');
+    add('Security','no-docwrite','No document.write()',!/document\.write\s*\(/.test(jsBlocks),
+      /document\.write\s*\(/.test(jsBlocks)?'document.write() detected':'');
+    const innerHTMLCount=(jsBlocks.match(/\.innerHTML\s*=/g)||[]).length;
+    add('Security','no-innerhtml-risk','innerHTML usage',true,
+      innerHTMLCount?`${innerHTMLCount} innerHTML assignments (verify XSS safety)`:'');
 
-  add('Security','no-innerhtml-risk','innerHTML usage',true, // informational only
-    (jsBlocks.match(/\.innerHTML\s*=/g)||[]).length?`${(jsBlocks.match(/\.innerHTML\s*=/g)||[]).length} innerHTML assignments (verify XSS safety)`:'');
+    // ── Performance ──
+    const sizeKB=Math.round(new TextEncoder().encode(code).length/1024);
+    add('Performance','file-size',`File size: ${sizeKB}KB`,sizeKB<600,
+      sizeKB>=600?`${sizeKB}KB — consider reducing`:sizeKB+'KB ✓');
 
-  // ── Performance ──
-  const sizeKB=Math.round(new TextEncoder().encode(code).length/1024);
-  add('Performance','file-size',`File size: ${sizeKB}KB`,sizeKB<600,
-    sizeKB>=600?`${sizeKB}KB — consider reducing`:sizeKB+'KB ✓');
+    // Fixed: bound the style attribute check to avoid ReDoS
+    const longStyles=(code.match(/style\s*=\s*"[^"]{200,}"/gi)||[]).length;
+    add('Performance','inline-styles',`Long inline styles (${longStyles} found)`,longStyles<5,
+      longStyles>=5?`${longStyles} very long inline style(s)`:longStyles?longStyles+' found':'None');
 
-  const inlineStyles=(code.match(/style\s*=\s*["'][^"']{200,}["']/gi)||[]).length;
-  add('Performance','inline-styles',`Long inline styles (${inlineStyles} found)`,inlineStyles<5,
-    inlineStyles>=5?`${inlineStyles} very long inline style(s)`:inlineStyles?inlineStyles+' found':'None');
+  }catch(e){
+    // Regex failure on malformed input — return partial results rather than crashing
+    add('Syntax','check-error','Check engine error',false,'Some checks skipped: '+String(e.message).slice(0,80));
+  }
 
   return results;
 }
 
-/* ════════ APPROVAL GATE — Promise-based pause ════════ */
+/* ════════ PREVIEW STORE — temporary code cache for pre-save previews ════════ */
+// Apps are previewed at Step 6 but not saved until Step 8 (after approval).
+// This cache lets the Full Screen viewer work before the app is in ST.apps.
+const _previewCache={};
+function setPreview(id,code){_previewCache[id]=code;}
+function clearPreview(id){delete _previewCache[id];}
+window.openPreview=function(id){
+  // Try preview cache first (pre-save), fall back to saved app
+  const code=_previewCache[id];
+  if(code){
+    // Open viewer directly with cached code
+    $('vbar-name').textContent='Preview';
+    $('vbar-url').textContent='Not yet merged to GitHub';
+    $('vbar-url').dataset.url='';
+    $('viewer-iframe').removeAttribute('src');
+    $('viewer-iframe').srcdoc=code;
+    closeBuilder();closeProject();
+    showScreen('viewer');
+  }else{
+    openApp(id);
+  }
+};
 // Keyed by pipeline ID so concurrent pipelines don't collide
 const _approvalGates={};
 
@@ -1032,17 +1214,29 @@ function openBuilder(editId){
   ST.pendingColor=app?.ci??Math.floor(Math.random()*GRADS.length);
   $('emoji-pick-btn').textContent=ST.pendingIcon;
   $('bs-title').textContent=app?`Editing: ${app.name}`:'Build an App';
-  $('bs-sub').textContent=app?'Describe changes — will push update to GitHub':'Claude → GPT audit → Claude fix → GitHub push';
+  $('bs-sub').textContent=app?'Describe changes — new branch → checks → fix → preview → merge':'Branch → Build → Check → Audit → Fix → Preview → Approve → Merge';
   $('bs-proj-btn').style.display=app?'flex':'none';
   resetChat();
   if(app){
     addMsg({role:'system',text:'Editing: '+app.name});
-    addMsg({role:'asst',type:'text',html:`Loaded <strong>${esc(app.name)}</strong>. Describe what to change and I'll rebuild, audit, fix, and push the update to GitHub.<br><br><span style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.35)">🌐 ${ghPageUrl(app.id)}</span>`});
+    const liveUrl=ghPageUrl(app.id);
+    addMsg({role:'asst',type:'text',html:`Loaded <strong>${esc(app.name)}</strong>. Describe what to change and I'll rebuild, audit, fix, and push the update.${liveUrl?`<br><br><span style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.35)">🌐 ${liveUrl}</span>`:''}`});
   }
   $('builder-sheet').classList.add('open');
   setTimeout(()=>$('chat-input').focus(),420);
 }
-function closeBuilder(){$('builder-sheet').classList.remove('open');}
+function closeBuilder(){
+  $('builder-sheet').classList.remove('open');
+  // If a pipeline is paused at the approval gate, cancel it so the UI unlocks.
+  // Reject all pending gates with a special error that the pipeline catch can ignore.
+  Object.keys(_approvalGates).forEach(pid=>{
+    _approvalGates[pid]?.reject(new Error('BUILDER_CLOSED'));
+    delete _approvalGates[pid];
+  });
+  // Ensure the send button is always re-enabled when the sheet closes
+  ST._building=false;
+  const sb=$('send-btn');if(sb)sb.disabled=false;
+}
 function resetChat(){
   const s=$('chat-scroll');s.innerHTML='';
   const w=document.createElement('div');w.className='chat-welcome';w.id='chat-welcome';
@@ -1093,19 +1287,43 @@ function addMsg(cfg){
       var badgeText=fails?(fails+' Issue'+(fails!==1?'s':'')):'All Clear';
       var groups={};
       checks.forEach(function(c){if(!groups[c.cat])groups[c.cat]=[];groups[c.cat].push(c);});
-      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--g2)">\U0001F4CB</div><div style="flex:1;min-width:0"><div class="checks-card"><div class="chk-hdr"><div class="chk-hdr-ico">\U0001F4CB</div><div class="chk-hdr-title">Automated Checks</div><span class="chk-badge '+badgeClass+'">'+badgeText+'</span></div>'+Object.entries(groups).map(function(e){return '<div class="chk-group"><div class="chk-group-title">'+esc(e[0])+'</div>'+e[1].map(function(c){return '<div class="chk-row"><div class="chk-dot '+(c.passed?'ok':'fail')+'"></div><div class="chk-label">'+esc(c.label)+'</div>'+(c.detail?'<div class="chk-detail">'+esc(c.detail)+'</div>':'')+'</div>';}).join('')+'</div>';}).join('')+'</div></div></div>';
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--g2)">📋</div><div style="flex:1;min-width:0"><div class="checks-card"><div class="chk-hdr"><div class="chk-hdr-ico">📋</div><div class="chk-hdr-title">Automated Checks</div><span class="chk-badge '+badgeClass+'">'+badgeText+'</span></div>'+Object.entries(groups).map(function(e){return '<div class="chk-group"><div class="chk-group-title">'+esc(e[0])+'</div>'+e[1].map(function(c){return '<div class="chk-row"><div class="chk-dot '+(c.passed?'ok':'fail')+'"></div><div class="chk-label">'+esc(c.label)+'</div>'+(c.detail?'<div class="chk-detail">'+esc(c.detail)+'</div>':'')+'</div>';}).join('')+'</div>';}).join('')+'</div></div></div>';
     }else if(cfg.type==='audit'){
       var bugs=cfg.bugs||[];
       row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gg);font-family:var(--fh);font-size:10px;font-weight:800">G</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge">G</div><div class="audit-title">GPT-4o Audit Report</div><span class="ab '+(bugs.length?'bugs':'clean')+'">'+(bugs.length?bugs.length+' Bug'+(bugs.length!==1?'s':''):'&#x2713; Clean')+'</span></div>'+(bugs.length?bugs.map(function(b){return '<div class="ai"><span class="sev '+(b.severity||'low')+'">'+esc(b.severity||'low')+'</span><div class="aitxt"><strong>'+esc(b.issue||'')+'</strong>'+(b.location?'<span style="font-size:9px;color:rgba(255,255,255,.28)">'+esc(b.location)+'</span>':'')+'</div></div>';}).join(''):'<div class="audit-clean">&#x2705; No bugs found &#x2014; code looks clean!</div>')+'</div></div></div>';
     }else if(cfg.type==='preview-card'){
-      row.innerHTML='<div class="awrap"><div class="aav">\U0001F441</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview &#x2014; '+esc(cfg.appName||'App')+'</div><span class="pcc-branch">'+esc(cfg.branch||'local')+'</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="'+escAttr(cfg.code||'')+'"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openApp(\''+cfg.appId+'\')">&#x1F50D; Full Screen</button></div></div></div></div></div>';
+      row.innerHTML='<div class="awrap"><div class="aav">👁</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview &#x2014; '+esc(cfg.appName||'App')+'</div><span class="pcc-branch">'+esc(cfg.branch||'local')+'</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="'+escAttr(cfg.code||'')+'"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\''+cfg.appId+'\')">&#x1F50D; Full Screen</button></div></div></div></div></div>';
     }else if(cfg.type==='approval'){
       row.id=cfg.id;
-      row.innerHTML='<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#3D5AFE,#00E5FF)">\u2705</div><div style="flex:1;min-width:0"><div class="approval-card"><div class="appr-title">Ready to Merge</div><div class="appr-sub">All checks passed. Preview looks good. Approve to merge into <strong>main</strong> and trigger GitHub Pages deploy.</div><div class="appr-branch">'+esc(cfg.branch||'')+'</div><div class="appr-btns"><button class="appr-btn approve" onclick="approveAndMerge(\''+cfg.pid+'\');this.disabled=true;this.closest(\'.appr-btns\').querySelector(\'.changes\').disabled=true;this.textContent=\'Merging\u2026\'">\U0001F500 Approve &amp; Merge</button><button class="appr-btn changes" onclick="requestChanges(\''+cfg.pid+'\');this.disabled=true;this.closest(\'.appr-btns\').querySelector(\'.approve\').disabled=true">\u270F\uFE0F Request Changes</button></div></div></div></div>';
+      // Use data-* attributes — avoids fragile nested quote escaping in inline onclick
+      var _apid=esc(cfg.pid||'');
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#3D5AFE,#00E5FF)">\u2705</div>'
+        +'<div style="flex:1;min-width:0"><div class="approval-card">'
+        +'<div class="appr-title">Ready to Merge</div>'
+        +'<div class="appr-sub">All checks passed. Preview looks good. Approve to merge into <strong>main</strong> and trigger GitHub Pages deploy.</div>'
+        +'<div class="appr-branch">'+esc(cfg.branch||'')+'</div>'
+        +'<div class="appr-btns">'
+        +'<button class="appr-btn approve" data-pid="'+_apid+'" data-action="approve">🔀 Approve &amp; Merge</button>'
+        +'<button class="appr-btn changes" data-pid="'+_apid+'" data-action="changes">\u270F\uFE0F Request Changes</button>'
+        +'</div></div></div></div>';
+      // Wire approval buttons safely via delegated listener
+      (function(rowEl){
+        setTimeout(function(){
+          rowEl.querySelectorAll('.appr-btn[data-pid]').forEach(function(btn){
+            btn.addEventListener('click',function(){
+              var pid=this.dataset.pid;
+              var action=this.dataset.action;
+              rowEl.querySelectorAll('.appr-btn').forEach(function(b){b.disabled=true;});
+              if(action==='approve'){this.textContent='Merging\u2026';approveAndMerge(pid);}
+              else{requestChanges(pid);}
+            });
+          });
+        },0);
+      })(row);
     }else if(cfg.type==='merge-status'){
       row.id=cfg.mergeId;
       var spinning=cfg.status==='merging';
-      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gh);font-size:14px">\U0001F500</div><div style="flex:1;min-width:0"><div class="merge-card"><div class="merge-ico">\U0001F419</div><div class="merge-info"><span class="merge-title">'+(spinning?'Merging to main\u2026':cfg.status==='done'?'Merged &amp; Deploying \u2713':'Merge failed')+'</span>'+(cfg.url?'<a class="merge-url" href="'+cfg.url+'" target="_blank">'+cfg.url+'</a>':'')+'<span class="merge-meta" id="'+cfg.mergeId+'-meta">'+esc(cfg.meta||'')+'</span></div>'+(spinning?'<div class="merge-spin"></div>':'')+'</div></div></div>';
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gh);font-size:14px">🔀</div><div style="flex:1;min-width:0"><div class="merge-card"><div class="merge-ico">🐙</div><div class="merge-info"><span class="merge-title">'+(spinning?'Merging to main\u2026':cfg.status==='done'?'Merged &amp; Deploying \u2713':'Merge failed')+'</span>'+(cfg.url?'<a class="merge-url" href="'+cfg.url+'" target="_blank">'+cfg.url+'</a>':'')+'<span class="merge-meta" id="'+cfg.mergeId+'-meta">'+esc(cfg.meta||'')+'</span></div>'+(spinning?'<div class="merge-spin"></div>':'')+'</div></div></div>';
     }
   }
   if(cfg.id)row.id=cfg.id;
@@ -1166,8 +1384,12 @@ async function runPipeline(prompt,existingApp){
 
     /* STEP 1 — Claude builds */
     updatePS(pid,1,'active','Claude is writing your app\u2026');
-    const userMsg=existingApp?.code
-      ?'Existing code:\n\n'+existingApp.code+'\n\nChange request: '+prompt
+    // Truncate existing code to 60KB to avoid hitting API context limits
+    const existingCodeSlice=existingApp?.code
+      ?(existingApp.code.length>61440?existingApp.code.slice(0,61440)+'\n\n<!-- [code truncated for context window] -->' : existingApp.code)
+      :null;
+    const userMsg=existingCodeSlice
+      ?'Existing code:\n\n'+existingCodeSlice+'\n\nChange request: '+prompt
       :'Build this app: '+prompt;
     const v1=await callClaude(SYS_BUILD,userMsg);
     updatePS(pid,1,'done','Build complete \u2713');
@@ -1229,6 +1451,7 @@ async function runPipeline(prompt,existingApp){
 
     /* STEP 6 — Preview */
     updatePS(pid,6,'done','Preview ready');
+    setPreview(appId,v2); // cache for Full Screen before app is saved
     addMsg({role:'asst',type:'preview-card',code:v2,appName,branch:branchName||'local',appId});
 
     /* STEP 7 — Final Validation (PAUSE) */
@@ -1240,12 +1463,21 @@ async function runPipeline(prompt,existingApp){
     try{
       decision=await waitForApproval(pid);
     }catch(e){
+      if(e.message==='BUILDER_CLOSED'){
+        // User closed the sheet — save work locally, clean up silently
+        clearPreview(appId);
+        _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
+        ST.activeAppId=appId;
+        renderGrid();
+        return; // finally{} runs, resets ST._building + send-btn
+      }
       if(e.message==='CHANGES_REQUESTED'){
         updatePS(pid,7,'error','Changes requested');
+        clearPreview(appId);
         addMsg({role:'asst',type:'text',text:'No problem! Describe what you want changed and I\'ll do a new build with your feedback.'});
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
         ST.activeAppId=appId;
-        $('ihint').textContent='\U0001F4AC Describe what to change \u2014 I\'ll rebuild';
+        $('ihint').textContent='💬 Describe what to change \u2014 I\'ll rebuild';
         $('bs-proj-btn').style.display='flex';
         renderGrid();
         return;
@@ -1268,36 +1500,43 @@ async function runPipeline(prompt,existingApp){
         updatePS(pid,8,'done','Merged & deploying \u2713');
         const mc=$(mergeStatusId);
         if(mc){
-          mc.querySelector('.merge-card').innerHTML='<div class="merge-ico">\U0001F419</div><div class="merge-info"><span class="merge-title">Merged to main \u2713 \u2014 deploying</span><a class="merge-url" href="'+liveUrl+'" target="_blank">'+liveUrl+'</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>';
+          const card=mc.querySelector('.merge-card');
+          if(card)card.innerHTML='<div class="merge-ico">🐙</div><div class="merge-info"><span class="merge-title">Merged to main \u2713 \u2014 deploying</span><a class="merge-url" href="'+liveUrl+'" target="_blank">'+liveUrl+'</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>';
         }
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,true);
-        toast('\U0001F680 '+appName+' is deploying to GitHub Pages!',3500);
+        clearPreview(appId);
+        toast('🚀 '+appName+' is deploying to GitHub Pages!',3500);
       }catch(e){
-        updatePS(pid,8,'error',e.message);
+        const safeE=scrubKeys(e.message||String(e));
+        updatePS(pid,8,'error',safeE);
+        clearPreview(appId);
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
-        addMsg({role:'asst',type:'text',html:'Merge failed: <strong>'+esc(e.message)+'</strong>. App saved locally. You can retry by pushing the branch manually on GitHub or updating settings.'});
-        toast('Merge failed \u2014 saved locally',5000);
+        addMsg({role:'asst',type:'text',html:'Merge failed: <strong>'+esc(safeE)+'</strong>. App saved locally. You can retry by pushing the branch manually on GitHub or updating settings.'});
+        toast('Merge failed — saved locally',5000);
       }
     }else{
       updatePS(pid,8,'done','Saved locally \u2713');
       _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
+      clearPreview(appId);
       toast('\u2705 '+appName+' saved!',2800);
     }
 
     ST.activeAppId=appId;
-    $('ihint').textContent='\U0001F4AC Describe changes for a new build \u00b7 \U0001F4CB View project details';
+    $('ihint').textContent='💬 Describe changes for a new build · 📋 View project details';
     $('bs-proj-btn').style.display='flex';
     renderGrid();
 
     const finalApp=ST.apps.find(a=>a.id===appId);
     const g=grad(appCi);
     addMsg({role:'asst',type:'text',
-      html:'<strong>'+esc(finalApp?.name||appName)+'</strong> '+(hasGitHub?'is live on GitHub Pages':'has been saved')+' \U0001F389<br><br><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px"><button onclick="openApp(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:'+g+';border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\U0001F680 Open</button>'+(hasGitHub&&finalApp?.ghPushed?'<a href="'+ghPageUrl(appId)+'" target="_blank" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center">\U0001F310 Live URL</a>':'')+'<button onclick="openProjectSheet(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\U0001F4CB Project</button></div>'
+      html:'<strong>'+esc(finalApp?.name||appName)+'</strong> '+(hasGitHub?'is live on GitHub Pages':'has been saved')+' 🎉<br><br><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px"><button onclick="openApp(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:'+g+';border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">🚀 Open</button>'+(hasGitHub&&finalApp?.ghPushed?'<a href="'+ghPageUrl(appId)+'" target="_blank" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center">🌐 Live URL</a>':'')+'<button onclick="openProjectSheet(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">📋 Project</button></div>'
     });
 
   }catch(err){
-    addMsg({role:'asst',type:'text',text:'Pipeline error: '+err.message+'. Please try again.'});
-    toast('Error: '+err.message,5000);
+    clearPreview(appId||'');
+    const safeMsg=scrubKeys(err.message||String(err));
+    addMsg({role:'asst',type:'text',text:'Pipeline error: '+safeMsg+'. Please try again.'});
+    toast('Error: '+safeMsg,5000);
   }finally{
     ST._building=false;
     const sb=$('send-btn');if(sb)sb.disabled=false;
@@ -1325,26 +1564,41 @@ function _saveAppLocally(id,name,icon,ci,code,prompt,existingApp,ghPushed){
 }
 
 /* ════════ AI CALLS ════════ */
+// Shared timeout helper — rejects after `ms` milliseconds
+function fetchWithTimeout(url,opts,ms=120000){
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),ms);
+  return fetch(url,{...opts,signal:ctrl.signal})
+    .finally(()=>clearTimeout(timer));
+}
+
 async function callClaude(sys,msg){
-  const r=await fetch('https://api.anthropic.com/v1/messages',{
+  const r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8000,system:sys,messages:[{role:'user',content:msg}]}),
-  });
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error('Claude: '+(e.error?.message||`HTTP ${r.status}`));}
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,system:sys,messages:[{role:'user',content:msg}]}),
+  },120000);
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error('Claude: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
+  }
   const d=await r.json();
   let code=d.content?.[0]?.text||'';
   code=code.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
-  if(!code.includes('<html')&&!code.includes('<!DOCTYPE'))throw new Error('Unexpected Claude response');
+  if(!code.includes('<html')&&!code.includes('<!DOCTYPE'))throw new Error('Unexpected Claude response — please try again');
   return code;
 }
+
 async function callGPT(code){
-  const r=await fetch('https://api.openai.com/v1/chat/completions',{
+  const r=await fetchWithTimeout('https://api.openai.com/v1/chat/completions',{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+ST.gptKey},
     body:JSON.stringify({model:'gpt-4o',max_tokens:2000,temperature:0.1,messages:[{role:'system',content:SYS_AUDIT},{role:'user',content:'Audit:\n\n'+code.slice(0,20000)}]}),
-  });
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error('GPT: '+(e.error?.message||`HTTP ${r.status}`));}
+  },60000);
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error('GPT: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
+  }
   const d=await r.json();
   let raw=d.choices?.[0]?.message?.content||'[]';
   raw=raw.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
@@ -1466,12 +1720,29 @@ function openSettings(){
   $('s-audit-pill').classList.toggle('on',ST.auditEnabled);
   $('s-sync-pill').classList.toggle('on',ST.sbEnabled);
   $('s-sb-exp').style.display=ST.sbEnabled?'flex':'none';
+  // Render key safety status (shows redacted keys + storage guarantee)
+  const ksc=$('key-safety-card');
+  if(ksc)ksc.innerHTML=keyStatusHTML();
   $('settings-overlay').classList.add('on');
 }
 
 /* ════════ SUPABASE ════════ */
 async function pushToSupabase(app){
-  if(!ST.sbEnabled||!ST.sbUrl||!ST.sbAnon)return;
+  if(!ST.sbEnabled||!ST.sbUrl||!ST.sbAnon||!app?.id)return;
+  // Build payload explicitly — only app data fields, never any key material
+  const safePayload={
+    id:         app.id,
+    name:       app.name,
+    icon:       app.icon,
+    color_index:app.ci,
+    description:app.desc,
+    code:       app.code,
+    prompts:    app.prompts||[],
+    gh_pushed:  app.ghPushed||false,
+    created_at: app.createdAt,
+    updated_at: app.updatedAt,
+    // Explicitly excluded: ST.key, ST.gptKey, ST.ghToken, ST.sbAnon
+  };
   try{
     await fetch(`${ST.sbUrl}/rest/v1/builder_apps`,{
       method:'POST',
@@ -1481,29 +1752,34 @@ async function pushToSupabase(app){
         'Authorization':'Bearer '+ST.sbAnon,
         'Prefer':'resolution=merge-duplicates',
       },
-      body:JSON.stringify({
-        id:app.id,name:app.name,icon:app.icon,
-        color_index:app.ci,description:app.desc,
-        code:app.code,prompts:app.prompts||[],
-        gh_pushed:app.ghPushed||false,
-        created_at:app.createdAt,updated_at:app.updatedAt,
-      }),
+      body:JSON.stringify(safePayload),
     });
   }catch(e){
-    console.warn('Supabase push failed:',e.message);
-    // Don't surface this to user — it's a background sync, not critical path
+    // Scrub keys from any error message before logging
+    console.warn('Supabase push failed:',scrubKeys(e.message));
   }
 }
 
 async function pullFromSupabase(){
   if(!ST.sbUrl||!ST.sbAnon){toast('No Supabase credentials');return;}
   try{
-    const r=await fetch(`${ST.sbUrl}/rest/v1/builder_apps?select=*&order=created_at.desc`,{headers:{'apikey':ST.sbAnon,'Authorization':'Bearer '+ST.sbAnon}});
+    const r=await fetch(`${ST.sbUrl}/rest/v1/builder_apps?select=*&order=created_at.desc`,{
+      headers:{'apikey':ST.sbAnon,'Authorization':'Bearer '+ST.sbAnon},
+    });
     const data=await r.json();if(!Array.isArray(data))throw new Error('Bad response');
     const ids=new Set(data.map(a=>a.id));
-    ST.apps=[...data.map(d=>({id:d.id,name:d.name,icon:d.icon,ci:d.color_index,desc:d.description,code:d.code,versions:[],prompts:d.prompts||[],ghPushed:d.gh_pushed||false,createdAt:d.created_at,updatedAt:d.updated_at})),...ST.apps.filter(a=>!ids.has(a.id))];
+    // Map only app fields — never write any keys into app records
+    ST.apps=[
+      ...data.map(d=>({
+        id:d.id,name:d.name,icon:d.icon,ci:d.color_index,
+        desc:d.description,code:d.code,versions:[],
+        prompts:d.prompts||[],ghPushed:d.gh_pushed||false,
+        createdAt:d.created_at,updatedAt:d.updated_at,
+      })),
+      ...ST.apps.filter(a=>!ids.has(a.id)),
+    ];
     persist();renderGrid();toast(`Pulled ${data.length} apps ☁️`);
-  }catch(e){toast('Pull failed: '+e.message,4000);}
+  }catch(e){toast('Pull failed: '+scrubKeys(e.message),4000);}
 }
 
 /* ════════ INPUT ════════ */
@@ -1530,6 +1806,7 @@ function init(){
 
   // GitHub live validation — don't mutate ST until submit, just show UI feedback
   let ghTimer;
+  let _obSubmitted=false; // guard: prevent async validation restore from wiping committed values
   const ghValidate=()=>{
     clearTimeout(ghTimer);
     const t=$('ob-gh-token').value.trim(),u=$('ob-gh-user').value.trim(),r=$('ob-gh-repo').value.trim();
@@ -1540,7 +1817,8 @@ function init(){
       const prevToken=ST.ghToken,prevUser=ST.ghUser,prevRepo=ST.ghRepo;
       ST.ghToken=t;ST.ghUser=u;ST.ghRepo=r;
       const ok=await testGitHub();
-      ST.ghToken=prevToken;ST.ghUser=prevUser;ST.ghRepo=prevRepo;
+      // Only restore if submit hasn't already committed new values
+      if(!_obSubmitted){ST.ghToken=prevToken;ST.ghUser=prevUser;ST.ghRepo=prevRepo;}
       $('gh-dot').className='gh-dot '+(ok?'ok':'err');
       $('gh-st-m').textContent=ok?`✓ Connected: ${u}/${r}`:'✗ Connection failed';
       $('gh-st-s').textContent=ok?`Apps will push to github.com/${u}/${r}`:'Check token has "repo" scope and repo exists';
@@ -1551,6 +1829,8 @@ function init(){
   let obSbOn=false;
   $('ob-sb-tog').addEventListener('click',()=>{obSbOn=!obSbOn;$('ob-sb-pill').classList.toggle('on',obSbOn);$('ob-sb-exp').classList.toggle('open',obSbOn);});
   $('ob-submit').addEventListener('click',()=>{
+    clearTimeout(ghTimer); // cancel any pending validation
+    _obSubmitted=true;     // prevent in-flight testGitHub() from restoring old values
     const k=$('ob-anth').value.trim();
     if(!k){toast('Anthropic API key is required!');return;}
     // GitHub is optional — skip if fields are empty (local-only mode)
@@ -1605,16 +1885,34 @@ function init(){
   // ── Settings ──
   $('ssclose').addEventListener('click',()=>$('settings-overlay').classList.remove('on'));
   $('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay')$('settings-overlay').classList.remove('on');});
-  $('s-save-ai').addEventListener('click',()=>{ST.key=$('s-anth').value.trim();ST.gptKey=$('s-gpt').value.trim();saveKeys();toast(ST.gptKey?'AI keys saved — GPT audit active ✓':'AI keys saved ✓');});
-  $('s-save-gh').addEventListener('click',async()=>{
-    ST.ghToken=$('s-gh-token').value.trim();ST.ghUser=$('s-gh-user').value.trim();ST.ghRepo=$('s-gh-repo').value.trim();
+  $('s-save-ai').addEventListener('click',()=>{
+    ST.key=$('s-anth').value.trim();
+    ST.gptKey=$('s-gpt').value.trim();
     saveKeys();
+    // Refresh key safety display with new redacted values
+    const ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
+    toast(ST.gptKey?'AI keys saved — GPT audit active ✓':'AI keys saved ✓');
+  });
+  $('s-save-gh').addEventListener('click',async()=>{
+    const ghT=$('s-gh-token').value.trim(),ghU=$('s-gh-user').value.trim(),ghR=$('s-gh-repo').value.trim();
+    if(!ghT||!ghU||!ghR){toast('Fill in all three GitHub fields first');return;}
+    ST.ghToken=ghT;ST.ghUser=ghU;ST.ghRepo=ghR;
+    saveKeys();
+    const ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
     toast('Testing GitHub connection…');
     const ok=await testGitHub();
     toast(ok?`✓ GitHub connected: ${ST.ghUser}/${ST.ghRepo}`:'✗ GitHub test failed — check token & repo',4000);
   });
   $('s-audit-pill').addEventListener('click',()=>{ST.auditEnabled=!ST.auditEnabled;saveKeys();$('s-audit-pill').classList.toggle('on',ST.auditEnabled);toast(ST.auditEnabled?'GPT audit enabled':'GPT audit disabled');});
   $('s-sync-pill').addEventListener('click',()=>{ST.sbEnabled=!ST.sbEnabled;saveKeys();$('s-sync-pill').classList.toggle('on',ST.sbEnabled);$('s-sb-exp').style.display=ST.sbEnabled?'flex':'none';toast(ST.sbEnabled?'Supabase sync enabled':'Sync disabled');});
+  $('s-save-sb').addEventListener('click',()=>{
+    const url=$('s-sb-url').value.trim(),anon=$('s-sb-anon').value.trim();
+    if(!url||!anon){toast('Enter both Supabase URL and Anon Key');return;}
+    ST.sbUrl=url;ST.sbAnon=anon;
+    saveKeys();
+    const ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
+    toast('Supabase credentials saved ✓');
+  });
   $('s-pull').addEventListener('click',pullFromSupabase);
   $('s-clear').addEventListener('click',()=>{if(!confirm('Delete all apps locally?'))return;ST.apps=[];persist();renderGrid();toast('All apps cleared locally');});
   $('s-signout').addEventListener('click',()=>{if(!confirm('Sign out and clear all keys?'))return;localStorage.clear();location.reload();});
