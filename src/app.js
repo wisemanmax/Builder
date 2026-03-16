@@ -19,6 +19,8 @@ import { openSettings, initSettings } from './screens/settings.js'
 import { selfUpdateBuilder } from './pipelines/builder-plus.js'
 import { pullFromGitHub } from './lib/github.js'
 import { pullFromSupabase } from './lib/storage.js'
+import { loadCheckpoint, clearCheckpoint } from './lib/recovery.js'
+import { _saveAppLocally } from './pipelines/build-pipeline.js'
 
 export function init() {
   // Global error guard
@@ -40,6 +42,22 @@ export function init() {
 
   // Hydrate state
   hydrate()
+
+  // Check for interrupted build and recover partial code
+  var checkpoint = loadCheckpoint()
+  if (checkpoint) {
+    var bestCode = checkpoint.v2 || checkpoint.v1
+    if (bestCode && checkpoint.appId) {
+      var appExists = false
+      for (var ci = 0; ci < ST.apps.length; ci++) { if (ST.apps[ci].id === checkpoint.appId) { appExists = true; break } }
+      _saveAppLocally(checkpoint.appId, checkpoint.appName || 'Recovered App', checkpoint.appIcon || '\uD83D\uDEE0', checkpoint.appCi || 0, bestCode, checkpoint.prompt || 'Recovered from interrupted build', appExists ? { id: checkpoint.appId } : null, false)
+    }
+    clearCheckpoint()
+    setTimeout(function () {
+      if (bestCode) toast('\uD83D\uDEE0 Recovered code from interrupted build of ' + (checkpoint.appName || 'app'), 5000)
+      else toast('Previous build was interrupted before code was generated', 4000)
+    }, 1200)
+  }
 
   // Re-acquire Wake Lock when user returns to app during a build
   document.addEventListener('visibilitychange', function () {

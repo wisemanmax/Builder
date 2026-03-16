@@ -1,5 +1,5 @@
 import { $, esc, escAttr } from '../lib/utils.js'
-import { PIPE_NAMES, PIPE_ICONS } from '../config/constants.js'
+import { PIPE_NAMES, PIPE_ICONS, PIPE_ESTIMATES } from '../config/constants.js'
 import { approveAndMerge, requestChanges } from './approval-card.js'
 
 export function scrollBot() {
@@ -124,7 +124,8 @@ export function addMsg(cfg) {
 export function updatePS(pid, step, state, det) {
   var el = $(pid + '-s' + step); if (!el) return
   var ico = state === 'done' ? '\u2713' : state === 'error' ? '\u2717' : state === 'wait' ? '\u23F8' : PIPE_ICONS[step] || '\u00B7'
+  var estimate = (state === 'active' && PIPE_ESTIMATES[step]) ? '<span class="ps-eta">' + PIPE_ESTIMATES[step] + '</span>' : ''
   el.className = 'ps s-' + state
-  el.innerHTML = '<div class="psico">' + ico + '</div><div class="pstxt"><div class="psname">' + esc(PIPE_NAMES[step] || 'Step ' + step) + '</div><div class="psdet">' + esc(det) + '</div></div>' + (state === 'active' ? '<div class="spin"></div>' : '')
+  el.innerHTML = '<div class="psico">' + ico + '</div><div class="pstxt"><div class="psname">' + esc(PIPE_NAMES[step] || 'Step ' + step) + estimate + '</div><div class="psdet">' + esc(det) + '</div></div>' + (state === 'active' ? '<div class="spin"></div>' : '')
   scrollBot()
 }

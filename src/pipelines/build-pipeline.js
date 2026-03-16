@@ -11,6 +11,7 @@ import { setPreview, clearPreview, waitForApproval } from '../components/approva
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
+import { saveCheckpoint, clearCheckpoint } from '../lib/recovery.js'
 
 export function runPipeline(prompt, existingApp, customName) {
   ST._building = true; $('send-btn').disabled = true
@@ -29,6 +30,8 @@ export function runPipeline(prompt, existingApp, customName) {
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? ('builder/app-' + appId + '-' + Date.now().toString(36)) : ''
 
+  var checkpointBase = { appId: appId, appName: appName, appIcon: appIcon, appCi: appCi, prompt: prompt, existingApp: !!existingApp, branchName: branchName, hasGitHub: hasGitHub }
+
   var v1, v2
 
   // Step 0 — Branch
@@ -37,6 +40,7 @@ export function runPipeline(prompt, existingApp, customName) {
     updatePS(pid, 0, 'active', 'Creating feature branch\u2026')
     p = ghCreateBranch(branchName).then(function () {
       updatePS(pid, 0, 'done', branchName)
+      saveCheckpoint(Object.assign({}, checkpointBase, { step: 0, v1: null, v2: null }))
     }).catch(function (e) {
       updatePS(pid, 0, 'error', e.message)
       throw new Error('Branch creation failed: ' + e.message)
@@ -91,6 +95,7 @@ export function runPipeline(prompt, existingApp, customName) {
   }).then(function (code) {
     v1 = code
     updatePS(pid, 1, 'done', 'Build complete \u2713')
+    saveCheckpoint(Object.assign({}, checkpointBase, { step: 1, v1: code, v2: null }))
 
     var canAudit = !!(ST.gptKey && ST.auditEnabled)
     var currentCode = v1
@@ -167,6 +172,8 @@ export function runPipeline(prompt, existingApp, customName) {
 
     return runValidationPass()
   }).then(function () {
+    saveCheckpoint(Object.assign({}, checkpointBase, { step: 4, v1: v1, v2: v2 }))
+
     // Step 5 — Backend
     if (ST.backendEnabled && ST.sbUrl) {
       updatePS(pid, 5, 'active', 'Generating Supabase backend\u2026')
@@ -185,6 +192,8 @@ export function runPipeline(prompt, existingApp, customName) {
       return Promise.resolve()
     }
   }).then(function () {
+    saveCheckpoint(Object.assign({}, checkpointBase, { step: 5, v1: v1, v2: v2 }))
+
     // Step 6 — Push to branch
     if (hasGitHub) {
       updatePS(pid, 6, 'active', 'Pushing to ' + branchName + '\u2026')
@@ -202,6 +211,8 @@ export function runPipeline(prompt, existingApp, customName) {
       return Promise.resolve()
     }
   }).then(function () {
+    saveCheckpoint(Object.assign({}, checkpointBase, { step: 6, v1: v1, v2: v2 }))
+
     // Step 7 — Preview
     updatePS(pid, 7, 'done', 'Preview ready')
     setPreview(appId, v2)
@@ -264,6 +275,7 @@ export function runPipeline(prompt, existingApp, customName) {
   }).catch(function (err) {
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
+      clearCheckpoint()
       _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
       renderGrid()
@@ -272,6 +284,7 @@ export function runPipeline(prompt, existingApp, customName) {
     if (err.message === 'CHANGES_REQUESTED') {
       updatePS(pid, 8, 'error', 'Changes requested')
       clearPreview(appId)
+      clearCheckpoint()
       addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
       _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
@@ -284,6 +297,7 @@ export function runPipeline(prompt, existingApp, customName) {
     addMsg({ role: 'asst', type: 'text', text: 'Pipeline error: ' + safeMsg + '. Please try again.' })
     toast('Error: ' + safeMsg, 5000)
   }).finally(function () {
+    clearCheckpoint()
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
     clearInterval(_keepAlive)
@@ -292,7 +306,7 @@ export function runPipeline(prompt, existingApp, customName) {
   })
 }
 
-function _saveAppLocally(id, name, icon, ci, code, prompt, existingApp, ghPushed) {
+export function _saveAppLocally(id, name, icon, ci, code, prompt, existingApp, ghPushed) {
   if (existingApp) {
     var idx = -1
     for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === id) { idx = i; break } }
