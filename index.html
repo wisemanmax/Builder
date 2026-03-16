@@ -462,6 +462,14 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .think-actions{display:flex;gap:8px;padding:10px 13px;animation:mIn .3s cubic-bezier(.34,1.56,.64,1) both}
 .think-actions button{flex:1;padding:12px;border-radius:12px;border:none;font-family:var(--fh);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s}
 .think-actions button:active{transform:scale(.96)}
+#think-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--fb);font-size:15px;color:#fff;resize:none;min-height:48px;max-height:160px;line-height:1.6;padding:4px 2px;overflow-y:auto}
+#think-input::placeholder{color:rgba(255,255,255,.3);font-size:14px}
+#think-sheet .ibox{border-radius:20px;padding:10px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(170,255,0,.15);min-height:56px}
+#think-sheet .ibox:focus-within{border-color:rgba(170,255,0,.45);box-shadow:0 0 20px rgba(170,255,0,.08)}
+#think-send-btn{width:36px;height:36px;border-radius:10px;border:none;background:var(--g4);color:#080812;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(170,255,0,.3);transition:transform .15s,opacity .15s}
+#think-send-btn:hover{transform:scale(1.1)}
+#think-send-btn:active{transform:scale(.91)}
+#think-send-btn:disabled{opacity:.28;cursor:not-allowed;transform:none}
 .ta-save{background:var(--g4);color:#000;box-shadow:0 6px 20px rgba(170,255,0,.3)}
 .ta-refine{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.1) !important}
 
@@ -630,7 +638,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
     <div id="think-scroll"></div>
     <div class="bs-input">
       <div class="ibox">
-        <textarea id="think-input" rows="1" placeholder="Type your own answer..."></textarea>
+        <textarea id="think-input" rows="2" placeholder="Type your thoughts here..."></textarea>
         <div class="iacts">
           <button id="think-send-btn">&uarr;</button>
         </div>
@@ -1107,6 +1115,70 @@ function ghPushManifest(branch){
   });
 }
 
+/* ======== THOUGHTS & RULES GITHUB SYNC ======== */
+function ghPushThought(thought){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve(null);
+  var slug=slugify(thought.name||'thought');
+  var path='thoughts/'+slug+'.json';
+  var content=JSON.stringify({
+    id:thought.id,name:thought.name,status:thought.status,
+    originalPrompt:thought.originalPrompt,rounds:thought.rounds,
+    conversation:thought.conversation,brief:thought.brief,
+    linkedRulesId:thought.linkedRulesId,linkedAppId:thought.linkedAppId,
+    createdAt:thought.createdAt,updatedAt:thought.updatedAt
+  },null,2);
+  return ghGetFileSha(path,'main').then(function(sha){
+    return ghPushFile(path,content,'Save thought: '+thought.name,'main',sha);
+  });
+}
+
+function ghPushThoughtsManifest(){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve(null);
+  var manifestData=ST.thoughts.map(function(t){
+    return{id:t.id,name:t.name,status:t.status,rounds:t.rounds,
+      linkedRulesId:t.linkedRulesId,linkedAppId:t.linkedAppId,
+      path:'thoughts/'+slugify(t.name||'thought')+'.json',
+      createdAt:t.createdAt,updatedAt:t.updatedAt};
+  });
+  return ghGetFileSha('thoughts/manifest.json','main').then(function(sha){
+    return ghPushFile('thoughts/manifest.json',JSON.stringify(manifestData,null,2),'Update thoughts manifest','main',sha);
+  });
+}
+
+function ghPushRuleSet(rules){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve(null);
+  var slug=slugify(rules.name||'rules');
+  var path='rules/'+slug+'.json';
+  var content=JSON.stringify({
+    id:rules.id,name:rules.name,linkedThoughtId:rules.linkedThoughtId,
+    mustRules:rules.mustRules,mustNotRules:rules.mustNotRules,
+    niceToHave:rules.niceToHave,
+    createdAt:rules.createdAt,updatedAt:rules.updatedAt
+  },null,2);
+  return ghGetFileSha(path,'main').then(function(sha){
+    return ghPushFile(path,content,'Save rules: '+rules.name,'main',sha);
+  });
+}
+
+function ghPushRulesManifest(){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve(null);
+  var manifestData=ST.rules.map(function(r){
+    return{id:r.id,name:r.name,linkedThoughtId:r.linkedThoughtId,
+      ruleCount:((r.mustRules||[]).length+(r.mustNotRules||[]).length+(r.niceToHave||[]).length),
+      path:'rules/'+slugify(r.name||'rules')+'.json',
+      createdAt:r.createdAt,updatedAt:r.updatedAt};
+  });
+  return ghGetFileSha('rules/manifest.json','main').then(function(sha){
+    return ghPushFile('rules/manifest.json',JSON.stringify(manifestData,null,2),'Update rules manifest','main',sha);
+  });
+}
+
+function ghSyncThoughtAndRules(thought,rules){
+  var promises=[ghPushThought(thought),ghPushThoughtsManifest()];
+  if(rules){promises.push(ghPushRuleSet(rules));promises.push(ghPushRulesManifest());}
+  return Promise.all(promises).catch(function(e){console.warn('GitHub thought/rules sync:',e);});
+}
+
 function testGitHub(){
   return fetch('https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo,{headers:ghHeaders()}).then(function(res){return res.ok;}).catch(function(){return false;});
 }
@@ -1523,14 +1595,18 @@ function saveRulesFromThought(thought,rulesData){
 
 function finishThink(){
   var thought=saveThought('complete');
+  var rules=null;
   if(_thinkState.rules){
-    saveRulesFromThought(thought,_thinkState.rules);
+    rules=saveRulesFromThought(thought,_thinkState.rules);
   }
   ST.activeThoughtId=thought.id;
   $('think-sheet').classList.remove('open');
   ST._thinking=false;
   openBuilder();
   toast('Thought saved \u2014 rules attached to build',3000);
+  ghSyncThoughtAndRules(thought,rules).then(function(){
+    if(ST.ghToken)toast('\u2601\uFE0F Thought & rules synced to GitHub',2500);
+  });
 }
 
 function refineThink(){
@@ -2583,7 +2659,7 @@ function init(){
   $('ts-handle').addEventListener('touchstart',function(e){if(e.touches[0])tsY=e.touches[0].clientY;},{passive:true});
   $('ts-handle').addEventListener('touchend',function(e){if(e.changedTouches[0]&&e.changedTouches[0].clientY-tsY>55)closeThink();},{passive:true});
   var tInp=$('think-input');
-  tInp.addEventListener('input',function(){autoResize(tInp);});
+  tInp.addEventListener('input',function(){tInp.style.height='auto';tInp.style.height=Math.min(tInp.scrollHeight,160)+'px';});
   tInp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendThinkMsg();}});
   $('think-send-btn').addEventListener('click',sendThinkMsg);
 
