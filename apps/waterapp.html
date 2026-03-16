@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydration Tracker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --water: #06b6d4;
+            --border: #475569;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 25px -5px var(--shadow), 0 10px 10px -5px var(--shadow);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--water) 0%, var(--accent) 100%);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--water) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .cups-display {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .cups-remaining {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--water) 0%, var(--accent) 100%);
+            border-radius: 6px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .add-cup-btn {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 16px 32px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .add-cup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        .add-cup-btn:active {
+            transform: translateY(0);
+        }
+
+        .add-cup-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .add-cup-btn:hover::before {
+            left: 100%;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .celebration.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .celebration-content {
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px var(--shadow);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .celebration.show .celebration-content {
+            transform: scale(1);
+        }
+
+        .celebration h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--success) 0%, var(--water) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .celebration p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .wave-animation {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .close-btn {
+            background: var(--success);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .water-drops {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .drop {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--water);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10px);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(calc(100vh + 10px));
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .cups-display {
+                font-size: 2.5rem;
+            }
+            
+            .add-cup-btn {
+                font-size: 1rem;
+                padding: 14px 28px;
+            }
+            
+            .celebration-content {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .celebration h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="water-drops"></div>
+    
+    <div class="container">
+        <h1>💧 Hydration Tracker</h1>
+        <p class="subtitle">Stay healthy, stay hydrated</p>
+        
+        <div class="progress-container">
+            <div class="cups-display" id="cupsCount">0</div>
+            <div class="cups-remaining" id="cupsRemaining">13 cups remaining</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <button class="add-cup-btn" id="addCupBtn">
+            💧 Add 8oz Cup
+        </button>
+        
+        <button class="reset-btn" id="resetBtn">Reset Progress</button>
+    </div>
+    
+    <div class="celebration" id="celebration">
+        <div class="celebration-content">
+            <div class="wave-animation">🎉</div>
+            <h2>Goal Achieved!</h2>
+            <p>Congratulations! You've reached your daily hydration goal of 13 cups!</p>
+            <button class="close-btn" id="closeBtn">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        class HydrationTracker {
+            constructor() {
+                this.cups = parseInt(localStorage.getItem('waterCups') || '0');
+                this.goal = 13;
+                
+                this.cupsCountEl = document.getElementById('cupsCount');
+                this.cupsRemainingEl = document.getElementById('cupsRemaining');
+                this.progressFillEl = document.getElementById('progressFill');
+                this.addCupBtn = document.getElementById('addCupBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.celebrationEl = document.getElementById('celebration');
+                this.closeBtn = document.getElementById('closeBtn');
+                
+                this.init();
+            }
+            
+            init() {
+                this.updateDisplay();
+                this.bindEvents();
+                this.createWaterDrops();
+                
+                // Check if goal was just achieved
+                if (this.cups === this.goal && !localStorage.getItem('celebrationShown')) {
+                    setTimeout(() => this.showCelebration(), 500);
+                }
+            }
+            
+            bindEvents() {
+                this.addCupBtn.addEventListener('click', () => this.addCup());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                this.closeBtn.addEventListener('click', () => this.hideCelebration());
+                
+                // Close celebration on outside click
+                this.celebrationEl.addEventListener('click', (e) => {
+                    if (e.target === this.celebrationEl) {
+                        this.hideCelebration();
+                    }
+                });
+            }
+            
+            addCup() {
+                if (this.cups < this.goal) {
+                    this.cups++;
+                    localStorage.setItem('waterCups', this.cups.toString());
+                    localStorage.removeItem('celebrationShown');
+                    
+                    this.updateDisplay();
+                    this.animateButton();
+                    
+                    if (this.cups === this.goal) {
+                        setTimeout(() => this.showCelebration(), 800);
+                    }
+                }
+            }
+            
+            reset() {
+                this.cups = 0;
+                localStorage.setItem('waterCups', '0');
+                localStorage.removeItem('celebrationShown');
+                this.updateDisplay();
+            }
+            
+            updateDisplay() {
+                const remaining = Math.max(0, this.goal - this.cups);
+                const progress = Math.min(100, (this.cups / this.goal) * 100);
+                
+                this.cupsCountEl.textContent = this.cups;
+                this.cupsRemainingEl.textContent = remaining === 0 
+                    ? 'Goal achieved! 🎉' 
+                    : `${remaining} cup${remaining !== 1 ? 's' : ''} remaining`;
+                
+                this.progressFillEl.style.width = `${progress}%`;
+                
+                // Update button state
+                if (this.cups >= this.goal) {
+                    this.addCupBtn.textContent = '✅ Goal Achieved!';
+                    this.addCupBtn.style.background = 'linear-gradient(135deg, var(--success) 0%, #059669 100%)';
+                    this.addCupBtn.disabled = true;
+                    this.addCupBtn.style.cursor = 'default';
+                } else {
+                    this.addCupBtn.textContent = '💧 Add 8oz Cup';
+                    this.addCupBtn.style.background = 'linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%)';
+                    this.addCupBtn.disabled = false;
+                    this.addCupBtn.style.cursor = 'pointer';
+                }
+            }
+            
+            animateButton() {
+                this.addCupBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.addCupBtn.style.transform = 'scale(1)';
+                }, 150);
+            }
+            
+            showCelebration() {
+                localStorage.setItem('celebrationShown', 'true');
+                this.celebrationEl.classList.add('show');
+                this.createConfetti();
+            }
+            
+            hideCelebration() {
+                this.celebrationEl.classList.remove('show');
+            }
+            
+            createWaterDrops() {
+                const dropsContainer = document.querySelector('.water-drops');
+                
+                const createDrop = () => {
+                    const drop = document.createElement('div');
+                    drop.className = 'drop';
+                    drop.style.left = Math.random() * 100 + '%';
+                    drop.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    drop.style.animationDelay = Math.random() * 2 + 's';
+                    
+                    dropsContainer.appendChild(drop);
+                    
+                    setTimeout(() => {
+                        drop.remove();
+                    }, 5000);
+                };
+                
+                // Create drops periodically
+                setInterval(createDrop, 800);
+            }
+            
+            createConfetti() {
+                const colors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
+                
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.style.position = 'fixed';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.top = '-10px';
+                        confetti.style.width = '10px';
+                        confetti.style.height = '10px';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.borderRadius = '50%';
+                        confetti.style.pointerEvents = 'none';
+                        confetti.style.zIndex = '1001';
+                        confetti.style.animation = `fall ${Math.random() * 2 + 3}s linear forwards`;
+                        
+                        document.body.appendChild(confetti);
+                        
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, 5000);
+                    }, i * 50);
+                }
+            }
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            new HydrationTracker();
+        });
+    </script>
+</body>
+</html>
