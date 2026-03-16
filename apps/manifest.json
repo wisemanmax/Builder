@@ -1,5 +1,22 @@
 [
   {
+    "id": "ammsi8x61fxu",
+    "name": "Grocery List Trackers,",
+    "icon": "🎯",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammsi8x61fxu.html",
+    "path": "apps/ammsi8x61fxu.html",
+    "prompts": [
+      {
+        "ts": "2026-03-16T01:30:52.336Z",
+        "type": "initial",
+        "text": "Make a grocery list trackers, that tracks habit knows when we would likely need to apply stocks and breaks it up in cate"
+      }
+    ],
+    "createdAt": "2026-03-16T01:30:52.336Z",
+    "updatedAt": "2026-03-16T01:30:52.336Z"
+  },
+  {
     "id": "ammshyw3prp9",
     "name": "Ti-84 Calculator Can",
     "icon": "🎯",
