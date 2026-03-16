@@ -1107,6 +1107,49 @@ function ghPushManifest(branch){
   });
 }
 
+function ghPushThought(thought){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve();
+  var path='thoughts/'+thought.id+'.json';
+  var content=JSON.stringify(thought,null,2);
+  return ghGetFileSha(path,'main').then(function(sha){
+    return ghPushFile(path,content,'Save thought: '+thought.name,'main',sha);
+  }).catch(function(e){console.warn('Failed to push thought:',e);});
+}
+
+function ghPushThoughtManifest(){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve();
+  var manifestData=ST.thoughts.map(function(t){
+    return{id:t.id,name:t.name,status:t.status,originalPrompt:(t.originalPrompt||'').slice(0,120),
+      rounds:t.rounds,linkedRulesId:t.linkedRulesId,linkedAppId:t.linkedAppId,
+      createdAt:t.createdAt,updatedAt:t.updatedAt};
+  });
+  return ghGetFileSha('thoughts/manifest.json','main').then(function(sha){
+    return ghPushFile('thoughts/manifest.json',JSON.stringify(manifestData,null,2),'Update thoughts manifest','main',sha);
+  }).catch(function(e){console.warn('Failed to push thoughts manifest:',e);});
+}
+
+function ghPushRulesFile(rules){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve();
+  var path='rules/'+rules.id+'.json';
+  var content=JSON.stringify(rules,null,2);
+  return ghGetFileSha(path,'main').then(function(sha){
+    return ghPushFile(path,content,'Save rules: '+rules.name,'main',sha);
+  }).catch(function(e){console.warn('Failed to push rules:',e);});
+}
+
+function ghPushRulesManifest(){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo)return Promise.resolve();
+  var manifestData=ST.rules.map(function(r){
+    return{id:r.id,name:r.name,linkedThoughtId:r.linkedThoughtId,
+      mustCount:(r.mustRules||[]).length,mustNotCount:(r.mustNotRules||[]).length,
+      niceToHaveCount:(r.niceToHave||[]).length,
+      createdAt:r.createdAt,updatedAt:r.updatedAt};
+  });
+  return ghGetFileSha('rules/manifest.json','main').then(function(sha){
+    return ghPushFile('rules/manifest.json',JSON.stringify(manifestData,null,2),'Update rules manifest','main',sha);
+  }).catch(function(e){console.warn('Failed to push rules manifest:',e);});
+}
+
 function testGitHub(){
   return fetch('https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo,{headers:ghHeaders()}).then(function(res){return res.ok;}).catch(function(){return false;});
 }
@@ -1499,6 +1542,10 @@ function saveThought(status){
     ST.thoughts.unshift(thought);
   }
   persist();
+  if(status==='complete'||status==='built'){
+    ghPushThought(thought);
+    ghPushThoughtManifest();
+  }
   return thought;
 }
 
@@ -1518,6 +1565,8 @@ function saveRulesFromThought(thought,rulesData){
     if(ST.thoughts[i].id===thought.id){ST.thoughts[i].linkedRulesId=rules.id;break;}
   }
   persist();
+  ghPushRulesFile(rules);
+  ghPushRulesManifest();
   return rules;
 }
 
