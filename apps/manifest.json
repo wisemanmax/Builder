@@ -1,5 +1,22 @@
 [
   {
+    "id": "ammtgse7utaw",
+    "name": "gym app",
+    "icon": "🎯",
+    "ci": 4,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammtgse7utaw.html",
+    "path": "apps/ammtgse7utaw.html",
+    "prompts": [
+      {
+        "ts": "2026-03-16T17:37:30.495Z",
+        "type": "initial",
+        "text": "Create a gym app the creates logs and tracks PR"
+      }
+    ],
+    "createdAt": "2026-03-16T17:37:30.495Z",
+    "updatedAt": "2026-03-16T17:37:30.495Z"
+  },
+  {
     "id": "ammteubbmev4",
     "name": "Ti84",
     "icon": "🎯",
