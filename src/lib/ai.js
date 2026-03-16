@@ -1,0 +1,93 @@
+import { ST } from './state.js'
+import { scrubKeys } from './utils.js'
+import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
+import { SYS_AUDIT } from '../config/prompts.js'
+
+export function fetchWithTimeout(url, opts, ms) {
+  ms = ms || 120000
+  _validateKeyedRequest(url, opts)
+  var timer
+  var req = _nativeFetch.call(window, url, opts).then(function (r) { clearTimeout(timer); return r }, function (e) { clearTimeout(timer); throw e })
+  var timeout = new Promise(function (_, reject) {
+    timer = setTimeout(function () { reject(new Error('Request timed out')) }, ms)
+  })
+  return Promise.race([req, timeout])
+}
+
+export function fetchWithRetry(url, opts, ms, retries) {
+  retries = retries || 2
+  function attempt(n) {
+    return fetchWithTimeout(url, opts, ms).catch(function (e) {
+      var msg = String(e && e.message || e || '').toLowerCase()
+      var isNetwork = msg.indexOf('failed to fetch') >= 0 || msg.indexOf('load failed') >= 0 || msg.indexOf('timed out') >= 0 || msg.indexOf('network') >= 0
+      if (isNetwork && n < retries) {
+        return new Promise(function (resolve) { setTimeout(resolve, (n + 1) * 1500) }).then(function () { return attempt(n + 1) })
+      }
+      throw e
+    })
+  }
+  return attempt(0)
+}
+
+export function classifyFetchError(e, api) {
+  var msg = String(e && e.message || e || '')
+  if (msg.indexOf('timed out') >= 0) return api + ': Request timed out.'
+  if (msg.toLowerCase().indexOf('load failed') >= 0 || msg.toLowerCase().indexOf('failed to fetch') >= 0)
+    return api + ': Network error \u2014 check your internet connection.'
+  return api + ': ' + msg
+}
+
+export function callClaude(sys, msg) {
+  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, system: sys, messages: [{ role: 'user', content: msg }] }),
+  }, 120000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var code = (d.content && d.content[0] && d.content[0].text) || ''
+    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
+    return code
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('Claude:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'Claude'))
+  })
+}
+
+export function callClaudeRaw(sys, msg, maxTokens) {
+  maxTokens = maxTokens || 4000
+  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: sys, messages: [{ role: 'user', content: msg }] }),
+  }, 60000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var raw = (d.content && d.content[0] && d.content[0].text) || ''
+    return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('Claude:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'Claude'))
+  })
+}
+
+export function callGPT(code) {
+  return fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 2000, temperature: 0.1, messages: [{ role: 'system', content: SYS_AUDIT }, { role: 'user', content: 'Audit:\n\n' + code.slice(0, 20000) }] }),
+  }, 60000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '[]'
+    raw = raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+    try { var p = JSON.parse(raw); return Array.isArray(p) ? p : [] } catch (e) { return [] }
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('GPT:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'GPT'))
+  })
+}
