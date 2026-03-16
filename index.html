@@ -13,7 +13,7 @@
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self' 'unsafe-inline' data: blob:;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
   connect-src 'self'
     https://api.anthropic.com
     https://api.openai.com
@@ -21,9 +21,10 @@
     https://raw.githubusercontent.com
     https://*.supabase.co
     https://fonts.googleapis.com
-    https://fonts.gstatic.com;
-  font-src https://fonts.gstatic.com data:;
-  img-src 'self' data: blob:;
+    https://fonts.gstatic.com
+    https:;
+  font-src https://fonts.gstatic.com data: https:;
+  img-src 'self' data: blob: https:;
   frame-src 'self' blob: data: https:;
 ">
 <title>The Builder</title>
@@ -276,6 +277,8 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 
 /* INPUT */
 .bs-input{padding:9px 13px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0;padding-bottom:max(24px,env(safe-area-inset-bottom,24px))}
+.name-row{margin-bottom:7px}
+.name-row .fi{padding:9px 12px;font-size:13px;border-radius:13px}
 .ibox{display:flex;align-items:flex-end;gap:7px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:17px;padding:8px 9px;transition:border-color .2s}
 .ibox:focus-within{border-color:rgba(255,60,172,.5)}
 #chat-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--fb);font-size:14px;color:#fff;resize:none;max-height:120px;line-height:1.5;padding:2px 0}
@@ -536,6 +539,9 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
     </div>
     <div id="chat-scroll"></div>
     <div class="bs-input">
+      <div class="name-row" id="name-row">
+        <input class="fi" type="text" id="app-name-input" placeholder="App name (optional)" maxlength="40" autocomplete="off">
+      </div>
       <div class="ibox">
         <textarea id="chat-input" rows="1" placeholder="Describe an app to build, or ask to update the current one..."></textarea>
         <div class="iacts">
@@ -1110,6 +1116,9 @@ function openBuilder(editId){
   $('bs-title').textContent=app?'Editing: '+app.name:'Build an App';
   $('bs-sub').textContent=app?'Describe changes':'Branch \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Preview \u2192 Approve \u2192 Merge';
   $('bs-proj-btn').style.display=app?'flex':'none';
+  var nameRow=$('name-row'),nameInp=$('app-name-input');
+  if(app){nameRow.style.display='none';nameInp.value='';}
+  else{nameRow.style.display='';nameInp.value='';}
   resetChat();
   if(app){
     addMsg({role:'system',text:'Editing: '+app.name});
@@ -1270,19 +1279,21 @@ function sendMsg(){
   var text=inp.value.trim();
   if(!text||ST._building)return;
   if(!ST.key){toast('Add your Anthropic API key in Settings first',4000);return;}
+  var customName=$('app-name-input').value.trim();
   inp.value='';autoResize(inp);
+  $('app-name-input').value='';
   addMsg({role:'user',text:text});
   var existing=ST.activeAppId?ST.apps.find(function(a){return a.id===ST.activeAppId;}):null;
-  runPipeline(text,existing);
+  runPipeline(text,existing,customName);
 }
 
-function runPipeline(prompt,existingApp){
+function runPipeline(prompt,existingApp,customName){
   ST._building=true;$('send-btn').disabled=true;
   var pid='p'+Date.now();
   var hasGitHub=!!(ST.ghToken&&ST.ghUser&&ST.ghRepo);
   addMsg({role:'asst',type:'pipeline',id:pid});
 
-  var appName=existingApp?existingApp.name:autoName(prompt);
+  var appName=existingApp?existingApp.name:((customName&&customName.trim())||autoName(prompt));
   var appIcon=ST.pendingIcon;
   var appCi=ST.pendingColor;
   var appId=existingApp?existingApp.id:uid();
