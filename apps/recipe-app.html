@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Recipes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-card: #333333;
+            --accent-cream: #f5f3f0;
+            --accent-orange: #ff6b35;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #999999;
+            --border: #444444;
+            --success: #4ade80;
+            --warning: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, var(--accent-orange), #ff8c42);
+            border-radius: 16px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 2px solid var(--border);
+        }
+
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--accent-cream);
+        }
+
+        .filters-toggle {
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .filters-toggle:hover {
+            background: #e55a2b;
+        }
+
+        .ingredient-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        .ingredient-input:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+        }
+
+        .ingredient-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            min-height: 40px;
+        }
+
+        .ingredient-tag {
+            background: var(--accent-orange);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .tag-remove {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .tag-remove:hover {
+            background: rgba(255,255,255,0.2);
+            opacity: 1;
+        }
+
+        .filters {
+            display: none;
+            margin-top: 20px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .filters.active {
+            display: block;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--accent-cream);
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-option {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-option.active {
+            background: var(--accent-orange);
+            border-color: var(--accent-orange);
+            color: white;
+        }
+
+        .recipes-section {
+            margin-top: 30px;
+        }
+
+        .recipe-count {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .recipe-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .recipe-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+
+        .recipe-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .recipe-title {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--accent-cream);
+            margin-bottom: 8px;
+            flex: 1;
+        }
+
+        .recipe-stats {
+            display: flex;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .match-percentage {
+            background: var(--success);
+            color: var(--bg-primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+
+        .ingredient-match {
+            margin-bottom: 15px;
+        }
+
+        .match-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .ingredient-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .ingredient-item {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .ingredient-have {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+
+        .ingredient-need {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .recipe-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .recipe-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--accent-orange);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #e55a2b;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-favorite {
+            background: none;
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .btn-favorite.active {
+            background: var(--warning);
+            color: var(--bg-primary);
+        }
+
+        .rating {
+            display: flex;
+            gap: 2px;
+            margin-left: auto;
+        }
+
+        .star {
+            color: var(--border);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .star.filled {
+            color: var(--warning);
+        }
+
+        .recipe-detail {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .recipe-detail.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recipe-detail-content {
+            background: var(--bg-card);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: none;
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recipe-instructions {
+            margin-top: 25px;
+        }
+
+        .instruction-step {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .step-number {
+            color: var(--accent-orange);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .cooking-tip {
+            background: var(--accent-cream);
+            color: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .tip-icon {
+            color: var(--accent-orange);
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--border);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .search-section {
+                padding: 20px;
+            }
+            
+            .recipe-card {
+                padding: 20px;
+            }
+            
+            .recipe-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .match-percentage {
+                margin-left: 0;
+                margin-top: 10px;
+                align-self: flex-start;
+            }
+            
+            .recipe-actions {
+                flex-wrap: wrap;
+            }
+            
+            .recipe-detail-content {
+                margin: 10px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simple Recipes</h1>
+            <p class="subtitle">Find recipes with ingredients you already have</p>
+        </header>
+
+        <div class="search-section">
+            <div class="search-header">
+                <h2 class="search-title">What's in your kitchen?</h2>
+                <button class="filters-toggle" onclick="toggleFilters()">Filters</button>
+            </div>
+            
+            <input 
+                type="text" 
+                class="ingredient-input" 
+                placeholder="Type an ingredient and press Enter..."
+                onkeypress="handleIngredientInput(event)"
+                id="ingredientInput"
+            >
+            
+            <div class="ingredient-tags" id="ingredientTags"></div>
+
+            <div class="filters" id="filters">
+                <div class="filter-group">
+                    <label class="filter-label">Dietary Restrictions</label>
+                    <div class="filter-options">
+                        <div class="filter-option" onclick="toggleFilter(this, 'vegetarian')">Vegetarian</div>
+                        <div class="filter-option" onclick="toggleFilter(this, 'vegan')">Vegan</div>
+                        <div class="filter-option" onclick="toggleFilter(this, 'gluten-free')">Gluten Free</div>
+                        <div class="filter-option" onclick="toggleFilter(this, 'dairy-free')">Dairy Free</div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Cooking Time</label>
+                    <div class="filter-options">
+                        <div class="filter-option" onclick="toggleFilter(this, 'quick')">15 min or less</div>
+                        <div class="filter-option" onclick="toggleFilter(this, 'medium')">30 min or less</div>
+                        <div class="filter-option" onclick="toggleFilter(this, 'longer')">45 min or less</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recipes-section">
+            <div class="recipe-count" id="recipeCount"></div>
+            <div id="recipesList"></div>
+        </div>
+    </div>
+
+    <div class="recipe-detail" id="recipeDetail">
+        <div class="recipe-detail-content">
+            <button class="close-btn" onclick="closeRecipeDetail()">×</button>
+            <div id="recipeDetailContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Recipe database
+        const recipes = [
+            {
+                id: 1,
+                title: "Creamy Garlic Pasta",
+                description: "Simple and delicious pasta with a creamy garlic sauce that comes together in minutes.",
+                ingredients: ["pasta", "garlic", "butter", "cream", "parmesan", "salt", "pepper"],
+                cookTime: 20,
+                servings: 2,
+                difficulty: "beginner",
+                tags: ["vegetarian"],
+                rating: 0,
+                instructions: [
+                    "Bring a large pot of salted water to boil. Cook pasta according to package directions.",
+                    "While pasta cooks, melt butter in a large pan over medium heat. Add minced garlic and cook for 1 minute until fragrant.",
+                    "Pour in cream and bring to a gentle simmer. Season with salt and pepper.",
+                    "Drain pasta, reserving 1/2 cup pasta water. Add pasta to the cream sauce.",
+                    "Toss with parmesan cheese, adding pasta water if needed to create a silky sauce.",
+                    "Serve immediately with extra parmesan on top."
+                ],
+                tips: [
+                    "Don't let the garlic burn - it will taste bitter. Keep the heat at medium.",
+                    "Save some pasta water! The starch helps create a creamy sauce.",
+                    "Fresh parmesan makes a huge difference in flavor."
+                ]
+            },
+            {
+                id: 2,
+                title: "One-Pan Chicken & Rice",
+                description: "Tender chicken thighs with perfectly seasoned rice, all cooked in one pan for easy cleanup.",
+                ingredients: ["chicken thighs", "rice", "onion", "garlic", "chicken broth", "olive oil", "paprika", "salt", "pepper"],
+                cookTime: 35,
+                servings: 4,
+                difficulty: "beginner",
+                tags: ["gluten-free", "dairy-free"],
+                rating: 0,
+                instructions: [
+                    "Preheat oven to 375°F. Season chicken thighs with salt, pepper, and paprika.",
+                    "Heat olive oil in an oven-safe pan over medium-high heat. Brown chicken skin-side down for 5 minutes.",
+                    "Remove chicken and set aside. Add diced onion to the same pan and cook for 3 minutes.",
+                    "Add garlic and rice, stirring for 1 minute until rice is lightly toasted.",
+                    "Pour in chicken broth and bring to a simmer. Place chicken on top of rice.",
+                    "Cover and bake for 25 minutes until rice is tender and chicken is cooked through."
+                ],
+                tips: [
+                    "Use chicken thighs - they stay moist and flavorful during baking.",
+                    "Don't skip browning the chicken - it adds incredible flavor.",
+                    "Let it rest for 5 minutes before serving to let the rice absorb any remaining liquid."
+                ]
+            },
+            {
+                id: 3,
+                title: "Quick Veggie Stir Fry",
+                description: "Colorful and nutritious stir fry that's ready in minutes with whatever vegetables you have on hand.",
+                ingredients: ["bell peppers", "broccoli", "carrots", "onion", "garlic", "ginger", "soy sauce", "sesame oil", "vegetable oil"],
+                cookTime: 15,
+                servings: 3,
+                difficulty: "beginner",
+                tags: ["vegetarian", "vegan", "dairy-free"],
+                rating: 0,
+                instructions: [
+                    "Cut all vegetables into similar-sized pieces for even cooking.",
+                    "Heat vegetable oil in a large wok or skillet over high heat.",
+                    "Add harder vegetables first (carrots, broccoli) and stir-fry for 2 minutes.",
+                    "Add bell peppers and onion, stir-fry for another 2 minutes.",
+                    "Push vegetables to one side, add garlic and ginger to the empty space, cook for 30 seconds.",
+                    "Mix everything together, add soy sauce and sesame oil. Toss for 1 minute and serve."
+                ],
+                tips: [
+                    "High heat is key for good stir fry - it should sizzle when you add ingredients.",
+                    "Don't overcrowd the pan or vegetables will steam instead of stir-fry.",
+                    "Have all ingredients prepped before you start - stir frying happens fast!"
+                ]
+            },
+            {
+                id: 4,
+                title: "Classic Tomato Soup",
+                description: "Rich and creamy tomato soup that's perfect for a cozy meal, especially with grilled cheese.",
+                ingredients: ["canned tomatoes", "onion", "garlic", "vegetable broth", "cream", "butter", "basil", "salt", "pepper", "sugar"],
+                cookTime: 25,
+                servings: 4,
+                difficulty: "beginner",
+                tags: ["vegetarian", "gluten-free"],
+                rating: 0,
+                instructions: [
+                    "Melt butter in a large pot over medium heat. Add diced onion and cook until soft, about 5 minutes.",
+                    "Add garlic and cook for 1 more minute until fragrant.",
+                    "Pour in canned tomatoes with their juice, breaking them up with a spoon.",
+                    "Add vegetable broth, basil, salt, pepper, and a pinch of sugar. Simmer for 15 minutes.",
+                    "Use an immersion blender to puree until smooth, or blend in batches in a regular blender.",
+                    "Stir in cream and heat through. Taste and adjust seasonings."
+                ],
+                tips: [
+                    "A pinch of sugar balances the acidity of the tomatoes.",
+                    "Don't skip the basil - it makes the soup taste fresh and aromatic.",
+                    "For extra richness, add a pat of butter just before serving."
+                ]
+            },
+            {
+                id: 5,
+                title: "Beef & Bean Tacos",
+                description: "Quick and flavorful tacos with seasoned ground beef and beans, perfect for taco night.",
+                ingredients: ["ground beef", "black beans", "taco shells", "onion", "garlic", "cumin", "chili powder", "salt", "cheese", "lettuce", "tomatoes"],
+                cookTime: 20,
+                servings: 4,
+                difficulty: "beginner",
+                tags: ["gluten-free"],
+                rating: 0,
+                instructions: [
+                    "Heat taco shells according to package directions and set aside.",
+                    "Cook ground beef in a large skillet over medium-high heat, breaking it up as it cooks.",
+                    "Add diced onion and cook until beef is browned and onion is soft, about 8 minutes.",
+                    "Add garlic, cumin, and chili powder. Cook for 1 minute until fragrant.",
+                    "Drain black beans and add to the pan. Season with salt and simmer for 5 minutes.",
+                    "Serve in taco shells with shredded cheese, lettuce, and diced tomatoes."
+                ],
+                tips: [
+                    "Drain the fat from the beef for a less greasy taco filling.",
+                    "Warm your taco shells for better flavor and texture.",
+                    "Set up a taco bar with toppings so everyone can customize their tacos."
+                ]
+            },
+            {
+                id: 6,
+                title: "Fluffy Pancakes",
+                description: "Light and fluffy pancakes that are perfect for weekend breakfast or brunch.",
+                ingredients: ["flour", "sugar", "baking powder", "salt", "milk", "eggs", "butter", "vanilla"],
+                cookTime: 20,
+                servings: 3,
+                difficulty: "beginner",
+                tags: ["vegetarian"],
+                rating: 0,
+                instructions: [
+                    "In a large bowl, whisk together flour, sugar, baking powder, and salt.",
+                    "In another bowl, whisk together milk, eggs, melted butter, and vanilla.",
+                    "Pour wet ingredients into dry ingredients and stir just until combined - lumps are okay!",
+                    "Heat a lightly oiled griddle or non-stick pan over medium heat.",
+                    "Pour 1/4 cup batter for each pancake. Cook until bubbles form on surface, then flip.",
+                    "Cook until golden brown on both sides, about 2-3 minutes per side."
+                ],
+                tips: [
+                    "Don't overmix the batter - a few lumps are fine and will make fluffier pancakes.",
+                    "Let the batter rest for 5 minutes before cooking for even fluffier results.",
+                    "Keep pancakes warm in a 200°F oven while cooking the rest."
+                ]
+            },
+            {
+                id: 7,
+                title: "Mediterranean Quinoa Bowl",
+                description: "Fresh and healthy bowl with quinoa, vegetables, and a simple lemon dressing.",
+                ingredients: ["quinoa", "cucumber", "tomatoes", "red onion", "feta cheese", "olives", "lemon", "olive oil", "oregano", "salt"],
+                cookTime: 25,
+                servings: 2,
+                difficulty: "beginner",
+                tags: ["vegetarian", "gluten-free"],
+                rating: 0,
+                instructions: [
+                    "Rinse quinoa and cook according to package directions. Let cool completely.",
+                    "Dice cucumber, tomatoes, and red onion into small, uniform pieces.",
+                    "In a large bowl, combine cooled quinoa with diced vegetables.",
+                    "Crumble feta cheese and add olives to the bowl.",
+                    "Whisk together lemon juice, olive oil, oregano, and salt for dressing.",
+                    "Pour dressing over quinoa mixture and toss well. Let sit for 10 minutes before serving."
+                ],
+                tips: [
+                    "Rinse quinoa before cooking to remove the bitter coating.",
+                    "Let the quinoa cool completely or it will make the other ingredients soggy.",
+                    "This bowl tastes even better after sitting for a while - great for meal prep!"
+                ]
+            },
+            {
+                id: 8,
+                title: "Honey Soy Salmon",
+                description: "Simple glazed salmon that's sweet, savory, and ready in under 20 minutes.",
+                ingredients: ["salmon fillets", "honey", "soy sauce", "garlic", "ginger", "rice vinegar", "sesame oil", "green onions"],
+                cookTime: 15,
+                servings: 2,
+                difficulty: "intermediate",
+                tags: ["gluten-free", "dairy-free"],
+                rating: 0,
+                instructions: [
+                    "Pat salmon fillets dry and season with salt and pepper.",
+                    "Mix honey, soy sauce, minced garlic, ginger, and rice vinegar in a small bowl.",
+                    "Heat sesame oil in a large skillet over medium-high heat.",
+                    "Add salmon skin-side up and cook for 4 minutes without moving.",
+                    "Flip salmon and pour honey soy mixture into the pan around the fish.",
+                    "Cook for 3-4 more minutes, spooning glaze over salmon until cooked through. Garnish with green onions."
+                ],
+                tips: [
+                    "Don't move the salmon once you place it in the pan - let it develop a nice crust.",
+                    "Use a meat thermometer - salmon is done at 145°F internal temperature.",
+                    "The glaze will thicken as it cooks, creating a beautiful coating."
+                ]
+            }
+        ];
+
+        // App state
+        let userIngredients = JSON.parse(localStorage.getItem('userIngredients') || '[]');
+        let activeFilters = JSON.parse(localStorage.getItem('activeFilters') || '{}');
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        let ratings = JSON.parse(localStorage.getItem('ratings') || '{}');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            renderIngredientTags();
+            renderRecipes();
+            loadSavedFilters();
+        });
+
+        function handleIngredientInput(event) {
+            if (event.key === 'Enter') {
+                const input = event.target;
+                const ingredient = input.value.trim().toLowerCase();
+                
+                if (ingredient && !userIngredients.includes(ingredient)) {
+                    userIngredients.push(ingredient);
+                    localStorage.setItem('userIngredients', JSON.stringify(userIngredients));
+                    input.value = '';
+                    renderIngredientTags();
+                    renderRecipes();
+                }
+            }
+        }
+
+        function removeIngredient(ingredient) {
+            userIngredients = userIngredients.filter(item => item !== ingredient);
+            localStorage.setItem('userIngredients', JSON.stringify(userIngredients));
+            renderIngredientTags();
+            renderRecipes();
+        }
+
+        function renderIngredientTags() {
+            const container = document.getElementById('ingredientTags');
+            container.innerHTML = userIngredients.map(ingredient => `
+                <div class="ingredient-tag">
+                    ${ingredient}
+                    <button class="tag-remove" onclick="removeIngredient('${ingredient}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        function toggleFilters() {
+            const filters = document.getElementById('filters');
+            filters.classList.toggle('active');
+        }
+
+        function toggleFilter(element, filterType) {
+            element.classList.toggle('active');
+            
+            if (element.classList.contains('active')) {
+                activeFilters[filterType] = true;
+            } else {
+                delete activeFilters[filterType];
+            }
+            
+            localStorage.setItem('activeFilters', JSON.stringify(activeFilters));
+            renderRecipes();
+        }
+
+        function loadSavedFilters() {
+            Object.keys(activeFilters).forEach(filterType => {
+                const element = document.querySelector(`[onclick="toggleFilter(this, '${filterType}')"]`);
+                if (element) {
+                    element.classList.add('active');
+                }
+            });
+        }
+
+        function calculateIngredientMatch(recipe) {
+            if (userIngredients.length === 0) return 0;
+            
+            const matches = recipe.ingredients.filter(ingredient => 
+                userIngredients.some(userIng => 
+                    ingredient.includes(userIng) || userIng.includes(ingredient)
+                )
+            );
+            
+            return Math.round((matches.length / recipe.ingredients.length) * 100);
+        }
+
+        function filterRecipes(recipes) {
+            return recipes.filter(recipe => {
+                // Dietary filters
+                if (activeFilters.vegetarian && !recipe.tags.includes('vegetarian')) return false;
+                if (activeFilters.vegan && !recipe.tags.includes('vegan')) return false;
+                if (activeFilters['gluten-free'] && !recipe.tags.includes('gluten-free')) return false;
+                if (activeFilters['dairy-free'] && !recipe.tags.includes('dairy-free')) return false;
+                
+                // Time filters
+                if (activeFilters.quick && recipe.cookTime > 15) return false;
+                if (activeFilters.medium && recipe.cookTime > 30) return false;
+                if (activeFilters.longer && recipe.cookTime > 45) return false;
+                
+                return true;
+            });
+        }
+
+        function renderRecipes() {
+            const filteredRecipes = filterRecipes(recipes);
+            const sortedRecipes = filteredRecipes.sort((a, b) => {
+                const matchA = calculateIngredientMatch(a);
+                const matchB = calculateIngredientMatch(b);
+                return matchB - matchA;
+            });
+
+            const container = document.getElementById('recipesList');
+            const countElement = document.getElementById('recipeCount');
+            
+            countElement.textContent = `${sortedRecipes.length} recipes found`;
+
+            if (sortedRecipes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🍳</div>
+                        <h3>No recipes found</h3>
+                        <p>Try adding some ingredients or adjusting your filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = sortedRecipes.map(recipe => {
+                const match = calculateIngredientMatch(recipe);
+                const userRating = ratings[recipe.id] || 0;
+                const isFavorite = favorites.includes(recipe.id);
+                
+                return `
+                    <div class="recipe-card" onclick="openRecipeDetail(${recipe.id})">
+                        <div class="recipe-header">
+                            <div>
+                                <h3 class="recipe-title">${recipe.title}</h3>
+                                <div class="recipe-stats">
+                                    <span>⏱️ ${recipe.cookTime} min</span>
+                                    <span>👥 ${recipe.servings} servings</span>
+                                    <span>📊 ${recipe.difficulty}</span>
+                                </div>
+                            </div>
+                            <div class="match-percentage">${match}% match</div>
+                        </div>
+                        
+                        <div class="ingredient-match">
+                            <div class="match-label">Ingredients you have:</div>
+                            <div class="ingredient-list">
+                                ${recipe.ingredients.map(ing => {
+                                    const hasIngredient = userIngredients.some(userIng => 
+                                        ing.includes(userIng) || userIng.includes(ing)
+                                    );
+                                    return `<span class="ingredient-item ${hasIngredient ? 'ingredient-have' : 'ingredient-need'}">${ing}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        
+                        <p class="recipe-description">${recipe.description}</p>
+                        
+                        <div class="recipe-actions" onclick="event.stopPropagation()">
+                            <button class="btn btn-primary" onclick="openRecipeDetail(${recipe.id})">View Recipe</button>
+                            <button class="btn btn-favorite ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id})">
+                                ⭐ ${isFavorite ? 'Favorited' : 'Favorite'}
+                            </button>
+                            <div class="rating">
+                                ${[1,2,3,4,5].map(star => `
+                                    <span class="star ${star <= userRating ? 'filled' : ''}" onclick="rateRecipe(${recipe.id}, ${star})">★</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleFavorite(recipeId) {
+            if (favorites.includes(recipeId)) {
+                favorites = favorites.filter(id => id !== recipeId);
+            } else {
+                favorites.push(recipeId);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            renderRecipes();
+        }
+
+        function rateRecipe(recipeId, rating) {
+            ratings[recipeId] = rating;
+            localStorage.setItem('ratings', JSON.stringify(ratings));
+            renderRecipes();
+        }
+
+        function openRecipeDetail(recipeId) {
+            const recipe = recipes.find(r => r.id === recipeId);
+            if (!recipe) return;
+
+            const content = document.getElementById('recipeDetailContent');
+            const userRating = ratings[recipe.id] || 0;
+            
+            content.innerHTML = `
+                <h2 class="recipe-title">${recipe.title}</h2>
+                <div class="recipe-stats" style="margin-bottom: 20px;">
+                    <span>⏱️ ${recipe.cookTime} min</span>
+                    <span>👥 ${recipe.servings} servings</span>
+                    <span>📊 ${recipe.difficulty}</span>
+                    <div class="rating" style="margin-left: auto;">
+                        ${[1,2,3,4,5].map(star => `
+                            <span class="star ${star <= userRating ? 'filled' : ''}" onclick="rateRecipe(${recipe.id}, ${star}); openRecipeDetail(${recipe.id})">★</span>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <p class="recipe-description" style="margin-bottom: 25px;">${recipe.description}</p>
+                
+                <h3 style="color: var(--accent-cream); margin-bottom: 15px;">Ingredients:</h3>
+                <div class="ingredient-list" style="margin-bottom: 30px;">
+                    ${recipe.ingredients.map(ing => {
+                        const hasIngredient = userIngredients.some(userIng => 
+                            ing.includes(userIng) || userIng.includes(ing)
+                        );
+                        return `<span class="ingredient-item ${hasIngredient ? 'ingredient-have' : 'ingredient-need'}">${ing}</span>`;
+                    }).join('')}
+                </div>
+                
+                <div class="recipe-instructions">
+                    <h3 style="color: var(--accent-cream); margin-bottom: 20px;">Instructions:</h3>
+                    ${recipe.instructions.map((instruction, index) => `
+                        <div class="instruction-step">
+                            <div class="step-number">Step ${index + 1}</div>
+                            <div>${instruction}</div>
+                        </div>
+                        ${recipe.tips && recipe.tips[index] ? `
+                            <div class="cooking-tip">
+                                <span class="tip-icon">💡</span>
+                                <strong>Tip:</strong> ${recipe.tips[index]}
+                            </div>
+                        ` : ''}
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('recipeDetail').classList.add('active');
+        }
+
+        function closeRecipeDetail() {
+            document.getElementById('recipeDetail').classList.remove('active');
+        }
+
+        // Close recipe detail when clicking outside
+        document.getElementById('recipeDetail').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRecipeDetail();
+            }
+        });
+    </script>
+</body>
+</html>
