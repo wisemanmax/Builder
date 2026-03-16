@@ -515,6 +515,14 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
         <div class="di-img">&#x2726;</div>
         <div class="di-lbl">Build</div>
       </div>
+      <div class="di" onclick="pullFromGitHub()">
+        <div class="di-img" style="background:rgba(255,255,255,.12)">&#x1F504;</div>
+        <div class="di-lbl">Sync</div>
+      </div>
+      <div class="di" onclick="openCustomizeBuilder()">
+        <div class="di-img" style="background:linear-gradient(135deg,#B44FFF,#3D5AFE)">&#x1F527;</div>
+        <div class="di-lbl">Customize</div>
+      </div>
       <div class="di" onclick="openSettings()">
         <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
         <div class="di-lbl">Settings</div>
@@ -680,12 +688,6 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
         <button class="dbtn" id="s-clear">&#x1F5D1;&#xFE0F; Delete All Apps Locally</button>
         <button class="dbtn" id="s-signout">&#x1F6AA; Sign Out &amp; Clear All Keys</button>
       </div>
-      <span class="ssec">&#x1F527; Update The Builder</span>
-      <div class="update-card">
-        <div class="update-info">Describe an improvement and Claude will update The Builder itself &mdash; rewriting this app's code, pushing to GitHub, and reloading.</div>
-        <div class="fl"><label>Describe the improvement</label><textarea class="fi" id="s-self-update-input" rows="3" style="resize:vertical;min-height:72px" placeholder="e.g. Add a dark/light theme toggle to the home screen..."></textarea></div>
-        <button class="btn-p" id="s-self-update-btn" style="background:var(--g6);box-shadow:0 6px 20px rgba(180,79,255,.35)">&#x1F527; Update The Builder</button>
-      </div>
     </div>
     <div class="ssfooter">The Builder &middot; Claude + GPT-4o + GitHub Pages &middot; PWA</div>
   </div>
@@ -770,6 +772,8 @@ var ST={
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function uid(){return 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function slugify(str){return String(str).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'app';}
+function uniqueSlug(name){var base=slugify(name);var id=base;var n=2;while(ST.apps.some(function(a){return a.id===id;})){id=base+'-'+n;n++;}return id;}
 function grad(ci){return GRADS[((ci||0)%GRADS.length+GRADS.length)%GRADS.length]||GRADS[0];}
 
 function toast(msg,ms){
@@ -930,7 +934,7 @@ function ghFetch(url,opts){
   var headers=ghHeaders();
   if(opts.headers){for(var k in opts.headers)headers[k]=opts.headers[k];}
   opts.headers=headers;
-  return fetch(url,opts).then(function(res){
+  return fetchWithRetry(url,opts,30000).then(function(res){
     if(!res.ok)return res.json().catch(function(){return{};}).then(function(e){throw new Error(e.message||'GitHub HTTP '+res.status);});
     return res.status===204?{}:res.json();
   });
@@ -1132,6 +1136,7 @@ function openBuilder(editId){
 
 function closeBuilder(){
   $('builder-sheet').classList.remove('open');
+  ST._selfUpdateMode=false;
   if(_previewPid)return;
   var keys=Object.keys(_approvalGates);
   for(var i=0;i<keys.length;i++){
@@ -1140,6 +1145,33 @@ function closeBuilder(){
   }
   ST._building=false;
   var sb=$('send-btn');if(sb)sb.disabled=false;
+}
+
+function openCustomizeBuilder(){
+  ST._selfUpdateMode=true;
+  ST.activeAppId=null;
+  $('emoji-pick-btn').textContent='\uD83D\uDD27';
+  $('bs-title').textContent='Customize The Builder';
+  $('bs-sub').textContent='Describe an improvement \u2192 Claude rewrites \u2192 Push \u2192 Reload';
+  $('bs-proj-btn').style.display='none';
+  $('name-row').style.display='none';
+  $('app-name-input').value='';
+  resetChat();
+  var s=$('chat-scroll');
+  var w=$('chat-welcome');if(w){
+    w.innerHTML='<div class="cw-icon">\uD83D\uDD27</div>'
+      +'<div class="cw-title">Customize The Builder</div>'
+      +'<div class="cw-sub">Describe any improvement and Claude will rewrite The Builder itself, push to GitHub, and reload.</div>'
+      +'<div class="chips">'
+      +'<div class="chip" onclick="chipSend(\'Add a dark/light theme toggle to the home screen\')">\uD83C\uDF19 Dark mode</div>'
+      +'<div class="chip" onclick="chipSend(\'Improve the app grid layout and animations\')">\u2728 Better grid</div>'
+      +'<div class="chip" onclick="chipSend(\'Add app search/filter on the home screen\')">\uD83D\uDD0D Search</div>'
+      +'<div class="chip" onclick="chipSend(\'Add app categories and folders on the home screen\')">\uD83D\uDCC2 Folders</div>'
+      +'</div>';
+    w.style.display='';
+  }
+  $('builder-sheet').classList.add('open');
+  setTimeout(function(){$('chat-input').focus();},420);
 }
 
 function resetChat(){
@@ -1280,10 +1312,14 @@ function sendMsg(){
   var text=inp.value.trim();
   if(!text||ST._building)return;
   if(!ST.key){toast('Add your Anthropic API key in Settings first',4000);return;}
-  var customName=$('app-name-input').value.trim();
   inp.value='';autoResize(inp);
-  $('app-name-input').value='';
   addMsg({role:'user',text:text});
+  if(ST._selfUpdateMode){
+    runSelfUpdatePipeline(text);
+    return;
+  }
+  var customName=$('app-name-input').value.trim();
+  $('app-name-input').value='';
   var existing=ST.activeAppId?ST.apps.find(function(a){return a.id===ST.activeAppId;}):null;
   runPipeline(text,existing,customName);
 }
@@ -1293,11 +1329,17 @@ function runPipeline(prompt,existingApp,customName){
   var pid='p'+Date.now();
   var hasGitHub=!!(ST.ghToken&&ST.ghUser&&ST.ghRepo);
   addMsg({role:'asst',type:'pipeline',id:pid});
+  // Wake Lock to prevent screen sleep during build
+  var _wakeLock=null;
+  function acquireWakeLock(){try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(function(wl){_wakeLock=wl;}).catch(function(){});}catch(e){}}
+  acquireWakeLock();
+  // Keep-alive ping to discourage browser from suspending
+  var _keepAlive=setInterval(function(){try{localStorage.setItem('bldr_ping',Date.now());}catch(e){}},15000);
 
   var appName=existingApp?existingApp.name:((customName&&customName.trim())||autoName(prompt));
   var appIcon=ST.pendingIcon;
   var appCi=ST.pendingColor;
-  var appId=existingApp?existingApp.id:uid();
+  var appId=existingApp?existingApp.id:uniqueSlug(appName);
   var branchName=hasGitHub?('builder/app-'+appId+'-'+Date.now().toString(36)):'';
 
   var v1,v2;
@@ -1531,10 +1573,69 @@ function runPipeline(prompt,existingApp,customName){
   }).finally(function(){
     ST._building=false;
     var sb=$('send-btn');if(sb)sb.disabled=false;
+    clearInterval(_keepAlive);
+    if(_wakeLock){try{_wakeLock.release();}catch(e){}_wakeLock=null;}
+    try{localStorage.removeItem('bldr_ping');}catch(e){}
   });
 }
 
 /* ======== SELF-UPDATE ======== */
+var SELFUPDATE_STEPS=['Fetch Source','Claude \u00B7 Improve','Push to GitHub','Reload'];
+var SELFUPDATE_ICONS=['\uD83D\uDCE5','\uD83D\uDD28','\u2B06\uFE0F','\uD83D\uDD04'];
+
+function runSelfUpdatePipeline(improvement){
+  if(!ST.key){toast('Anthropic API key required',3000);return;}
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo){toast('GitHub credentials required',3500);return;}
+  ST._building=true;$('send-btn').disabled=true;
+  var pid='su'+Date.now();
+  // render pipeline steps
+  var html='<div class="pipe" id="'+pid+'">';
+  for(var i=0;i<SELFUPDATE_STEPS.length;i++){
+    html+='<div class="ps s-wait" id="'+pid+'-s'+i+'"><div class="psico">'+SELFUPDATE_ICONS[i]+'</div><div class="pstxt"><div class="psname">'+SELFUPDATE_STEPS[i]+'</div><div class="psdet">Waiting\u2026</div></div></div>';
+  }
+  html+='</div>';
+  var s=$('chat-scroll');var row=document.createElement('div');row.className='mrow asst';row.innerHTML='<div class="abub">'+html+'</div>';s.appendChild(row);scrollBot();
+
+  function ups(step,state,det){
+    var el=$(pid+'-s'+step);if(!el)return;
+    var ico=state==='done'?'\u2713':state==='error'?'\u2717':SELFUPDATE_ICONS[step]||'\u00B7';
+    el.className='ps s-'+state;
+    el.innerHTML='<div class="psico">'+ico+'</div><div class="pstxt"><div class="psname">'+SELFUPDATE_STEPS[step]+'</div><div class="psdet">'+esc(det)+'</div></div>'+(state==='active'?'<div class="spin"></div>':'');
+    scrollBot();
+  }
+
+  var rawUrl='https://raw.githubusercontent.com/'+ST.ghUser+'/'+ST.ghRepo+'/main/index.html';
+  ups(0,'active','Fetching current Builder source\u2026');
+  _nativeFetch(rawUrl).then(function(res){
+    if(!res.ok)throw new Error('Could not fetch source (HTTP '+res.status+')');
+    return res.text();
+  }).then(function(currentSrc){
+    if(currentSrc.indexOf('<!DOCTYPE')<0)throw new Error('Fetched file is not The Builder');
+    ups(0,'done','Source fetched ('+Math.round(currentSrc.length/1024)+'KB)');
+    ups(1,'active','Claude is writing the improvement\u2026');
+    return callClaude(SYS_SELFUPDATE,'CURRENT BUILDER SOURCE:\n\n'+currentSrc.slice(0,80000)+'\n\nIMPROVEMENT REQUESTED:\n'+improvement);
+  }).then(function(improved){
+    ups(1,'done','Improvement generated');
+    ups(2,'active','Pushing to GitHub\u2026');
+    return ghGetFileSha('index.html','main').then(function(sha){
+      return ghPushFile('index.html',improved,'\uD83D\uDD27 Self-update: '+improvement.slice(0,80),'main',sha);
+    });
+  }).then(function(){
+    ups(2,'done','Pushed to main');
+    ups(3,'active','Reloading in 5s\u2026');
+    addMsg({role:'asst',type:'text',html:'\u2705 <strong>Builder updated!</strong> Reloading in 5 seconds\u2026'});
+    setTimeout(function(){location.reload();},5000);
+  }).catch(function(e){
+    var step=0;
+    for(var i=0;i<4;i++){var el=$(pid+'-s'+i);if(el&&el.className.indexOf('s-active')>=0){step=i;break;}}
+    ups(step,'error',scrubKeys(String(e.message||e)));
+    addMsg({role:'asst',type:'text',html:'\u274C Self-update failed: '+esc(scrubKeys(String(e.message||e)))});
+  }).finally(function(){
+    ST._building=false;
+    var sb=$('send-btn');if(sb)sb.disabled=false;
+  });
+}
+
 function selfUpdateBuilder(improvement){
   if(!ST.key){toast('Anthropic API key required',3000);return;}
   if(!ST.ghToken||!ST.ghUser||!ST.ghRepo){toast('GitHub credentials required',3500);return;}
@@ -1600,6 +1701,21 @@ function fetchWithTimeout(url,opts,ms){
   return Promise.race([req,timeout]);
 }
 
+function fetchWithRetry(url,opts,ms,retries){
+  retries=retries||2;
+  function attempt(n){
+    return fetchWithTimeout(url,opts,ms).catch(function(e){
+      var msg=String(e&&e.message||e||'').toLowerCase();
+      var isNetwork=msg.indexOf('failed to fetch')>=0||msg.indexOf('load failed')>=0||msg.indexOf('timed out')>=0||msg.indexOf('network')>=0;
+      if(isNetwork&&n<retries){
+        return new Promise(function(resolve){setTimeout(resolve,(n+1)*1500);}).then(function(){return attempt(n+1);});
+      }
+      throw e;
+    });
+  }
+  return attempt(0);
+}
+
 function classifyFetchError(e,api){
   var msg=String(e&&e.message||e||'');
   if(msg.indexOf('timed out')>=0)return api+': Request timed out.';
@@ -1609,7 +1725,7 @@ function classifyFetchError(e,api){
 }
 
 function callClaude(sys,msg){
-  return fetchWithTimeout('https://api.anthropic.com/v1/messages',{
+  return fetchWithRetry('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,system:sys,messages:[{role:'user',content:msg}]}),
@@ -1629,7 +1745,7 @@ function callClaude(sys,msg){
 
 function callClaudeRaw(sys,msg,maxTokens){
   maxTokens=maxTokens||4000;
-  return fetchWithTimeout('https://api.anthropic.com/v1/messages',{
+  return fetchWithRetry('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system:sys,messages:[{role:'user',content:msg}]}),
@@ -1819,6 +1935,42 @@ function pushToSupabase(app){
   }).catch(function(e){console.warn('Supabase push failed:',scrubKeys(e.message));});
 }
 
+function pullFromGitHub(){
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo){toast('GitHub credentials required \u2014 set them in Settings',4000);return;}
+  toast('Syncing from GitHub\u2026',2000);
+  var url=ghApiUrl('apps/manifest.json');
+  fetch(url,{headers:ghHeaders()}).then(function(res){
+    if(res.status===404){toast('No apps/manifest.json in repo yet',3000);return Promise.reject('NO_MANIFEST');}
+    if(!res.ok)throw new Error('GitHub HTTP '+res.status);
+    return res.json();
+  }).then(function(file){
+    var raw=atob(file.content.replace(/\n/g,''));
+    var manifest=JSON.parse(raw);
+    if(!Array.isArray(manifest)){toast('Invalid manifest format',3000);return;}
+    var localIds={};ST.apps.forEach(function(a){localIds[a.id]=true;});
+    var newApps=manifest.filter(function(a){return !localIds[a.id];});
+    if(!newApps.length){toast('All apps already synced \u2714\uFE0F',2500);return;}
+    var fetches=newApps.map(function(app){
+      return fetch(ghApiUrl('apps/'+app.id+'.html'),{headers:ghHeaders()}).then(function(r){
+        if(!r.ok)return null;
+        return r.json().then(function(f){
+          var code=decodeURIComponent(escape(atob(f.content.replace(/\n/g,''))));
+          return{id:app.id,name:app.name,icon:app.icon||'\uD83D\uDCE6',ci:app.ci||0,desc:(app.prompts&&app.prompts[0]?app.prompts[0].text:'').slice(0,90),code:code,versions:[],prompts:app.prompts||[],createdAt:app.createdAt||new Date().toISOString(),updatedAt:app.updatedAt||new Date().toISOString(),ghPushed:true};
+        });
+      }).catch(function(){return null;});
+    });
+    return Promise.all(fetches).then(function(results){
+      var added=0;
+      results.forEach(function(a){if(a){ST.apps.push(a);added++;}});
+      if(added>0){persist();renderGrid();}
+      toast('Synced '+added+' app'+(added===1?'':'s')+' from GitHub \uD83D\uDD04',3000);
+    });
+  }).catch(function(e){
+    if(e==='NO_MANIFEST')return;
+    toast('Sync failed: '+scrubKeys(String(e.message||e)),4000);
+  });
+}
+
 function pullFromSupabase(){
   if(!ST.sbUrl||!ST.sbAnon){toast('No Supabase credentials');return;}
   fetch(ST.sbUrl+'/rest/v1/builder_apps?select=*&order=created_at.desc',{
@@ -1838,6 +1990,13 @@ function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrol
 /* ======== INIT ======== */
 function init(){
   hydrate();
+
+  // Re-acquire Wake Lock when user returns to app during a build
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'&&ST._building&&navigator.wakeLock){
+      navigator.wakeLock.request('screen').catch(function(){});
+    }
+  });
 
   $('emoji-grid').innerHTML=EMOJIS.map(function(e){return '<button class="egi" onclick="pickEmoji(\''+e+'\')">'+e+'</button>';}).join('');
 
@@ -2015,12 +2174,6 @@ function init(){
       toast(ST.backendEnabled?'Backend step enabled':'Backend step disabled');
     });
   }
-  $('s-self-update-btn').addEventListener('click',function(){
-    var improvement=$('s-self-update-input').value.trim();
-    if(!improvement){toast('Describe the improvement first',2500);return;}
-    if(!confirm('Claude will update The Builder itself and reload. Continue?'))return;
-    selfUpdateBuilder(improvement);
-  });
   $('s-clear').addEventListener('click',function(){if(!confirm('Delete all apps locally?'))return;ST.apps=[];persist();renderGrid();toast('All apps cleared locally');});
   $('s-signout').addEventListener('click',function(){if(!confirm('Sign out and clear all keys?'))return;localStorage.clear();location.reload();});
 
