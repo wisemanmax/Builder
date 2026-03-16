@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Grocery Tracker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a1f2e;
+            --bg-tertiary: #252a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #374151;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .category-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-count {
+            background: var(--accent);
+            color: white;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .item-list {
+            list-style: none;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .item-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-ok {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-low {
+            background: var(--warning);
+            color: white;
+        }
+
+        .status-out {
+            background: var(--danger);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 40px 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Smart Grocery Tracker</h1>
+            <p>Track your groceries, predict restocking needs, and never run out again</p>
+        </div>
+
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-number" id="totalItems">0</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="needRestock">0</div>
+                <div class="stat-label">Need Restocking</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="outOfStock">0</div>
+                <div class="stat-label">Out of Stock</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Add New Item
+                </h3>
+                <form id="addItemForm">
+                    <div class="form-group">
+                        <label for="itemName">Item Name</label>
+                        <input type="text" id="itemName" class="form-control" placeholder="e.g., Whole Milk" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" class="form-control" required>
+                            <option value="">Select category</option>
+                            <option value="dairy">🥛 Dairy</option>
+                            <option value="meat">🥩 Meat & Poultry</option>
+                            <option value="bread">🍞 Bread & Bakery</option>
+                            <option value="produce">🥬 Produce</option>
+                            <option value="pantry">🥫 Pantry</option>
+                            <option value="frozen">🧊 Frozen</option>
+                            <option value="beverages">🥤 Beverages</option>
+                            <option value="snacks">🍿 Snacks</option>
+                            <option value="cleaning">🧽 Cleaning</option>
+                            <option value="personal">🧴 Personal Care</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentStock">Current Stock</label>
+                        <input type="number" id="currentStock" class="form-control" min="0" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usageRate">Usage per Week</label>
+                        <input type="number" id="usageRate" class="form-control" min="0.1" step="0.1" value="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                    </svg>
+                    Shopping List Generator
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Generate your shopping list based on predicted needs</p>
+                <button id="generateList" class="btn btn-success">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                    Generate Shopping List
+                </button>
+                <div id="shoppingList" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <div class="categories-grid" id="categoriesContainer">
+            <!-- Categories will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        class GroceryTracker {
+            constructor() {
+                this.items = this.loadFromStorage('groceryItems') || [];
+                this.categoryEmojis = {
+                    dairy: '🥛',
+                    meat: '🥩',
+                    bread: '🍞',
+                    produce: '🥬',
+                    pantry: '🥫',
+                    frozen: '🧊',
+                    beverages: '🥤',
+                    snacks: '🍿',
+                    cleaning: '🧽',
+                    personal: '🧴'
+                };
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadSampleData();
+                this.render();
+                this.startAutoUpdate();
+            }
+
+            setupEventListeners() {
+                document.getElementById('addItemForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addItem();
+                });
+
+                document.getElementById('generateList').addEventListener('click', () => {
+                    this.generateShoppingList();
+                });
+            }
+
+            loadSampleData() {
+                if (this.items.length === 0) {
+                    const sampleItems = [
+                        { name: 'Whole Milk', category: 'dairy', currentStock: 1, usageRate: 1.5, lastUpdated: Date.now() - 86400000 * 5 },
+                        { name: 'Chicken Breast', category: 'meat', currentStock: 2, usageRate: 1, lastUpdated: Date.now() - 86400000 * 3 },
+                        { name: 'White Bread', category: 'bread', currentStock: 0, usageRate: 0.5, lastUpdated: Date.now() - 86400000 * 7 },
+                        { name: 'Bananas', category: 'produce', currentStock: 6, usageRate: 3, lastUpdated: Date.now() - 86400000 * 2 },
+                        { name: 'Rice', category: 'pantry', currentStock: 1, usageRate: 0.2, lastUpdated: Date.now() - 86400000 * 10 },
+                        { name: 'Frozen Peas', category: 'frozen', currentStock: 2, usageRate: 0.3, lastUpdated: Date.now() - 86400000 * 14 },
+                        { name: 'Orange Juice', category: 'beverages', currentStock: 0, usageRate: 1, lastUpdated: Date.now() - 86400000 * 4 },
+                        { name: 'Pasta', category: 'pantry', currentStock: 3, usageRate: 0.8, lastUpdated: Date.now() - 86400000 * 8 },
+                        { name: 'Cheddar Cheese', category: 'dairy', currentStock: 1, usageRate: 0.5, lastUpdated: Date.now() - 86400000 * 6 },
+                        { name: 'Apples', category: 'produce', currentStock: 4, usageRate: 2, lastUpdated: Date.now() - 86400000 * 3 }
+                    ];
+                    this.items = sampleItems.map(item => ({ ...item, id: this.generateId() }));
+                    this.saveToStorage();
+                }
+            }
+
+            addItem() {
+                const form = document.getElementById('addItemForm');
+                const formData = new FormData(form);
+                
+                const item = {
+                    id: this.generateId(),
+                    name: formData.get('itemName') || document.getElementById('itemName').value,
+                    category: formData.get('category') || document.getElementById('category').value,
+                    currentStock: parseInt(document.getElementById('currentStock').value),
+                    usageRate: parseFloat(document.getElementById('usageRate').value),
+                    lastUpdated: Date.now()
+                };
+
+                this.items.push(item);
+                this.saveToStorage();
+                this.render();
+                form.reset();
+            }
+
+            updateStock(id, newStock) {
+                const item = this.items.find(i => i.id === id);
+                if (item) {
+                    item.currentStock = newStock;
+                    item.lastUpdated = Date.now();
+                    this.saveToStorage();
+                    this.render();
+                }
+            }
+
+            deleteItem(id) {
+                this.items = this.items.filter(i => i.id !== id);
+                this.saveToStorage();
+                this.render();
+            }
+
+            calculatePredictedStock(item) {
+                const daysSinceUpdate = (Date.now() - item.lastUpdated) / (1000 * 60 * 60 * 24);
+                const weeksSinceUpdate = daysSinceUpdate / 7;
+                const predictedStock = Math.max(0, item.currentStock - (item.usageRate * weeksSinceUpdate));
+                return Math.round(predictedStock * 10) / 10;
+            }
+
+            getItemStatus(item) {
+                const predictedStock = this.calculatePredictedStock(item);
+                const weeksRemaining = predictedStock / item.usageRate;
+                
+                if (predictedStock <= 0) return 'out';
+                if (weeksRemaining <= 1) return 'low';
+                return 'ok';
+            }
+
+            getDaysUntilRestock(item) {
+                const predictedStock = this.calculatePredictedStock(item);
+                const daysRemaining = (predictedStock / item.usageRate) * 7;
+                return Math.max(0, Math.round(daysRemaining));
+            }
+
+            generateShoppingList() {
+                const needsRestock = this.items.filter(item => {
+                    const status = this.getItemStatus(item);
+                    return status === 'out' || status === 'low';
+                });
+
+                const listContainer = document.getElementById('shoppingList');
+                
+                if (needsRestock.length === 0) {
+                    listContainer.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">All items are well stocked! 🎉</p>';
+                    return;
+                }
+
+                const groupedByCategory = needsRestock.reduce((acc, item) => {
+                    if (!acc[item.category]) acc[item.category] = [];
+                    acc[item.category].push(item);
+                    return acc;
+                }, {});
+
+                let html = '<div style="background: var(--bg-tertiary); border-radius: 8px; padding: 16px;">';
+                html += '<h4 style="margin-bottom: 16px; color: var(--text-primary);">📝 Shopping List</h4>';
+                
+                Object.entries(groupedByCategory).forEach(([category, items]) => {
+                    html += `<div style="margin-bottom: 12px;">`;
+                    html += `<strong style="color: var(--accent);">${this.categoryEmojis[category]} ${category.charAt(0).toUpperCase() + category.slice(1)}</strong>`;
+                    html += '<ul style="margin: 8px 0 0 20px; color: var(--text-secondary);">';
+                    items.forEach(item => {
+                        const status = this.getItemStatus(item);
+                        const urgency = status === 'out' ? ' (OUT OF STOCK)' : ' (Running low)';
+                        html += `<li>${item.name}${urgency}</li>`;
+                    });
+                    html += '</ul></div>';
+                });
+                
+                html += '</div>';
+                listContainer.innerHTML = html;
+            }
+
+            updateStats() {
+                const totalItems = this.items.length;
+                const needRestock = this.items.filter(item => this.getItemStatus(item) === 'low').length;
+                const outOfStock = this.items.filter(item => this.getItemStatus(item) === 'out').length;
+
+                document.getElementById('totalItems').textContent = totalItems;
+                document.getElementById('needRestock').textContent = needRestock;
+                document.getElementById('outOfStock').textContent = outOfStock;
+            }
+
+            render() {
+                this.updateStats();
+                this.renderCategories();
+            }
+
+            renderCategories() {
+                const container = document.getElementById('categoriesContainer');
+                const groupedItems = this.items.reduce((acc, item) => {
+                    if (!acc[item.category]) acc[item.category] = [];
+                    acc[item.category].push(item);
+                    return acc;
+                }, {});
+
+                if (Object.keys(groupedItems).length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No items yet. Add some groceries to get started!</p></div>';
+                    return;
+                }
+
+                let html = '';
+                Object.entries(groupedItems).forEach(([category, items]) => {
+                    const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+                    html += `
+                        <div class="category-card">
+                            <div class="category-header">
+                                <div class="category-title">
+                                    ${this.categoryEmojis[category]} ${categoryName}
+                                    <span class="category-count">${items.length}</span>
+                                </div>
+                            </div>
+                            <ul class="item-list">
+                    `;
+
+                    items.forEach(item => {
+                        const predictedStock = this.calculatePredictedStock(item);
+                        const status = this.getItemStatus(item);
+                        const daysUntilRestock = this.getDaysUntilRestock(item);
+                        
+                        let statusClass = 'status-ok';
+                        let statusText = 'Good';
+                        if (status === 'low') {
+                            statusClass = 'status-low';
+                            statusText = `${daysUntilRestock}d left`;
+                        } else if (status === 'out') {
+                            statusClass = 'status-out';
+                            statusText = 'Out';
+                        } else {
+                            statusText = `${daysUntilRestock}d left`;
+                        }
+
+                        html += `
+                            <li class="item">
+                                <div class="item-info">
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-details">
+                                        Stock: ${predictedStock} | Usage: ${item.usageRate}/week
+                                        <span class="status-badge ${statusClass}">${statusText}</span>
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn btn-sm btn-primary" onclick="groceryTracker.updateStock('${item.id}', ${predictedStock + 1})">+1</button>
+                                    <button class="btn btn-sm btn-danger" onclick="groceryTracker.deleteItem('${item.id}')">Delete</button>
+                                </div>
+                            </li>
+                        `;
+                    });
+
+                    html += '</ul></div>';
+                });
+
+                container.innerHTML = html;
+            }
+
+            startAutoUpdate() {
+                // Update predictions every minute
+                setInterval(() => {
+                    this.render();
+                }, 60000);
+            }
+
+            generateId() {
+                return '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            saveToStorage() {
+                localStorage.setItem('groceryItems', JSON.stringify(this.items));
+            }
+
+            loadFromStorage(key) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.error('Error loading from storage:', error);
+                    return null;
+                }
+            }
+        }
+
+        // Initialize the app
+        const groceryTracker = new GroceryTracker();
+    </script>
+</body>
+</html>
