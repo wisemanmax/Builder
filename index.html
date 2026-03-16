@@ -752,6 +752,7 @@ var SYS_FIX='You are an expert web developer doing a targeted bug fix pass. Rece
 var SYS_AUDIT='You are a senior code reviewer auditing a single-file HTML app. Return a JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]. Only report REAL bugs. If clean return []. Return ONLY the raw JSON array.';
 var SYS_BACKEND='You are a backend architect. Given a single-file HTML app, analyze what persistent data it manages and generate a Supabase (PostgreSQL) backend for it.\nReturn ONLY a JSON object (no markdown, no explanation):\n{\n  "tables": [{"name":"table_name","sql":"CREATE TABLE IF NOT EXISTS ... (with RLS enabled);","description":"what it stores"}],\n  "rls": ["ALTER TABLE x ENABLE ROW LEVEL SECURITY;", "CREATE POLICY ..."],\n  "injectedHTML": "the COMPLETE original HTML with Supabase JS client injected"\n}\nUse the placeholder values \'YOUR_SUPABASE_URL\' and \'YOUR_SUPABASE_ANON_KEY\' in the injected code.';
 var SYS_SELFUPDATE='You are improving a PWA app called "The Builder". You will receive the complete current HTML source and a description of the improvement to make.\nReturn ONLY the complete improved HTML starting with <!DOCTYPE html> — no markdown, no explanation, no code fences.\nRules: Keep all existing functionality. Apply ONLY the requested improvement. Do not rewrite things that are not related to the request.';
+var MAX_FIX_PASSES=3;
 
 /* ======== STATE ======== */
 var ST={
@@ -1331,50 +1332,86 @@ function runPipeline(prompt,existingApp,customName){
     v1=code;
     updatePS(pid,1,'done','Build complete \u2713');
 
-    // Step 2 — Checks
-    updatePS(pid,2,'active','Running checks\u2026');
-    var checks=runLocalChecks(v1);
-    var criticalFails=checks.filter(function(c){return !c.passed&&['no-innerhtml-risk','fetch-calls','inline-styles'].indexOf(c.id)===-1;});
-    addMsg({role:'asst',type:'checks',checks:checks});
-    updatePS(pid,2,criticalFails.length?'warn':'done',
-      criticalFails.length?(criticalFails.length+' issue'+(criticalFails.length!==1?'s':'')+' found'):'All checks passed \u2713');
-
-    // Step 3 — Audit
+    // Steps 2-4 — Validation + Fix Loop (up to MAX_FIX_PASSES passes)
     var canAudit=!!(ST.gptKey&&ST.auditEnabled);
-    if(canAudit){
-      updatePS(pid,3,'active','GPT-4o reviewing\u2026');
-      return callGPT(v1).then(function(bugs){
-        updatePS(pid,3,'done',bugs.length?('Found '+bugs.length+' issue'+(bugs.length!==1?'s':'')):'Code is clean \u2713');
-        addMsg({role:'asst',type:'audit',bugs:bugs});
-        return{criticalFails:criticalFails,bugs:bugs};
-      }).catch(function(e){
-        var auditErr=scrubKeys(e.message||String(e));
-        updatePS(pid,3,'error','Audit failed: '+auditErr);
-        return{criticalFails:criticalFails,bugs:[]};
-      });
-    }else{
-      updatePS(pid,3,'skip',ST.gptKey?'Audit disabled':'No OpenAI key \u2014 skipped');
-      return{criticalFails:criticalFails,bugs:[]};
-    }
-  }).then(function(result){
-    var allIssues=result.criticalFails.map(function(c){return{severity:'medium',issue:c.label+(c.detail?' \u2014 '+c.detail:''),location:c.cat};}).concat(result.bugs);
+    var currentCode=v1;
+    var passNum=0;
+    var totalFixed=0;
 
-    // Step 4 — Fix
-    if(allIssues.length>0){
-      updatePS(pid,4,'active','Fixing '+allIssues.length+' issue'+(allIssues.length!==1?'s':'')+'\u2026');
-      var fm='ISSUES TO FIX:\n'+allIssues.map(function(b,i){return(i+1)+'. ['+((b.severity||'medium').toUpperCase())+'] '+(b.issue||'')+' \u2014 '+(b.location||'');}).join('\n')+'\n\nORIGINAL CODE:\n'+v1;
-      return callClaude(SYS_FIX,fm).then(function(fixed){
-        v2=fixed;
-        updatePS(pid,4,'done',allIssues.length+' issue'+(allIssues.length!==1?'s':'')+' resolved \u2713');
-      }).catch(function(){
-        v2=v1;
-        updatePS(pid,4,'error','Fix pass failed \u2014 using original');
+    function runValidationPass(){
+      passNum++;
+      var passLabel=passNum>1?' (pass '+passNum+'/'+MAX_FIX_PASSES+')':'';
+
+      // Step 2 — Local Checks
+      updatePS(pid,2,'active','Running checks'+passLabel+'\u2026');
+      var checks=runLocalChecks(currentCode);
+      var criticalFails=checks.filter(function(c){return !c.passed&&['no-innerhtml-risk','fetch-calls','inline-styles'].indexOf(c.id)===-1;});
+      addMsg({role:'asst',type:'checks',checks:checks});
+      updatePS(pid,2,criticalFails.length?'warn':'done',
+        criticalFails.length?(criticalFails.length+' issue'+(criticalFails.length!==1?'s':'')+' found'+passLabel):'All checks passed'+passLabel+' \u2713');
+
+      // Step 3 — GPT-4o Audit
+      var auditPromise;
+      if(canAudit){
+        updatePS(pid,3,'active','GPT-4o reviewing'+passLabel+'\u2026');
+        auditPromise=callGPT(currentCode).then(function(bugs){
+          updatePS(pid,3,'done',bugs.length?('Found '+bugs.length+' issue'+(bugs.length!==1?'s':'')+passLabel):'Code is clean'+passLabel+' \u2713');
+          addMsg({role:'asst',type:'audit',bugs:bugs});
+          return{criticalFails:criticalFails,bugs:bugs};
+        }).catch(function(e){
+          var auditErr=scrubKeys(e.message||String(e));
+          updatePS(pid,3,'error','Audit failed'+passLabel+': '+auditErr);
+          return{criticalFails:criticalFails,bugs:[]};
+        });
+      }else{
+        if(passNum===1) updatePS(pid,3,'skip',ST.gptKey?'Audit disabled':'No OpenAI key \u2014 skipped');
+        auditPromise=Promise.resolve({criticalFails:criticalFails,bugs:[]});
+      }
+
+      return auditPromise.then(function(result){
+        var allIssues=result.criticalFails.map(function(c){return{severity:'medium',issue:c.label+(c.detail?' \u2014 '+c.detail:''),location:c.cat};}).concat(result.bugs);
+
+        // Step 4 — Fix
+        if(allIssues.length>0){
+          updatePS(pid,4,'active','Fixing '+allIssues.length+' issue'+(allIssues.length!==1?'s':'')+passLabel+'\u2026');
+          var fm='ISSUES TO FIX:\n'+allIssues.map(function(b,i){return(i+1)+'. ['+((b.severity||'medium').toUpperCase())+'] '+(b.issue||'')+' \u2014 '+(b.location||'');}).join('\n')+'\n\nORIGINAL CODE:\n'+currentCode;
+          return callClaude(SYS_FIX,fm).then(function(fixed){
+            currentCode=fixed;
+            totalFixed+=allIssues.length;
+            // Re-validate if we have passes remaining
+            if(passNum<MAX_FIX_PASSES){
+              updatePS(pid,4,'active','Re-validating fixes'+passLabel+'\u2026');
+              return runValidationPass();
+            }else{
+              // Final pass exhausted — run one last check to see if issues remain
+              var finalChecks=runLocalChecks(currentCode);
+              var finalFails=finalChecks.filter(function(c){return !c.passed&&['no-innerhtml-risk','fetch-calls','inline-styles'].indexOf(c.id)===-1;});
+              if(finalFails.length>0){
+                updatePS(pid,4,'warn',finalFails.length+' issue'+(finalFails.length!==1?'s':'')+' remain after '+MAX_FIX_PASSES+' passes');
+              }else{
+                updatePS(pid,4,'done','All issues resolved after '+passNum+' pass'+(passNum!==1?'es':'')+' \u2713');
+              }
+              v2=currentCode;
+              addMsg({role:'asst',type:'text',text:'Validation summary: '+totalFixed+' issue'+(totalFixed!==1?'s':'')+' addressed across '+passNum+' pass'+(passNum!==1?'es':'')+'.'+(finalFails.length>0?' '+finalFails.length+' minor issue'+(finalFails.length!==1?'s':'')+' may remain.':'')});
+            }
+          }).catch(function(){
+            v2=currentCode;
+            updatePS(pid,4,'error','Fix pass failed \u2014 using '+(passNum>1?'last good version':'original'));
+          });
+        }else{
+          v2=currentCode;
+          if(passNum===1){
+            updatePS(pid,4,'done','No fixes needed \u2713');
+          }else{
+            updatePS(pid,4,'done','All issues resolved after '+passNum+' pass'+(passNum!==1?'es':'')+' \u2713');
+            addMsg({role:'asst',type:'text',text:'Validation summary: '+totalFixed+' issue'+(totalFixed!==1?'s':'')+' addressed across '+passNum+' pass'+(passNum!==1?'es':'')+'. Code is clean \u2713'});
+          }
+          return Promise.resolve();
+        }
       });
-    }else{
-      v2=v1;
-      updatePS(pid,4,'done','No fixes needed \u2713');
-      return Promise.resolve();
     }
+
+    return runValidationPass();
   }).then(function(){
     // Step 5 — Backend
     if(ST.backendEnabled&&ST.sbUrl){
