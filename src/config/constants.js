@@ -39,6 +39,19 @@ export const THINK_ROUND_LABELS = [
   'What to Build', 'Who & How', 'Differentiators', 'Boundaries', 'Confirm & Lock',
 ]
 
+export const PIPE_ESTIMATES = [
+  '~2s',   // 0: Create Branch
+  '~20s',  // 1: Claude Build
+  '~1s',   // 2: Checks
+  '~8s',   // 3: GPT Audit
+  '~15s',  // 4: Claude Fix
+  '~10s',  // 5: Backend
+  '~3s',   // 6: Push
+  '~1s',   // 7: Preview
+  '',       // 8: Approval (user-dependent)
+  '~3s',   // 9: Merge
+]
+
 export const MAX_FIX_PASSES = 3
 
 export const KEY_STORE = {

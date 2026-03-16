@@ -97,3 +97,7 @@
 .schema-title{flex:1;font-size:11px;font-weight:700;color:rgba(255,255,255,.9)}
 .schema-copy{padding:4px 10px;border-radius:7px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cy);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--fh)}
 .schema-sql{padding:11px 13px;font-family:var(--fm);font-size:10px;color:var(--cy);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+
+/* Pipeline ETA badge */
+.ps-eta{font-size:9px;font-weight:600;color:rgba(255,255,255,.3);margin-left:6px;font-style:normal}
+.s-active .ps-eta{color:rgba(255,60,172,.6)}
