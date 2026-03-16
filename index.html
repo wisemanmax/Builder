@@ -10,12 +10,11 @@
 <meta name="theme-color" content="#080812">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 180 180%22%3E%3Crect width=%22180%22 height=%22180%22 rx=%2240%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%2290%22 y=%22120%22 font-size=%2290%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
-<!-- Content Security Policy: keys only ever leave the device to these three endpoints -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self' 'unsafe-inline' data: blob:;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-  connect-src
+  connect-src 'self'
     https://api.anthropic.com
     https://api.openai.com
     https://api.github.com
@@ -52,7 +51,7 @@
 html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overflow:hidden;-webkit-font-smoothing:antialiased}
 #app{height:100dvh;position:relative;overflow:hidden}
 
-/* ══ WALLPAPER ══ */
+/* WALLPAPER */
 #wp{position:fixed;inset:0;z-index:0;animation:wpShift 25s ease-in-out infinite alternate}
 @keyframes wpShift{
   0%{background:radial-gradient(ellipse 90% 60% at 15% 10%,rgba(255,60,172,.38),transparent 60%),radial-gradient(ellipse 60% 80% at 85% 85%,rgba(61,90,254,.42),transparent 55%),radial-gradient(ellipse 50% 50% at 50% 45%,rgba(180,79,255,.22),transparent 70%),linear-gradient(165deg,#06060F,#0C0C22,#080818)}
@@ -61,13 +60,11 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
   100%{background:radial-gradient(ellipse 80% 55% at 60% 80%,rgba(61,90,254,.35),transparent 60%),radial-gradient(ellipse 65% 75% at 25% 20%,rgba(170,255,0,.18),transparent 55%),radial-gradient(ellipse 55% 55% at 70% 50%,rgba(255,60,172,.28),transparent 70%),linear-gradient(165deg,#06060F,#0C0C22,#080818)}
 }
 
-/* ══ SCREENS ══ */
+/* SCREENS */
 .screen{position:absolute;inset:0;z-index:1;display:none;flex-direction:column}
 .screen.active{display:flex}
 
-/* ══════════════════════════════
-   ONBOARDING
-══════════════════════════════ */
+/* ONBOARDING */
 #s-onboard{align-items:center;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .ob-wrap{width:100%;max-width:430px;margin:0 auto;padding:56px 22px 48px;display:flex;flex-direction:column;gap:18px;flex-shrink:0}
 .ob-logo{text-align:center;padding-bottom:4px}
@@ -106,9 +103,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .gh-dot.err{background:var(--co)}
 .gh-status-txt .gm{font-size:12px;font-weight:600}.gh-status-txt .gs{font-size:10px;color:rgba(255,255,255,.4)}
 
-/* ══════════════════════════════
-   HOME SCREEN
-══════════════════════════════ */
+/* HOME SCREEN */
 #s-home{background:transparent}
 .statusbar{padding:14px 20px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;z-index:5}
 .sb-time{font-family:var(--fh);font-size:15px;font-weight:700;letter-spacing:.02em}
@@ -148,9 +143,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .di-lbl{font-size:10px;color:rgba(255,255,255,.65);font-weight:500}
 .di-build .di-img{background:var(--g1);box-shadow:0 8px 28px rgba(255,60,172,.5)}
 
-/* ══════════════════════════════
-   BUILDER SHEET (CHAT)
-══════════════════════════════ */
+/* BUILDER SHEET (CHAT) */
 #builder-sheet{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 #builder-sheet.open{display:flex;flex-direction:column;justify-content:flex-end}
 .bs{background:#111120;border-radius:26px 26px 0 0;max-height:96dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -24px 60px rgba(0,0,0,.65);transform:translateY(100%);transition:transform .36s cubic-bezier(.32,0,.15,1)}
@@ -188,7 +181,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .abub a{color:var(--cy);text-decoration:none}
 .sysbub{font-size:10px;color:rgba(255,255,255,.28);padding:2px 9px;background:rgba(255,255,255,.04);border-radius:100px}
 
-/* PIPELINE — 9 steps */
+/* PIPELINE */
 .pipe-card{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:4px 14px 14px 14px;overflow:hidden;min-width:260px}
 .ps{display:flex;align-items:center;gap:8px;padding:8px 12px;transition:background .3s}
 .ps:not(:last-child){border-bottom:1px solid rgba(255,255,255,.05)}
@@ -302,9 +295,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .td:nth-child(2){animation-delay:.18s}.td:nth-child(3){animation-delay:.36s}
 @keyframes tda{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px);background:var(--pk)}}
 
-/* ══════════════════════════════
-   PROJECT SHEET
-══════════════════════════════ */
+/* PROJECT SHEET */
 #project-sheet{position:fixed;inset:0;z-index:55;display:none;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);align-items:flex-end}
 #project-sheet.open{display:flex}
 .psheet{background:#111120;border-radius:26px 26px 0 0;width:100%;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -24px 60px rgba(0,0,0,.65);animation:shUp .34s cubic-bezier(.34,1.56,.64,1)}
@@ -340,9 +331,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .btn-full:hover{transform:translateY(-1px)}
 .btn-full:active{transform:scale(.97)}
 
-/* ══════════════════════════════
-   STUDIO (split preview + editor)
-══════════════════════════════ */
+/* STUDIO */
 #s-viewer{z-index:60;background:#080812;flex-direction:column}
 .vbar{display:flex;align-items:center;gap:9px;padding:50px 13px 10px;background:rgba(0,0,0,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
 .vback{width:34px;height:34px;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -361,8 +350,6 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 #studio-preview{flex:1;min-height:80px;position:relative;overflow:hidden}
 #studio-preview.fullscreen{flex:1}
 #viewer-iframe{width:100%;height:100%;border:none;display:block}
-
-/* Studio inline editor (bottom panel) */
 #studio-editor{height:220px;background:#111120;border-top:2px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0;transition:height .22s cubic-bezier(.4,0,.2,1)}
 #studio-editor.collapsed{height:44px;overflow:hidden}
 #studio-editor.fullscreen-mode{height:0;overflow:hidden;pointer-events:none}
@@ -390,14 +377,11 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .schema-copy{padding:4px 10px;border-radius:7px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cy);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--fh)}
 .schema-sql{padding:11px 13px;font-family:var(--fm);font-size:10px;color:var(--cy);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
 
-/* Self-update card in settings */
+/* Self-update card */
 .update-card{background:rgba(180,79,255,.06);border:1.5px solid rgba(180,79,255,.25);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 .update-info{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7}
 
-
-/* ══════════════════════════════
-   SETTINGS SHEET
-══════════════════════════════ */
+/* SETTINGS */
 #settings-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);backdrop-filter:blur(14px);display:none;align-items:flex-end}
 #settings-overlay.on{display:flex}
 .ssheet{background:#111120;border-radius:24px 24px 0 0;width:100%;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden;animation:shUp .34s cubic-bezier(.34,1.56,.64,1)}
@@ -415,9 +399,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .dbtn:hover{background:rgba(255,82,82,.18)}
 .ssfooter{padding:10px 16px 24px;text-align:center;font-size:10px;color:rgba(255,255,255,.2)}
 
-/* ══════════════════════════════
-   EMOJI + CONTEXT MENU
-══════════════════════════════ */
+/* EMOJI + CONTEXT MENU */
 #emoji-overlay{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center}
 #emoji-overlay.on{display:flex}
 .ebox{background:#1A1A2E;border-radius:var(--r);padding:15px;width:296px;border:1.5px solid rgba(255,255,255,.1);box-shadow:0 20px 60px rgba(0,0,0,.65);animation:popIn .28s cubic-bezier(.34,1.56,.64,1)}
@@ -450,26 +432,24 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 <div id="app">
 <div id="wp"></div>
 
-<!-- ══ ONBOARDING ══ -->
+<!-- ONBOARDING -->
 <div class="screen" id="s-onboard">
 <div class="ob-wrap">
   <div class="ob-logo">
-    <div class="lmark">⚡</div>
+    <div class="lmark">&#x26A1;</div>
     <h1>The Builder</h1>
-    <p>Build · Push · Deploy · Repeat</p>
+    <p>Build &middot; Push &middot; Deploy &middot; Repeat</p>
   </div>
-
   <div style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(0,230,118,.07);border:1.5px solid rgba(0,230,118,.2);border-radius:var(--rs)">
-    <span style="font-size:16px">🔒</span>
+    <span style="font-size:16px">&#x1F512;</span>
     <span style="font-size:11px;color:rgba(255,255,255,.65);line-height:1.6">All API keys are stored <strong style="color:#fff">on this device only</strong> in localStorage. They are never uploaded, synced, logged, or included in any file pushed to GitHub.</span>
   </div>
-
   <div class="section-card">
-    <div class="sec-title">🤖 AI Keys</div>
+    <div class="sec-title">&#x1F916; AI Keys</div>
     <div class="fl">
       <label>Anthropic API Key <span style="color:var(--co)">*</span></label>
       <input class="fi fi-mono" type="password" id="ob-anth" placeholder="sk-ant-..." autocomplete="off">
-      <span class="fhint">Required — sent only to <span style="color:var(--cy)">api.anthropic.com</span>, stored locally on this device</span>
+      <span class="fhint">Required &mdash; sent only to <span style="color:var(--cy)">api.anthropic.com</span>, stored locally on this device</span>
     </div>
     <div class="fl">
       <label>OpenAI API Key <span style="color:rgba(255,255,255,.28)">(recommended)</span></label>
@@ -480,13 +460,12 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
       </div>
     </div>
   </div>
-
   <div class="section-card">
-    <div class="sec-title">🐙 GitHub — Push to Repo</div>
+    <div class="sec-title">&#x1F419; GitHub &mdash; Push to Repo</div>
     <div class="fl">
       <label>Personal Access Token <span style="color:var(--co)">*</span></label>
       <input class="fi fi-mono" type="password" id="ob-gh-token" placeholder="ghp_..." autocomplete="off">
-      <span class="fhint">Needs <strong style="color:rgba(255,255,255,.6)">repo</strong> scope. Sent only to <span style="color:var(--cy)">api.github.com</span>. <a href="https://github.com/settings/tokens/new" target="_blank">Create token ↗</a></span>
+      <span class="fhint">Needs <strong style="color:rgba(255,255,255,.6)">repo</strong> scope. Sent only to <span style="color:var(--cy)">api.github.com</span>. <a href="https://github.com/settings/tokens/new" target="_blank">Create token &#x2197;</a></span>
     </div>
     <div class="fl">
       <label>GitHub Username</label>
@@ -495,17 +474,16 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
     <div class="fl">
       <label>Repository Name</label>
       <input class="fi fi-mono" type="text" id="ob-gh-repo" placeholder="my-builder-apps" autocomplete="off">
-      <span class="fhint">Must exist &amp; have GitHub Pages enabled (Settings → Pages → main branch)</span>
+      <span class="fhint">Must exist &amp; have GitHub Pages enabled (Settings &rarr; Pages &rarr; main branch)</span>
     </div>
     <div class="gh-status" id="gh-status">
       <div class="gh-dot" id="gh-dot"></div>
       <div class="gh-status-txt"><div class="gm" id="gh-st-m">GitHub: Not connected</div><div class="gs" id="gh-st-s">Enter your token, username &amp; repo</div></div>
     </div>
   </div>
-
   <div class="section-card">
     <div class="toggle-row" id="ob-sb-tog">
-      <div class="tl"><div class="tm">Supabase Sync</div><div class="ts">Optional — cross-device backup</div></div>
+      <div class="tl"><div class="tm">Supabase Sync</div><div class="ts">Optional &mdash; cross-device backup</div></div>
       <div class="pill" id="ob-sb-pill"></div>
     </div>
     <div class="exp" id="ob-sb-exp">
@@ -513,143 +491,126 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
       <div class="fl"><label>Supabase Anon Key</label><input class="fi fi-mono" type="password" id="ob-sb-anon" placeholder="eyJ..."></div>
     </div>
   </div>
-
-  <button class="btn-p" id="ob-submit">Launch The Builder →</button>
+  <button class="btn-p" id="ob-submit">Launch The Builder &rarr;</button>
 </div>
 </div>
 
-<!-- ══ HOME SCREEN ══ -->
+<!-- HOME SCREEN -->
 <div class="screen" id="s-home">
   <div class="statusbar">
     <div class="sb-time" id="clock">12:00</div>
-    <div class="sb-icons">⚡🔋</div>
+    <div class="sb-icons">&#x26A1;&#x1F50B;</div>
   </div>
   <div class="home-hdr">
     <div class="home-title">The Builder</div>
-    <div class="home-sub" id="home-sub">Tap to open · Hold for options · ✦ to build</div>
+    <div class="home-sub" id="home-sub">Tap to open &middot; Hold for options &middot; &#x2726; to build</div>
   </div>
   <div class="app-grid" id="app-grid"></div>
   <div class="dock">
     <div class="dock-inner">
       <div class="di di-build" onclick="openBuilder()">
-        <div class="di-img">✦</div>
+        <div class="di-img">&#x2726;</div>
         <div class="di-lbl">Build</div>
       </div>
       <div class="di" onclick="openSettings()">
-        <div class="di-img" style="background:rgba(255,255,255,.12)">⚙️</div>
+        <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
         <div class="di-lbl">Settings</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ BUILDER SHEET ══ -->
+<!-- BUILDER SHEET -->
 <div id="builder-sheet">
   <div class="bs" id="bs-inner">
     <div class="bs-handle" id="bs-handle"></div>
     <div class="bs-top">
       <div class="bs-info">
         <div class="bs-title" id="bs-title">Build an App</div>
-        <div class="bs-sub" id="bs-sub">Branch → Build → Checks → Audit → Fix → Preview → Approve → Merge</div>
+        <div class="bs-sub" id="bs-sub">Branch &rarr; Build &rarr; Checks &rarr; Audit &rarr; Fix &rarr; Preview &rarr; Approve &rarr; Merge</div>
       </div>
       <div class="bs-actions">
-        <button class="bs-btn" id="bs-proj-btn" title="View project" style="display:none">📋</button>
-        <button class="bs-btn bs-close" id="bs-close">✕</button>
+        <button class="bs-btn" id="bs-proj-btn" title="View project" style="display:none">&#x1F4CB;</button>
+        <button class="bs-btn bs-close" id="bs-close">&#x2715;</button>
       </div>
     </div>
-    <div id="chat-scroll">
-      <div class="chat-welcome" id="chat-welcome">
-        <div class="cw-icon">⚡</div>
-        <div class="cw-title">What should we build?</div>
-        <div class="cw-sub">Describe any app — it'll be built, audited, fixed, pushed to GitHub, and dropped on your home screen.</div>
-        <div class="chips">
-          <div class="chip" onclick="chipSend('A habit tracker with daily streaks, emoji reactions per habit, and a monthly calendar heatmap')">🔥 Habit tracker</div>
-          <div class="chip" onclick="chipSend('A pomodoro timer with customizable work/break intervals, session history, and daily stats')">⏱ Pomodoro</div>
-          <div class="chip" onclick="chipSend('A personal budget tracker with expense categories, monthly limits, and spending charts')">💰 Budget tracker</div>
-          <div class="chip" onclick="chipSend('A daily mood journal with emoji ratings, notes, and a scrollable calendar view')">🌙 Mood journal</div>
-          <div class="chip" onclick="chipSend('A workout log with exercises, sets, reps, weights and a weekly progress chart')">💪 Workout log</div>
-          <div class="chip" onclick="chipSend('A flashcard study app with spaced repetition algorithm and deck progress tracking')">🧠 Flashcards</div>
-        </div>
-      </div>
-    </div>
+    <div id="chat-scroll"></div>
     <div class="bs-input">
       <div class="ibox">
         <textarea id="chat-input" rows="1" placeholder="Describe an app to build, or ask to update the current one..."></textarea>
         <div class="iacts">
-          <button class="ia-btn" id="emoji-pick-btn" title="Pick icon">🎯</button>
-          <button id="send-btn">↑</button>
+          <button class="ia-btn" id="emoji-pick-btn" title="Pick icon">&#x1F3AF;</button>
+          <button id="send-btn">&uarr;</button>
         </div>
       </div>
-      <div class="ihint" id="ihint">🌿 Branch → 🔨 Build → 📋 Checks → 🔍 Audit → 🛠 Fix → 👁 Preview → ✅ Approve → 🔀 Merge</div>
+      <div class="ihint" id="ihint">&#x1F33F; Branch &rarr; &#x1F528; Build &rarr; &#x1F4CB; Checks &rarr; &#x1F50D; Audit &rarr; &#x1F6E0; Fix &rarr; &#x1F441; Preview &rarr; &#x2705; Approve &rarr; &#x1F500; Merge</div>
     </div>
   </div>
 </div>
 
-<!-- ══ PROJECT SHEET ══ -->
+<!-- PROJECT SHEET -->
 <div id="project-sheet">
   <div class="psheet">
     <div class="psh-handle"></div>
     <div class="psh-top">
       <div class="psh-app-info">
-        <div class="psh-icon" id="psh-icon">🎯</div>
+        <div class="psh-icon" id="psh-icon">&#x1F3AF;</div>
         <div>
           <div class="psh-name" id="psh-name">App Name</div>
           <div class="psh-url-line" id="psh-url-line" onclick="copyUrl()">...</div>
         </div>
       </div>
       <div class="psh-top-btns">
-        <button class="psh-btn" onclick="openCurrentInViewer()">🚀 Open</button>
-        <button class="psh-btn primary" onclick="editCurrentApp()">✏️ Edit</button>
-        <button class="psh-btn" onclick="closeProject()">✕</button>
+        <button class="psh-btn" onclick="openCurrentInViewer()">&#x1F680; Open</button>
+        <button class="psh-btn primary" onclick="editCurrentApp()">&#x270F;&#xFE0F; Edit</button>
+        <button class="psh-btn" onclick="closeProject()">&#x2715;</button>
       </div>
     </div>
     <div class="psh-body">
       <div class="psec">
         <div class="psec-title">Live URL</div>
         <div class="url-box">
-          <div class="url-text" id="proj-url-display">—</div>
+          <div class="url-text" id="proj-url-display">&mdash;</div>
           <button class="url-copy" onclick="copyUrl()">Copy</button>
         </div>
       </div>
       <div class="psec">
         <div class="psec-title">Details</div>
-        <div class="info-row"><span class="ir-label">Status</span><span class="ir-value" id="proj-status">—</span></div>
-        <div class="info-row"><span class="ir-label">GitHub Path</span><span class="ir-value" id="proj-path">—</span></div>
-        <div class="info-row"><span class="ir-label">Created</span><span class="ir-value" id="proj-created">—</span></div>
-        <div class="info-row"><span class="ir-label">Last Updated</span><span class="ir-value" id="proj-updated">—</span></div>
-        <div class="info-row"><span class="ir-label">Build Count</span><span class="ir-value" id="proj-builds">—</span></div>
+        <div class="info-row"><span class="ir-label">Status</span><span class="ir-value" id="proj-status">&mdash;</span></div>
+        <div class="info-row"><span class="ir-label">GitHub Path</span><span class="ir-value" id="proj-path">&mdash;</span></div>
+        <div class="info-row"><span class="ir-label">Created</span><span class="ir-value" id="proj-created">&mdash;</span></div>
+        <div class="info-row"><span class="ir-label">Last Updated</span><span class="ir-value" id="proj-updated">&mdash;</span></div>
+        <div class="info-row"><span class="ir-label">Build Count</span><span class="ir-value" id="proj-builds">&mdash;</span></div>
       </div>
       <div class="psec">
         <div class="psec-title">Prompt History</div>
         <div class="prompt-history" id="prompt-history"></div>
       </div>
       <div style="margin-top:8px">
-        <button class="btn-full" onclick="editCurrentApp()">✏️ Update This App</button>
+        <button class="btn-full" onclick="editCurrentApp()">&#x270F;&#xFE0F; Update This App</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ STUDIO (split preview + inline editor) ══ -->
+<!-- STUDIO -->
 <div class="screen" id="s-viewer">
   <div class="vbar">
-    <button class="vback" id="vback">←</button>
+    <button class="vback" id="vback">&larr;</button>
     <div class="vbar-center">
       <div class="vbar-name" id="vbar-name">App</div>
-      <div class="vbar-url" id="vbar-url" onclick="copyViewerUrl()">—</div>
+      <div class="vbar-url" id="vbar-url" onclick="copyViewerUrl()">&mdash;</div>
     </div>
     <div class="vbar-btns" id="vbar-btns">
-      <button class="vbar-btn" id="vbar-proj">📋</button>
-      <button class="vbar-btn" id="vbar-fs-toggle" title="Full screen preview">⛶</button>
+      <button class="vbar-btn" id="vbar-proj">&#x1F4CB;</button>
+      <button class="vbar-btn" id="vbar-fs-toggle" title="Full screen preview">&#x26F6;</button>
     </div>
   </div>
-  <!-- Approval bar — pipeline review mode only -->
   <div id="vbar-approve-row" style="display:none;align-items:center;gap:8px;padding:10px 14px;background:rgba(61,90,254,.1);border-bottom:1.5px solid rgba(61,90,254,.25);flex-shrink:0">
     <span style="flex:1;font-size:11px;color:rgba(255,255,255,.6)">Review the app, then approve or request changes</span>
-    <button id="vbar-req-changes" style="padding:7px 13px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">✏️ Changes</button>
-    <button id="vbar-approve" style="padding:7px 14px;border-radius:9px;background:linear-gradient(135deg,#FF3CAC,#784BA0);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(255,60,172,.35)">🔀 Approve & Merge</button>
+    <button id="vbar-req-changes" style="padding:7px 13px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">&#x270F;&#xFE0F; Changes</button>
+    <button id="vbar-approve" style="padding:7px 14px;border-radius:9px;background:linear-gradient(135deg,#FF3CAC,#784BA0);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(255,60,172,.35)">&#x1F500; Approve &amp; Merge</button>
   </div>
-  <!-- Studio split body -->
   <div id="studio-body">
     <div id="studio-preview">
       <iframe id="viewer-iframe" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock allow-same-origin"></iframe>
@@ -657,28 +618,28 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
     <div id="studio-editor">
       <div class="se-drag" id="se-drag"></div>
       <div class="se-header" id="se-header-toggle">
-        <span class="se-header-title">✏️ Edit App</span>
+        <span class="se-header-title">&#x270F;&#xFE0F; Edit App</span>
         <div class="se-header-btns">
-          <button class="se-hbtn" id="se-proj-btn">📋 Project</button>
-          <button class="se-hbtn" id="se-liveurl-btn" style="display:none">🌐 Live URL</button>
-          <button class="se-hbtn" id="se-collapse-btn">▼ Hide</button>
+          <button class="se-hbtn" id="se-proj-btn">&#x1F4CB; Project</button>
+          <button class="se-hbtn" id="se-liveurl-btn" style="display:none">&#x1F310; Live URL</button>
+          <button class="se-hbtn" id="se-collapse-btn">&#x25BC; Hide</button>
         </div>
       </div>
       <div class="se-input-row">
-        <textarea id="se-textarea" rows="1" placeholder="Describe a change — I'll rebuild with your update…"></textarea>
-        <button class="se-send" id="se-send">↑</button>
+        <textarea id="se-textarea" rows="1" placeholder="Describe a change &mdash; I'll rebuild with your update..."></textarea>
+        <button class="se-send" id="se-send">&uarr;</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ SETTINGS ══ -->
+<!-- SETTINGS -->
 <div id="settings-overlay">
   <div class="ssheet">
     <div class="ssh"></div>
     <div class="sshead">
-      <span class="sshead-title">⚙️ Settings</span>
-      <button class="ssclose" id="ssclose">✕</button>
+      <span class="sshead-title">&#x2699;&#xFE0F; Settings</span>
+      <button class="ssclose" id="ssclose">&#x2715;</button>
     </div>
     <div class="ssbody">
       <span class="ssec">AI Keys</span>
@@ -697,37 +658,34 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
       <span class="ssec">Pipeline</span>
       <div class="sscard">
         <div class="ssrow"><div class="ssrl"><div class="sl">GPT-4o Audit Step</div><div class="ss">Scan for bugs between builds</div></div><div class="pill" id="s-audit-pill"></div></div>
-        <div class="ssrow"><div class="ssrl"><div class="sl">🗄️ Supabase Backend Step</div><div class="ss">Auto-generate tables + RLS for each app</div></div><div class="pill" id="s-backend-pill"></div></div>
+        <div class="ssrow"><div class="ssrl"><div class="sl">&#x1F5C4;&#xFE0F; Supabase Backend Step</div><div class="ss">Auto-generate tables + RLS for each app</div></div><div class="pill" id="s-backend-pill"></div></div>
         <div class="ssrow"><div class="ssrl"><div class="sl">Supabase Cloud Sync</div><div class="ss">Cross-device backup of your apps list</div></div><div class="pill" id="s-sync-pill"></div></div>
         <div id="s-sb-exp" style="display:none;flex-direction:column;gap:9px">
           <input class="fi fi-mono" type="text" id="s-sb-url" placeholder="Supabase URL">
           <input class="fi fi-mono" type="password" id="s-sb-anon" placeholder="Supabase Anon Key">
-          <button class="btn-p" id="s-save-sb" style="background:var(--g2);box-shadow:none;font-size:12px;padding:11px">💾 Save Supabase Credentials</button>
-          <button class="btn-p" id="s-pull" style="background:rgba(255,255,255,.08);box-shadow:none;font-size:12px;padding:11px;border:1.5px solid rgba(255,255,255,.12)">☁️ Pull from Cloud</button>
+          <button class="btn-p" id="s-save-sb" style="background:var(--g2);box-shadow:none;font-size:12px;padding:11px">&#x1F4BE; Save Supabase Credentials</button>
+          <button class="btn-p" id="s-pull" style="background:rgba(255,255,255,.08);box-shadow:none;font-size:12px;padding:11px;border:1.5px solid rgba(255,255,255,.12)">&#x2601;&#xFE0F; Pull from Cloud</button>
         </div>
       </div>
       <span class="ssec">Key Safety</span>
-      <div class="sscard" id="key-safety-card">
-        <!-- populated by keyStatusHTML() on open -->
-      </div>
-
+      <div class="sscard" id="key-safety-card"></div>
       <span class="ssec">Danger Zone</span>
       <div class="sscard">
-        <button class="dbtn" id="s-clear">🗑️ Delete All Apps Locally</button>
-        <button class="dbtn" id="s-signout">🚪 Sign Out &amp; Clear All Keys</button>
+        <button class="dbtn" id="s-clear">&#x1F5D1;&#xFE0F; Delete All Apps Locally</button>
+        <button class="dbtn" id="s-signout">&#x1F6AA; Sign Out &amp; Clear All Keys</button>
       </div>
-      <span class="ssec">🔧 Update The Builder</span>
+      <span class="ssec">&#x1F527; Update The Builder</span>
       <div class="update-card">
-        <div class="update-info">Describe an improvement and Claude will update The Builder itself — rewriting this app's code, pushing to GitHub, and reloading.</div>
-        <div class="fl"><label>Describe the improvement</label><textarea class="fi" id="s-self-update-input" rows="3" style="resize:vertical;min-height:72px" placeholder="e.g. Add a dark/light theme toggle to the home screen…"></textarea></div>
-        <button class="btn-p" id="s-self-update-btn" style="background:var(--g6);box-shadow:0 6px 20px rgba(180,79,255,.35)">🔧 Update The Builder</button>
+        <div class="update-info">Describe an improvement and Claude will update The Builder itself &mdash; rewriting this app's code, pushing to GitHub, and reloading.</div>
+        <div class="fl"><label>Describe the improvement</label><textarea class="fi" id="s-self-update-input" rows="3" style="resize:vertical;min-height:72px" placeholder="e.g. Add a dark/light theme toggle to the home screen..."></textarea></div>
+        <button class="btn-p" id="s-self-update-btn" style="background:var(--g6);box-shadow:0 6px 20px rgba(180,79,255,.35)">&#x1F527; Update The Builder</button>
       </div>
     </div>
-    <div class="ssfooter">The Builder · Claude + GPT-4o + GitHub Pages · PWA</div>
+    <div class="ssfooter">The Builder &middot; Claude + GPT-4o + GitHub Pages &middot; PWA</div>
   </div>
 </div>
 
-<!-- ══ EMOJI PICKER ══ -->
+<!-- EMOJI PICKER -->
 <div id="emoji-overlay">
   <div class="ebox">
     <div class="ebox-title">Pick an Icon</div>
@@ -735,35 +693,38 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
   </div>
 </div>
 
-<!-- ══ CONTEXT MENU ══ -->
+<!-- CONTEXT MENU -->
 <div id="ctx-menu">
-  <div class="cmi" id="ctx-open">🚀 Open App</div>
-  <div class="cmi" id="ctx-proj">📋 Project Details</div>
-  <div class="cmi" id="ctx-edit">✏️ Edit / Update</div>
+  <div class="cmi" id="ctx-open">&#x1F680; Open App</div>
+  <div class="cmi" id="ctx-proj">&#x1F4CB; Project Details</div>
+  <div class="cmi" id="ctx-edit">&#x270F;&#xFE0F; Edit / Update</div>
   <div class="cmsep"></div>
-  <div class="cmi danger" id="ctx-del">🗑️ Delete</div>
+  <div class="cmi danger" id="ctx-del">&#x1F5D1;&#xFE0F; Delete</div>
 </div>
 
-<!-- ══ INSTALL BANNER ══ -->
+<!-- INSTALL BANNER -->
 <div id="install-banner">
-  <div class="ib-icon">⚡</div>
+  <div class="ib-icon">&#x26A1;</div>
   <div class="ib-info"><div class="ib-title">Install The Builder</div><div class="ib-sub">Add to home screen for full PWA experience</div></div>
   <button class="ib-add" id="ib-add">Add</button>
-  <button class="ib-x" id="ib-x">✕</button>
+  <button class="ib-x" id="ib-x">&#x2715;</button>
 </div>
 
 <div class="toast" id="toast"></div>
 </div>
 
 <script>
-/* ════════ GLOBAL ERROR GUARD — prevents Safari blob errors from crashing app ════════ */
+/* ======== GLOBAL ERROR GUARD ======== */
 window.onerror=function(m,s){if(String(m).includes('Script error')||String(s||'').includes('blob:'))return true;};
+window.addEventListener('unhandledrejection',function(e){
+  console.warn('Unhandled rejection:',e.reason);
+  e.preventDefault();
+});
 
-/* ════════ PWA SETUP ════════ */
+/* ======== PWA SETUP ======== */
 var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 var isSafari=!window.chrome&&/safari/i.test(navigator.userAgent);
 
-// Service Worker — register from real file (blob: URLs are rejected by browsers)
 if('serviceWorker' in navigator){
   try{
     navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(function(){});
@@ -776,595 +737,427 @@ window.addEventListener('beforeinstallprompt',function(e){
   setTimeout(function(){try{if(!localStorage.getItem('pwa_dis')){var b=document.getElementById('install-banner');if(b)b.classList.add('on');}}catch(x){}},800);
 });
 
-/* ════════ CONSTANTS ════════ */
-const GRADS=['linear-gradient(135deg,#3D5AFE,#00E5FF)','linear-gradient(135deg,#FF3CAC,#784BA0)','linear-gradient(135deg,#FF5252,#FFD600)','linear-gradient(135deg,#AAFF00,#00C2FF)','linear-gradient(135deg,#FF9F43,#FF3CAC)','linear-gradient(135deg,#B44FFF,#3D5AFE)'];
-const EMOJIS=['🎯','📊','💰','🏋️','📝','⏰','🎵','🎨','📚','🌱','🚀','💡','🔥','⭐','🎮','🍎','🧠','💪','🌙','🌞','📅','🎭','🧪','🔑','💎','🏆','🎲','🌍','🎤','🎸','🐉','🦋','🌺','🍕','☕','🎪','🔮','🧩','🪄','💻','📱','🔧','🏠','🚗','✈️','🛸','🌈','🦁','🐋','🎃','👑','🍭','🌊','⚡','🎁','🧲','🪐','🎬','🖌️','🧬'];
+/* ======== CONSTANTS ======== */
+var GRADS=['linear-gradient(135deg,#3D5AFE,#00E5FF)','linear-gradient(135deg,#FF3CAC,#784BA0)','linear-gradient(135deg,#FF5252,#FFD600)','linear-gradient(135deg,#AAFF00,#00C2FF)','linear-gradient(135deg,#FF9F43,#FF3CAC)','linear-gradient(135deg,#B44FFF,#3D5AFE)'];
+var EMOJIS=['🎯','📊','💰','🏋️','📝','⏰','🎵','🎨','📚','🌱','🚀','💡','🔥','⭐','🎮','🍎','🧠','💪','🌙','🌞','📅','🎭','🧪','🔑','💎','🏆','🎲','🌍','🎤','🎸','🐉','🦋','🌺','🍕','☕','🎪','🔮','🧩','🪄','💻','📱','🔧','🏠','🚗','✈️','🛸','🌈','🦁','🐋','🎃','👑','🍭','🌊','⚡','🎁','🧲','🪐','🎬','🖌️','🧬'];
 
-const SYS_BUILD=`You are an elite web developer. Generate a complete, polished, fully functional single-file web app.
-STRICT RULES:
-1. Return ONLY raw HTML — no markdown, no code fences, no explanation
-2. All CSS inside <style>, all JS inside <script>
-3. ZERO external dependencies — no CDN scripts/links. You may use @import in CSS for Google Fonts only.
-4. Must work as a standalone HTML file
-5. Begin response with <!DOCTYPE html> and nothing else
-6. Use localStorage for all data persistence — the app runs in an iframe with allow-scripts, so localStorage works perfectly
-7. Do NOT use: alert(), confirm(), prompt(), window.open(), location.href changes, or cookies — these are blocked in the sandbox
-8. DO use: localStorage, fetch() to public APIs (no auth needed), CSS animations, inline SVG, canvas
-DESIGN: Dark theme by default. Google Fonts via @import. CSS variables. Smooth animations. Realistic sample data. Mobile-responsive. Looks like a shipped product.`;
-const SYS_FIX=`You are an expert web developer doing a targeted bug fix pass. Receive HTML code + bug list. Fix every listed issue. Do NOT change anything not broken. Keep design identical. Return ONLY fixed raw HTML starting with <!DOCTYPE html>.`;
-const SYS_AUDIT=`You are a senior code reviewer auditing a single-file HTML app. Return a JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]. Only report REAL bugs. If clean return []. Return ONLY the raw JSON array.`;
-const SYS_BACKEND=`You are a backend architect. Given a single-file HTML app, analyze what persistent data it manages and generate a Supabase (PostgreSQL) backend for it.
-Return ONLY a JSON object (no markdown, no explanation):
-{
-  "tables": [{"name":"table_name","sql":"CREATE TABLE IF NOT EXISTS ... (with RLS enabled);","description":"what it stores"}],
-  "rls": ["ALTER TABLE x ENABLE ROW LEVEL SECURITY;", "CREATE POLICY ..."],
-  "injectedHTML": "the COMPLETE original HTML with Supabase JS client injected — add <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script> in <head>, replace hardcoded data with Supabase CRUD calls, add SUPABASE_URL and SUPABASE_ANON_KEY as const at top of script"
-}
-Use the placeholder values 'YOUR_SUPABASE_URL' and 'YOUR_SUPABASE_ANON_KEY' in the injected code.`;
-const SYS_SELFUPDATE=`You are improving a PWA app called "The Builder". You will receive the complete current HTML source and a description of the improvement to make.
-Return ONLY the complete improved HTML starting with <!DOCTYPE html> — no markdown, no explanation, no code fences.
-Rules: Keep all existing functionality. Apply ONLY the requested improvement. Do not rewrite things that are not related to the request.`;
+var SYS_BUILD='You are an elite web developer. Generate a complete, polished, fully functional single-file web app.\nSTRICT RULES:\n1. Return ONLY raw HTML — no markdown, no code fences, no explanation\n2. All CSS inside <style>, all JS inside <script>\n3. ZERO external dependencies — no CDN scripts/links. You may use @import in CSS for Google Fonts only.\n4. Must work as a standalone HTML file\n5. Begin response with <!DOCTYPE html> and nothing else\n6. Use localStorage for all data persistence — the app runs in an iframe with allow-scripts, so localStorage works perfectly\n7. Do NOT use: alert(), confirm(), prompt(), window.open(), location.href changes, or cookies — these are blocked in the sandbox\n8. DO use: localStorage, fetch() to public APIs (no auth needed), CSS animations, inline SVG, canvas\nDESIGN: Dark theme by default. Google Fonts via @import. CSS variables. Smooth animations. Realistic sample data. Mobile-responsive. Looks like a shipped product.';
+var SYS_FIX='You are an expert web developer doing a targeted bug fix pass. Receive HTML code + bug list. Fix every listed issue. Do NOT change anything not broken. Keep design identical. Return ONLY fixed raw HTML starting with <!DOCTYPE html>.';
+var SYS_AUDIT='You are a senior code reviewer auditing a single-file HTML app. Return a JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]. Only report REAL bugs. If clean return []. Return ONLY the raw JSON array.';
+var SYS_BACKEND='You are a backend architect. Given a single-file HTML app, analyze what persistent data it manages and generate a Supabase (PostgreSQL) backend for it.\nReturn ONLY a JSON object (no markdown, no explanation):\n{\n  "tables": [{"name":"table_name","sql":"CREATE TABLE IF NOT EXISTS ... (with RLS enabled);","description":"what it stores"}],\n  "rls": ["ALTER TABLE x ENABLE ROW LEVEL SECURITY;", "CREATE POLICY ..."],\n  "injectedHTML": "the COMPLETE original HTML with Supabase JS client injected"\n}\nUse the placeholder values \'YOUR_SUPABASE_URL\' and \'YOUR_SUPABASE_ANON_KEY\' in the injected code.';
+var SYS_SELFUPDATE='You are improving a PWA app called "The Builder". You will receive the complete current HTML source and a description of the improvement to make.\nReturn ONLY the complete improved HTML starting with <!DOCTYPE html> — no markdown, no explanation, no code fences.\nRules: Keep all existing functionality. Apply ONLY the requested improvement. Do not rewrite things that are not related to the request.';
 
-/* ════════ STATE ════════ */
-const ST={
+/* ======== STATE ======== */
+var ST={
   apps:[],
   key:'',gptKey:'',
   ghToken:'',ghUser:'',ghRepo:'',
   sbUrl:'',sbAnon:'',sbEnabled:false,auditEnabled:true,
-  backendEnabled:false, // add Supabase backend step to each build
+  backendEnabled:false,
   activeAppId:null,pendingIcon:'🎯',pendingColor:0,
   viewingApp:null,projectAppId:null,_building:false,
-  _studioFullscreen:false, // true = preview takes full height
+  _studioFullscreen:false,
 };
 
-/* ════════ UTILS ════════ */
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const uid=()=>'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-// Safe gradient lookup — clamps bad/missing ci values instead of returning undefined
-const grad=ci=>GRADS[((ci??0)%GRADS.length+GRADS.length)%GRADS.length]||GRADS[0];
+/* ======== UTILS ======== */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function uid(){return 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function grad(ci){return GRADS[((ci||0)%GRADS.length+GRADS.length)%GRADS.length]||GRADS[0];}
 
-function toast(msg,ms=2900){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),ms);}
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));if(id)$('s-'+id)?.classList.add('active');}
+function toast(msg,ms){
+  ms=ms||2900;
+  var el=$('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t=setTimeout(function(){el.classList.remove('show');},ms);
+}
+
+function showScreen(id){
+  var screens=document.querySelectorAll('.screen');
+  for(var i=0;i<screens.length;i++)screens[i].classList.remove('active');
+  if(id){var s=$('s-'+id);if(s)s.classList.add('active');}
+}
+
 function persist(){
   try{
     localStorage.setItem('bldr_apps',JSON.stringify(ST.apps));
   }catch(e){
-    // QuotaExceededError — strip version history to reclaim space, retry once
-    if(e.name==='QuotaExceededError'||String(e.name).includes('QuotaExceeded')||e.code===22){
+    if(e.name==='QuotaExceededError'||String(e.name).indexOf('QuotaExceeded')>=0||e.code===22){
       try{
-        const slim=ST.apps.map(a=>({...a,versions:[]}));
+        var slim=ST.apps.map(function(a){return Object.assign({},a,{versions:[]});});
         localStorage.setItem('bldr_apps',JSON.stringify(slim));
-        toast('Storage nearly full — version history cleared to save space',4000);
+        toast('Storage nearly full — version history cleared',4000);
       }catch(e2){
-        toast('⚠️ Storage full — could not save. Delete old apps to free space.',6000);
+        toast('Storage full — delete old apps to free space.',6000);
       }
     }
   }
 }
-/* ════════ KEY SAFETY ════════
-   Keys live ONLY in localStorage under these exact keys.
-   They are NEVER included in:
-     - ST.apps (the persisted app array)
-     - Supabase payloads
-     - GitHub file contents / commit messages
-     - Error messages or toast text
-     - Any console output
-   They are ONLY sent as Authorization/x-api-key headers
-   directly to api.anthropic.com, api.openai.com, api.github.com,
-   and *.supabase.co — enforced by the Content-Security-Policy above.
-════════════════════════════════════════ */
 
-const KEY_STORE={
-  ANTH:'bldr_key',
-  GPT: 'bldr_gptKey',
-  GH_TOKEN:'bldr_ghToken',
-  GH_USER:'bldr_ghUser',
-  GH_REPO:'bldr_ghRepo',
-  SB_URL:'bldr_sbUrl',
-  SB_ANON:'bldr_sbAnon',
-  SB_ON:  'bldr_sbOn',
-  AUDIT:  'bldr_audit',
-  BACKEND:'bldr_backend',
+/* ======== KEY STORE ======== */
+var KEY_STORE={
+  ANTH:'bldr_key',GPT:'bldr_gptKey',
+  GH_TOKEN:'bldr_ghToken',GH_USER:'bldr_ghUser',GH_REPO:'bldr_ghRepo',
+  SB_URL:'bldr_sbUrl',SB_ANON:'bldr_sbAnon',SB_ON:'bldr_sbOn',
+  AUDIT:'bldr_audit',BACKEND:'bldr_backend',
 };
 
-// Returns a redacted version of a key for display (e.g. "sk-ant-••••••••1A2B")
 function redactKey(k){
   if(!k||k.length<8)return k?'••••••••':'(not set)';
   return k.slice(0,6)+'••••••••'+k.slice(-4);
 }
 
-// Scrub any key value from a string before it could appear in an error/toast
 function scrubKeys(str){
-  let s=String(str);
-  [ST.key,ST.gptKey,ST.ghToken,ST.sbAnon].forEach(k=>{
+  var s=String(str);
+  [ST.key,ST.gptKey,ST.ghToken,ST.sbAnon].forEach(function(k){
     if(k&&k.length>8)s=s.split(k).join('[REDACTED]');
   });
   return s;
 }
 
 function hydrate(){
-  try{ST.apps=JSON.parse(localStorage.getItem('bldr_apps')||'[]');}catch{ST.apps=[];}
-  // Load keys from localStorage into memory — this is the ONLY place they ever come from
-  ST.key    =localStorage.getItem(KEY_STORE.ANTH)||'';
-  ST.gptKey =localStorage.getItem(KEY_STORE.GPT)||'';
+  try{ST.apps=JSON.parse(localStorage.getItem('bldr_apps')||'[]');}catch(e){ST.apps=[];}
+  ST.key=localStorage.getItem(KEY_STORE.ANTH)||'';
+  ST.gptKey=localStorage.getItem(KEY_STORE.GPT)||'';
   ST.ghToken=localStorage.getItem(KEY_STORE.GH_TOKEN)||'';
-  ST.ghUser =localStorage.getItem(KEY_STORE.GH_USER)||'';
-  ST.ghRepo =localStorage.getItem(KEY_STORE.GH_REPO)||'';
-  ST.sbUrl  =localStorage.getItem(KEY_STORE.SB_URL)||'';
-  ST.sbAnon =localStorage.getItem(KEY_STORE.SB_ANON)||'';
-  ST.sbEnabled  =localStorage.getItem(KEY_STORE.SB_ON)==='true';
+  ST.ghUser=localStorage.getItem(KEY_STORE.GH_USER)||'';
+  ST.ghRepo=localStorage.getItem(KEY_STORE.GH_REPO)||'';
+  ST.sbUrl=localStorage.getItem(KEY_STORE.SB_URL)||'';
+  ST.sbAnon=localStorage.getItem(KEY_STORE.SB_ANON)||'';
+  ST.sbEnabled=localStorage.getItem(KEY_STORE.SB_ON)==='true';
   ST.auditEnabled=localStorage.getItem(KEY_STORE.AUDIT)!=='false';
   ST.backendEnabled=localStorage.getItem(KEY_STORE.BACKEND)==='true';
 }
 
 function saveKeys(){
-  // Write each key individually — never serialized as a group, never in a structure
-  // that could be accidentally pushed anywhere
-  localStorage.setItem(KEY_STORE.ANTH,    ST.key);
-  localStorage.setItem(KEY_STORE.GPT,     ST.gptKey);
+  localStorage.setItem(KEY_STORE.ANTH,ST.key);
+  localStorage.setItem(KEY_STORE.GPT,ST.gptKey);
   localStorage.setItem(KEY_STORE.GH_TOKEN,ST.ghToken);
-  localStorage.setItem(KEY_STORE.GH_USER, ST.ghUser);
-  localStorage.setItem(KEY_STORE.GH_REPO, ST.ghRepo);
-  localStorage.setItem(KEY_STORE.SB_URL,  ST.sbUrl);
-  localStorage.setItem(KEY_STORE.SB_ANON, ST.sbAnon);
-  localStorage.setItem(KEY_STORE.SB_ON,   String(ST.sbEnabled));
-  localStorage.setItem(KEY_STORE.AUDIT,   String(ST.auditEnabled));
-  localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled));
+  localStorage.setItem(KEY_STORE.GH_USER,ST.ghUser);
+  localStorage.setItem(KEY_STORE.GH_REPO,ST.ghRepo);
+  localStorage.setItem(KEY_STORE.SB_URL,ST.sbUrl);
+  localStorage.setItem(KEY_STORE.SB_ANON,ST.sbAnon);
+  localStorage.setItem(KEY_STORE.SB_ON,String(ST.sbEnabled));
+  localStorage.setItem(KEY_STORE.AUDIT,String(ST.auditEnabled));
+  localStorage.setItem(KEY_STORE.BACKEND,String(ST.backendEnabled));
 }
 
-function fmtDate(iso){if(!iso)return'—';try{return new Date(iso).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return iso;}}
-function timeSince(iso){if(!iso)return'';const s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
-function autoName(prompt){const stop=new Set(['a','an','the','with','and','for','to','of','that','in','on','at','my','your','build','make','create','app']);return prompt.split(/\s+/).filter(w=>w.length>2&&!stop.has(w.toLowerCase())).slice(0,3).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ')||'My App';}
-function ghPageUrl(id){return ST.ghUser&&ST.ghRepo?`https://${ST.ghUser}.github.io/${ST.ghRepo}/apps/${id}.html`:'';}
-function ghApiUrl(path){return`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/contents/${path}`;}
+function fmtDate(iso){if(!iso)return'\u2014';try{return new Date(iso).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){return iso;}}
+function timeSince(iso){if(!iso)return'';var s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function autoName(prompt){var stop=['a','an','the','with','and','for','to','of','that','in','on','at','my','your','build','make','create','app'];return prompt.split(/\s+/).filter(function(w){return w.length>2&&stop.indexOf(w.toLowerCase())===-1;}).slice(0,3).map(function(w){return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();}).join(' ')||'My App';}
+function ghPageUrl(id){return ST.ghUser&&ST.ghRepo?'https://'+ST.ghUser+'.github.io/'+ST.ghRepo+'/apps/'+id+'.html':'';}
+function ghApiUrl(path){return'https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo+'/contents/'+path;}
 function ghHeaders(){return{'Authorization':'token '+ST.ghToken,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'};}
 
-/* ════════ OUTBOUND REQUEST GUARD ════════
-   Intercepts every fetch call. If the request carries any of our secret keys
-   in headers or body, it verifies the destination is an approved domain.
-   Any attempt to send keys anywhere else throws immediately.
-════════════════════════════════════════ */
-const APPROVED_KEY_DOMAINS=[
-  'api.anthropic.com',
-  'api.openai.com',
-  'api.github.com',
-];
+/* ======== FETCH GUARD ======== */
+var APPROVED_KEY_DOMAINS=['api.anthropic.com','api.openai.com','api.github.com'];
+var _nativeFetch=window.fetch;
 
-const _nativeFetch=window.fetch;
-
-// Shared validation — called by both the fetch wrapper and fetchWithTimeout
 function _validateKeyedRequest(url,opts){
-  const headersObj=(opts&&opts.headers)||{};
-  const sensitiveValues=[ST.key,ST.gptKey,ST.ghToken,ST.sbAnon].filter(v=>v&&v.length>8);
-  const hasKeyInHeaders=sensitiveValues.some(v=>
-    Object.values(headersObj).some(h=>String(h).includes(v))
-  );
-  if(!hasKeyInHeaders)return; // no key material, no check needed
-  let destOk=false;
+  var headersObj=(opts&&opts.headers)||{};
+  var sensitiveValues=[ST.key,ST.gptKey,ST.ghToken,ST.sbAnon].filter(function(v){return v&&v.length>8;});
+  var hasKeyInHeaders=sensitiveValues.some(function(v){
+    var vals=Object.values(headersObj);
+    return vals.some(function(h){return String(h).indexOf(v)>=0;});
+  });
+  if(!hasKeyInHeaders)return;
+  var destOk=false;
   try{
-    const dest=new URL(String(url));
-    destOk=APPROVED_KEY_DOMAINS.some(d=>dest.hostname===d||dest.hostname.endsWith('.'+d));
+    var dest=new URL(String(url));
+    destOk=APPROVED_KEY_DOMAINS.some(function(d){return dest.hostname===d||dest.hostname.indexOf('.'+d)>=0;});
     if(!destOk&&ST.sbUrl){
-      try{const sbHost=new URL(ST.sbUrl).hostname;destOk=dest.hostname===sbHost;}catch{}
+      try{var sbHost=new URL(ST.sbUrl).hostname;destOk=dest.hostname===sbHost;}catch(e){}
     }
-  }catch{destOk=false;}
+  }catch(e){destOk=false;}
   if(!destOk){
-    const err=new Error('[KEY GUARD] Blocked: credentials sent to unexpected domain: '+String(url).split('?')[0]);
-    console.error(err.message);
-    throw err;
+    throw new Error('[KEY GUARD] Blocked: credentials sent to unexpected domain');
   }
 }
 
-window.fetch=function(url,opts={}){
+window.fetch=function(url,opts){
+  opts=opts||{};
   try{_validateKeyedRequest(url,opts);}catch(e){return Promise.reject(e);}
   return _nativeFetch.apply(this,arguments);
 };
 
-/* ════════ KEY SUMMARY (for Settings display) ════════ */
+/* ======== KEY STATUS HTML ======== */
 function keyStatusHTML(){
-  return `
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px">Where keys are stored</div>
-      <div style="background:rgba(0,230,118,.08);border:1.5px solid rgba(0,230,118,.2);border-radius:10px;padding:11px 13px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.7">
-        🔒 <strong style="color:#fff">Device only — localStorage</strong><br>
-        Keys are never uploaded, synced, logged, or included in any file pushed to GitHub.<br>
-        They are sent exclusively as HTTP headers directly to:<br>
-        <span style="font-family:var(--fm);color:var(--cy);font-size:10px">api.anthropic.com · api.openai.com · api.github.com</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${[
-          ['Anthropic',ST.key],
-          ['OpenAI',ST.gptKey],
-          ['GitHub Token',ST.ghToken],
-          ['Supabase Anon',ST.sbAnon],
-        ].map(([label,val])=>`
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px">
-            <span style="font-size:11px;color:rgba(255,255,255,.5)">${label}</span>
-            <span style="font-family:var(--fm);font-size:10px;color:${val?'var(--mn)':'rgba(255,255,255,.25)'}">${val?redactKey(val):'not set'}</span>
-          </div>`).join('')}
-      </div>
-    </div>`;
+  var items=[
+    ['Anthropic',ST.key],['OpenAI',ST.gptKey],
+    ['GitHub Token',ST.ghToken],['Supabase Anon',ST.sbAnon]
+  ];
+  var rows='';
+  for(var i=0;i<items.length;i++){
+    var label=items[i][0],val=items[i][1];
+    rows+='<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px">'
+      +'<span style="font-size:11px;color:rgba(255,255,255,.5)">'+label+'</span>'
+      +'<span style="font-family:var(--fm);font-size:10px;color:'+(val?'var(--mn)':'rgba(255,255,255,.25)')+'">'+redactKey(val)+'</span>'
+      +'</div>';
+  }
+  return '<div style="display:flex;flex-direction:column;gap:8px">'
+    +'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px">Where keys are stored</div>'
+    +'<div style="background:rgba(0,230,118,.08);border:1.5px solid rgba(0,230,118,.2);border-radius:10px;padding:11px 13px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.7">'
+    +'\uD83D\uDD12 <strong style="color:#fff">Device only \u2014 localStorage</strong><br>'
+    +'Keys are never uploaded, synced, logged, or included in any file pushed to GitHub.</div>'
+    +'<div style="display:flex;flex-direction:column;gap:6px">'+rows+'</div></div>';
 }
-function tick(){const el=$('clock');if(!el)return;const n=new Date();el.textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
-// Update every 30s — minutes only change every 60s, 30s keeps it accurate without wasteful 10s wakes
+
+function tick(){var el=$('clock');if(!el)return;var n=new Date();el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
 setInterval(tick,30000);
-// Delay initial tick until DOM is fully ready
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',tick);}else{tick();}
 
-/* ════════ GITHUB API — Branch-based deployment ════════ */
+/* ======== GITHUB API ======== */
 function safeBase64(str){
   try{
-    const bytes=new TextEncoder().encode(str);
-    let bin='';const CHUNK=8192;
-    for(let i=0;i<bytes.length;i+=CHUNK)bin+=String.fromCharCode(...bytes.subarray(i,i+CHUNK));
+    var bytes=new TextEncoder().encode(str);
+    var bin='';var CHUNK=8192;
+    for(var i=0;i<bytes.length;i+=CHUNK)bin+=String.fromCharCode.apply(null,Array.from(bytes.subarray(i,i+CHUNK)));
     return btoa(bin);
   }catch(e){return btoa(unescape(encodeURIComponent(str)));}
 }
 
-async function ghFetch(url,opts={}){
-  const res=await fetch(url,{...opts,headers:{...ghHeaders(),...(opts.headers||{})}});
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||`GitHub HTTP ${res.status}`);}
-  return res.status===204?{}:res.json();
-}
-
-// Get the SHA of main branch head — uses /branches/{branch} (stable, always single object)
-async function ghGetMainSha(){
-  const d=await ghFetch(`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/branches/main`);
-  const sha=d?.commit?.sha;
-  if(!sha)throw new Error('Could not read main branch SHA — check repo exists and has at least one commit');
-  return sha;
-}
-
-// Create a new branch from main
-async function ghCreateBranch(branchName){
-  const sha=await ghGetMainSha();
-  await ghFetch(`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/git/refs`,{
-    method:'POST',
-    body:JSON.stringify({ref:`refs/heads/${branchName}`,sha}),
+function ghFetch(url,opts){
+  opts=opts||{};
+  var headers=ghHeaders();
+  if(opts.headers){for(var k in opts.headers)headers[k]=opts.headers[k];}
+  opts.headers=headers;
+  return fetch(url,opts).then(function(res){
+    if(!res.ok)return res.json().catch(function(){return{};}).then(function(e){throw new Error(e.message||'GitHub HTTP '+res.status);});
+    return res.status===204?{}:res.json();
   });
-  return sha;
 }
 
-// Push a file to a specific branch
-async function ghPushFile(path,content,message,branch,existingSha){
-  const body={message,content:safeBase64(content),branch};
+function ghGetMainSha(){
+  return ghFetch('https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo+'/branches/main').then(function(d){
+    var sha=d&&d.commit&&d.commit.sha;
+    if(!sha)throw new Error('Could not read main branch SHA');
+    return sha;
+  });
+}
+
+function ghCreateBranch(branchName){
+  return ghGetMainSha().then(function(sha){
+    return ghFetch('https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo+'/git/refs',{
+      method:'POST',
+      body:JSON.stringify({ref:'refs/heads/'+branchName,sha:sha}),
+    }).then(function(){return sha;});
+  });
+}
+
+function ghPushFile(path,content,message,branch,existingSha){
+  var body={message:message,content:safeBase64(content),branch:branch};
   if(existingSha)body.sha=existingSha;
   return ghFetch(ghApiUrl(path),{method:'PUT',body:JSON.stringify(body)});
 }
 
-// Get file metadata (sha) from a branch
-async function ghGetFileSha(path,branch='main'){
-  try{
-    const url=ghApiUrl(path)+(branch!=='main'?`?ref=${encodeURIComponent(branch)}`:'');
-    const res=await fetch(url,{headers:ghHeaders()});
+function ghGetFileSha(path,branch){
+  branch=branch||'main';
+  var url=ghApiUrl(path)+(branch!=='main'?'?ref='+encodeURIComponent(branch):'');
+  return fetch(url,{headers:ghHeaders()}).then(function(res){
     if(res.status===404)return null;
     if(!res.ok)return null;
-    const d=await res.json();
-    return d.sha||null;
-  }catch{return null;}
+    return res.json().then(function(d){return d.sha||null;});
+  }).catch(function(){return null;});
 }
 
-// Merge a branch into main
-async function ghMergeBranch(branchName,appName){
-  const res=await fetch(`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/merges`,{
-    method:'POST',
-    headers:ghHeaders(),
-    body:JSON.stringify({
-      base:'main',
-      head:branchName,
-      commit_message:`✅ Merge ${branchName} — ${appName} via The Builder`,
-    }),
+function ghMergeBranch(branchName,appName){
+  return fetch('https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo+'/merges',{
+    method:'POST',headers:ghHeaders(),
+    body:JSON.stringify({base:'main',head:branchName,commit_message:'\u2705 Merge '+branchName+' \u2014 '+appName+' via The Builder'}),
+  }).then(function(res){
+    if(res.status===204)return{noChange:true};
+    if(res.status===409)throw new Error('Merge conflict');
+    if(!res.ok)return res.json().catch(function(){return{};}).then(function(e){throw new Error(e.message||'Merge failed');});
+    return res.json();
   });
-  if(res.status===204)return{noChange:true}; // Already up to date
-  if(res.status===409){throw new Error('Merge conflict — manual resolution needed');}
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||`Merge failed HTTP ${res.status}`);}
-  return res.json();
 }
 
-// Delete a branch after merge (cleanup)
-async function ghDeleteBranch(branchName){
-  try{
-    await fetch(`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}/git/refs/heads/${branchName}`,{
-      method:'DELETE',headers:ghHeaders(),
-    });
-  }catch{} // best-effort cleanup
+function ghDeleteBranch(branchName){
+  try{fetch('https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo+'/git/refs/heads/'+branchName,{method:'DELETE',headers:ghHeaders()});}catch(e){}
 }
 
-async function ghPushManifest(branch){
-  // Manifest contains only app metadata — never any credentials
-  const manifestData=ST.apps.map(a=>({
-    id:a.id,name:a.name,icon:a.icon,ci:a.ci,
-    url:ghPageUrl(a.id),path:`apps/${a.id}.html`,
-    prompts:(a.prompts||[]).map(p=>({ts:p.ts,type:p.type,text:p.text.slice(0,120)})),
-    createdAt:a.createdAt,updatedAt:a.updatedAt,
-    // Explicitly excluded: code (pushed separately), any key material
-  }));
-  const existingSha=await ghGetFileSha('apps/manifest.json',branch);
-  await ghPushFile('apps/manifest.json',JSON.stringify(manifestData,null,2),'Update Builder manifest',branch,existingSha);
+function ghPushManifest(branch){
+  var manifestData=ST.apps.map(function(a){
+    return{id:a.id,name:a.name,icon:a.icon,ci:a.ci,url:ghPageUrl(a.id),path:'apps/'+a.id+'.html',
+      prompts:(a.prompts||[]).map(function(p){return{ts:p.ts,type:p.type,text:p.text.slice(0,120)};}),
+      createdAt:a.createdAt,updatedAt:a.updatedAt};
+  });
+  return ghGetFileSha('apps/manifest.json',branch).then(function(existingSha){
+    return ghPushFile('apps/manifest.json',JSON.stringify(manifestData,null,2),'Update Builder manifest',branch,existingSha);
+  });
 }
 
-async function testGitHub(){
-  try{
-    const res=await fetch(`https://api.github.com/repos/${ST.ghUser}/${ST.ghRepo}`,{headers:ghHeaders()});
-    return res.ok;
-  }catch{return false;}
+function testGitHub(){
+  return fetch('https://api.github.com/repos/'+ST.ghUser+'/'+ST.ghRepo,{headers:ghHeaders()}).then(function(res){return res.ok;}).catch(function(){return false;});
 }
 
-/* ════════ CLIENT-SIDE AUTOMATED CHECKS ════════ */
+/* ======== LOCAL CHECKS ======== */
 function runLocalChecks(code){
-  const results=[];
-  const add=(cat,id,label,passed,detail='')=>results.push({cat,id,label,passed,detail});
-
-  // Hard cap: skip checks on absurdly large code to avoid hanging the UI
-  if(!code||code.length>500000){
-    add('Syntax','size-guard','File size check',false,'File too large to check locally');
-    return results;
-  }
-
+  var results=[];
+  function add(cat,id,label,passed,detail){results.push({cat:cat,id:id,label:label,passed:passed,detail:detail||''});}
+  if(!code||code.length>500000){add('Syntax','size-guard','File size check',false,'File too large');return results;}
   try{
-    // ── Syntax / Structure ──
-    add('Syntax','doctype','DOCTYPE declaration',/^[\s\S]{0,200}<!DOCTYPE/i.test(code));
+    add('Syntax','doctype','DOCTYPE declaration',/<!DOCTYPE/i.test(code.slice(0,300)));
     add('Syntax','html-tag','<html> element present',/<html[\s>]/i.test(code));
     add('Syntax','viewport','Viewport meta tag',/<meta[^>]{1,200}viewport/i.test(code));
     add('Syntax','charset','Charset meta tag',/<meta[^>]{1,200}charset/i.test(code));
-
-    // Parse JS blocks — limit to first 200KB to avoid catastrophic backtracking
-    const codeSlice=code.slice(0,200000);
-    const jsBlocks=[...codeSlice.matchAll(/<script(?![^>]{0,200}src)[^>]{0,200}>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).join('\n');
-
-    // Tag balance (approximate)
-    const openTags=(code.match(/<(div|section|article|main|nav|header|footer|ul|ol|table)[^>]{0,300}>/gi)||[]).length;
-    const closeTags=(code.match(/<\/(div|section|article|main|nav|header|footer|ul|ol|table)>/gi)||[]).length;
-    const tagBalance=Math.abs(openTags-closeTags);
-    add('Syntax','tag-balance',`Tag balance (${tagBalance>0?'-'+tagBalance:'OK'})`,tagBalance<=2,
-      tagBalance>2?`${tagBalance} unclosed structural tags`:'');
-
-    // ── Accessibility ──
-    const imgTags=[...code.matchAll(/<img[^>]{0,500}>/gi)];
-    const missingAlt=imgTags.filter(m=>!/\balt\s*=/i.test(m[0]));
-    add('Accessibility','img-alt',`Images have alt (${imgTags.length} found)`,missingAlt.length===0,
-      missingAlt.length?`${missingAlt.length} missing alt attribute`:'');
-
+    var sizeKB=Math.round(new TextEncoder().encode(code).length/1024);
+    add('Performance','file-size','File size: '+sizeKB+'KB',sizeKB<600,sizeKB+'KB');
     add('Accessibility','lang','html[lang] attribute',/<html[^>]{0,300}lang\s*=/i.test(code));
-
-    const textInputs=[...code.matchAll(/<input[^>]{0,400}type\s*=\s*["']?(text|email|password|search|tel|url|number)["']?[^>]{0,400}>/gi)];
-    const hasLabelling=/<label[\s>]/i.test(code)||/aria-label/i.test(code)||/aria-labelledby/i.test(code)||/placeholder/i.test(code);
-    add('Accessibility','form-labels',`Form inputs labelled (${textInputs.length} found)`,
-      textInputs.length===0||hasLabelling,textInputs.length&&!hasLabelling?'Inputs found with no labels/placeholders':'');
-
-    // Compute once, reuse — avoids double matchAll
-    const emptyBtns=[...code.matchAll(/<button[^>]{0,300}>\s*<\/button>/gi)].length;
-    add('Accessibility','btn-text','Buttons have accessible text',emptyBtns===0,
-      emptyBtns?'Empty button(s) found':'');
-
-    // ── Links & Paths ──
-    const emptyHrefs=[...code.matchAll(/href\s*=\s*["']\s*["']/gi)].length;
-    add('Links','empty-href','No empty href values',emptyHrefs===0,
-      emptyHrefs?`${emptyHrefs} empty href(s)`:'');
-
-    const emptySrcs=[...code.matchAll(/src\s*=\s*["']\s*["']/gi)].length;
-    add('Links','empty-src','No empty src values',emptySrcs===0,
-      emptySrcs?`${emptySrcs} empty src(s)`:'');
-
-    const fetchCalls=(jsBlocks.match(/fetch\s*\(/g)||[]).length;
-    add('Links','fetch-calls',`API fetch calls (${fetchCalls} found)`,true,
-      fetchCalls?`${fetchCalls} network call(s) — may need CORS`:'None');
-
-    // ── Security ──
-    add('Security','no-eval','No eval() usage',!/\beval\s*\(/.test(jsBlocks),
-      /\beval\s*\(/.test(jsBlocks)?'eval() detected':'');
-    add('Security','no-docwrite','No document.write()',!/document\.write\s*\(/.test(jsBlocks),
-      /document\.write\s*\(/.test(jsBlocks)?'document.write() detected':'');
-    const innerHTMLCount=(jsBlocks.match(/\.innerHTML\s*=/g)||[]).length;
-    add('Security','no-innerhtml-risk','innerHTML usage',true,
-      innerHTMLCount?`${innerHTMLCount} innerHTML assignments (verify XSS safety)`:'');
-
-    // ── Performance ──
-    const sizeKB=Math.round(new TextEncoder().encode(code).length/1024);
-    add('Performance','file-size',`File size: ${sizeKB}KB`,sizeKB<600,
-      sizeKB>=600?`${sizeKB}KB — consider reducing`:sizeKB+'KB ✓');
-
-    // Fixed: bound the style attribute check to avoid ReDoS
-    const longStyles=(code.match(/style\s*=\s*"[^"]{200,}"/gi)||[]).length;
-    add('Performance','inline-styles',`Long inline styles (${longStyles} found)`,longStyles<5,
-      longStyles>=5?`${longStyles} very long inline style(s)`:longStyles?longStyles+' found':'None');
-
+    add('Security','no-eval','No eval() usage',!/\beval\s*\(/.test(code));
+    add('Security','no-docwrite','No document.write()',!/document\.write\s*\(/.test(code));
   }catch(e){
-    // Regex failure on malformed input — return partial results rather than crashing
-    add('Syntax','check-error','Check engine error',false,'Some checks skipped: '+String(e.message).slice(0,80));
+    add('Syntax','check-error','Check engine error',false,String(e.message||'').slice(0,80));
   }
-
   return results;
 }
 
-/* ════════ PREVIEW STORE — temporary code cache for pre-save previews ════════ */
-// Apps are previewed at Step 6 but not saved until Step 8 (after approval).
-// This cache lets the Full Screen viewer work before the app is in ST.apps.
-const _previewCache={};
-let _previewPid=null; // pid of pipeline waiting on approval, or null
+/* ======== PREVIEW CACHE ======== */
+var _previewCache={};
+var _previewPid=null;
 
 function setPreview(id,code){_previewCache[id]=code;}
 function clearPreview(id){delete _previewCache[id];}
 
-// Called from the preview card "Full Screen" button inside a running pipeline.
-// MUST NOT call closeBuilder() — that would kill the pending approval gate.
 window.openPreview=function(id,pid){
-  const code=_previewCache[id]||ST.apps.find(a=>a.id===id)?.code;
+  var code=_previewCache[id];
+  if(!code){var app=null;for(var i=0;i<ST.apps.length;i++){if(ST.apps[i].id===id){app=ST.apps[i];break;}}if(app)code=app.code;}
   if(!code){toast('Preview not available',2000);return;}
-
   _previewPid=pid||null;
-
-  // Re-enable approval buttons in case they were disabled by a previous session
-  const approveBtn=$('vbar-approve'),changesBtn=$('vbar-req-changes');
-  if(approveBtn){approveBtn.disabled=false;approveBtn.textContent='🔀 Approve & Merge';}
+  var approveBtn=$('vbar-approve'),changesBtn=$('vbar-req-changes');
+  if(approveBtn){approveBtn.disabled=false;approveBtn.textContent='\uD83D\uDD00 Approve & Merge';}
   if(changesBtn){changesBtn.disabled=false;}
-
-  // Set up viewer
-  $('vbar-name').textContent='🔍 Preview — Reviewing';
-  $('vbar-url').textContent='Not merged yet — reviewing before approve';
+  $('vbar-name').textContent='\uD83D\uDD0D Preview \u2014 Reviewing';
+  $('vbar-url').textContent='Not merged yet \u2014 reviewing';
   $('vbar-url').dataset.url='';
   $('viewer-iframe').removeAttribute('src');
   $('viewer-iframe').srcdoc=code;
-
-  // Show/hide the right buttons
-  const approveRow=$('vbar-approve-row');
-  const normalBtns=$('vbar-btns');
-  if(_previewPid){
-    approveRow.style.display='flex';
-    normalBtns.style.display='none';
-    $('vback').title='Back to chat history';
-  }else{
-    approveRow.style.display='none';
-    normalBtns.style.display='flex';
-    $('vback').title='';
-  }
-
-  // Do NOT call closeBuilder — the pipeline is still running, paused at step 7.
+  var approveRow=$('vbar-approve-row'),normalBtns=$('vbar-btns');
+  if(_previewPid){approveRow.style.display='flex';normalBtns.style.display='none';}
+  else{approveRow.style.display='none';normalBtns.style.display='flex';}
   showScreen('viewer');
 };
-// Keyed by pipeline ID so concurrent pipelines don't collide
-const _approvalGates={};
 
-function waitForApproval(pid){
-  return new Promise((resolve,reject)=>{
-    _approvalGates[pid]={resolve,reject};
-  });
-}
-function approveAndMerge(pid){
-  _previewPid=null; // clear preview mode regardless of how approval was triggered
-  _approvalGates[pid]?.resolve('approved');
-  delete _approvalGates[pid];
-}
-function requestChanges(pid){
-  _previewPid=null;
-  _approvalGates[pid]?.reject(new Error('CHANGES_REQUESTED'));
-  delete _approvalGates[pid];
-}
-// Expose globally for inline onclick handlers
+var _approvalGates={};
+function waitForApproval(pid){return new Promise(function(resolve,reject){_approvalGates[pid]={resolve:resolve,reject:reject};});}
+function approveAndMerge(pid){_previewPid=null;if(_approvalGates[pid])_approvalGates[pid].resolve('approved');delete _approvalGates[pid];}
+function requestChanges(pid){_previewPid=null;if(_approvalGates[pid])_approvalGates[pid].reject(new Error('CHANGES_REQUESTED'));delete _approvalGates[pid];}
 window.approveAndMerge=approveAndMerge;
 window.requestChanges=requestChanges;
 
-/* ════════ HOME SCREEN GRID ════════ */
+/* ======== HOME GRID ======== */
 function renderGrid(){
-  const grid=$('app-grid');
-  let html='';
+  var grid=$('app-grid');
+  var html='';
   if(!ST.apps.length){
-    html+=`<div class="aicon new-tile" onclick="openBuilder()"><div class="aicon-img">✦</div><div class="aicon-label">Build App</div></div>
-    <div class="home-empty" style="grid-column:1/-1;margin-top:12px">
-      <div class="he-icon">🚀</div>
-      <div class="he-title">Canvas is empty</div>
-      <div class="he-sub">Tap Build and describe your first app — it'll land here as an icon</div>
-    </div>`;
+    html+='<div class="aicon new-tile" onclick="openBuilder()"><div class="aicon-img">\u2726</div><div class="aicon-label">Build App</div></div>'
+      +'<div class="home-empty" style="grid-column:1/-1;margin-top:12px">'
+      +'<div class="he-icon">\uD83D\uDE80</div>'
+      +'<div class="he-title">Canvas is empty</div>'
+      +'<div class="he-sub">Tap Build and describe your first app</div></div>';
   }else{
-    ST.apps.forEach((app,i)=>{
-      const g=grad(app.ci);
-      html+=`<div class="aicon" style="animation-delay:${i*.04}s" data-id="${app.id}" onclick="handleTap('${app.id}')" oncontextmenu="showCtx(event,'${app.id}');return false">
-        <div class="aicon-img" style="background:${g}">${app.icon}</div>
-        <button class="aicon-del" onclick="delApp('${app.id}');event.stopPropagation()">✕</button>
-        <div class="aicon-label">${esc(app.name)}</div>
-      </div>`;
-    });
-    html+=`<div class="aicon new-tile" onclick="openBuilder()"><div class="aicon-img">✦</div><div class="aicon-label">New App</div></div>`;
+    for(var i=0;i<ST.apps.length;i++){
+      var app=ST.apps[i];
+      var g=grad(app.ci);
+      html+='<div class="aicon" style="animation-delay:'+i*.04+'s" data-id="'+app.id+'" onclick="handleTap(\''+app.id+'\')" oncontextmenu="showCtx(event,\''+app.id+'\');return false">'
+        +'<div class="aicon-img" style="background:'+g+'">'+app.icon+'</div>'
+        +'<button class="aicon-del" onclick="delApp(\''+app.id+'\');event.stopPropagation()">\u2715</button>'
+        +'<div class="aicon-label">'+esc(app.name)+'</div></div>';
+    }
+    html+='<div class="aicon new-tile" onclick="openBuilder()"><div class="aicon-img">\u2726</div><div class="aicon-label">New App</div></div>';
   }
   grid.innerHTML=html;
 
-  // Long press — capture coordinates at touchstart time (not inside timeout)
-  grid.querySelectorAll('.aicon[data-id]').forEach(el=>{
-    let t;
-    el.addEventListener('touchstart',e=>{
-      // Capture position NOW before touch ends and the list goes stale
-      const touch=e.touches[0];
-      if(!touch)return;
-      const cx=touch.clientX,cy=touch.clientY;
-      t=setTimeout(()=>{
-        showCtxAt(cx,cy,el.dataset.id);
-        if(navigator.vibrate)navigator.vibrate(28);
-      },520);
-    },{passive:true});
-    el.addEventListener('touchend',()=>clearTimeout(t),{passive:true});
-    el.addEventListener('touchmove',()=>clearTimeout(t),{passive:true});
-  });
+  // Long press
+  var icons=grid.querySelectorAll('.aicon[data-id]');
+  for(var j=0;j<icons.length;j++){
+    (function(el){
+      var t;
+      el.addEventListener('touchstart',function(e){
+        var touch=e.touches[0];if(!touch)return;
+        var cx=touch.clientX,cy=touch.clientY;
+        t=setTimeout(function(){showCtxAt(cx,cy,el.dataset.id);if(navigator.vibrate)navigator.vibrate(28);},520);
+      },{passive:true});
+      el.addEventListener('touchend',function(){clearTimeout(t);},{passive:true});
+      el.addEventListener('touchmove',function(){clearTimeout(t);},{passive:true});
+    })(icons[j]);
+  }
 }
 
 function handleTap(id){closeCtx();openApp(id);}
 
-/* ════════ CONTEXT MENU ════════ */
-let _ctxId=null;
+/* ======== CONTEXT MENU ======== */
+var _ctxId=null;
 function showCtxAt(x,y,id){
-  _ctxId=id;const m=$('ctx-menu');m.classList.add('on');
-  const mw=m.offsetWidth||178,mh=m.offsetHeight||140;
+  _ctxId=id;var m=$('ctx-menu');m.classList.add('on');
+  var mw=m.offsetWidth||178,mh=m.offsetHeight||140;
   m.style.left=Math.min(x,window.innerWidth-mw-10)+'px';
   m.style.top=Math.min(y,window.innerHeight-mh-10)+'px';
 }
-function showCtx(e,id){
-  // Desktop right-click path — e is a MouseEvent with reliable clientX/Y
-  const x=e.clientX||0,y=e.clientY||0;
-  showCtxAt(x,y,id);
-}
+function showCtx(e,id){showCtxAt(e.clientX||0,e.clientY||0,id);}
 function closeCtx(){$('ctx-menu').classList.remove('on');_ctxId=null;}
 
-/* ════════ BUILDER SHEET ════════ */
+/* ======== BUILDER SHEET ======== */
 function openBuilder(editId){
-  // Guard: if editId given but app not found, open fresh build instead
-  const app=editId?ST.apps.find(a=>a.id===editId):null;
-  if(editId&&!app){editId=null;}
+  var app=editId?ST.apps.find(function(a){return a.id===editId;}):null;
+  if(editId&&!app)editId=null;
   ST.activeAppId=editId||null;
-  ST.pendingIcon=app?.icon||'🎯';
-  ST.pendingColor=app?.ci??Math.floor(Math.random()*GRADS.length);
+  ST.pendingIcon=app?app.icon:'🎯';
+  ST.pendingColor=app?app.ci:Math.floor(Math.random()*GRADS.length);
   $('emoji-pick-btn').textContent=ST.pendingIcon;
-  $('bs-title').textContent=app?`Editing: ${app.name}`:'Build an App';
-  $('bs-sub').textContent=app?'Describe changes — new branch → checks → fix → preview → merge':'Branch → Build → Check → Audit → Fix → Preview → Approve → Merge';
+  $('bs-title').textContent=app?'Editing: '+app.name:'Build an App';
+  $('bs-sub').textContent=app?'Describe changes':'Branch \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Preview \u2192 Approve \u2192 Merge';
   $('bs-proj-btn').style.display=app?'flex':'none';
   resetChat();
   if(app){
     addMsg({role:'system',text:'Editing: '+app.name});
-    const liveUrl=ghPageUrl(app.id);
-    addMsg({role:'asst',type:'text',html:`Loaded <strong>${esc(app.name)}</strong>. Describe what to change and I'll rebuild, audit, fix, and push the update.${liveUrl?`<br><br><span style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.35)">🌐 ${liveUrl}</span>`:''}`});
+    var liveUrl=ghPageUrl(app.id);
+    addMsg({role:'asst',type:'text',html:'Loaded <strong>'+esc(app.name)+'</strong>. Describe what to change.'+(liveUrl?'<br><span style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.35)">\uD83C\uDF10 '+liveUrl+'</span>':'')});
   }
   $('builder-sheet').classList.add('open');
-  setTimeout(()=>$('chat-input').focus(),420);
+  setTimeout(function(){$('chat-input').focus();},420);
 }
+
 function closeBuilder(){
   $('builder-sheet').classList.remove('open');
-  // If we're in preview mode the user navigated to the viewer intentionally —
-  // the pipeline is still alive and waiting. Don't cancel it.
   if(_previewPid)return;
-  // Otherwise, if a pipeline is paused at the approval gate, cancel it so the UI unlocks.
-  Object.keys(_approvalGates).forEach(pid=>{
-    _approvalGates[pid]?.reject(new Error('BUILDER_CLOSED'));
-    delete _approvalGates[pid];
-  });
+  var keys=Object.keys(_approvalGates);
+  for(var i=0;i<keys.length;i++){
+    if(_approvalGates[keys[i]])_approvalGates[keys[i]].reject(new Error('BUILDER_CLOSED'));
+    delete _approvalGates[keys[i]];
+  }
   ST._building=false;
-  const sb=$('send-btn');if(sb)sb.disabled=false;
+  var sb=$('send-btn');if(sb)sb.disabled=false;
 }
+
 function resetChat(){
-  const s=$('chat-scroll');s.innerHTML='';
-  const w=document.createElement('div');w.className='chat-welcome';w.id='chat-welcome';
-  w.innerHTML=`<div class="cw-icon">⚡</div>
-    <div class="cw-title">What should we build?</div>
-    <div class="cw-sub">Describe any app — it'll be built, audited, fixed, pushed to GitHub, and dropped on your home screen.</div>
-    <div class="chips">
-      <div class="chip" onclick="chipSend('A habit tracker with daily streaks, emoji reactions per habit, and a monthly calendar heatmap')">🔥 Habit tracker</div>
-      <div class="chip" onclick="chipSend('A pomodoro timer with customizable intervals, session history, and daily stats')">⏱ Pomodoro</div>
-      <div class="chip" onclick="chipSend('A personal budget tracker with expense categories, monthly limits, and charts')">💰 Budget tracker</div>
-      <div class="chip" onclick="chipSend('A daily mood journal with emoji ratings, notes, and a calendar view')">🌙 Mood journal</div>
-      <div class="chip" onclick="chipSend('A workout log with exercises, sets, reps, weights and a weekly progress chart')">💪 Workout log</div>
-      <div class="chip" onclick="chipSend('A flashcard app with spaced repetition and deck progress tracking')">🧠 Flashcards</div>
-    </div>`;
-  s.appendChild(w);
+  var s=$('chat-scroll');
+  s.innerHTML='<div class="chat-welcome" id="chat-welcome">'
+    +'<div class="cw-icon">\u26A1</div>'
+    +'<div class="cw-title">What should we build?</div>'
+    +'<div class="cw-sub">Describe any app \u2014 it will be built, audited, fixed, pushed to GitHub, and dropped on your home screen.</div>'
+    +'<div class="chips">'
+    +'<div class="chip" onclick="chipSend(\'A habit tracker with daily streaks and a monthly calendar heatmap\')">\uD83D\uDD25 Habit tracker</div>'
+    +'<div class="chip" onclick="chipSend(\'A pomodoro timer with customizable intervals and session history\')">\u23F1 Pomodoro</div>'
+    +'<div class="chip" onclick="chipSend(\'A personal budget tracker with expense categories and charts\')">\uD83D\uDCB0 Budget tracker</div>'
+    +'<div class="chip" onclick="chipSend(\'A daily mood journal with emoji ratings and a calendar view\')">\uD83C\uDF19 Mood journal</div>'
+    +'</div></div>';
 }
 
-/* ════════ MESSAGES ════════ */
-function scrollBot(){const el=$('chat-scroll');setTimeout(()=>el.scrollTo({top:el.scrollHeight,behavior:'smooth'}),60);}
+/* ======== MESSAGES ======== */
+function scrollBot(){var el=$('chat-scroll');setTimeout(function(){el.scrollTo({top:el.scrollHeight,behavior:'smooth'});},60);}
 
-const PIPE_NAMES=['Create Branch','Claude · Build','Automated Checks','GPT-4o · Audit','Claude · Fix','🗄 Backend Setup','Push to Branch','Preview','Final Validation','Merge to Main'];
-const PIPE_ICONS=['🌿','🔨','📋','🔍','🛠','🗄️','⬆️','👁','✅','🔀'];
+var PIPE_NAMES=['Create Branch','Claude \u00B7 Build','Automated Checks','GPT-4o \u00B7 Audit','Claude \u00B7 Fix','\uD83D\uDDC4 Backend Setup','Push to Branch','Preview','Final Validation','Merge to Main'];
+var PIPE_ICONS=['\uD83C\uDF3F','\uD83D\uDD28','\uD83D\uDCCB','\uD83D\uDD0D','\uD83D\uDEE0','\uD83D\uDDC4\uFE0F','\u2B06\uFE0F','\uD83D\uDC41','\u2705','\uD83D\uDD00'];
+
+function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function addMsg(cfg){
-  const s=$('chat-scroll');
-  const w=$('chat-welcome');if(w)w.style.display='none';
-  const row=document.createElement('div');
+  var s=$('chat-scroll');
+  var w=$('chat-welcome');if(w)w.style.display='none';
+  var row=document.createElement('div');
   if(cfg.role==='user'){
     row.className='mrow user';
     row.innerHTML='<div class="ubub">'+esc(cfg.text)+'</div>';
@@ -1380,7 +1173,12 @@ function addMsg(cfg){
       row.innerHTML='<div class="awrap"><div class="aav">\u26A1</div><div class="abub">'+(cfg.html||esc(cfg.text||''))+'</div></div>';
     }else if(cfg.type==='pipeline'){
       row.id=cfg.id;
-      row.innerHTML='<div class="awrap"><div class="aav">\u26A1</div><div style="flex:1;min-width:0"><div class="pipe-card" id="'+cfg.id+'-inner">'+PIPE_NAMES.map(function(name,i){return '<div class="ps s-idle" id="'+cfg.id+'-s'+i+'"><div class="psico">'+PIPE_ICONS[i]+'</div><div class="pstxt"><div class="psname">'+name+'</div><div class="psdet">Waiting</div></div></div>';}).join('')+'</div></div></div>';
+      var phtml='<div class="awrap"><div class="aav">\u26A1</div><div style="flex:1;min-width:0"><div class="pipe-card" id="'+cfg.id+'-inner">';
+      for(var i=0;i<PIPE_NAMES.length;i++){
+        phtml+='<div class="ps s-idle" id="'+cfg.id+'-s'+i+'"><div class="psico">'+PIPE_ICONS[i]+'</div><div class="pstxt"><div class="psname">'+PIPE_NAMES[i]+'</div><div class="psdet">Waiting</div></div></div>';
+      }
+      phtml+='</div></div></div>';
+      row.innerHTML=phtml;
     }else if(cfg.type==='checks'){
       var checks=cfg.checks||[];
       var fails=checks.filter(function(c){return !c.passed&&c.id!=='no-innerhtml-risk'&&c.id!=='fetch-calls';}).length;
@@ -1388,57 +1186,67 @@ function addMsg(cfg){
       var badgeText=fails?(fails+' Issue'+(fails!==1?'s':'')):'All Clear';
       var groups={};
       checks.forEach(function(c){if(!groups[c.cat])groups[c.cat]=[];groups[c.cat].push(c);});
-      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--g2)">📋</div><div style="flex:1;min-width:0"><div class="checks-card"><div class="chk-hdr"><div class="chk-hdr-ico">📋</div><div class="chk-hdr-title">Automated Checks</div><span class="chk-badge '+badgeClass+'">'+badgeText+'</span></div>'+Object.entries(groups).map(function(e){return '<div class="chk-group"><div class="chk-group-title">'+esc(e[0])+'</div>'+e[1].map(function(c){return '<div class="chk-row"><div class="chk-dot '+(c.passed?'ok':'fail')+'"></div><div class="chk-label">'+esc(c.label)+'</div>'+(c.detail?'<div class="chk-detail">'+esc(c.detail)+'</div>':'')+'</div>';}).join('')+'</div>';}).join('')+'</div></div></div>';
+      var ghtml='';
+      for(var cat in groups){
+        ghtml+='<div class="chk-group"><div class="chk-group-title">'+esc(cat)+'</div>';
+        for(var ci2=0;ci2<groups[cat].length;ci2++){
+          var c=groups[cat][ci2];
+          ghtml+='<div class="chk-row"><div class="chk-dot '+(c.passed?'ok':'fail')+'"></div><div class="chk-label">'+esc(c.label)+'</div>'+(c.detail?'<div class="chk-detail">'+esc(c.detail)+'</div>':'')+'</div>';
+        }
+        ghtml+='</div>';
+      }
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--g2)">\uD83D\uDCCB</div><div style="flex:1;min-width:0"><div class="checks-card"><div class="chk-hdr"><div class="chk-hdr-ico">\uD83D\uDCCB</div><div class="chk-hdr-title">Automated Checks</div><span class="chk-badge '+badgeClass+'">'+badgeText+'</span></div>'+ghtml+'</div></div></div>';
     }else if(cfg.type==='audit'){
       var bugs=cfg.bugs||[];
-      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gg);font-family:var(--fh);font-size:10px;font-weight:800">G</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge">G</div><div class="audit-title">GPT-4o Audit Report</div><span class="ab '+(bugs.length?'bugs':'clean')+'">'+(bugs.length?bugs.length+' Bug'+(bugs.length!==1?'s':''):'&#x2713; Clean')+'</span></div>'+(bugs.length?bugs.map(function(b){return '<div class="ai"><span class="sev '+(b.severity||'low')+'">'+esc(b.severity||'low')+'</span><div class="aitxt"><strong>'+esc(b.issue||'')+'</strong>'+(b.location?'<span style="font-size:9px;color:rgba(255,255,255,.28)">'+esc(b.location)+'</span>':'')+'</div></div>';}).join(''):'<div class="audit-clean">&#x2705; No bugs found &#x2014; code looks clean!</div>')+'</div></div></div>';
+      var bhtml='';
+      if(bugs.length){
+        for(var bi=0;bi<bugs.length;bi++){
+          var b=bugs[bi];
+          bhtml+='<div class="ai"><span class="sev '+(b.severity||'low')+'">'+esc(b.severity||'low')+'</span><div class="aitxt"><strong>'+esc(b.issue||'')+'</strong></div></div>';
+        }
+      }else{
+        bhtml='<div class="audit-clean">\u2705 No bugs found \u2014 code looks clean!</div>';
+      }
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gg);font-family:var(--fh);font-size:10px;font-weight:800">G</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge">G</div><div class="audit-title">GPT-4o Audit Report</div><span class="ab '+(bugs.length?'bugs':'clean')+'">'+(bugs.length?bugs.length+' Bug'+(bugs.length!==1?'s':''):'\u2713 Clean')+'</span></div>'+bhtml+'</div></div></div>';
     }else if(cfg.type==='preview-card'){
-      row.innerHTML='<div class="awrap"><div class="aav">👁</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview &#x2014; '+esc(cfg.appName||'App')+'</div><span class="pcc-branch">'+esc(cfg.branch||'local')+'</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="'+escAttr(cfg.code||'')+'"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\''+esc(cfg.appId||'')+'\',\''+esc(cfg.pid||'')+'\');">🔍 Full Screen</button></div></div></div></div></div>';
+      row.innerHTML='<div class="awrap"><div class="aav">\uD83D\uDC41</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview \u2014 '+esc(cfg.appName||'App')+'</div><span class="pcc-branch">'+esc(cfg.branch||'local')+'</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="'+escAttr(cfg.code||'')+'"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\''+esc(cfg.appId||'')+'\',\''+esc(cfg.pid||'')+'\');">\uD83D\uDD0D Full Screen</button></div></div></div></div></div>';
     }else if(cfg.type==='approval'){
       row.id=cfg.id;
-      // Use data-* attributes — avoids fragile nested quote escaping in inline onclick
-      var _apid=esc(cfg.pid||'');
+      var apid=esc(cfg.pid||'');
       row.innerHTML='<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#3D5AFE,#00E5FF)">\u2705</div>'
         +'<div style="flex:1;min-width:0"><div class="approval-card">'
         +'<div class="appr-title">Ready to Merge</div>'
-        +'<div class="appr-sub">All checks passed. Preview looks good. Approve to merge into <strong>main</strong> and trigger GitHub Pages deploy.</div>'
+        +'<div class="appr-sub">All checks passed. Approve to merge into <strong>main</strong>.</div>'
         +'<div class="appr-branch">'+esc(cfg.branch||'')+'</div>'
         +'<div class="appr-btns">'
-        +'<button class="appr-btn approve" data-pid="'+_apid+'" data-action="approve">🔀 Approve &amp; Merge</button>'
-        +'<button class="appr-btn changes" data-pid="'+_apid+'" data-action="changes">\u270F\uFE0F Request Changes</button>'
+        +'<button class="appr-btn approve" data-pid="'+apid+'" data-action="approve">\uD83D\uDD00 Approve &amp; Merge</button>'
+        +'<button class="appr-btn changes" data-pid="'+apid+'" data-action="changes">\u270F\uFE0F Request Changes</button>'
         +'</div></div></div></div>';
-      // Wire approval buttons safely via delegated listener
-      (function(rowEl){
-        setTimeout(function(){
-          rowEl.querySelectorAll('.appr-btn[data-pid]').forEach(function(btn){
-            btn.addEventListener('click',function(){
-              var pid=this.dataset.pid;
-              var action=this.dataset.action;
-              rowEl.querySelectorAll('.appr-btn').forEach(function(b){b.disabled=true;});
-              if(action==='approve'){this.textContent='Merging\u2026';approveAndMerge(pid);}
-              else{requestChanges(pid);}
-            });
+      setTimeout(function(){
+        var btns=row.querySelectorAll('.appr-btn[data-pid]');
+        for(var bi2=0;bi2<btns.length;bi2++){
+          btns[bi2].addEventListener('click',function(){
+            var pid2=this.dataset.pid;
+            var action=this.dataset.action;
+            var allBtns=row.querySelectorAll('.appr-btn');
+            for(var k=0;k<allBtns.length;k++)allBtns[k].disabled=true;
+            if(action==='approve'){this.textContent='Merging\u2026';approveAndMerge(pid2);}
+            else{requestChanges(pid2);}
           });
-        },0);
-      })(row);
+        }
+      },0);
     }else if(cfg.type==='schema'){
-      // Supabase schema card — shows SQL and copy button
       var sqlText=cfg.sql||'';
       var tables=cfg.tables||[];
-      row.innerHTML='<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#10A37F,#00C48C);font-size:13px">🗄️</div>'
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#10A37F,#00C48C);font-size:13px">\uD83D\uDDC4\uFE0F</div>'
         +'<div style="flex:1;min-width:0"><div class="schema-card">'
-        +'<div class="schema-hdr"><div class="schema-title">Supabase Backend — '+tables.length+' Table'+(tables.length!==1?'s':'')+' Generated</div>'
+        +'<div class="schema-hdr"><div class="schema-title">Supabase Backend \u2014 '+tables.length+' Table'+(tables.length!==1?'s':'')+' Generated</div>'
         +'<button class="schema-copy" onclick="copyToClipboard(this.dataset.sql,\'SQL\');" data-sql="'+escAttr(sqlText)+'">Copy SQL</button></div>'
-        +'<div class="schema-sql">'+esc(sqlText)+'</div>'
-        +'<div style="padding:8px 13px 10px;font-size:11px;color:rgba(255,255,255,.45);line-height:1.7">'
-        +'▶ Run this SQL in your <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--cy)">Supabase SQL Editor</a><br>'
-        +'▶ Replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY in the app with your actual values'
-        +'</div></div></div></div>';
-
+        +'<div class="schema-sql">'+esc(sqlText)+'</div></div></div></div>';
     }else if(cfg.type==='merge-status'){
       row.id=cfg.mergeId;
       var spinning=cfg.status==='merging';
-      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gh);font-size:14px">🔀</div><div style="flex:1;min-width:0"><div class="merge-card"><div class="merge-ico">🐙</div><div class="merge-info"><span class="merge-title">'+(spinning?'Merging to main\u2026':cfg.status==='done'?'Merged &amp; Deploying \u2713':'Merge failed')+'</span>'+(cfg.url?'<a class="merge-url" href="'+cfg.url+'" target="_blank">'+cfg.url+'</a>':'')+'<span class="merge-meta" id="'+cfg.mergeId+'-meta">'+esc(cfg.meta||'')+'</span></div>'+(spinning?'<div class="merge-spin"></div>':'')+'</div></div></div>';
+      row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--gh);font-size:14px">\uD83D\uDD00</div><div style="flex:1;min-width:0"><div class="merge-card"><div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">'+(spinning?'Merging to main\u2026':cfg.status==='done'?'Merged &amp; Deploying \u2713':'Merge failed')+'</span>'+(cfg.url?'<a class="merge-url" href="'+cfg.url+'" target="_blank">'+cfg.url+'</a>':'')+'<span class="merge-meta" id="'+cfg.mergeId+'-meta">'+esc(cfg.meta||'')+'</span></div>'+(spinning?'<div class="merge-spin"></div>':'')+'</div></div></div>';
     }
   }
   if(cfg.id)row.id=cfg.id;
@@ -1446,451 +1254,388 @@ function addMsg(cfg){
   return row;
 }
 
-function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
 function updatePS(pid,step,state,det){
   var el=$(pid+'-s'+step);if(!el)return;
-  var ico=state==='done'?'\u2713':state==='error'?'\u2717':state==='wait'?'\u23F8':PIPE_ICONS[step]||'\xb7';
+  var ico=state==='done'?'\u2713':state==='error'?'\u2717':state==='wait'?'\u23F8':PIPE_ICONS[step]||'\u00B7';
   el.className='ps s-'+state;
   el.innerHTML='<div class="psico">'+ico+'</div><div class="pstxt"><div class="psname">'+esc(PIPE_NAMES[step]||'Step '+step)+'</div><div class="psdet">'+esc(det)+'</div></div>'+(state==='active'?'<div class="spin"></div>':'');
   scrollBot();
 }
 
-/* ════════ SEND / PIPELINE ════════ */
+/* ======== SEND / PIPELINE ======== */
 function chipSend(t){$('chat-input').value=t;autoResize($('chat-input'));sendMsg();}
 
-async function sendMsg(){
-  const inp=$('chat-input');
-  const text=inp.value.trim();
+function sendMsg(){
+  var inp=$('chat-input');
+  var text=inp.value.trim();
   if(!text||ST._building)return;
-  if(!ST.key){toast('Add your Anthropic API key in \u2699\uFE0F Settings first',4000);return;}
+  if(!ST.key){toast('Add your Anthropic API key in Settings first',4000);return;}
   inp.value='';autoResize(inp);
-  addMsg({role:'user',text});
-  const existing=ST.activeAppId?ST.apps.find(a=>a.id===ST.activeAppId):null;
-  await runPipeline(text,existing);
+  addMsg({role:'user',text:text});
+  var existing=ST.activeAppId?ST.apps.find(function(a){return a.id===ST.activeAppId;}):null;
+  runPipeline(text,existing);
 }
 
-async function runPipeline(prompt,existingApp){
+function runPipeline(prompt,existingApp){
   ST._building=true;$('send-btn').disabled=true;
-  const pid='p'+Date.now();
-  const hasGitHub=!!(ST.ghToken&&ST.ghUser&&ST.ghRepo);
+  var pid='p'+Date.now();
+  var hasGitHub=!!(ST.ghToken&&ST.ghUser&&ST.ghRepo);
   addMsg({role:'asst',type:'pipeline',id:pid});
 
-  const appName=existingApp?.name||autoName(prompt);
-  const appIcon=ST.pendingIcon;
-  const appCi=ST.pendingColor;
-  const appId=existingApp?.id||uid();
-  const branchName=hasGitHub?('builder/app-'+appId+'-'+Date.now().toString(36)):'';
+  var appName=existingApp?existingApp.name:autoName(prompt);
+  var appIcon=ST.pendingIcon;
+  var appCi=ST.pendingColor;
+  var appId=existingApp?existingApp.id:uid();
+  var branchName=hasGitHub?('builder/app-'+appId+'-'+Date.now().toString(36)):'';
 
-  try{
-    /* STEP 0 — Create Branch */
-    if(hasGitHub){
-      updatePS(pid,0,'active','Creating feature branch\u2026');
-      try{
-        await ghCreateBranch(branchName);
-        updatePS(pid,0,'done',branchName);
-      }catch(e){
-        updatePS(pid,0,'error',e.message);
-        throw new Error('Branch creation failed: '+e.message);
-      }
-    }else{
-      updatePS(pid,0,'skip','No GitHub \u2014 local-only mode');
-    }
+  var v1,v2;
 
-    /* STEP 1 — Claude builds */
+  // Step 0 — Branch
+  var p=Promise.resolve();
+  if(hasGitHub){
+    updatePS(pid,0,'active','Creating feature branch\u2026');
+    p=ghCreateBranch(branchName).then(function(){
+      updatePS(pid,0,'done',branchName);
+    }).catch(function(e){
+      updatePS(pid,0,'error',e.message);
+      throw new Error('Branch creation failed: '+e.message);
+    });
+  }else{
+    updatePS(pid,0,'skip','No GitHub \u2014 local-only mode');
+  }
+
+  p.then(function(){
+    // Step 1 — Build
     updatePS(pid,1,'active','Claude is writing your app\u2026');
-    let userMsg;
+    var userMsg;
     if(existingApp){
-      // For edits: describe the app from its prompt history rather than sending
-      // the full HTML code. This keeps the request body small (avoids iOS "Load failed")
-      // and lets Claude regenerate a clean version incorporating the changes.
-      const prevPrompts=(existingApp.prompts||[]).map(p=>p.text).join('\n→ ');
-      const appDesc=prevPrompts||existingApp.desc||existingApp.name||'an existing app';
-      userMsg='Rebuild this app from scratch with the following change:\n\nOriginal app: '+appDesc+'\n\nChange request: '+prompt+'\n\nRebuild the complete app with this change applied. Keep all original functionality, just apply the requested change.';
+      var prevPrompts=(existingApp.prompts||[]).map(function(p2){return p2.text;}).join('\n\u2192 ');
+      var appDesc=prevPrompts||existingApp.desc||existingApp.name||'an existing app';
+      userMsg='Rebuild this app from scratch with the following change:\n\nOriginal app: '+appDesc+'\n\nChange request: '+prompt+'\n\nRebuild the complete app with this change applied.';
     }else{
       userMsg='Build this app: '+prompt;
     }
-    const v1=await callClaude(SYS_BUILD,userMsg);
+    return callClaude(SYS_BUILD,userMsg);
+  }).then(function(code){
+    v1=code;
     updatePS(pid,1,'done','Build complete \u2713');
 
-    /* STEP 2 — Automated Checks */
-    updatePS(pid,2,'active','Running lint, a11y, links, security\u2026');
-    const checks=runLocalChecks(v1);
-    const criticalFails=checks.filter(c=>!c.passed&&!['no-innerhtml-risk','fetch-calls','inline-styles'].includes(c.id));
-    addMsg({role:'asst',type:'checks',checks});
+    // Step 2 — Checks
+    updatePS(pid,2,'active','Running checks\u2026');
+    var checks=runLocalChecks(v1);
+    var criticalFails=checks.filter(function(c){return !c.passed&&['no-innerhtml-risk','fetch-calls','inline-styles'].indexOf(c.id)===-1;});
+    addMsg({role:'asst',type:'checks',checks:checks});
     updatePS(pid,2,criticalFails.length?'warn':'done',
-      criticalFails.length?(criticalFails.length+' issue'+(criticalFails.length!==1?'s':'')+' found \u2014 fixing'):'All checks passed \u2713');
+      criticalFails.length?(criticalFails.length+' issue'+(criticalFails.length!==1?'s':'')+' found'):'All checks passed \u2713');
 
-    /* STEP 3 — GPT-4o Audit */
-    let bugs=[];
-    const canAudit=!!(ST.gptKey&&ST.auditEnabled);
+    // Step 3 — Audit
+    var canAudit=!!(ST.gptKey&&ST.auditEnabled);
     if(canAudit){
-      updatePS(pid,3,'active','GPT-4o reviewing as secondary auditor\u2026');
-      try{
-        bugs=await callGPT(v1);
+      updatePS(pid,3,'active','GPT-4o reviewing\u2026');
+      return callGPT(v1).then(function(bugs){
         updatePS(pid,3,'done',bugs.length?('Found '+bugs.length+' issue'+(bugs.length!==1?'s':'')):'Code is clean \u2713');
-        addMsg({role:'asst',type:'audit',bugs});
-      }catch(e){
-        // Show the real error so user can diagnose (key issue, quota, CORS, etc.)
-        const auditErr=scrubKeys(e?.message||String(e));
+        addMsg({role:'asst',type:'audit',bugs:bugs});
+        return{criticalFails:criticalFails,bugs:bugs};
+      }).catch(function(e){
+        var auditErr=scrubKeys(e.message||String(e));
         updatePS(pid,3,'error','Audit failed: '+auditErr);
-        toast('GPT audit failed: '+auditErr,5000);
-        bugs=[];
-      }
+        return{criticalFails:criticalFails,bugs:[]};
+      });
     }else{
-      updatePS(pid,3,'skip',ST.gptKey?'Audit disabled in settings':'No OpenAI key \u2014 skipped');
+      updatePS(pid,3,'skip',ST.gptKey?'Audit disabled':'No OpenAI key \u2014 skipped');
+      return{criticalFails:criticalFails,bugs:[]};
     }
+  }).then(function(result){
+    var allIssues=result.criticalFails.map(function(c){return{severity:'medium',issue:c.label+(c.detail?' \u2014 '+c.detail:''),location:c.cat};}).concat(result.bugs);
 
-    /* STEP 4 — Claude Fix Pass */
-    let v2=v1;
-    const allIssues=[
-      ...criticalFails.map(c=>({severity:'medium',issue:c.label+(c.detail?' \u2014 '+c.detail:''),location:c.cat})),
-      ...bugs,
-    ];
+    // Step 4 — Fix
     if(allIssues.length>0){
       updatePS(pid,4,'active','Fixing '+allIssues.length+' issue'+(allIssues.length!==1?'s':'')+'\u2026');
-      try{
-        const fm='ISSUES TO FIX:\n'+allIssues.map((b,i)=>(i+1)+'. ['+(b.severity||'medium').toUpperCase()+'] '+(b.issue||'')+' \u2014 '+(b.location||'')).join('\n')+'\n\nORIGINAL CODE:\n'+v1;
-        v2=await callClaude(SYS_FIX,fm);
+      var fm='ISSUES TO FIX:\n'+allIssues.map(function(b,i){return(i+1)+'. ['+((b.severity||'medium').toUpperCase())+'] '+(b.issue||'')+' \u2014 '+(b.location||'');}).join('\n')+'\n\nORIGINAL CODE:\n'+v1;
+      return callClaude(SYS_FIX,fm).then(function(fixed){
+        v2=fixed;
         updatePS(pid,4,'done',allIssues.length+' issue'+(allIssues.length!==1?'s':'')+' resolved \u2713');
-      }catch{updatePS(pid,4,'error','Fix pass failed \u2014 using original');v2=v1;}
+      }).catch(function(){
+        v2=v1;
+        updatePS(pid,4,'error','Fix pass failed \u2014 using original');
+      });
     }else{
-      updatePS(pid,4,'done',canAudit?'No fixes needed \u2713':'Skipped');
+      v2=v1;
+      updatePS(pid,4,'done','No fixes needed \u2713');
+      return Promise.resolve();
     }
-
-    /* STEP 5 — Supabase Backend */
+  }).then(function(){
+    // Step 5 — Backend
     if(ST.backendEnabled&&ST.sbUrl){
-      updatePS(pid,5,'active','Generating Supabase backend schema\u2026');
-      try{
-        const backendRaw=await callClaudeRaw(SYS_BACKEND,'App code:\n\n'+v2.slice(0,60000),4000);
-        let backend;
-        try{
-          backend=JSON.parse(backendRaw);
-        }catch{
-          throw new Error('Backend response was not valid JSON — Claude may have added extra text. Try rebuilding.');
-        }
-        if(!backend||typeof backend!=='object'){throw new Error('Unexpected backend response structure');}
-        const tables=backend.tables||[];
-        const allSql=[...tables.map(t=>t.sql||''),...(backend.rls||[])].filter(Boolean).join('\n\n');
+      updatePS(pid,5,'active','Generating Supabase backend\u2026');
+      return callClaudeRaw(SYS_BACKEND,'App code:\n\n'+v2.slice(0,60000),4000).then(function(raw){
+        var backend=JSON.parse(raw);
+        var tables=backend.tables||[];
+        var allSql=tables.map(function(t){return t.sql||'';}).concat(backend.rls||[]).filter(Boolean).join('\n\n');
         updatePS(pid,5,'done',tables.length+' table'+(tables.length!==1?'s':'')+' designed \u2713');
-        addMsg({role:'asst',type:'schema',sql:allSql,tables});
-        // Guard: only use injectedHTML if it's actual complete HTML (not truncated)
-        if(backend.injectedHTML&&backend.injectedHTML.includes('<!DOCTYPE')&&backend.injectedHTML.length>500){
-          v2=backend.injectedHTML;
-        }
-      }catch(e){
+        addMsg({role:'asst',type:'schema',sql:allSql,tables:tables});
+        if(backend.injectedHTML&&backend.injectedHTML.indexOf('<!DOCTYPE')>=0&&backend.injectedHTML.length>500){v2=backend.injectedHTML;}
+      }).catch(function(e){
         updatePS(pid,5,'warn','Backend gen skipped: '+scrubKeys(e.message||String(e)));
-        // Non-fatal — continue pipeline with existing v2
-      }
+      });
     }else{
-      updatePS(pid,5,'skip',ST.backendEnabled?'Add Supabase URL in Settings to enable':'Backend off — toggle in Settings');
+      updatePS(pid,5,'skip','Backend off');
+      return Promise.resolve();
     }
-
-    /* STEP 6 — Push to Branch */
+  }).then(function(){
+    // Step 6 — Push to branch
     if(hasGitHub){
       updatePS(pid,6,'active','Pushing to '+branchName+'\u2026');
-      try{
-        const appPath='apps/'+appId+'.html';
-        const existingSha=await ghGetFileSha(appPath,branchName);
-        await ghPushFile(appPath,v2,(existingApp?'Update':'Add')+' '+appName+' [branch]',branchName,existingSha);
+      var appPath='apps/'+appId+'.html';
+      return ghGetFileSha(appPath,branchName).then(function(existingSha){
+        return ghPushFile(appPath,v2,(existingApp?'Update':'Add')+' '+appName+' [branch]',branchName,existingSha);
+      }).then(function(){
         updatePS(pid,6,'done','Pushed to branch \u2713');
-      }catch(e){
+      }).catch(function(e){
         updatePS(pid,6,'error',e.message);
         throw new Error('Branch push failed: '+e.message);
-      }
+      });
     }else{
-      updatePS(pid,6,'skip','Local-only \u2014 no push needed');
+      updatePS(pid,6,'skip','Local-only');
+      return Promise.resolve();
     }
-
-    /* STEP 7 — Preview */
+  }).then(function(){
+    // Step 7 — Preview
     updatePS(pid,7,'done','Preview ready');
     setPreview(appId,v2);
-    addMsg({role:'asst',type:'preview-card',code:v2,appName,branch:branchName||'local',appId,pid});
+    addMsg({role:'asst',type:'preview-card',code:v2,appName:appName,branch:branchName||'local',appId:appId,pid:pid});
 
-    /* STEP 8 — Final Validation (PAUSE) */
+    // Step 8 — Approval gate
     updatePS(pid,8,'wait','Waiting for your approval\u2026');
-    const approvalMsgId='appr-'+Date.now();
-    addMsg({role:'asst',type:'approval',id:approvalMsgId,pid,branch:branchName||'local'});
+    addMsg({role:'asst',type:'approval',id:'appr-'+Date.now(),pid:pid,branch:branchName||'local'});
 
-    let decision;
-    try{
-      decision=await waitForApproval(pid);
-    }catch(e){
-      if(e.message==='BUILDER_CLOSED'){
-        clearPreview(appId);
-        _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
-        ST.activeAppId=appId;
-        renderGrid();
-        return;
-      }
-      if(e.message==='CHANGES_REQUESTED'){
-        updatePS(pid,8,'error','Changes requested');
-        clearPreview(appId);
-        addMsg({role:'asst',type:'text',text:'No problem! Describe what you want changed and I\'ll do a new build with your feedback.'});
-        _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
-        ST.activeAppId=appId;
-        $('ihint').textContent='💬 Describe what to change \u2014 I\'ll rebuild';
-        $('bs-proj-btn').style.display='flex';
-        renderGrid();
-        return;
-      }
-      throw e;
-    }
+    return waitForApproval(pid);
+  }).then(function(){
     updatePS(pid,8,'done','Approved \u2713');
 
-    /* STEP 9 — Merge to Main */
-    const mergeStatusId='merge-'+Date.now();
+    // Step 9 — Merge
+    var mergeStatusId='merge-'+Date.now();
     if(hasGitHub){
       updatePS(pid,9,'active','Merging to main\u2026');
       addMsg({role:'asst',type:'merge-status',mergeId:mergeStatusId,status:'merging'});
-      try{
-        await ghMergeBranch(branchName,appName);
-        await ghPushManifest('main').catch(()=>{});
+      return ghMergeBranch(branchName,appName).then(function(){
+        return ghPushManifest('main').catch(function(){});
+      }).then(function(){
         ghDeleteBranch(branchName);
-
-        const liveUrl=ghPageUrl(appId);
+        var liveUrl=ghPageUrl(appId);
         updatePS(pid,9,'done','Merged & deploying \u2713');
-        const mc=$(mergeStatusId);
-        if(mc){
-          const card=mc.querySelector('.merge-card');
-          if(card)card.innerHTML='<div class="merge-ico">🐙</div><div class="merge-info"><span class="merge-title">Merged to main \u2713 \u2014 deploying</span><a class="merge-url" href="'+liveUrl+'" target="_blank">'+liveUrl+'</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>';
-        }
+        var mc=$(mergeStatusId);
+        if(mc){var card=mc.querySelector('.merge-card');if(card)card.innerHTML='<div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">Merged to main \u2713</span><a class="merge-url" href="'+liveUrl+'" target="_blank">'+liveUrl+'</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>';}
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,true);
         clearPreview(appId);
-        toast('🚀 '+appName+' is deploying to GitHub Pages!',3500);
-      }catch(e){
-        const safeE=scrubKeys(e.message||String(e));
+        toast('\uD83D\uDE80 '+appName+' is deploying!',3500);
+        return 'github';
+      }).catch(function(e){
+        var safeE=scrubKeys(e.message||String(e));
         updatePS(pid,9,'error',safeE);
         clearPreview(appId);
         _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
         addMsg({role:'asst',type:'text',html:'Merge failed: <strong>'+esc(safeE)+'</strong>. App saved locally.'});
-        toast('Merge failed — saved locally',5000);
-      }
+        return 'local';
+      });
     }else{
       updatePS(pid,9,'done','Saved locally \u2713');
       _saveAppLocally(appId,appName,appIcon,appCi,v2,prompt,existingApp,false);
       clearPreview(appId);
       toast('\u2705 '+appName+' saved!',2800);
+      return 'local';
     }
-
+  }).then(function(mode){
     ST.activeAppId=appId;
-    $('ihint').textContent='💬 Describe changes for a new build · 📋 View project details';
+    $('ihint').textContent='\uD83D\uDCAC Describe changes for a new build';
     $('bs-proj-btn').style.display='flex';
     renderGrid();
-
-    const finalApp=ST.apps.find(a=>a.id===appId);
-    const g=grad(appCi);
+    var g=grad(appCi);
     addMsg({role:'asst',type:'text',
-      html:'<strong>'+esc(finalApp?.name||appName)+'</strong> '+(hasGitHub?'is live on GitHub Pages':'has been saved')+' 🎉<br><br>'
+      html:'<strong>'+esc(appName)+'</strong> '+(mode==='github'?'is live on GitHub Pages':'has been saved')+' \uD83C\uDF89<br><br>'
         +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px">'
-        +'<button onclick="openApp(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:'+g+';border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">🚀 Open in Studio</button>'
-        +(hasGitHub&&finalApp?.ghPushed?'<a href="'+ghPageUrl(appId)+'" target="_blank" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center">🌐 Live URL</a>':'')
-        +'<button onclick="openProjectSheet(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">📋 Project</button>'
+        +'<button onclick="openApp(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:'+g+';border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDE80 Open in Studio</button>'
+        +'<button onclick="openProjectSheet(\''+appId+'\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>'
         +'</div>'
     });
-
-  }catch(err){
+  }).catch(function(err){
+    if(err.message==='BUILDER_CLOSED'){
+      clearPreview(appId);
+      _saveAppLocally(appId,appName,appIcon,appCi,v2||v1||'',prompt,existingApp,false);
+      ST.activeAppId=appId;
+      renderGrid();
+      return;
+    }
+    if(err.message==='CHANGES_REQUESTED'){
+      updatePS(pid,8,'error','Changes requested');
+      clearPreview(appId);
+      addMsg({role:'asst',type:'text',text:'No problem! Describe what you want changed.'});
+      _saveAppLocally(appId,appName,appIcon,appCi,v2||v1||'',prompt,existingApp,false);
+      ST.activeAppId=appId;
+      $('bs-proj-btn').style.display='flex';
+      renderGrid();
+      return;
+    }
     clearPreview(appId||'');
-    const safeMsg=scrubKeys(err.message||String(err));
+    var safeMsg=scrubKeys(err.message||String(err));
     addMsg({role:'asst',type:'text',text:'Pipeline error: '+safeMsg+'. Please try again.'});
     toast('Error: '+safeMsg,5000);
-  }finally{
+  }).finally(function(){
     ST._building=false;
-    const sb=$('send-btn');if(sb)sb.disabled=false;
-  }
+    var sb=$('send-btn');if(sb)sb.disabled=false;
+  });
 }
 
-/* ════════ SELF-UPDATE THE BUILDER ════════ */
-async function selfUpdateBuilder(improvement){
+/* ======== SELF-UPDATE ======== */
+function selfUpdateBuilder(improvement){
   if(!ST.key){toast('Anthropic API key required',3000);return;}
-  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo){toast('GitHub credentials required to push updated Builder',3500);return;}
-  if(!improvement.trim()){toast('Describe the improvement first',2500);return;}
-
-  const btn=$('s-self-update-btn');
-  if(btn){btn.disabled=true;btn.textContent='🔄 Updating…';}
-  toast('Fetching current Builder source…',2000);
-
-  try{
-    // Fetch current index.html from GitHub (raw content)
-    // raw.githubusercontent.com is allowed in CSP connect-src
-    const rawUrl=`https://raw.githubusercontent.com/${ST.ghUser}/${ST.ghRepo}/main/index.html`;
-    const srcRes=await _nativeFetch(rawUrl);
-    if(!srcRes.ok)throw new Error('Could not fetch current Builder source (HTTP '+srcRes.status+'). Check index.html exists on main branch.');
-    const currentSrc=await srcRes.text();
-    if(!currentSrc.includes('<!DOCTYPE'))throw new Error('Fetched file doesn\'t look like The Builder. Check index.html is in repo root.');
-
-    toast('Claude is writing the improvement…',3000);
-
-    // Ask Claude to improve the source
-    const improved=await callClaude(SYS_SELFUPDATE,
-      'CURRENT BUILDER SOURCE:\n\n'+currentSrc.slice(0,80000)+'\n\nIMPROVEMENT REQUESTED:\n'+improvement
-    );
-
-    toast('Pushing updated Builder to GitHub…',2500);
-
-    // Push as index.html on main (direct push, no branch needed — it's the app itself)
-    const existingSha=await ghGetFileSha('index.html','main');
-    await ghPushFile('index.html',improved,'🔧 Self-update: '+improvement.slice(0,80),'main',existingSha);
-
-    toast('✅ Builder updated! Reloading in 5s…',5000);
-    // Reload after delay to allow GitHub Pages to start deploying
-    setTimeout(()=>location.reload(),5000);
-
-  }catch(e){
-    const msg=scrubKeys(e.message||String(e));
-    toast('Self-update failed: '+msg,6000);
-  }finally{
-    if(btn){btn.disabled=false;btn.textContent='🔧 Update The Builder';}
-  }
+  if(!ST.ghToken||!ST.ghUser||!ST.ghRepo){toast('GitHub credentials required',3500);return;}
+  var btn=$('s-self-update-btn');
+  if(btn){btn.disabled=true;btn.textContent='\uD83D\uDD04 Updating\u2026';}
+  toast('Fetching current Builder source\u2026',2000);
+  var rawUrl='https://raw.githubusercontent.com/'+ST.ghUser+'/'+ST.ghRepo+'/main/index.html';
+  _nativeFetch(rawUrl).then(function(res){
+    if(!res.ok)throw new Error('Could not fetch current source (HTTP '+res.status+')');
+    return res.text();
+  }).then(function(currentSrc){
+    if(currentSrc.indexOf('<!DOCTYPE')<0)throw new Error('Fetched file is not The Builder');
+    toast('Claude is writing the improvement\u2026',3000);
+    return callClaude(SYS_SELFUPDATE,'CURRENT BUILDER SOURCE:\n\n'+currentSrc.slice(0,80000)+'\n\nIMPROVEMENT REQUESTED:\n'+improvement);
+  }).then(function(improved){
+    toast('Pushing updated Builder to GitHub\u2026',2500);
+    return ghGetFileSha('index.html','main').then(function(sha){
+      return ghPushFile('index.html',improved,'\uD83D\uDD27 Self-update: '+improvement.slice(0,80),'main',sha);
+    });
+  }).then(function(){
+    toast('\u2705 Builder updated! Reloading in 5s\u2026',5000);
+    setTimeout(function(){location.reload();},5000);
+  }).catch(function(e){
+    toast('Self-update failed: '+scrubKeys(e.message||String(e)),6000);
+  }).finally(function(){
+    if(btn){btn.disabled=false;btn.textContent='\uD83D\uDD27 Update The Builder';}
+  });
 }
 
 function _saveAppLocally(id,name,icon,ci,code,prompt,existingApp,ghPushed){
   if(existingApp){
-    const idx=ST.apps.findIndex(a=>a.id===id);
+    var idx=-1;
+    for(var i=0;i<ST.apps.length;i++){if(ST.apps[i].id===id){idx=i;break;}}
     if(idx!==-1){
-      ST.apps[idx].versions=[{code:ST.apps[idx].code,ts:ST.apps[idx].updatedAt},...(ST.apps[idx].versions||[])].slice(0,10);
-      ST.apps[idx].prompts=[...(ST.apps[idx].prompts||[]),{text:prompt,ts:new Date().toISOString(),type:'update'}];
-      Object.assign(ST.apps[idx],{code,updatedAt:new Date().toISOString(),ghPushed:ghPushed||ST.apps[idx].ghPushed||false});
+      ST.apps[idx].versions=[{code:ST.apps[idx].code,ts:ST.apps[idx].updatedAt}].concat((ST.apps[idx].versions||[]).slice(0,9));
+      ST.apps[idx].prompts=(ST.apps[idx].prompts||[]).concat([{text:prompt,ts:new Date().toISOString(),type:'update'}]);
+      ST.apps[idx].code=code;
+      ST.apps[idx].updatedAt=new Date().toISOString();
+      ST.apps[idx].ghPushed=ghPushed||ST.apps[idx].ghPushed||false;
     }else{
-      ST.apps.unshift({id,name,icon,ci,desc:prompt.slice(0,90),code,versions:[],prompts:[{text:prompt,ts:new Date().toISOString(),type:'update'}],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),ghPushed});
+      ST.apps.unshift({id:id,name:name,icon:icon,ci:ci,desc:prompt.slice(0,90),code:code,versions:[],prompts:[{text:prompt,ts:new Date().toISOString(),type:'update'}],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),ghPushed:ghPushed});
     }
   }else{
-    if(!ST.apps.find(a=>a.id===id)){
-      ST.apps.unshift({id,name,icon,ci,desc:prompt.slice(0,90)+(prompt.length>90?'\u2026':''),code,versions:[],prompts:[{text:prompt,ts:new Date().toISOString(),type:'initial'}],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),ghPushed});
+    var exists=false;for(var j=0;j<ST.apps.length;j++){if(ST.apps[j].id===id){exists=true;break;}}
+    if(!exists){
+      ST.apps.unshift({id:id,name:name,icon:icon,ci:ci,desc:prompt.slice(0,90),code:code,versions:[],prompts:[{text:prompt,ts:new Date().toISOString(),type:'initial'}],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),ghPushed:ghPushed});
     }
   }
   persist();
-  const app=ST.apps.find(a=>a.id===id);
+  var app=null;for(var k=0;k<ST.apps.length;k++){if(ST.apps[k].id===id){app=ST.apps[k];break;}}
   if(app)pushToSupabase(app);
 }
 
-/* ════════ AI CALLS ════════ */
-// iOS Safari has known issues with AbortController + fetch when opts are spread.
-// We use a race-based timeout instead — no signal passed to fetch at all.
-// This avoids the "Load failed" WebKit bug where signal in spread opts causes
-// the request to silently abort before it even starts.
-// We call _nativeFetch directly to avoid any wrapper overhead on AI calls,
-// but still run the key guard validation.
-function fetchWithTimeout(url,opts,ms=120000){
-  _validateKeyedRequest(url,opts); // enforce key safety even though we bypass window.fetch
-  let timer;
-  const req=_nativeFetch.call(window,url,opts).then(r=>{clearTimeout(timer);return r;},e=>{clearTimeout(timer);throw e;});
-  const timeout=new Promise((_,reject)=>{
-    timer=setTimeout(()=>reject(new Error('Request timed out after '+(ms/1000)+'s — check your network connection')),ms);
+/* ======== AI CALLS ======== */
+function fetchWithTimeout(url,opts,ms){
+  ms=ms||120000;
+  _validateKeyedRequest(url,opts);
+  var timer;
+  var req=_nativeFetch.call(window,url,opts).then(function(r){clearTimeout(timer);return r;},function(e){clearTimeout(timer);throw e;});
+  var timeout=new Promise(function(_,reject){
+    timer=setTimeout(function(){reject(new Error('Request timed out'));},ms);
   });
   return Promise.race([req,timeout]);
 }
 
-// Translate raw network errors into actionable messages
 function classifyFetchError(e,api){
-  const msg=String(e?.message||e||'');
-  if(msg.includes('timed out'))return api+': Request timed out. Check your internet connection and try again.';
-  if(msg.toLowerCase().includes('load failed')||msg.toLowerCase().includes('failed to fetch')||msg.toLowerCase().includes('networkerror'))
-    return api+': Network error — check your internet connection. On iOS, large requests can fail; try a shorter prompt.';
-  if(msg.includes('abort'))return api+': Request was cancelled.';
+  var msg=String(e&&e.message||e||'');
+  if(msg.indexOf('timed out')>=0)return api+': Request timed out.';
+  if(msg.toLowerCase().indexOf('load failed')>=0||msg.toLowerCase().indexOf('failed to fetch')>=0)
+    return api+': Network error \u2014 check your internet connection.';
   return api+': '+msg;
 }
 
-async function callClaude(sys,msg){
-  let r;
-  try{
-    r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,system:sys,messages:[{role:'user',content:msg}]}),
-    },120000);
-  }catch(e){
+function callClaude(sys,msg){
+  return fetchWithTimeout('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,system:sys,messages:[{role:'user',content:msg}]}),
+  },120000).then(function(r){
+    if(!r.ok)return r.json().catch(function(){return{};}).then(function(e){throw new Error('Claude: '+scrubKeys((e.error&&e.error.message)||'HTTP '+r.status));});
+    return r.json();
+  }).then(function(d){
+    var code=(d.content&&d.content[0]&&d.content[0].text)||'';
+    code=code.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
+    if(code.indexOf('<html')<0&&code.indexOf('<!DOCTYPE')<0)throw new Error('Claude returned an unexpected response format');
+    return code;
+  }).catch(function(e){
+    if(e.message&&e.message.indexOf('Claude:')===0)throw e;
     throw new Error(classifyFetchError(e,'Claude'));
-  }
-  if(!r.ok){
-    const e=await r.json().catch(()=>({}));
-    throw new Error('Claude: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
-  }
-  const d=await r.json();
-  let code=d.content?.[0]?.text||'';
-  code=code.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
-  if(!code.includes('<html')&&!code.includes('<!DOCTYPE'))throw new Error('Claude returned an unexpected response format — please try again');
-  return code;
+  });
 }
 
-// Like callClaude but for non-HTML responses (JSON, text) — no HTML validation
-async function callClaudeRaw(sys,msg,maxTokens=4000){
-  let r;
-  try{
-    r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system:sys,messages:[{role:'user',content:msg}]}),
-    },60000);
-  }catch(e){
+function callClaudeRaw(sys,msg,maxTokens){
+  maxTokens=maxTokens||4000;
+  return fetchWithTimeout('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':ST.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system:sys,messages:[{role:'user',content:msg}]}),
+  },60000).then(function(r){
+    if(!r.ok)return r.json().catch(function(){return{};}).then(function(e){throw new Error('Claude: '+scrubKeys((e.error&&e.error.message)||'HTTP '+r.status));});
+    return r.json();
+  }).then(function(d){
+    var raw=(d.content&&d.content[0]&&d.content[0].text)||'';
+    return raw.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
+  }).catch(function(e){
+    if(e.message&&e.message.indexOf('Claude:')===0)throw e;
     throw new Error(classifyFetchError(e,'Claude'));
-  }
-  if(!r.ok){
-    const e=await r.json().catch(()=>({}));
-    throw new Error('Claude: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
-  }
-  const d=await r.json();
-  let raw=d.content?.[0]?.text||'';
-  // Strip markdown fences if present
-  return raw.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
+  });
 }
 
-async function callGPT(code){
-  let r;
-  try{
-    r=await fetchWithTimeout('https://api.openai.com/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+ST.gptKey},
-      body:JSON.stringify({model:'gpt-4o',max_tokens:2000,temperature:0.1,messages:[{role:'system',content:SYS_AUDIT},{role:'user',content:'Audit:\n\n'+code.slice(0,20000)}]}),
-    },60000);
-  }catch(e){
+function callGPT(code){
+  return fetchWithTimeout('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+ST.gptKey},
+    body:JSON.stringify({model:'gpt-4o',max_tokens:2000,temperature:0.1,messages:[{role:'system',content:SYS_AUDIT},{role:'user',content:'Audit:\n\n'+code.slice(0,20000)}]}),
+  },60000).then(function(r){
+    if(!r.ok)return r.json().catch(function(){return{};}).then(function(e){throw new Error('GPT: '+scrubKeys((e.error&&e.error.message)||'HTTP '+r.status));});
+    return r.json();
+  }).then(function(d){
+    var raw=(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||'[]';
+    raw=raw.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
+    try{var p=JSON.parse(raw);return Array.isArray(p)?p:[];}catch(e){return[];}
+  }).catch(function(e){
+    if(e.message&&e.message.indexOf('GPT:')===0)throw e;
     throw new Error(classifyFetchError(e,'GPT'));
-  }
-  if(!r.ok){
-    const e=await r.json().catch(()=>({}));
-    throw new Error('GPT: '+scrubKeys(e.error?.message||`HTTP ${r.status}`));
-  }
-  const d=await r.json();
-  let raw=d.choices?.[0]?.message?.content||'[]';
-  raw=raw.replace(/^```[\w]*\n?/,'').replace(/\n?```$/,'').trim();
-  try{const p=JSON.parse(raw);return Array.isArray(p)?p:[];}catch{return[];}
+  });
 }
 
-/* ════════ APP ACTIONS — STUDIO ════════ */
+/* ======== APP ACTIONS — STUDIO ======== */
 function openApp(id){
-  const app=ST.apps.find(a=>a.id===id);if(!app)return;
+  var app=null;for(var i=0;i<ST.apps.length;i++){if(ST.apps[i].id===id){app=ST.apps[i];break;}}
+  if(!app)return;
   ST.viewingApp=app;
-  ST.activeAppId=id; // keep active so studio editor can rebuild
-
-  // Vbar
+  ST.activeAppId=id;
   $('vbar-name').textContent=app.icon+' '+app.name;
-  const url=ghPageUrl(id);
-  $('vbar-url').textContent=url||'Saved locally — no live URL';
+  var url=ghPageUrl(id);
+  $('vbar-url').textContent=url||'Saved locally';
   $('vbar-url').dataset.url=url||'';
-
-  // iframe — always use srcdoc for instant display
   $('viewer-iframe').removeAttribute('src');
   $('viewer-iframe').srcdoc=app.code||'<html><body style="background:#111;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>No code found.</p></body></html>';
-
-  // Studio editor
   $('se-textarea').value='';
   autoResizeSe($('se-textarea'));
-
-  // Show live URL button if available
-  const liveBtn=$('se-liveurl-btn');
-  if(liveBtn){liveBtn.style.display=url?'block':'none';liveBtn.onclick=()=>copyToClipboard(url,'URL');}
-
-  // Reset viewer to normal mode (not preview-approval mode)
+  var liveBtn=$('se-liveurl-btn');
+  if(liveBtn){liveBtn.style.display=url?'block':'none';liveBtn.onclick=function(){copyToClipboard(url,'URL');};}
   _previewPid=null;
   $('vbar-approve-row').style.display='none';
   $('vbar-btns').style.display='flex';
-  $('vback').title='';
-
-  // Restore non-fullscreen mode if it was left fullscreen from a prior session
   if(ST._studioFullscreen)studioSetFullscreen(false);
-
-  closeBuilder();
-  closeProject();
+  closeBuilder();closeProject();
   showScreen('viewer');
 }
 
@@ -1898,477 +1643,356 @@ function autoResizeSe(el){el.style.height='auto';el.style.height=Math.min(el.scr
 
 function studioSetFullscreen(full){
   ST._studioFullscreen=full;
-  const ed=$('studio-editor');
-  const btn=$('vbar-fs-toggle');
+  var ed=$('studio-editor'),btn=$('vbar-fs-toggle');
   if(full){
     ed.classList.add('fullscreen-mode');
-    if(btn)btn.textContent='⊡';
-    if(btn)btn.title='Exit full screen';
+    if(btn){btn.textContent='\u229E';btn.title='Exit full screen';}
   }else{
     ed.classList.remove('fullscreen-mode');
-    if(btn)btn.textContent='⛶';
-    if(btn)btn.title='Full screen preview';
+    if(btn){btn.textContent='\u26F6';btn.title='Full screen preview';}
   }
 }
 
-async function studioSend(){
-  const text=$('se-textarea').value.trim();
+function studioSend(){
+  var text=$('se-textarea').value.trim();
   if(!text)return;
-  if(ST._building){
-    toast('A build is already running — wait for it to finish',3000);
-    return;
-  }
-  if(!ST.key){toast('Add your Anthropic API key in ⚙️ Settings first',4000);return;}
-  const app=ST.apps.find(a=>a.id===ST.activeAppId);
-  if(!app){toast('No app selected — go back and open an app first',3000);return;}
-
-  $('se-textarea').value='';
-  autoResizeSe($('se-textarea'));
+  if(ST._building){toast('A build is already running',3000);return;}
+  if(!ST.key){toast('Add your Anthropic API key in Settings first',4000);return;}
+  var app=null;for(var i=0;i<ST.apps.length;i++){if(ST.apps[i].id===ST.activeAppId){app=ST.apps[i];break;}}
+  if(!app){toast('No app selected',3000);return;}
+  $('se-textarea').value='';autoResizeSe($('se-textarea'));
   $('se-send').disabled=true;
-
-  // Open builder sheet WITHOUT resetting chat if already focused on this app.
-  // openBuilder always calls resetChat(), which destroys pipeline history.
-  // Instead: only do a full reset if switching to a different app.
-  const sheetAlreadyReady=(ST.activeAppId===app.id&&$('bs-title').textContent.includes(app.name));
-  if(!sheetAlreadyReady){
-    // Different app or first time — do the full open (sets title, sub, etc.)
-    $('bs-title').textContent='Editing: '+app.name;
-    $('bs-sub').textContent='Describe changes — new branch → checks → fix → preview → merge';
-    $('bs-proj-btn').style.display='flex';
-    ST.pendingIcon=app.icon||'🎯';
-    ST.pendingColor=app.ci??0;
-    $('emoji-pick-btn').textContent=ST.pendingIcon;
-  }
-  // Just open the sheet — keep existing chat messages
+  $('bs-title').textContent='Editing: '+app.name;
+  $('bs-sub').textContent='Describe changes';
+  $('bs-proj-btn').style.display='flex';
+  ST.pendingIcon=app.icon||'\uD83C\uDFAF';
+  ST.pendingColor=app.ci||0;
+  $('emoji-pick-btn').textContent=ST.pendingIcon;
   $('builder-sheet').classList.add('open');
-
-  setTimeout(()=>{
-    addMsg({role:'user',text});
-    runPipeline(text,app).finally(()=>{
-      $('se-send').disabled=false;
-    });
+  setTimeout(function(){
+    addMsg({role:'user',text:text});
+    runPipeline(text,app);
+    $('se-send').disabled=false;
   },80);
 }
 
 function openCurrentInViewer(){
-  const id=ST.projectAppId||ST.activeAppId;
+  var id=ST.projectAppId||ST.activeAppId;
   if(id){openApp(id);closeProject();}
 }
 
 function copyToClipboard(text,label){
   if(navigator.clipboard&&window.isSecureContext){
-    navigator.clipboard.writeText(text)
-      .then(()=>toast((label||'Text')+' copied!'))
-      .catch(()=>{
-        // Clipboard API failed — try execCommand fallback
-        fallbackCopy(text,label);
-      });
-  }else{
-    fallbackCopy(text,label);
-  }
+    navigator.clipboard.writeText(text).then(function(){toast((label||'Text')+' copied!');}).catch(function(){fallbackCopy(text,label);});
+  }else{fallbackCopy(text,label);}
 }
 function fallbackCopy(text,label){
   try{
-    const ta=document.createElement('textarea');
-    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+    var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
     toast((label||'Text')+' copied!');
-  }catch{toast('Could not copy — try selecting manually',4000);}
+  }catch(e){toast('Could not copy',4000);}
 }
-
-function copyViewerUrl(){
-  const url=$('vbar-url').dataset.url;
-  if(url)copyToClipboard(url,'URL');
-  else toast('No live URL yet — push to GitHub first',3000);
-}
-
+function copyViewerUrl(){var url=$('vbar-url').dataset.url;if(url)copyToClipboard(url,'URL');else toast('No live URL yet',3000);}
 function copyUrl(){
-  const app=ST.apps.find(a=>a.id===(ST.projectAppId||ST.activeAppId));
+  var app=null;var id=ST.projectAppId||ST.activeAppId;
+  for(var i=0;i<ST.apps.length;i++){if(ST.apps[i].id===id){app=ST.apps[i];break;}}
   if(app&&app.ghPushed&&ghPageUrl(app.id))copyToClipboard(ghPageUrl(app.id),'URL');
-  else toast('Push to GitHub first to get a live URL',3000);
+  else toast('Push to GitHub first',3000);
 }
 
 function delApp(id){
-  if(!confirm('Delete this app locally? (GitHub file remains)'))return;
-  ST.apps=ST.apps.filter(a=>a.id!==id);
-  persist();
-  renderGrid();
+  if(!confirm('Delete this app locally?'))return;
+  ST.apps=ST.apps.filter(function(a){return a.id!==id;});
+  persist();renderGrid();
   if(ST.activeAppId===id)ST.activeAppId=null;
-  if(ST.viewingApp?.id===id){
+  if(ST.viewingApp&&ST.viewingApp.id===id){
     ST.viewingApp=null;
-    // If we're currently in the Studio viewing this app, go back to home
-    if($('s-viewer').classList.contains('active')){
-      showScreen('home');renderGrid();
-    }
+    if($('s-viewer').classList.contains('active')){showScreen('home');renderGrid();}
   }
   if(ST.projectAppId===id){ST.projectAppId=null;closeProject();}
   toast('App deleted locally');
 }
 
 function editCurrentApp(){
-  const id=ST.projectAppId||ST.activeAppId;
+  var id=ST.projectAppId||ST.activeAppId;
   if(id){closeProject();openBuilder(id);}
 }
 
-/* ════════ PROJECT SHEET ════════ */
+/* ======== PROJECT SHEET ======== */
 function openProjectSheet(id){
   ST.projectAppId=id;
-  const app=ST.apps.find(a=>a.id===id);if(!app)return;
-  const g=grad(app.ci);
-  const url=app.ghPushed?ghPageUrl(id):'Not yet pushed to GitHub';
-
+  var app=null;for(var i=0;i<ST.apps.length;i++){if(ST.apps[i].id===id){app=ST.apps[i];break;}}
+  if(!app)return;
+  var g=grad(app.ci);
   $('psh-icon').textContent=app.icon;
   $('psh-icon').style.background=g;
   $('psh-name').textContent=app.name;
-  $('psh-url-line').textContent=app.ghPushed?ghPageUrl(id):'Local only — not pushed yet';
+  $('psh-url-line').textContent=app.ghPushed?ghPageUrl(id):'Local only';
   $('proj-url-display').textContent=app.ghPushed?ghPageUrl(id):'Push to GitHub to get a live URL';
-  $('proj-status').textContent=app.ghPushed?'✓ Live on GitHub Pages':'Saved locally only';
-  $('proj-path').textContent=`apps/${id}.html`;
+  $('proj-status').textContent=app.ghPushed?'\u2713 Live on GitHub Pages':'Saved locally only';
+  $('proj-path').textContent='apps/'+id+'.html';
   $('proj-created').textContent=fmtDate(app.createdAt);
   $('proj-updated').textContent=fmtDate(app.updatedAt);
-  $('proj-builds').textContent=(app.prompts?.length||1)+' build'+(((app.prompts?.length||1)!==1)?'s':'');
-
-  // Prompt history
-  const ph=$('prompt-history');
-  const prompts=app.prompts||[{text:app.desc||'Initial build',ts:app.createdAt,type:'initial'}];
-  ph.innerHTML=prompts.slice().reverse().map((p,i)=>`
-    <div class="ph-item">
-      <div class="ph-meta">
-        <span class="ph-tag">${p.type==='initial'?'🔨 Initial Build':'✏️ Update'}</span>
-        <span class="ph-date">${fmtDate(p.ts)}</span>
-      </div>
-      <div class="ph-text">${esc(p.text)}</div>
-    </div>`).join('');
-
+  $('proj-builds').textContent=((app.prompts&&app.prompts.length)||1)+' build'+((((app.prompts&&app.prompts.length)||1)!==1)?'s':'');
+  var ph=$('prompt-history');
+  var prompts=app.prompts||[{text:app.desc||'Initial build',ts:app.createdAt,type:'initial'}];
+  var phhtml='';
+  for(var j=prompts.length-1;j>=0;j--){
+    var p=prompts[j];
+    phhtml+='<div class="ph-item"><div class="ph-meta"><span class="ph-tag">'+(p.type==='initial'?'\uD83D\uDD28 Initial Build':'\u270F\uFE0F Update')+'</span><span class="ph-date">'+fmtDate(p.ts)+'</span></div><div class="ph-text">'+esc(p.text)+'</div></div>';
+  }
+  ph.innerHTML=phhtml;
   $('project-sheet').classList.add('open');
 }
-function closeProject(){$('project-sheet').classList.remove('open');ST.projectAppId=null;}
+function closeProject(){$('project-sheet').classList.remove('on');$('project-sheet').classList.remove('open');ST.projectAppId=null;}
 
-/* ════════ SETTINGS ════════ */
+/* ======== SETTINGS ======== */
 function openSettings(){
   $('s-anth').value=ST.key;$('s-gpt').value=ST.gptKey;
   $('s-gh-token').value=ST.ghToken;$('s-gh-user').value=ST.ghUser;$('s-gh-repo').value=ST.ghRepo;
   $('s-sb-url').value=ST.sbUrl;$('s-sb-anon').value=ST.sbAnon;
   $('s-audit-pill').classList.toggle('on',ST.auditEnabled);
   $('s-sync-pill').classList.toggle('on',ST.sbEnabled);
-  const bp=$('s-backend-pill');if(bp)bp.classList.toggle('on',ST.backendEnabled);
+  var bp=$('s-backend-pill');if(bp)bp.classList.toggle('on',ST.backendEnabled);
   $('s-sb-exp').style.display=ST.sbEnabled?'flex':'none';
-  const ksc=$('key-safety-card');
-  if(ksc)ksc.innerHTML=keyStatusHTML();
+  var ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
   $('settings-overlay').classList.add('on');
 }
 
-/* ════════ SUPABASE ════════ */
-async function pushToSupabase(app){
-  if(!ST.sbEnabled||!ST.sbUrl||!ST.sbAnon||!app?.id)return;
-  // Build payload explicitly — only app data fields, never any key material
-  const safePayload={
-    id:         app.id,
-    name:       app.name,
-    icon:       app.icon,
-    color_index:app.ci,
-    description:app.desc,
-    code:       app.code,
-    prompts:    app.prompts||[],
-    gh_pushed:  app.ghPushed||false,
-    created_at: app.createdAt,
-    updated_at: app.updatedAt,
-    // Explicitly excluded: ST.key, ST.gptKey, ST.ghToken, ST.sbAnon
-  };
-  try{
-    await fetch(`${ST.sbUrl}/rest/v1/builder_apps`,{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'apikey':ST.sbAnon,
-        'Authorization':'Bearer '+ST.sbAnon,
-        'Prefer':'resolution=merge-duplicates',
-      },
-      body:JSON.stringify(safePayload),
-    });
-  }catch(e){
-    // Scrub keys from any error message before logging
-    console.warn('Supabase push failed:',scrubKeys(e.message));
-  }
+/* ======== SUPABASE ======== */
+function pushToSupabase(app){
+  if(!ST.sbEnabled||!ST.sbUrl||!ST.sbAnon||!app||!app.id)return;
+  var safePayload={id:app.id,name:app.name,icon:app.icon,color_index:app.ci,description:app.desc,code:app.code,prompts:app.prompts||[],gh_pushed:app.ghPushed||false,created_at:app.createdAt,updated_at:app.updatedAt};
+  fetch(ST.sbUrl+'/rest/v1/builder_apps',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':ST.sbAnon,'Authorization':'Bearer '+ST.sbAnon,'Prefer':'resolution=merge-duplicates'},
+    body:JSON.stringify(safePayload),
+  }).catch(function(e){console.warn('Supabase push failed:',scrubKeys(e.message));});
 }
 
-async function pullFromSupabase(){
+function pullFromSupabase(){
   if(!ST.sbUrl||!ST.sbAnon){toast('No Supabase credentials');return;}
-  try{
-    const r=await fetch(`${ST.sbUrl}/rest/v1/builder_apps?select=*&order=created_at.desc`,{
-      headers:{'apikey':ST.sbAnon,'Authorization':'Bearer '+ST.sbAnon},
-    });
-    const data=await r.json();if(!Array.isArray(data))throw new Error('Bad response');
-    const ids=new Set(data.map(a=>a.id));
-    // Map only app fields — never write any keys into app records
-    ST.apps=[
-      ...data.map(d=>({
-        id:d.id,name:d.name,icon:d.icon,ci:d.color_index,
-        desc:d.description,code:d.code,versions:[],
-        prompts:d.prompts||[],ghPushed:d.gh_pushed||false,
-        createdAt:d.created_at,updatedAt:d.updated_at,
-      })),
-      ...ST.apps.filter(a=>!ids.has(a.id)),
-    ];
-    persist();renderGrid();toast(`Pulled ${data.length} apps ☁️`);
-  }catch(e){toast('Pull failed: '+scrubKeys(e.message),4000);}
+  fetch(ST.sbUrl+'/rest/v1/builder_apps?select=*&order=created_at.desc',{
+    headers:{'apikey':ST.sbAnon,'Authorization':'Bearer '+ST.sbAnon},
+  }).then(function(r){return r.json();}).then(function(data){
+    if(!Array.isArray(data))throw new Error('Bad response');
+    var ids={};data.forEach(function(a){ids[a.id]=true;});
+    var mapped=data.map(function(d){return{id:d.id,name:d.name,icon:d.icon,ci:d.color_index,desc:d.description,code:d.code,versions:[],prompts:d.prompts||[],ghPushed:d.gh_pushed||false,createdAt:d.created_at,updatedAt:d.updated_at};});
+    ST.apps=mapped.concat(ST.apps.filter(function(a){return !ids[a.id];}));
+    persist();renderGrid();toast('Pulled '+data.length+' apps \u2601\uFE0F');
+  }).catch(function(e){toast('Pull failed: '+scrubKeys(e.message),4000);});
 }
 
-/* ════════ INPUT ════════ */
+/* ======== INPUT ======== */
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 
-/* ════════ INIT ════════ */
+/* ======== INIT ======== */
 function init(){
   hydrate();
 
-  // Emoji grid
-  $('emoji-grid').innerHTML=EMOJIS.map(e=>`<button class="egi" onclick="pickEmoji('${e}')">${e}</button>`).join('');
+  $('emoji-grid').innerHTML=EMOJIS.map(function(e){return '<button class="egi" onclick="pickEmoji(\''+e+'\')">'+e+'</button>';}).join('');
 
-  // Route to home if key exists, otherwise onboarding
   if(ST.key){showScreen('home');renderGrid();}
   else showScreen('onboard');
 
-  // ── Onboarding ──
-  $('ob-gpt').addEventListener('input',()=>{
-    const v=$('ob-gpt').value.trim();
+  // Onboarding
+  $('ob-gpt').addEventListener('input',function(){
+    var v=$('ob-gpt').value.trim();
     $('gpt-dot').className='gdot'+(v?' on':'');
     $('gst-m').textContent=v?'GPT-4o Audit: Active':'GPT-4o Audit: Off';
-    $('gst-s').textContent=v?'Code will be reviewed & bugs auto-fixed':'Add OpenAI key to enable bug scanning';
+    $('gst-s').textContent=v?'Code will be reviewed':'Add OpenAI key to enable bug scanning';
   });
 
-  // GitHub live validation — don't mutate ST until submit, just show UI feedback
-  let ghTimer;
-  let _obSubmitted=false; // guard: prevent async validation restore from wiping committed values
-  const ghValidate=()=>{
+  var ghTimer;
+  var _obSubmitted=false;
+  var ghValidate=function(){
     clearTimeout(ghTimer);
-    const t=$('ob-gh-token').value.trim(),u=$('ob-gh-user').value.trim(),r=$('ob-gh-repo').value.trim();
+    var t=$('ob-gh-token').value.trim(),u=$('ob-gh-user').value.trim(),r=$('ob-gh-repo').value.trim();
     if(!t||!u||!r){$('gh-dot').className='gh-dot';$('gh-st-m').textContent='GitHub: Not connected (optional)';$('gh-st-s').textContent='Without GitHub, apps save locally only';return;}
-    $('gh-dot').className='gh-dot';$('gh-st-m').textContent='Validating…';$('gh-st-s').textContent='';
-    ghTimer=setTimeout(async()=>{
-      // Only temporarily set for test — final values written on submit
-      const prevToken=ST.ghToken,prevUser=ST.ghUser,prevRepo=ST.ghRepo;
+    $('gh-dot').className='gh-dot';$('gh-st-m').textContent='Validating\u2026';$('gh-st-s').textContent='';
+    ghTimer=setTimeout(function(){
+      var prevToken=ST.ghToken,prevUser=ST.ghUser,prevRepo=ST.ghRepo;
       ST.ghToken=t;ST.ghUser=u;ST.ghRepo=r;
-      const ok=await testGitHub();
-      // Only restore if submit hasn't already committed new values
-      if(!_obSubmitted){ST.ghToken=prevToken;ST.ghUser=prevUser;ST.ghRepo=prevRepo;}
-      $('gh-dot').className='gh-dot '+(ok?'ok':'err');
-      $('gh-st-m').textContent=ok?`✓ Connected: ${u}/${r}`:'✗ Connection failed';
-      $('gh-st-s').textContent=ok?`Apps will push to github.com/${u}/${r}`:'Check token has "repo" scope and repo exists';
+      testGitHub().then(function(ok){
+        if(!_obSubmitted){ST.ghToken=prevToken;ST.ghUser=prevUser;ST.ghRepo=prevRepo;}
+        $('gh-dot').className='gh-dot '+(ok?'ok':'err');
+        $('gh-st-m').textContent=ok?'\u2713 Connected: '+u+'/'+r:'\u2717 Connection failed';
+        $('gh-st-s').textContent=ok?'Apps will push to github.com/'+u+'/'+r:'Check token has "repo" scope';
+      });
     },900);
   };
-  ['ob-gh-token','ob-gh-user','ob-gh-repo'].forEach(id=>$(id).addEventListener('input',ghValidate));
+  ['ob-gh-token','ob-gh-user','ob-gh-repo'].forEach(function(id){$(id).addEventListener('input',ghValidate);});
 
-  let obSbOn=false;
-  $('ob-sb-tog').addEventListener('click',()=>{obSbOn=!obSbOn;$('ob-sb-pill').classList.toggle('on',obSbOn);$('ob-sb-exp').classList.toggle('open',obSbOn);});
-  $('ob-submit').addEventListener('click',()=>{
-    clearTimeout(ghTimer); // cancel any pending validation
-    _obSubmitted=true;     // prevent in-flight testGitHub() from restoring old values
-    const k=$('ob-anth').value.trim();
+  var obSbOn=false;
+  $('ob-sb-tog').addEventListener('click',function(){obSbOn=!obSbOn;$('ob-sb-pill').classList.toggle('on',obSbOn);$('ob-sb-exp').classList.toggle('open',obSbOn);});
+  $('ob-submit').addEventListener('click',function(){
+    clearTimeout(ghTimer);_obSubmitted=true;
+    var k=$('ob-anth').value.trim();
     if(!k){toast('Anthropic API key is required!');return;}
-    // GitHub is optional — skip if fields are empty (local-only mode)
-    const ghT=$('ob-gh-token').value.trim(),ghU=$('ob-gh-user').value.trim(),ghR=$('ob-gh-repo').value.trim();
-    const hasGh=ghT&&ghU&&ghR;
-    if((ghT||ghU||ghR)&&!hasGh){toast('Enter all three GitHub fields, or leave all blank for local-only mode');return;}
+    var ghT=$('ob-gh-token').value.trim(),ghU=$('ob-gh-user').value.trim(),ghR=$('ob-gh-repo').value.trim();
+    var hasGh=ghT&&ghU&&ghR;
+    if((ghT||ghU||ghR)&&!hasGh){toast('Enter all three GitHub fields, or leave all blank');return;}
     ST.key=k;ST.gptKey=$('ob-gpt').value.trim();
     ST.ghToken=ghT;ST.ghUser=ghU;ST.ghRepo=ghR;
     ST.sbUrl=$('ob-sb-url').value.trim();ST.sbAnon=$('ob-sb-anon').value.trim();
     ST.sbEnabled=obSbOn;saveKeys();
     showScreen('home');renderGrid();
-    toast(hasGh?'The Builder is ready — GitHub connected ⚡':'The Builder is ready (local-only mode) ⚡',3500);
+    toast(hasGh?'The Builder is ready \u2014 GitHub connected \u26A1':'The Builder is ready (local-only mode) \u26A1',3500);
   });
 
-  // ── Builder sheet ──
+  // Builder sheet
   $('bs-close').addEventListener('click',closeBuilder);
-  $('builder-sheet').addEventListener('click',e=>{if(e.target.id==='builder-sheet')closeBuilder();});
-  $('bs-proj-btn').addEventListener('click',()=>{if(ST.activeAppId)openProjectSheet(ST.activeAppId);});
-  let shY=0;
-  $('bs-handle').addEventListener('touchstart',e=>{if(e.touches[0])shY=e.touches[0].clientY;},{passive:true});
-  $('bs-handle').addEventListener('touchend',e=>{if(e.changedTouches[0]&&e.changedTouches[0].clientY-shY>55)closeBuilder();},{passive:true});
+  $('builder-sheet').addEventListener('click',function(e){if(e.target.id==='builder-sheet')closeBuilder();});
+  $('bs-proj-btn').addEventListener('click',function(){if(ST.activeAppId)openProjectSheet(ST.activeAppId);});
+  var shY=0;
+  $('bs-handle').addEventListener('touchstart',function(e){if(e.touches[0])shY=e.touches[0].clientY;},{passive:true});
+  $('bs-handle').addEventListener('touchend',function(e){if(e.changedTouches[0]&&e.changedTouches[0].clientY-shY>55)closeBuilder();},{passive:true});
 
-  // ── Input ──
-  const inp=$('chat-input');
-  inp.addEventListener('input',()=>autoResize(inp));
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+  // Input
+  var inp=$('chat-input');
+  inp.addEventListener('input',function(){autoResize(inp);});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
   $('send-btn').addEventListener('click',sendMsg);
-  $('emoji-pick-btn').addEventListener('click',()=>$('emoji-overlay').classList.add('on'));
-  $('emoji-overlay').addEventListener('click',e=>{if(e.target.id==='emoji-overlay')$('emoji-overlay').classList.remove('on');});
+  $('emoji-pick-btn').addEventListener('click',function(){$('emoji-overlay').classList.add('on');});
+  $('emoji-overlay').addEventListener('click',function(e){if(e.target.id==='emoji-overlay')$('emoji-overlay').classList.remove('on');});
 
-  // ── Viewer / Studio ──
-  $('vback').addEventListener('click',()=>{
+  // Viewer / Studio
+  $('vback').addEventListener('click',function(){
     if(_previewPid){
       _previewPid=null;
       $('vbar-approve-row').style.display='none';
       $('vbar-btns').style.display='flex';
-      renderGrid();
-      showScreen('home');
+      renderGrid();showScreen('home');
       $('builder-sheet').classList.add('open');
     }else{
-      // If came from studio, go back to home with grid
       showScreen('home');renderGrid();
     }
   });
   $('vbar-approve').addEventListener('click',function(){
     if(!_previewPid)return;
-    const pid=_previewPid;_previewPid=null;
-    this.disabled=true;$('vbar-req-changes').disabled=true;this.textContent='Merging…';
-    approveAndMerge(pid);
+    var pid3=_previewPid;_previewPid=null;
+    this.disabled=true;$('vbar-req-changes').disabled=true;this.textContent='Merging\u2026';
+    approveAndMerge(pid3);
     $('vbar-approve-row').style.display='none';$('vbar-btns').style.display='flex';
     $('builder-sheet').classList.add('open');showScreen('home');
   });
   $('vbar-req-changes').addEventListener('click',function(){
     if(!_previewPid)return;
-    const pid=_previewPid;_previewPid=null;
+    var pid4=_previewPid;_previewPid=null;
     this.disabled=true;$('vbar-approve').disabled=true;
-    requestChanges(pid);
+    requestChanges(pid4);
     $('vbar-approve-row').style.display='none';$('vbar-btns').style.display='flex';
     $('builder-sheet').classList.add('open');showScreen('home');
   });
-  $('vbar-proj').addEventListener('click',()=>{if(ST.viewingApp)openProjectSheet(ST.viewingApp.id);});
+  $('vbar-proj').addEventListener('click',function(){if(ST.viewingApp)openProjectSheet(ST.viewingApp.id);});
+  $('vbar-fs-toggle').addEventListener('click',function(){studioSetFullscreen(!ST._studioFullscreen);});
 
-  // Full-screen toggle
-  $('vbar-fs-toggle').addEventListener('click',()=>studioSetFullscreen(!ST._studioFullscreen));
-
-  // Studio editor - collapse/expand
-  $('se-header-toggle').addEventListener('click',e=>{
-    if(e.target.closest('.se-hbtn'))return; // don't collapse if a button was clicked
-    const ed=$('studio-editor');
-    const isCollapsed=ed.classList.toggle('collapsed');
-    $('se-collapse-btn').textContent=isCollapsed?'▲ Show':'▼ Hide';
+  // Studio editor
+  $('se-header-toggle').addEventListener('click',function(e){
+    if(e.target.closest('.se-hbtn'))return;
+    var ed=$('studio-editor');
+    var isCollapsed=ed.classList.toggle('collapsed');
+    $('se-collapse-btn').textContent=isCollapsed?'\u25B2 Show':'\u25BC Hide';
   });
-  $('se-collapse-btn').addEventListener('click',e=>{
+  $('se-collapse-btn').addEventListener('click',function(e){
     e.stopPropagation();
-    const ed=$('studio-editor');
-    const isCollapsed=ed.classList.toggle('collapsed');
-    $('se-collapse-btn').textContent=isCollapsed?'▲ Show':'▼ Hide';
+    var ed=$('studio-editor');
+    var isCollapsed=ed.classList.toggle('collapsed');
+    $('se-collapse-btn').textContent=isCollapsed?'\u25B2 Show':'\u25BC Hide';
   });
-
-  // Studio editor - project button
-  $('se-proj-btn').addEventListener('click',()=>{if(ST.viewingApp)openProjectSheet(ST.viewingApp.id);});
-
-  // Studio editor - textarea auto-resize + send
-  const seInp=$('se-textarea');
-  seInp.addEventListener('input',()=>autoResizeSe(seInp));
-  seInp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();studioSend();}});
+  $('se-proj-btn').addEventListener('click',function(){if(ST.viewingApp)openProjectSheet(ST.viewingApp.id);});
+  var seInp=$('se-textarea');
+  seInp.addEventListener('input',function(){autoResizeSe(seInp);});
+  seInp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();studioSend();}});
   $('se-send').addEventListener('click',studioSend);
 
-  // Studio editor - drag handle to resize
+  // Drag handle
   (function(){
-    const handle=$('se-drag'),editor=$('studio-editor'),body=$('studio-body');
-    let startY=0,startH=0,dragging=false;
-    function onStart(clientY){
-      dragging=true;startY=clientY;startH=editor.offsetHeight;
-      // Disable CSS transition during drag for instant response
-      editor.style.transition='none';
-    }
-    function onMove(clientY){
-      if(!dragging)return;
-      const delta=startY-clientY;
-      const newH=Math.max(52,Math.min(startH+delta,body.offsetHeight-80));
-      editor.style.height=newH+'px';
-      editor.classList.remove('collapsed');
-      $('se-collapse-btn').textContent='▼ Hide';
-    }
-    function onEnd(){
-      if(!dragging)return;
-      dragging=false;
-      // Re-enable transition after drag ends
-      editor.style.transition='';
-    }
-    handle.addEventListener('touchstart',e=>{if(e.touches[0])onStart(e.touches[0].clientY);},{passive:true});
-    handle.addEventListener('touchmove',e=>{if(e.touches[0]){onMove(e.touches[0].clientY);e.preventDefault();}},{passive:false});
+    var handle=$('se-drag'),editor=$('studio-editor'),body=$('studio-body');
+    var startY=0,startH=0,dragging=false;
+    function onStart(clientY){dragging=true;startY=clientY;startH=editor.offsetHeight;editor.style.transition='none';}
+    function onMove(clientY){if(!dragging)return;var delta=startY-clientY;var newH=Math.max(52,Math.min(startH+delta,body.offsetHeight-80));editor.style.height=newH+'px';editor.classList.remove('collapsed');$('se-collapse-btn').textContent='\u25BC Hide';}
+    function onEnd(){if(!dragging)return;dragging=false;editor.style.transition='';}
+    handle.addEventListener('touchstart',function(e){if(e.touches[0])onStart(e.touches[0].clientY);},{passive:true});
+    handle.addEventListener('touchmove',function(e){if(e.touches[0]){onMove(e.touches[0].clientY);e.preventDefault();}},{passive:false});
     handle.addEventListener('touchend',onEnd,{passive:true});
-    handle.addEventListener('mousedown',e=>{onStart(e.clientY);});
-    document.addEventListener('mousemove',e=>{if(dragging)onMove(e.clientY);});
+    handle.addEventListener('mousedown',function(e){onStart(e.clientY);});
+    document.addEventListener('mousemove',function(e){if(dragging)onMove(e.clientY);});
     document.addEventListener('mouseup',onEnd);
   })();
 
-  // ── Project sheet ──
-  $('project-sheet').addEventListener('click',e=>{if(e.target.id==='project-sheet')closeProject();});
+  // Project sheet
+  $('project-sheet').addEventListener('click',function(e){if(e.target.id==='project-sheet')closeProject();});
 
-  // ── Context menu ──
-  $('ctx-open').addEventListener('click',()=>{if(_ctxId)openApp(_ctxId);closeCtx();});
-  $('ctx-proj').addEventListener('click',()=>{if(_ctxId)openProjectSheet(_ctxId);closeCtx();});
-  $('ctx-edit').addEventListener('click',()=>{if(_ctxId)openBuilder(_ctxId);closeCtx();});
-  $('ctx-del').addEventListener('click',()=>{if(_ctxId)delApp(_ctxId);closeCtx();});
-  document.addEventListener('click',e=>{if(!e.target.closest('#ctx-menu'))closeCtx();});
+  // Context menu
+  $('ctx-open').addEventListener('click',function(){if(_ctxId)openApp(_ctxId);closeCtx();});
+  $('ctx-proj').addEventListener('click',function(){if(_ctxId)openProjectSheet(_ctxId);closeCtx();});
+  $('ctx-edit').addEventListener('click',function(){if(_ctxId)openBuilder(_ctxId);closeCtx();});
+  $('ctx-del').addEventListener('click',function(){if(_ctxId)delApp(_ctxId);closeCtx();});
+  document.addEventListener('click',function(e){if(!e.target.closest('#ctx-menu'))closeCtx();});
 
-  // ── Settings ──
-  $('ssclose').addEventListener('click',()=>$('settings-overlay').classList.remove('on'));
-  $('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay')$('settings-overlay').classList.remove('on');});
-  $('s-save-ai').addEventListener('click',()=>{
-    ST.key=$('s-anth').value.trim();
-    ST.gptKey=$('s-gpt').value.trim();
-    saveKeys();
-    // Refresh key safety display with new redacted values
-    const ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
-    toast(ST.gptKey?'AI keys saved — GPT audit active ✓':'AI keys saved ✓');
+  // Settings
+  $('ssclose').addEventListener('click',function(){$('settings-overlay').classList.remove('on');});
+  $('settings-overlay').addEventListener('click',function(e){if(e.target.id==='settings-overlay')$('settings-overlay').classList.remove('on');});
+  $('s-save-ai').addEventListener('click',function(){
+    ST.key=$('s-anth').value.trim();ST.gptKey=$('s-gpt').value.trim();saveKeys();
+    var ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
+    toast(ST.gptKey?'AI keys saved \u2014 GPT audit active \u2713':'AI keys saved \u2713');
   });
-  $('s-save-gh').addEventListener('click',async()=>{
-    const ghT=$('s-gh-token').value.trim(),ghU=$('s-gh-user').value.trim(),ghR=$('s-gh-repo').value.trim();
-    if(!ghT||!ghU||!ghR){toast('Fill in all three GitHub fields first');return;}
-    ST.ghToken=ghT;ST.ghUser=ghU;ST.ghRepo=ghR;
-    saveKeys();
-    const ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
-    toast('Testing GitHub connection…');
-    const ok=await testGitHub();
-    toast(ok?`✓ GitHub connected: ${ST.ghUser}/${ST.ghRepo}`:'✗ GitHub test failed — check token & repo',4000);
+  $('s-save-gh').addEventListener('click',function(){
+    var ghT=$('s-gh-token').value.trim(),ghU=$('s-gh-user').value.trim(),ghR=$('s-gh-repo').value.trim();
+    if(!ghT||!ghU||!ghR){toast('Fill in all three GitHub fields');return;}
+    ST.ghToken=ghT;ST.ghUser=ghU;ST.ghRepo=ghR;saveKeys();
+    var ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
+    toast('Testing GitHub connection\u2026');
+    testGitHub().then(function(ok){toast(ok?'\u2713 GitHub connected: '+ST.ghUser+'/'+ST.ghRepo:'\u2717 GitHub test failed',4000);});
   });
-  $('s-audit-pill').addEventListener('click',()=>{ST.auditEnabled=!ST.auditEnabled;saveKeys();$('s-audit-pill').classList.toggle('on',ST.auditEnabled);toast(ST.auditEnabled?'GPT audit enabled':'GPT audit disabled');});
-  $('s-sync-pill').addEventListener('click',()=>{ST.sbEnabled=!ST.sbEnabled;saveKeys();$('s-sync-pill').classList.toggle('on',ST.sbEnabled);$('s-sb-exp').style.display=ST.sbEnabled?'flex':'none';toast(ST.sbEnabled?'Supabase sync enabled':'Sync disabled');});
-  $('s-save-sb').addEventListener('click',()=>{
-    const url=$('s-sb-url').value.trim(),anon=$('s-sb-anon').value.trim();
-    if(!url||!anon){toast('Enter both Supabase URL and Anon Key');return;}
-    ST.sbUrl=url;ST.sbAnon=anon;
-    saveKeys();
-    const ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
-    toast('Supabase credentials saved ✓');
+  $('s-audit-pill').addEventListener('click',function(){ST.auditEnabled=!ST.auditEnabled;saveKeys();$('s-audit-pill').classList.toggle('on',ST.auditEnabled);toast(ST.auditEnabled?'GPT audit enabled':'GPT audit disabled');});
+  $('s-sync-pill').addEventListener('click',function(){ST.sbEnabled=!ST.sbEnabled;saveKeys();$('s-sync-pill').classList.toggle('on',ST.sbEnabled);$('s-sb-exp').style.display=ST.sbEnabled?'flex':'none';toast(ST.sbEnabled?'Supabase sync enabled':'Sync disabled');});
+  $('s-save-sb').addEventListener('click',function(){
+    var url=$('s-sb-url').value.trim(),anon=$('s-sb-anon').value.trim();
+    if(!url||!anon){toast('Enter both Supabase fields');return;}
+    ST.sbUrl=url;ST.sbAnon=anon;saveKeys();
+    var ksc=$('key-safety-card');if(ksc)ksc.innerHTML=keyStatusHTML();
+    toast('Supabase credentials saved \u2713');
   });
   $('s-pull').addEventListener('click',pullFromSupabase);
-
-  // Backend toggle (adds Supabase schema step to every build)
-  const backendPill=$('s-backend-pill');
+  var backendPill=$('s-backend-pill');
   if(backendPill){
     backendPill.classList.toggle('on',ST.backendEnabled);
-    backendPill.addEventListener('click',()=>{
-      ST.backendEnabled=!ST.backendEnabled;
-      saveKeys();
+    backendPill.addEventListener('click',function(){
+      ST.backendEnabled=!ST.backendEnabled;saveKeys();
       backendPill.classList.toggle('on',ST.backendEnabled);
-      toast(ST.backendEnabled?'Backend step enabled — Supabase schema will be generated':'Backend step disabled');
+      toast(ST.backendEnabled?'Backend step enabled':'Backend step disabled');
     });
   }
-
-  // Self-update button
-  $('s-self-update-btn').addEventListener('click',()=>{
-    const improvement=$('s-self-update-input').value.trim();
+  $('s-self-update-btn').addEventListener('click',function(){
+    var improvement=$('s-self-update-input').value.trim();
     if(!improvement){toast('Describe the improvement first',2500);return;}
-    if(!confirm('Claude will update The Builder itself and reload the page. Continue?'))return;
+    if(!confirm('Claude will update The Builder itself and reload. Continue?'))return;
     selfUpdateBuilder(improvement);
   });
+  $('s-clear').addEventListener('click',function(){if(!confirm('Delete all apps locally?'))return;ST.apps=[];persist();renderGrid();toast('All apps cleared locally');});
+  $('s-signout').addEventListener('click',function(){if(!confirm('Sign out and clear all keys?'))return;localStorage.clear();location.reload();});
 
-  $('s-clear').addEventListener('click',()=>{if(!confirm('Delete all apps locally?'))return;ST.apps=[];persist();renderGrid();toast('All apps cleared locally');});
-  $('s-signout').addEventListener('click',()=>{if(!confirm('Sign out and clear all keys?'))return;localStorage.clear();location.reload();});
-
-  // ── PWA install ──
-  $('ib-add').addEventListener('click',()=>{if(_installPrompt)_installPrompt.prompt();$('install-banner').classList.remove('on');});
-  $('ib-x').addEventListener('click',()=>{$('install-banner').classList.remove('on');localStorage.setItem('pwa_dis','1');});
+  // PWA install
+  $('ib-add').addEventListener('click',function(){if(_installPrompt)_installPrompt.prompt();$('install-banner').classList.remove('on');});
+  $('ib-x').addEventListener('click',function(){$('install-banner').classList.remove('on');localStorage.setItem('pwa_dis','1');});
 }
 
 function pickEmoji(e){ST.pendingIcon=e;$('emoji-pick-btn').textContent=e;$('emoji-overlay').classList.remove('on');}
 
-// Safe launch — catches any init error and shows it instead of blank screen
+// Safe launch
 try{
   init();
 }catch(err){
   console.error('Builder init error:',err);
-  // Use DOM construction instead of innerHTML string concat —
-  // avoids quoting issues where err.message could break the string literal
   var _eWrap=document.createElement('div');
   _eWrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#080812;font-family:sans-serif;padding:24px';
   var _eBox=document.createElement('div');
   _eBox.style.cssText='text-align:center;color:white;max-width:320px';
-  _eBox.innerHTML='<div style="font-size:48px;margin-bottom:16px">⚠️</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Something went wrong</div>';
+  _eBox.innerHTML='<div style="font-size:48px;margin-bottom:16px">\u26A0\uFE0F</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Something went wrong</div>';
   var _eMsg=document.createElement('div');
   _eMsg.style.cssText='font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px;word-break:break-word';
   _eMsg.textContent=String(err&&err.message||err||'Unknown error');
@@ -2376,11 +2000,8 @@ try{
   _eBtn.style.cssText='padding:12px 24px;border-radius:10px;background:#FF3CAC;border:none;color:white;font-size:14px;font-weight:700;cursor:pointer';
   _eBtn.textContent='Clear & Restart';
   _eBtn.onclick=function(){localStorage.clear();location.reload();};
-  _eBox.appendChild(_eMsg);
-  _eBox.appendChild(_eBtn);
-  _eWrap.appendChild(_eBox);
-  document.body.innerHTML='';
-  document.body.appendChild(_eWrap);
+  _eBox.appendChild(_eMsg);_eBox.appendChild(_eBtn);_eWrap.appendChild(_eBox);
+  document.body.innerHTML='';document.body.appendChild(_eWrap);
 }
 </script>
 </body>
