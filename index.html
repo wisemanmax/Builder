@@ -429,6 +429,56 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .ib-info{flex:1}.ib-title{font-family:var(--fh);font-size:12px;font-weight:700}.ib-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
 .ib-add{padding:8px 15px;border-radius:9px;background:var(--g1);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
 .ib-x{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* THINK SHEET */
+#think-sheet{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#think-sheet.open{display:flex;flex-direction:column;justify-content:flex-end}
+#think-sheet.open .bs{transform:translateY(0)}
+.ts-progress{display:flex;gap:10px;justify-content:center;padding:8px 16px 12px;flex-shrink:0}
+.ts-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.12);transition:all .3s}
+.ts-dot.done{background:var(--g4);box-shadow:0 0 8px rgba(170,255,0,.4)}
+.ts-dot.active{background:var(--g4);box-shadow:0 0 12px rgba(170,255,0,.5);transform:scale(1.35);animation:tsPulse 1.8s ease-in-out infinite}
+@keyframes tsPulse{0%,100%{box-shadow:0 0 8px rgba(170,255,0,.4)}50%{box-shadow:0 0 18px rgba(170,255,0,.7)}}
+#think-scroll{flex:1;overflow-y:auto;padding:12px 0 8px;display:flex;flex-direction:column;gap:2px;-webkit-overflow-scrolling:touch}
+#think-scroll::-webkit-scrollbar{width:2px}
+#think-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:1px}
+.think-welcome{display:flex;flex-direction:column;align-items:center;padding:20px 18px 10px;gap:9px;text-align:center}
+.tw-icon{font-size:38px;animation:bob 3s ease-in-out infinite}
+.tw-title{font-family:var(--fh);font-size:20px;font-weight:800;background:var(--g4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tw-sub{font-size:12px;color:rgba(255,255,255,.38);line-height:1.7;max-width:300px}
+.think-options{display:flex;flex-wrap:wrap;gap:7px;padding:6px 16px 8px;animation:mIn .24s cubic-bezier(.34,1.56,.64,1) both}
+.think-opt{padding:9px 15px;border-radius:100px;border:1.5px solid rgba(170,255,0,.2);background:rgba(170,255,0,.06);color:rgba(255,255,255,.75);font-size:12px;cursor:pointer;transition:all .18s;line-height:1.4;text-align:left}
+.think-opt:hover{border-color:var(--lm);color:#fff;background:rgba(170,255,0,.12)}
+.think-opt:active{transform:scale(.95)}
+.think-opt.selected{border-color:var(--lm);color:#fff;background:rgba(170,255,0,.18);pointer-events:none}
+.think-opt.disabled{opacity:.35;pointer-events:none}
+.think-summary{margin:8px 13px;padding:14px 16px;border-radius:var(--rs);background:rgba(170,255,0,.06);border:1.5px solid rgba(170,255,0,.15)}
+.think-summary h3{font-family:var(--fh);font-size:15px;font-weight:800;margin:0 0 10px;color:var(--lm)}
+.think-summary h4{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+.think-summary ul{margin:0;padding:0 0 0 16px;font-size:12px;color:rgba(255,255,255,.65);line-height:1.8}
+.think-summary li{margin:1px 0}
+.think-summary .ts-design{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.think-summary .ts-tag{padding:4px 10px;border-radius:100px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:11px;color:rgba(255,255,255,.5)}
+.think-actions{display:flex;gap:8px;padding:10px 13px;animation:mIn .3s cubic-bezier(.34,1.56,.64,1) both}
+.think-actions button{flex:1;padding:12px;border-radius:12px;border:none;font-family:var(--fh);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s}
+.think-actions button:active{transform:scale(.96)}
+.ta-save{background:var(--g4);color:#000;box-shadow:0 6px 20px rgba(170,255,0,.3)}
+.ta-refine{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.1) !important}
+
+/* THOUGHT SELECTOR (in build sheet) */
+.thought-selector{padding:6px 16px 8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.05)}
+.thought-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 12px;border-radius:100px;background:rgba(170,255,0,.08);border:1.5px solid rgba(170,255,0,.2);font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap}
+.thought-chip .tc-x{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.4);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;line-height:1}
+.thought-chip .tc-x:hover{background:rgba(255,82,82,.2);color:var(--co)}
+.tc-rules{font-size:10px;color:rgba(170,255,0,.5);margin-left:2px}
+.tc-attach{padding:5px 12px;border-radius:100px;background:rgba(255,255,255,.05);border:1.5px dashed rgba(255,255,255,.12);color:rgba(255,255,255,.35);font-size:11px;cursor:pointer;transition:all .18s}
+.tc-attach:hover{border-color:rgba(170,255,0,.3);color:rgba(255,255,255,.55);background:rgba(170,255,0,.05)}
+.thought-picker{position:absolute;left:16px;right:16px;top:100%;background:#1a1a2e;border:1.5px solid rgba(255,255,255,.1);border-radius:var(--rs);box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:5;max-height:200px;overflow-y:auto;padding:4px}
+.thought-picker-item{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:12px;color:rgba(255,255,255,.6);transition:all .15s;display:flex;align-items:center;gap:8px}
+.thought-picker-item:hover{background:rgba(170,255,0,.08);color:#fff}
+.thought-picker-item .tpi-icon{font-size:16px}
+.thought-picker-item .tpi-name{flex:1}
+.thought-picker-item .tpi-status{font-size:10px;color:rgba(255,255,255,.25)}
 </style>
 </head>
 <body>
@@ -511,17 +561,17 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
   <div class="app-grid" id="app-grid"></div>
   <div class="dock">
     <div class="dock-inner">
+      <div class="di" onclick="openThink()">
+        <div class="di-img" style="background:var(--g4)">&#x1F4AD;</div>
+        <div class="di-lbl">Think</div>
+      </div>
       <div class="di di-build" onclick="openBuilder()">
         <div class="di-img">&#x2726;</div>
         <div class="di-lbl">Build</div>
       </div>
-      <div class="di" onclick="pullFromGitHub()">
-        <div class="di-img" style="background:rgba(255,255,255,.12)">&#x1F504;</div>
-        <div class="di-lbl">Sync</div>
-      </div>
       <div class="di" onclick="openCustomizeBuilder()">
         <div class="di-img" style="background:linear-gradient(135deg,#B44FFF,#3D5AFE)">&#x1F527;</div>
-        <div class="di-lbl">Customize</div>
+        <div class="di-lbl">Builder+</div>
       </div>
       <div class="di" onclick="openSettings()">
         <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
@@ -545,6 +595,7 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
         <button class="bs-btn bs-close" id="bs-close">&#x2715;</button>
       </div>
     </div>
+    <div class="thought-selector" id="thought-selector" style="display:none"></div>
     <div id="chat-scroll"></div>
     <div class="bs-input">
       <div class="name-row" id="name-row">
@@ -558,6 +609,33 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
         </div>
       </div>
       <div class="ihint" id="ihint">&#x1F33F; Branch &rarr; &#x1F528; Build &rarr; &#x1F4CB; Checks &rarr; &#x1F50D; Audit &rarr; &#x1F6E0; Fix &rarr; &#x1F441; Preview &rarr; &#x2705; Approve &rarr; &#x1F500; Merge</div>
+    </div>
+  </div>
+</div>
+
+<!-- THINK SHEET -->
+<div id="think-sheet">
+  <div class="bs" id="ts-inner">
+    <div class="bs-handle" id="ts-handle"></div>
+    <div class="bs-top">
+      <div class="bs-info">
+        <div class="bs-title" id="ts-title">Think It Through</div>
+        <div class="bs-sub" id="ts-sub">Round 1 of 5 &middot; What to Build</div>
+      </div>
+      <div class="bs-actions">
+        <button class="bs-btn bs-close" id="ts-close">&#x2715;</button>
+      </div>
+    </div>
+    <div class="ts-progress" id="ts-progress"></div>
+    <div id="think-scroll"></div>
+    <div class="bs-input">
+      <div class="ibox">
+        <textarea id="think-input" rows="1" placeholder="Type your own answer..."></textarea>
+        <div class="iacts">
+          <button id="think-send-btn">&uarr;</button>
+        </div>
+      </div>
+      <div class="ihint" id="think-hint">&#x1F4AD; Tap an option or type your own response</div>
     </div>
   </div>
 </div>
@@ -754,6 +832,30 @@ var SYS_FIX='You are an expert web developer doing a targeted bug fix pass. Rece
 var SYS_AUDIT='You are a senior code reviewer auditing a single-file HTML app. Return a JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]. Only report REAL bugs. If clean return []. Return ONLY the raw JSON array.';
 var SYS_BACKEND='You are a backend architect. Given a single-file HTML app, analyze what persistent data it manages and generate a Supabase (PostgreSQL) backend for it.\nReturn ONLY a JSON object (no markdown, no explanation):\n{\n  "tables": [{"name":"table_name","sql":"CREATE TABLE IF NOT EXISTS ... (with RLS enabled);","description":"what it stores"}],\n  "rls": ["ALTER TABLE x ENABLE ROW LEVEL SECURITY;", "CREATE POLICY ..."],\n  "injectedHTML": "the COMPLETE original HTML with Supabase JS client injected"\n}\nUse the placeholder values \'YOUR_SUPABASE_URL\' and \'YOUR_SUPABASE_ANON_KEY\' in the injected code.';
 var SYS_SELFUPDATE='You are improving a PWA app called "The Builder". You will receive the complete current HTML source and a description of the improvement to make.\nReturn ONLY the complete improved HTML starting with <!DOCTYPE html> — no markdown, no explanation, no code fences.\nRules: Keep all existing functionality. Apply ONLY the requested improvement. Do not rewrite things that are not related to the request.';
+var SYS_THINK='You are an expert product strategist helping a user ideate and refine an app concept through a structured conversation.\n'
++'You operate in ROUNDS. The user will tell you which round you are on.\n'
++'\nROUND STRUCTURE:\n'
++'Round 1 (WHAT): Understand what the user wants to build. Ask about the core idea, purpose, and primary use case.\n'
++'Round 2 (WHO & HOW): Explore who will use it, how they will interact, what data it needs.\n'
++'Round 3 (DIFFERENTIATORS): What makes this unique? Key features, design personality, edge cases.\n'
++'Round 4 (BOUNDARIES): What should the app NOT do? Scope limits, design constraints, technical boundaries.\n'
++'Round 5 (CONFIRM): Summarize everything into a complete brief and rules. Ask user to confirm.\n'
++'\nRESPONSE FORMAT: Return ONLY valid JSON (no markdown, no code fences, no explanation outside JSON):\n'
++'{"message":"Your conversational question or commentary (1-3 sentences, warm and direct)","options":["Option A","Option B","Option C"],"advance":false}\n'
++'\n- "message": Your question or response. Be encouraging but concise.\n'
++'- "options": 3-5 tappable choices. Each 4-12 words, specific to THIS idea (not generic). Cover 80% of likely answers.\n'
++'- "advance": Set true ONLY when the user has given enough info for this round. The system will increment the round counter.\n'
++'\nFor Round 5 ONLY, return this SUMMARY format instead:\n'
++'{"message":"Here is your complete app specification:","brief":{"name":"App Name","whatItDoes":["feature 1","feature 2","feature 3"],"whatItWontDo":["excluded thing 1","excluded thing 2"],"audience":"who this is for","features":["detailed feature 1","detailed feature 2","detailed feature 3","detailed feature 4"],"design":{"theme":"dark","accent":"color name","layout":"style description"},"technical":{"storage":"localStorage","offline":true}},"rules":{"must":["rule 1","rule 2","rule 3"],"must_not":["anti-rule 1","anti-rule 2"],"nice_to_have":["optional 1","optional 2"]},"advance":true}\n'
++'\nGuidelines:\n'
++'- Be warm, direct, and encouraging — not corporate\n'
++'- Options should feel like the user is being understood, not interrogated\n'
++'- If the user gives a very detailed first response, you may advance multiple rounds\n'
++'- Simple ideas need fewer rounds (3), complex ideas may need all 5\n'
++'- In Round 5 summary: features should be specific and buildable, rules should be actionable constraints\n'
++'- Design preferences should include theme (dark/light), accent color, and layout style\n'
++'- Always return valid JSON. Never wrap in markdown code fences.';
+
 var MAX_FIX_PASSES=3;
 
 /* ======== STATE ======== */
@@ -766,6 +868,7 @@ var ST={
   activeAppId:null,pendingIcon:'🎯',pendingColor:0,
   viewingApp:null,projectAppId:null,_building:false,
   _studioFullscreen:false,
+  thoughts:[],rules:[],activeThoughtId:null,_thinking:false,
 };
 
 /* ======== UTILS ======== */
@@ -794,6 +897,8 @@ function showScreen(id){
 function persist(){
   try{
     localStorage.setItem('bldr_apps',JSON.stringify(ST.apps));
+    localStorage.setItem('bldr_thoughts',JSON.stringify(ST.thoughts));
+    localStorage.setItem('bldr_rules',JSON.stringify(ST.rules));
   }catch(e){
     if(e.name==='QuotaExceededError'||String(e.name).indexOf('QuotaExceeded')>=0||e.code===22){
       try{
@@ -830,6 +935,8 @@ function scrubKeys(str){
 
 function hydrate(){
   try{ST.apps=JSON.parse(localStorage.getItem('bldr_apps')||'[]');}catch(e){ST.apps=[];}
+  try{ST.thoughts=JSON.parse(localStorage.getItem('bldr_thoughts')||'[]');}catch(e){ST.thoughts=[];}
+  try{ST.rules=JSON.parse(localStorage.getItem('bldr_rules')||'[]');}catch(e){ST.rules=[];}
   ST.key=localStorage.getItem(KEY_STORE.ANTH)||'';
   ST.gptKey=localStorage.getItem(KEY_STORE.GPT)||'';
   ST.ghToken=localStorage.getItem(KEY_STORE.GH_TOKEN)||'';
@@ -1130,7 +1237,9 @@ function openBuilder(editId){
     var liveUrl=ghPageUrl(app.id);
     addMsg({role:'asst',type:'text',html:'Loaded <strong>'+esc(app.name)+'</strong>. Describe what to change.'+(liveUrl?'<br><span style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.35)">\uD83C\uDF10 '+liveUrl+'</span>':'')});
   }
+  $('think-sheet').classList.remove('open');
   $('builder-sheet').classList.add('open');
+  renderThoughtSelector();
   setTimeout(function(){$('chat-input').focus();},420);
 }
 
@@ -1145,6 +1254,367 @@ function closeBuilder(){
   }
   ST._building=false;
   var sb=$('send-btn');if(sb)sb.disabled=false;
+}
+
+/* ======== THINK FLOW ======== */
+var THINK_ROUND_LABELS=['What to Build','Who & How','Differentiators','Boundaries','Confirm & Lock'];
+var _thinkState={round:1,maxRounds:5,thoughtId:null,conversation:[],originalPrompt:'',brief:null,rules:null};
+
+function openThink(resumeId){
+  $('builder-sheet').classList.remove('open');
+  if(resumeId){
+    var t=null;for(var i=0;i<ST.thoughts.length;i++){if(ST.thoughts[i].id===resumeId){t=ST.thoughts[i];break;}}
+    if(t){
+      _thinkState={round:t.rounds||1,maxRounds:5,thoughtId:t.id,conversation:t.conversation||[],originalPrompt:t.originalPrompt||'',brief:t.brief||null,rules:null};
+      renderThinkProgress(_thinkState.round);
+      var ts=$('think-scroll');ts.innerHTML='';
+      for(var j=0;j<_thinkState.conversation.length;j++){
+        var c=_thinkState.conversation[j];
+        addThinkMsg(c.role==='user'?{type:'user',text:c.text}:{type:'ai',text:c.text});
+      }
+      $('think-sheet').classList.add('open');
+      setTimeout(function(){$('think-input').focus();},420);
+      return;
+    }
+  }
+  _thinkState={round:1,maxRounds:5,thoughtId:uid(),conversation:[],originalPrompt:'',brief:null,rules:null};
+  renderThinkProgress(1);
+  var ts2=$('think-scroll');
+  ts2.innerHTML='<div class="think-welcome">'
+    +'<div class="tw-icon">\uD83D\uDCAD</div>'
+    +'<div class="tw-title">Think It Through</div>'
+    +'<div class="tw-sub">Describe your app idea and I\'ll help you flesh it out in a few quick rounds before building.</div>'
+    +'</div>';
+  $('think-sheet').classList.add('open');
+  setTimeout(function(){$('think-input').focus();},420);
+}
+
+function closeThink(){
+  if(_thinkState.conversation.length>0)saveThought('draft');
+  $('think-sheet').classList.remove('open');
+  ST._thinking=false;
+}
+
+function renderThinkProgress(round){
+  var el=$('ts-progress');
+  var html='';
+  for(var i=1;i<=_thinkState.maxRounds;i++){
+    var cls='ts-dot';
+    if(i<round)cls+=' done';
+    else if(i===round)cls+=' active';
+    html+='<div class="'+cls+'"></div>';
+  }
+  el.innerHTML=html;
+  var label=THINK_ROUND_LABELS[Math.min(round,_thinkState.maxRounds)-1]||'';
+  $('ts-sub').textContent='Round '+Math.min(round,_thinkState.maxRounds)+' of '+_thinkState.maxRounds+' \u00B7 '+label;
+}
+
+function scrollThinkBot(){var el=$('think-scroll');setTimeout(function(){el.scrollTo({top:el.scrollHeight,behavior:'smooth'});},60);}
+
+function addThinkMsg(cfg){
+  var s=$('think-scroll');
+  var w=s.querySelector('.think-welcome');if(w)w.style.display='none';
+  var row=document.createElement('div');
+  if(cfg.type==='user'){
+    row.className='mrow user';
+    row.innerHTML='<div class="ubub" style="background:var(--g4);color:#000">'+esc(cfg.text)+'</div>';
+  }else if(cfg.type==='typing'){
+    row.className='mrow asst';
+    row.id='think-typing';
+    row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--g4)">\uD83D\uDCAD</div><div class="tbub"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>';
+  }else if(cfg.type==='ai'){
+    row.className='mrow asst';
+    row.innerHTML='<div class="awrap"><div class="aav" style="background:var(--g4)">\uD83D\uDCAD</div><div class="abub">'+esc(cfg.text)+'</div></div>';
+  }else if(cfg.type==='options'){
+    row.className='think-options';
+    var ohtml='';
+    for(var i=0;i<cfg.options.length;i++){
+      ohtml+='<div class="think-opt" onclick="thinkOptionSelect(this)">'+esc(cfg.options[i])+'</div>';
+    }
+    row.innerHTML=ohtml;
+  }else if(cfg.type==='summary'){
+    row.className='';
+    row.innerHTML=cfg.html;
+  }
+  s.appendChild(row);
+  scrollThinkBot();
+  return row;
+}
+
+function thinkOptionSelect(el){
+  var text=el.textContent;
+  el.classList.add('selected');
+  var siblings=el.parentElement.querySelectorAll('.think-opt');
+  for(var i=0;i<siblings.length;i++){if(siblings[i]!==el)siblings[i].classList.add('disabled');}
+  $('think-input').value=text;
+  sendThinkMsg();
+}
+
+function sendThinkMsg(){
+  var inp=$('think-input');
+  var text=inp.value.trim();
+  if(!text||ST._thinking)return;
+  if(!ST.key){toast('Add your Anthropic API key in Settings first');return;}
+
+  ST._thinking=true;
+  var sb=$('think-send-btn');if(sb)sb.disabled=true;
+  inp.value='';inp.style.height='';
+
+  if(!_thinkState.originalPrompt)_thinkState.originalPrompt=text;
+
+  addThinkMsg({type:'user',text:text});
+  _thinkState.conversation.push({role:'user',text:text,round:_thinkState.round});
+
+  addThinkMsg({type:'typing'});
+
+  var convSummary='';
+  for(var i=0;i<_thinkState.conversation.length;i++){
+    var c=_thinkState.conversation[i];
+    convSummary+=(c.role==='user'?'User':'AI')+' (R'+c.round+'): '+c.text.slice(0,200)+'\n';
+  }
+
+  var aiMsg='Round: '+_thinkState.round+'/'+_thinkState.maxRounds+'\n'
+    +'Phase: '+THINK_ROUND_LABELS[Math.min(_thinkState.round,_thinkState.maxRounds)-1]+'\n'
+    +'User\'s original idea: '+_thinkState.originalPrompt+'\n'
+    +'Conversation so far:\n'+convSummary+'\n'
+    +'User\'s latest response: '+text;
+
+  callClaudeRaw(SYS_THINK,aiMsg,2000).then(function(raw){
+    var ti=$('think-typing');if(ti)ti.remove();
+    var parsed;
+    try{parsed=JSON.parse(raw);}catch(e){
+      parsed={message:raw,options:[],advance:false};
+    }
+
+    if(parsed.message){
+      addThinkMsg({type:'ai',text:parsed.message});
+      _thinkState.conversation.push({role:'ai',text:parsed.message,round:_thinkState.round});
+    }
+
+    if(parsed.advance){
+      _thinkState.round++;
+      renderThinkProgress(_thinkState.round);
+    }
+
+    if(parsed.brief&&parsed.rules){
+      _thinkState.brief=parsed.brief;
+      _thinkState.rules=parsed.rules;
+      renderThinkSummary(parsed.brief,parsed.rules);
+    }else if(parsed.options&&parsed.options.length>0){
+      addThinkMsg({type:'options',options:parsed.options});
+    }
+
+    saveThought(_thinkState.brief?'complete':'draft');
+    ST._thinking=false;
+    if(sb)sb.disabled=false;
+    scrollThinkBot();
+  }).catch(function(e){
+    var ti=$('think-typing');if(ti)ti.remove();
+    addThinkMsg({type:'ai',text:'Something went wrong: '+scrubKeys(e.message||String(e))+'. Try again.'});
+    ST._thinking=false;
+    if(sb)sb.disabled=false;
+  });
+}
+
+function renderThinkSummary(brief,rules){
+  var html='<div class="think-summary">';
+  html+='<h3>\uD83D\uDCDD '+(brief.name||'Your App')+'</h3>';
+
+  if(brief.whatItDoes&&brief.whatItDoes.length){
+    html+='<h4>What It Does</h4><ul>';
+    for(var i=0;i<brief.whatItDoes.length;i++)html+='<li>'+esc(brief.whatItDoes[i])+'</li>';
+    html+='</ul>';
+  }
+  if(brief.whatItWontDo&&brief.whatItWontDo.length){
+    html+='<h4>What It Won\'t Do</h4><ul>';
+    for(var j=0;j<brief.whatItWontDo.length;j++)html+='<li>'+esc(brief.whatItWontDo[j])+'</li>';
+    html+='</ul>';
+  }
+  if(brief.features&&brief.features.length){
+    html+='<h4>Key Features</h4><ul>';
+    for(var k=0;k<brief.features.length;k++)html+='<li>'+esc(brief.features[k])+'</li>';
+    html+='</ul>';
+  }
+  if(brief.audience)html+='<h4>Audience</h4><ul><li>'+esc(brief.audience)+'</li></ul>';
+  if(brief.design){
+    html+='<h4>Design</h4><div class="ts-design">';
+    if(brief.design.theme)html+='<span class="ts-tag">'+esc(brief.design.theme)+' theme</span>';
+    if(brief.design.accent)html+='<span class="ts-tag">'+esc(brief.design.accent)+' accent</span>';
+    if(brief.design.layout)html+='<span class="ts-tag">'+esc(brief.design.layout)+'</span>';
+    html+='</div>';
+  }
+
+  if(rules){
+    if(rules.must&&rules.must.length){
+      html+='<h4>Must Do</h4><ul>';
+      for(var m=0;m<rules.must.length;m++)html+='<li>'+esc(rules.must[m])+'</li>';
+      html+='</ul>';
+    }
+    if(rules.must_not&&rules.must_not.length){
+      html+='<h4>Must Not</h4><ul>';
+      for(var n=0;n<rules.must_not.length;n++)html+='<li>'+esc(rules.must_not[n])+'</li>';
+      html+='</ul>';
+    }
+    if(rules.nice_to_have&&rules.nice_to_have.length){
+      html+='<h4>Nice to Have</h4><ul>';
+      for(var p=0;p<rules.nice_to_have.length;p++)html+='<li>'+esc(rules.nice_to_have[p])+'</li>';
+      html+='</ul>';
+    }
+  }
+  html+='</div>';
+  addThinkMsg({type:'summary',html:html});
+
+  var actRow=document.createElement('div');
+  actRow.className='think-actions';
+  actRow.innerHTML='<button class="ta-save" onclick="finishThink()">\uD83D\uDCBE Save & Go to Build</button>'
+    +'<button class="ta-refine" onclick="refineThink()">\u270F\uFE0F Keep Refining</button>';
+  $('think-scroll').appendChild(actRow);
+  scrollThinkBot();
+}
+
+function saveThought(status){
+  var thought={
+    id:_thinkState.thoughtId,
+    name:_thinkState.brief?_thinkState.brief.name:(_thinkState.originalPrompt||'Untitled').slice(0,40),
+    status:status||'draft',
+    originalPrompt:_thinkState.originalPrompt,
+    rounds:_thinkState.round,
+    conversation:_thinkState.conversation,
+    brief:_thinkState.brief||null,
+    linkedRulesId:null,
+    linkedAppId:null,
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  var idx=-1;
+  for(var i=0;i<ST.thoughts.length;i++){
+    if(ST.thoughts[i].id===_thinkState.thoughtId){idx=i;break;}
+  }
+  if(idx>=0){
+    thought.createdAt=ST.thoughts[idx].createdAt;
+    thought.linkedRulesId=ST.thoughts[idx].linkedRulesId;
+    thought.linkedAppId=ST.thoughts[idx].linkedAppId;
+    ST.thoughts[idx]=thought;
+  }else{
+    ST.thoughts.unshift(thought);
+  }
+  persist();
+  return thought;
+}
+
+function saveRulesFromThought(thought,rulesData){
+  var rules={
+    id:uid(),
+    name:(thought.name||'App')+' Rules',
+    linkedThoughtId:thought.id,
+    mustRules:rulesData.must||[],
+    mustNotRules:rulesData.must_not||[],
+    niceToHave:rulesData.nice_to_have||[],
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  ST.rules.push(rules);
+  for(var i=0;i<ST.thoughts.length;i++){
+    if(ST.thoughts[i].id===thought.id){ST.thoughts[i].linkedRulesId=rules.id;break;}
+  }
+  persist();
+  return rules;
+}
+
+function finishThink(){
+  var thought=saveThought('complete');
+  if(_thinkState.rules){
+    saveRulesFromThought(thought,_thinkState.rules);
+  }
+  ST.activeThoughtId=thought.id;
+  $('think-sheet').classList.remove('open');
+  ST._thinking=false;
+  openBuilder();
+  toast('Thought saved \u2014 rules attached to build',3000);
+}
+
+function refineThink(){
+  _thinkState.round=Math.max(1,_thinkState.round-1);
+  renderThinkProgress(_thinkState.round);
+  _thinkState.brief=null;
+  _thinkState.rules=null;
+  addThinkMsg({type:'ai',text:'No problem! Let\'s keep refining. What would you like to change or add?'});
+  _thinkState.conversation.push({role:'ai',text:'Let\'s keep refining. What would you like to change or add?',round:_thinkState.round});
+  scrollThinkBot();
+}
+
+/* ======== THOUGHT SELECTOR (BUILD SHEET) ======== */
+function renderThoughtSelector(){
+  var sel=$('thought-selector');
+  if(!sel)return;
+  var activeThought=null;
+  if(ST.activeThoughtId){
+    for(var i=0;i<ST.thoughts.length;i++){
+      if(ST.thoughts[i].id===ST.activeThoughtId){activeThought=ST.thoughts[i];break;}
+    }
+  }
+  if(activeThought){
+    var linkedRules=null;
+    if(activeThought.linkedRulesId){
+      for(var j=0;j<ST.rules.length;j++){
+        if(ST.rules[j].id===activeThought.linkedRulesId){linkedRules=ST.rules[j];break;}
+      }
+    }
+    var rulesCount=linkedRules?((linkedRules.mustRules||[]).length+(linkedRules.mustNotRules||[]).length+(linkedRules.niceToHave||[]).length):0;
+    sel.innerHTML='<div class="thought-chip">\uD83D\uDCDD '+esc(activeThought.name)
+      +(rulesCount?'<span class="tc-rules">\u00B7 '+rulesCount+' rules</span>':'')
+      +'<button class="tc-x" onclick="detachThought()" title="Detach">\u2715</button></div>';
+    sel.style.display='flex';
+  }else{
+    var hasComplete=false;
+    for(var k=0;k<ST.thoughts.length;k++){if(ST.thoughts[k].status==='complete'){hasComplete=true;break;}}
+    if(hasComplete){
+      sel.innerHTML='<div class="tc-attach" onclick="showThoughtPicker()">+ Attach Thought</div>';
+      sel.style.display='flex';
+    }else{
+      sel.style.display='none';
+    }
+  }
+}
+
+function detachThought(){
+  ST.activeThoughtId=null;
+  renderThoughtSelector();
+}
+
+function showThoughtPicker(){
+  var sel=$('thought-selector');
+  var existing=sel.querySelector('.thought-picker');
+  if(existing){existing.remove();return;}
+  var picker=document.createElement('div');
+  picker.className='thought-picker';
+  var html='';
+  for(var i=0;i<ST.thoughts.length;i++){
+    var t=ST.thoughts[i];
+    if(t.status==='complete'){
+      html+='<div class="thought-picker-item" onclick="pickThought(\''+esc(t.id)+'\')">'
+        +'<div class="tpi-icon">\uD83D\uDCDD</div>'
+        +'<div class="tpi-name">'+esc(t.name)+'</div>'
+        +'<div class="tpi-status">'+esc(t.status)+'</div>'
+        +'</div>';
+    }
+  }
+  if(!html)html='<div style="padding:12px;font-size:12px;color:rgba(255,255,255,.35);text-align:center">No completed thoughts yet</div>';
+  picker.innerHTML=html;
+  sel.style.position='relative';
+  sel.appendChild(picker);
+  setTimeout(function(){
+    document.addEventListener('click',function closePicker(e){
+      if(!sel.contains(e.target)){picker.remove();document.removeEventListener('click',closePicker);}
+    });
+  },10);
+}
+
+function pickThought(id){
+  ST.activeThoughtId=id;
+  renderThoughtSelector();
+  var picker=$('thought-selector').querySelector('.thought-picker');
+  if(picker)picker.remove();
 }
 
 function openCustomizeBuilder(){
@@ -1369,7 +1839,39 @@ function runPipeline(prompt,existingApp,customName){
     }else{
       userMsg='Build this app: '+prompt;
     }
-    return callClaude(SYS_BUILD,userMsg);
+
+    // Inject thought brief + rules into system prompt if attached
+    var effectiveSys=SYS_BUILD;
+    var activeThought=ST.activeThoughtId?ST.thoughts.find(function(t){return t.id===ST.activeThoughtId;}):null;
+    if(activeThought){
+      var linkedRules=activeThought.linkedRulesId?ST.rules.find(function(r){return r.id===activeThought.linkedRulesId;}):null;
+      if(linkedRules){
+        effectiveSys+='\n\nUSER RULES (follow these constraints strictly):\nMUST DO:\n';
+        effectiveSys+=(linkedRules.mustRules||[]).map(function(r){return '- '+r;}).join('\n');
+        effectiveSys+='\nMUST NOT DO:\n';
+        effectiveSys+=(linkedRules.mustNotRules||[]).map(function(r){return '- '+r;}).join('\n');
+        if(linkedRules.niceToHave&&linkedRules.niceToHave.length){
+          effectiveSys+='\nNICE TO HAVE:\n';
+          effectiveSys+=(linkedRules.niceToHave||[]).map(function(r){return '- '+r;}).join('\n');
+        }
+      }
+      if(activeThought.brief){
+        effectiveSys+='\n\nAPP SPECIFICATION (from user ideation session):\n';
+        effectiveSys+='App Name: '+(activeThought.brief.name||'App')+'\n';
+        effectiveSys+='What it does: '+(activeThought.brief.whatItDoes||[]).join(', ')+'\n';
+        effectiveSys+='What it won\'t do: '+(activeThought.brief.whatItWontDo||[]).join(', ')+'\n';
+        effectiveSys+='Target audience: '+(activeThought.brief.audience||'General')+'\n';
+        effectiveSys+='Key features: '+(activeThought.brief.features||[]).join(', ')+'\n';
+        if(activeThought.brief.design){
+          effectiveSys+='Design: theme='+(activeThought.brief.design.theme||'dark')+', accent='+(activeThought.brief.design.accent||'blue')+', layout='+(activeThought.brief.design.layout||'standard')+'\n';
+        }
+      }
+      if(!existingApp&&activeThought.brief){
+        userMsg='Build this app based on the specification above.\n\nApp Name: '+(activeThought.brief.name||customName||'My App')+'\n\nAdditional notes from user: '+prompt;
+      }
+    }
+
+    return callClaude(effectiveSys,userMsg);
   }).then(function(code){
     v1=code;
     updatePS(pid,1,'done','Build complete \u2713');
@@ -1682,6 +2184,16 @@ function _saveAppLocally(id,name,icon,ci,code,prompt,existingApp,ghPushed){
     var exists=false;for(var j=0;j<ST.apps.length;j++){if(ST.apps[j].id===id){exists=true;break;}}
     if(!exists){
       ST.apps.unshift({id:id,name:name,icon:icon,ci:ci,desc:prompt.slice(0,90),code:code,versions:[],prompts:[{text:prompt,ts:new Date().toISOString(),type:'initial'}],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),ghPushed:ghPushed});
+    }
+  }
+  // Link thought to built app
+  if(ST.activeThoughtId){
+    for(var ti=0;ti<ST.thoughts.length;ti++){
+      if(ST.thoughts[ti].id===ST.activeThoughtId){
+        ST.thoughts[ti].linkedAppId=id;
+        ST.thoughts[ti].status='built';
+        break;
+      }
     }
   }
   persist();
@@ -2063,6 +2575,17 @@ function init(){
   $('send-btn').addEventListener('click',sendMsg);
   $('emoji-pick-btn').addEventListener('click',function(){$('emoji-overlay').classList.add('on');});
   $('emoji-overlay').addEventListener('click',function(e){if(e.target.id==='emoji-overlay')$('emoji-overlay').classList.remove('on');});
+
+  // Think sheet
+  $('ts-close').addEventListener('click',closeThink);
+  $('think-sheet').addEventListener('click',function(e){if(e.target.id==='think-sheet')closeThink();});
+  var tsY=0;
+  $('ts-handle').addEventListener('touchstart',function(e){if(e.touches[0])tsY=e.touches[0].clientY;},{passive:true});
+  $('ts-handle').addEventListener('touchend',function(e){if(e.changedTouches[0]&&e.changedTouches[0].clientY-tsY>55)closeThink();},{passive:true});
+  var tInp=$('think-input');
+  tInp.addEventListener('input',function(){autoResize(tInp);});
+  tInp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendThinkMsg();}});
+  $('think-send-btn').addEventListener('click',sendThinkMsg);
 
   // Viewer / Studio
   $('vback').addEventListener('click',function(){
