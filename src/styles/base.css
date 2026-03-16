@@ -15,9 +15,11 @@
   --glass-b:rgba(255,255,255,0.16);
   --r:18px; --rs:12px;
 }
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+*:focus{outline:none}
 html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overflow:hidden;-webkit-font-smoothing:antialiased}
 #app{height:100dvh;position:relative;overflow:hidden}
+@media(display-mode:standalone){html,body{overscroll-behavior:none}#app{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}}
 
 /* WALLPAPER */
 #wp{position:fixed;inset:0;z-index:0;animation:wpShift 25s ease-in-out infinite alternate}
