@@ -1,5 +1,22 @@
 [
   {
+    "id": "recipe-app",
+    "name": "Recipe app",
+    "icon": "🎯",
+    "ci": 1,
+    "url": "https://Wisemanmax.github.io/Builder/apps/recipe-app.html",
+    "path": "apps/recipe-app.html",
+    "prompts": [
+      {
+        "ts": "2026-03-16T20:21:08.712Z",
+        "type": "initial",
+        "text": "Beginner recipe app"
+      }
+    ],
+    "createdAt": "2026-03-16T20:21:08.712Z",
+    "updatedAt": "2026-03-16T20:21:08.712Z"
+  },
+  {
     "id": "ammtgse7utaw",
     "name": "gym app",
     "icon": "🎯",
