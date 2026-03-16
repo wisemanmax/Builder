@@ -1,4 +1,4 @@
-const CACHE_NAME = 'builder-v1';
+const CACHE_NAME = 'builder-v13';
 const PRECACHE_URLS = [
   './',
   './index.html',
