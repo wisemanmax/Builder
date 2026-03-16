@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TI-84 Calculator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-calculator: #4a4a4a;
+            --screen-bg: #1e4d3a;
+            --screen-text: #a8ff8a;
+            --button-bg: #5a5a5a;
+            --button-hover: #6a6a6a;
+            --button-active: #4a4a4a;
+            --button-text: #ffffff;
+            --button-function: #3a5998;
+            --button-operation: #8b4513;
+            --border: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .calculator {
+            background: var(--bg-calculator);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .brand {
+            text-align: center;
+            color: var(--button-text);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .screen-container {
+            background: var(--screen-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 2px solid var(--border);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .screen {
+            color: var(--screen-text);
+            font-size: 24px;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            word-wrap: break-word;
+            line-height: 1.2;
+        }
+        
+        .previous-operation {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+            min-height: 20px;
+        }
+        
+        .current-operation {
+            font-size: 28px;
+            font-weight: 600;
+            min-height: 35px;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        
+        .btn {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 6px;
+            padding: 15px 8px;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            font-weight: 600;
+        }
+        
+        .btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn:active {
+            background: var(--button-active);
+            transform: translateY(0);
+        }
+        
+        .btn.function {
+            background: var(--button-function);
+        }
+        
+        .btn.function:hover {
+            background: #4a6bb8;
+        }
+        
+        .btn.operation {
+            background: var(--button-operation);
+        }
+        
+        .btn.operation:hover {
+            background: #a0522d;
+        }
+        
+        .btn.wide {
+            grid-column: span 2;
+        }
+        
+        .btn.zero {
+            grid-column: span 2;
+        }
+        
+        .error {
+            color: #ff6b6b;
+        }
+        
+        @media (max-width: 480px) {
+            .calculator {
+                padding: 20px;
+            }
+            
+            .btn {
+                padding: 12px 6px;
+                font-size: 12px;
+                min-height: 45px;
+            }
+            
+            .current-operation {
+                font-size: 24px;
+            }
+            
+            .screen {
+                font-size: 20px;
+            }
+        }
+        
+        .history {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            color: var(--button-text);
+            font-size: 12px;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+        
+        .history::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .history::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 3px;
+        }
+        
+        .history::-webkit-scrollbar-thumb {
+            background: var(--button-bg);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="brand">TI-84 Plus</div>
+        
+        <div class="history" id="history">
+            <div class="history-item">Calculator ready...</div>
+        </div>
+        
+        <div class="screen-container">
+            <div class="screen">
+                <div class="previous-operation" id="previousOperation"></div>
+                <div class="current-operation" id="currentOperation">0</div>
+            </div>
+        </div>
+        
+        <div class="button-grid">
+            <!-- Row 1 -->
+            <button class="btn function" onclick="calculator.clear()">ON/C</button>
+            <button class="btn function" onclick="calculator.clearEntry()">CE</button>
+            <button class="btn function" onclick="calculator.backspace()">←</button>
+            <button class="btn operation" onclick="calculator.inputOperator('/')" title="Division">÷</button>
+            <button class="btn function" onclick="calculator.sqrt()" title="Square Root">√</button>
+            
+            <!-- Row 2 -->
+            <button class="btn function" onclick="calculator.power()" title="Power">^</button>
+            <button class="btn function" onclick="calculator.inputFunction('sin(')" title="Sine">sin</button>
+            <button class="btn function" onclick="calculator.inputFunction('cos(')" title="Cosine">cos</button>
+            <button class="btn function" onclick="calculator.inputFunction('tan(')" title="Tangent">tan</button>
+            <button class="btn function" onclick="calculator.inputFunction('log(')" title="Logarithm">log</button>
+            
+            <!-- Row 3 -->
+            <button class="btn function" onclick="calculator.factorial()" title="Factorial">n!</button>
+            <button class="btn function" onclick="calculator.inputNumber('(')">(</button>
+            <button class="btn function" onclick="calculator.inputNumber(')')">)</button>
+            <button class="btn operation" onclick="calculator.inputOperator('*')" title="Multiplication">×</button>
+            <button class="btn function" onclick="calculator.inputFunction('ln(')" title="Natural Log">ln</button>
+            
+            <!-- Row 4 -->
+            <button class="btn" onclick="calculator.inputNumber('7')">7</button>
+            <button class="btn" onclick="calculator.inputNumber('8')">8</button>
+            <button class="btn" onclick="calculator.inputNumber('9')">9</button>
+            <button class="btn operation" onclick="calculator.inputOperator('-')" title="Subtraction">−</button>
+            <button class="btn function" onclick="calculator.pi()" title="Pi">π</button>
+            
+            <!-- Row 5 -->
+            <button class="btn" onclick="calculator.inputNumber('4')">4</button>
+            <button class="btn" onclick="calculator.inputNumber('5')">5</button>
+            <button class="btn" onclick="calculator.inputNumber('6')">6</button>
+            <button class="btn operation" onclick="calculator.inputOperator('+')" title="Addition">+</button>
+            <button class="btn function" onclick="calculator.e()" title="Euler's number">e</button>
+            
+            <!-- Row 6 -->
+            <button class="btn" onclick="calculator.inputNumber('1')">1</button>
+            <button class="btn" onclick="calculator.inputNumber('2')">2</button>
+            <button class="btn" onclick="calculator.inputNumber('3')">3</button>
+            <button class="btn operation wide" onclick="calculator.equals()" title="Equals">=</button>
+            
+            <!-- Row 7 -->
+            <button class="btn zero" onclick="calculator.inputNumber('0')">0</button>
+            <button class="btn" onclick="calculator.inputNumber('.')">.</button>
+            <button class="btn function" onclick="calculator.negative()" title="Negative">±</button>
+        </div>
+    </div>
+
+    <script>
+        class TI84Calculator {
+            constructor() {
+                this.currentOperation = '0';
+                this.previousOperation = '';
+                this.shouldResetScreen = false;
+                this.history = this.loadHistory();
+                this.updateDisplay();
+                this.updateHistory();
+            }
+            
+            loadHistory() {
+                const saved = localStorage.getItem('ti84_history');
+                return saved ? JSON.parse(saved) : ['Calculator ready...'];
+            }
+            
+            saveHistory() {
+                localStorage.setItem('ti84_history', JSON.stringify(this.history));
+            }
+            
+            addToHistory(calculation) {
+                this.history.push(calculation);
+                if (this.history.length > 20) {
+                    this.history.shift();
+                }
+                this.saveHistory();
+                this.updateHistory();
+            }
+            
+            updateHistory() {
+                const historyEl = document.getElementById('history');
+                historyEl.innerHTML = this.history.map(item => 
+                    `<div class="history-item">${item}</div>`
+                ).join('');
+                historyEl.scrollTop = historyEl.scrollHeight;
+            }
+            
+            updateDisplay() {
+                document.getElementById('currentOperation').textContent = this.currentOperation;
+                document.getElementById('previousOperation').textContent = this.previousOperation;
+            }
+            
+            inputNumber(num) {
+                if (this.shouldResetScreen) {
+                    this.currentOperation = '';
+                    this.shouldResetScreen = false;
+                }
+                
+                if (this.currentOperation === '0' && num !== '.') {
+                    this.currentOperation = num;
+                } else {
+                    this.currentOperation += num;
+                }
+                
+                this.updateDisplay();
+            }
+            
+            inputOperator(operator) {
+                if (this.shouldResetScreen) {
+                    this.shouldResetScreen = false;
+                }
+                
+                this.currentOperation += ' ' + operator + ' ';
+                this.updateDisplay();
+            }
+            
+            inputFunction(func) {
+                if (this.shouldResetScreen) {
+                    this.currentOperation = '';
+                    this.shouldResetScreen = false;
+                }
+                
+                if (this.currentOperation === '0') {
+                    this.currentOperation = func;
+                } else {
+                    this.currentOperation += func;
+                }
+                
+                this.updateDisplay();
+            }
+            
+            clear() {
+                this.currentOperation = '0';
+                this.previousOperation = '';
+                this.shouldResetScreen = false;
+                this.updateDisplay();
+            }
+            
+            clearEntry() {
+                this.currentOperation = '0';
+                this.updateDisplay();
+            }
+            
+            backspace() {
+                if (this.currentOperation.length > 1) {
+                    this.currentOperation = this.currentOperation.slice(0, -1);
+                } else {
+                    this.currentOperation = '0';
+                }
+                this.updateDisplay();
+            }
+            
+            negative() {
+                if (this.currentOperation !== '0') {
+                    if (this.currentOperation.startsWith('-')) {
+                        this.currentOperation = this.currentOperation.substring(1);
+                    } else {
+                        this.currentOperation = '-' + this.currentOperation;
+                    }
+                    this.updateDisplay();
+                }
+            }
+            
+            sqrt() {
+                try {
+                    const result = Math.sqrt(this.evaluateExpression(this.currentOperation));
+                    this.addToHistory(`√(${this.currentOperation}) = ${result}`);
+                    this.previousOperation = `√(${this.currentOperation})`;
+                    this.currentOperation = result.toString();
+                    this.shouldResetScreen = true;
+                    this.updateDisplay();
+                } catch (error) {
+                    this.showError();
+                }
+            }
+            
+            power() {
+                this.inputOperator('^');
+            }
+            
+            factorial() {
+                try {
+                    const num = parseInt(this.evaluateExpression(this.currentOperation));
+                    if (num < 0 || num > 170) {
+                        throw new Error('Invalid range');
+                    }
+                    let result = 1;
+                    for (let i = 2; i <= num; i++) {
+                        result *= i;
+                    }
+                    this.addToHistory(`${this.currentOperation}! = ${result}`);
+                    this.previousOperation = `${this.currentOperation}!`;
+                    this.currentOperation = result.toString();
+                    this.shouldResetScreen = true;
+                    this.updateDisplay();
+                } catch (error) {
+                    this.showError();
+                }
+            }
+            
+            pi() {
+                if (this.shouldResetScreen) {
+                    this.currentOperation = '';
+                    this.shouldResetScreen = false;
+                }
+                
+                if (this.currentOperation === '0') {
+                    this.currentOperation = Math.PI.toString();
+                } else {
+                    this.currentOperation += Math.PI.toString();
+                }
+                this.updateDisplay();
+            }
+            
+            e() {
+                if (this.shouldResetScreen) {
+                    this.currentOperation = '';
+                    this.shouldResetScreen = false;
+                }
+                
+                if (this.currentOperation === '0') {
+                    this.currentOperation = Math.E.toString();
+                } else {
+                    this.currentOperation += Math.E.toString();
+                }
+                this.updateDisplay();
+            }
+            
+            equals() {
+                try {
+                    const result = this.evaluateExpression(this.currentOperation);
+                    this.addToHistory(`${this.currentOperation} = ${result}`);
+                    this.previousOperation = this.currentOperation + ' =';
+                    this.currentOperation = result.toString();
+                    this.shouldResetScreen = true;
+                    this.updateDisplay();
+                } catch (error) {
+                    this.showError();
+                }
+            }
+            
+            evaluateExpression(expression) {
+                // Replace display operators with JavaScript operators
+                let expr = expression
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/−/g, '-')
+                    .replace(/\^/g, '**');
+                
+                // Handle trigonometric functions (convert to radians)
+                expr = expr.replace(/sin\(([^)]+)\)/g, (match, angle) => {
+                    return Math.sin(this.evaluateExpression(angle) * Math.PI / 180);
+                });
+                
+                expr = expr.replace(/cos\(([^)]+)\)/g, (match, angle) => {
+                    return Math.cos(this.evaluateExpression(angle) * Math.PI / 180);
+                });
+                
+                expr = expr.replace(/tan\(([^)]+)\)/g, (match, angle) => {
+                    return Math.tan(this.evaluateExpression(angle) * Math.PI / 180);
+                });
+                
+                // Handle logarithms
+                expr = expr.replace(/log\(([^)]+)\)/g, (match, num) => {
+                    return Math.log10(this.evaluateExpression(num));
+                });
+                
+                expr = expr.replace(/ln\(([^)]+)\)/g, (match, num) => {
+                    return Math.log(this.evaluateExpression(num));
+                });
+                
+                // Use Function constructor for safe evaluation
+                const result = new Function('return ' + expr)();
+                
+                if (!isFinite(result)) {
+                    throw new Error('Invalid calculation');
+                }
+                
+                return Math.round(result * 1000000000) / 1000000000; // Round to 9 decimal places
+            }
+            
+            showError() {
+                this.currentOperation = 'Error';
+                document.getElementById('currentOperation').classList.add('error');
+                this.shouldResetScreen = true;
+                this.updateDisplay();
+                
+                setTimeout(() => {
+                    document.getElementById('currentOperation').classList.remove('error');
+                    this.clear();
+                }, 2000);
+            }
+        }
+        
+        const calculator = new TI84Calculator();
+        
+        // Keyboard support
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            
+            if (key >= '0' && key <= '9' || key === '.') {
+                calculator.inputNumber(key);
+            } else if (key === '+') {
+                calculator.inputOperator('+');
+            } else if (key === '-') {
+                calculator.inputOperator('−');
+            } else if (key === '*') {
+                calculator.inputOperator('×');
+            } else if (key === '/') {
+                event.preventDefault();
+                calculator.inputOperator('÷');
+            } else if (key === 'Enter' || key === '=') {
+                event.preventDefault();
+                calculator.equals();
+            } else if (key === 'Backspace') {
+                calculator.backspace();
+            } else if (key === 'Escape') {
+                calculator.clear();
+            } else if (key === '(' || key === ')') {
+                calculator.inputNumber(key);
+            }
+        });
+    </script>
+</body>
+</html>
