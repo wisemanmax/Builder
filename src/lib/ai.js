@@ -130,7 +130,7 @@ export function callClaude(sys, msg, temperature) {
 }
 
 export function callClaudeWithThinking(sys, msg, thinkingBudget) {
-  thinkingBudget = thinkingBudget || 4000
+  thinkingBudget = thinkingBudget || 2000
   var maxTokens = thinkingBudget + 16000
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -220,7 +220,7 @@ export function callClaudeRawMultiTurn(sys, messages, maxTokens) {
 }
 
 export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) {
-  thinkingBudget = thinkingBudget || 4000
+  thinkingBudget = thinkingBudget || 2000
   var maxTokens = thinkingBudget + 16000
 
   function parseSSE(responseBody) {
@@ -291,7 +291,7 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) 
     }).catch(function (e) {
       if (e.message && e.message.indexOf('Claude:') === 0) throw e
       var msg2 = String(e && e.message || e || '').toLowerCase()
-      var isRetryable = msg2.indexOf('failed to fetch') >= 0 || msg2.indexOf('load failed') >= 0 || msg2.indexOf('network') >= 0 || msg2.indexOf('aborted') >= 0
+      var isRetryable = msg2.indexOf('failed to fetch') >= 0 || msg2.indexOf('load failed') >= 0 || msg2.indexOf('network') >= 0 || msg2.indexOf('aborted') >= 0 || msg2.indexOf('timed out') >= 0
       if (isRetryable && n < 3) {
         var delay = Math.min(2000 * Math.pow(2, n), 16000)
         console.warn('Stream attempt ' + (n + 1) + ' failed, retrying in ' + delay + 'ms:', e.message)
