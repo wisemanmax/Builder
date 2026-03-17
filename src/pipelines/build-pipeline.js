@@ -12,6 +12,49 @@ import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 
+// Retry wrapper for pipeline steps — retries on network/timeout errors
+function retryStep(fn, maxRetries, label) {
+  maxRetries = maxRetries || 2
+  function attempt(n) {
+    return fn().catch(function (e) {
+      var msg = String(e && e.message || e || '').toLowerCase()
+      var isRetryable = msg.indexOf('timed out') >= 0 || msg.indexOf('network') >= 0
+        || msg.indexOf('failed to fetch') >= 0 || msg.indexOf('load failed') >= 0
+        || msg.indexOf('aborted') >= 0
+      if (isRetryable && n < maxRetries) {
+        var delay = Math.min(3000 * Math.pow(2, n), 30000)
+        console.warn('[Pipeline] ' + (label || 'Step') + ' failed (attempt ' + (n + 1) + '), retrying in ' + (delay / 1000) + 's:', e.message)
+        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
+          // Wait for visibility if backgrounded
+          if (document.visibilityState !== 'visible') {
+            return new Promise(function (resolve) {
+              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
+              document.addEventListener('visibilitychange', onVis)
+            })
+          }
+        }).then(function () { return attempt(n + 1) })
+      }
+      throw e
+    })
+  }
+  return attempt(0)
+}
+
+// Send a notification if the Notification API is available and permitted
+function notifyUser(title, body) {
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+      var n = new Notification(title, {
+        body: body,
+        icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%2250%22 y=%2268%22 font-size=%2256%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E',
+        tag: 'builder-pipeline',
+        renotify: true,
+      })
+      n.onclick = function () { window.focus(); n.close() }
+    }
+  } catch (e) { /* notifications not available */ }
+}
+
 export function runPipeline(prompt, existingApp, customName) {
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
@@ -22,10 +65,26 @@ export function runPipeline(prompt, existingApp, customName) {
     addMsg({ role: 'asst', type: 'pipeline', id: pid })
   }, 0)
 
+  // Request notification permission early (non-blocking)
+  try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission() } catch (e) {}
+
   var _wakeLock = null
   function acquireWakeLock() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (wl) { _wakeLock = wl }).catch(function () {}) } catch (e) {} }
   acquireWakeLock()
+  // Re-acquire wake lock whenever page becomes visible again
+  function _onVisChange() { if (document.visibilityState === 'visible' && ST._building) acquireWakeLock() }
+  document.addEventListener('visibilitychange', _onVisChange)
   var _keepAlive = setInterval(function () { try { localStorage.setItem('bldr_ping', Date.now()) } catch (e) {} }, 15000)
+
+  // Acquire a Web Lock to prevent the browser from discarding the tab during the build
+  var _lockRelease = null
+  try {
+    if (navigator.locks) {
+      navigator.locks.request('builder-pipeline-' + pid, { mode: 'exclusive' }, function () {
+        return new Promise(function (resolve) { _lockRelease = resolve })
+      })
+    }
+  } catch (e) { /* Web Locks not available */ }
 
   var appName = existingApp ? existingApp.name : ((customName && customName.trim()) || autoName(prompt))
   var appIcon = ST.pendingIcon
@@ -43,7 +102,7 @@ export function runPipeline(prompt, existingApp, customName) {
   var p = Promise.resolve()
   if (hasGitHub) {
     updatePS(pid, 0, 'active', 'Creating feature branch\u2026')
-    p = ghCreateBranch(branchName).then(function () {
+    p = retryStep(function () { return ghCreateBranch(branchName) }, 3, 'Branch').then(function () {
       updatePS(pid, 0, 'done', branchName)
     }).catch(function (e) {
       updatePS(pid, 0, 'error', e.message)
@@ -58,7 +117,7 @@ export function runPipeline(prompt, existingApp, customName) {
   p.then(function () {
     // Step 1 — Plan
     updatePS(pid, 1, 'active', 'Claude is planning the architecture\u2026')
-    return callClaudeRaw(SYS_PLAN, 'App description: ' + prompt, 2000).then(function (raw) {
+    return retryStep(function () { return callClaudeRaw(SYS_PLAN, 'App description: ' + prompt, 2000) }, 2, 'Plan').then(function (raw) {
       planJSON = raw
       updatePS(pid, 1, 'done', 'Architecture planned \u2713')
       addMsg({ role: 'asst', type: 'text', text: 'Architecture plan ready.' })
@@ -294,6 +353,7 @@ export function runPipeline(prompt, existingApp, customName) {
             } else {
               updatePS(pid, 8, 'wait', criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' remain after ' + reviewPass + ' passes')
               addMsg({ role: 'asst', type: 'retry-prompt', pid: pid, bugCount: criticalBugs.length })
+              notifyUser('Action Required', criticalBugs.length + ' issues found — retry or proceed?')
               return waitForRetryDecision(pid).then(function (doRetry) {
                 if (doRetry) {
                   updatePS(pid, 8, 'active', 'Claude is fixing remaining issues…')
@@ -345,9 +405,11 @@ export function runPipeline(prompt, existingApp, customName) {
     if (hasGitHub) {
       updatePS(pid, 10, 'active', 'Pushing to ' + branchName + '\u2026')
       var appPath = 'apps/' + appId + '.html'
-      return ghGetFileSha(appPath, branchName).then(function (existingSha) {
-        return ghPushFile(appPath, v2, (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [branch]', branchName, existingSha)
-      }).then(function () {
+      return retryStep(function () {
+        return ghGetFileSha(appPath, branchName).then(function (existingSha) {
+          return ghPushFile(appPath, v2, (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [branch]', branchName, existingSha)
+        })
+      }, 3, 'Push').then(function () {
         updatePS(pid, 10, 'done', 'Pushed to branch \u2713')
       }).catch(function (e) {
         updatePS(pid, 10, 'error', e.message)
@@ -366,6 +428,7 @@ export function runPipeline(prompt, existingApp, customName) {
     // Step 12 — Approval gate
     updatePS(pid, 12, 'wait', 'Waiting for your approval\u2026')
     addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
+    notifyUser('Build Ready for Review', appName + ' is waiting for your approval.')
 
     return waitForApproval(pid)
   }).then(function () {
@@ -376,7 +439,7 @@ export function runPipeline(prompt, existingApp, customName) {
     if (hasGitHub) {
       updatePS(pid, 13, 'active', 'Merging to main\u2026')
       addMsg({ role: 'asst', type: 'merge-status', mergeId: mergeStatusId, status: 'merging' })
-      return ghMergeBranch(branchName, appName).then(function () {
+      return retryStep(function () { return ghMergeBranch(branchName, appName) }, 3, 'Merge').then(function () {
         return ghPushManifest('main').catch(function () {})
       }).then(function () {
         ghDeleteBranch(branchName)
@@ -405,6 +468,7 @@ export function runPipeline(prompt, existingApp, customName) {
     }
   }).then(function (mode) {
     ST.activeAppId = appId
+    notifyUser('Build Complete', appName + (mode === 'github' ? ' is live on GitHub Pages!' : ' has been saved.'))
     $('ihint').textContent = '\uD83D\uDCAC Describe changes for a new build'
     $('bs-proj-btn').style.display = 'flex'
     renderGrid()
@@ -438,12 +502,15 @@ export function runPipeline(prompt, existingApp, customName) {
     clearPreview(appId || '')
     var safeMsg = scrubKeys(err.message || String(err))
     addMsg({ role: 'asst', type: 'text', text: 'Pipeline error: ' + safeMsg + '. Please try again.' })
+    notifyUser('Build Failed', safeMsg)
     toast('Error: ' + safeMsg, 5000)
   }).finally(function () {
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
     clearInterval(_keepAlive)
+    document.removeEventListener('visibilitychange', _onVisChange)
     if (_wakeLock) { try { _wakeLock.release() } catch (e) {} _wakeLock = null }
+    if (_lockRelease) { try { _lockRelease() } catch (e) {} _lockRelease = null }
     try { localStorage.removeItem('bldr_ping') } catch (e) {}
   })
 }

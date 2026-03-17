@@ -1,4 +1,4 @@
-const CACHE_NAME = 'builder-v13';
+const CACHE_NAME = 'builder-v14';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -23,6 +23,21 @@ self.addEventListener('activate', function(e) {
     })
   );
   e.waitUntil(clients.claim());
+});
+
+// Handle notification clicks — focus or open the app window
+self.addEventListener('notificationclick', function(e) {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      for (var i = 0; i < clientList.length; i++) {
+        if (clientList[i].url.indexOf(self.registration.scope) >= 0 && 'focus' in clientList[i]) {
+          return clientList[i].focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow('./');
+    })
+  );
 });
 
 self.addEventListener('fetch', function(e) {
