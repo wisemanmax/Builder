@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hip-Hop Link Tree - Your Music Hub</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --border-color: #333333;
+            --shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+            --gradient: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .particle-bg {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                pointer-events: none;
+            }
+
+            .particle {
+                position: absolute;
+                background: var(--accent-purple);
+                border-radius: 50%;
+                opacity: 0.4;
+                animation: float 8s ease-in-out infinite;
+            }
+
+            .particle:nth-child(2n) {
+                background: var(--accent-pink);
+                animation-delay: -2s;
+            }
+
+            .particle:nth-child(3n) {
+                background: var(--accent-cyan);
+                animation-delay: -4s;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
+                50% { transform: translateY(-15px) rotate(90deg); opacity: 0.6; }
+            }
+
+            .moving-shape {
+                position: absolute;
+                background: var(--gradient);
+                border-radius: 50%;
+                opacity: 0.05;
+                animation: move 20s linear infinite;
+            }
+
+            @keyframes move {
+                0% { transform: translate(-50px, -50px) scale(0.5); }
+                25% { transform: translate(calc(100vw + 50px), -50px) scale(1); }
+                50% { transform: translate(calc(100vw + 50px), calc(100vh + 50px)) scale(0.8); }
+                75% { transform: translate(-50px, calc(100vh + 50px)) scale(1.2); }
+                100% { transform: translate(-50px, -50px) scale(0.5); }
+            }
+
+            .profile-avatar {
+                animation: glow 4s ease-in-out infinite alternate;
+            }
+
+            @keyframes glow {
+                from { box-shadow: 0 0 15px var(--accent-purple); }
+                to { box-shadow: 0 0 25px var(--accent-purple), 0 0 35px var(--accent-purple); }
+            }
+
+            .progress-fill {
+                animation: pulse 3s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mini-player {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 200px;
+            height: 80px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 2px solid var(--accent-purple);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .mini-player-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .play-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--gradient);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .play-btn:focus {
+            outline: 2px solid var(--accent-purple);
+            outline-offset: 2px;
+        }
+
+        .track-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .track-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            font-size: 10px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--gradient);
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            border: 4px solid var(--accent-purple);
+        }
+
+        .profile-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-bio {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .links-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .link-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .link-card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .link-card:hover::before {
+            left: 100%;
+        }
+
+        .link-card:focus {
+            outline: 2px solid var(--accent-purple);
+            outline-offset: 2px;
+        }
+
+        .link-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .link-content {
+            flex: 1;
+        }
+
+        .link-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .link-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+        }
+
+        .social-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .social-card:hover {
+            border-color: var(--accent-pink);
+            transform: scale(1.05);
+            box-shadow: 0 8px 32px rgba(236, 72, 153, 0.2);
+        }
+
+        .social-card:focus {
+            outline: 2px solid var(--accent-pink);
+            outline-offset: 2px;
+        }
+
+        .social-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin: 0 auto 12px;
+            transition: transform 0.3s ease;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .social-card:hover .social-icon {
+                transform: rotateY(360deg);
+            }
+        }
+
+        .social-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .hidden-audio {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+
+            .mini-player {
+                width: 160px;
+                height: 70px;
+                bottom: 16px;
+                right: 16px;
+                padding: 8px;
+            }
+
+            .play-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .track-title {
+                font-size: 11px;
+            }
+
+            .track-artist {
+                font-size: 9px;
+            }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+
+            .profile-name {
+                font-size: 24px;
+            }
+
+            .social-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particle-bg" id="particleBackground"></div>
+    
+    <div class="moving-shape" style="width: 200px; height: 200px; top: 10%; left: -100px;"></div>
+    <div class="moving-shape" style="width: 150px; height: 150px; top: 60%; left: -75px; animation-delay: -5s;"></div>
+    <div class="moving-shape" style="width: 100px; height: 100px; top: 80%; left: -50px; animation-delay: -10s;"></div>
+
+    <div class="mini-player" id="miniPlayer">
+        <button class="play-btn" id="playBtn" aria-label="Play or pause audio track">▶</button>
+        <div class="track-info">
+            <div class="track-title">Latest Single</div>
+            <div class="track-artist">Hip-Hop Artist</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio class="hidden-audio" id="audioPlayer" loop preload="none">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="container">
+        <div class="profile">
+            <div class="profile-avatar" role="img" aria-label="Hip-hop artist profile picture">🎤</div>
+            <h1 class="profile-name">Hip-Hop Artist</h1>
+            <p class="profile-bio">Bringing you the freshest beats and realest lyrics. Follow my journey and connect with my music across all platforms.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Music & Content</h2>
+            <div class="links-grid">
+                <a href="https://open.spotify.com" class="link-card" aria-label="Listen to latest album on Spotify">
+                    <div class="link-icon">🎵</div>
+                    <div class="link-content">
+                        <div class="link-title">Latest Album - Spotify</div>
+                        <div class="link-description">Stream my newest tracks and discover my musical evolution</div>
+                    </div>
+                </a>
+                
+                <a href="https://youtube.com" class="link-card" aria-label="Watch music videos on YouTube">
+                    <div class="link-icon">📺</div>
+                    <div class="link-content">
+                        <div class="link-title">Music Videos - YouTube</div>
+                        <div class="link-description">Watch official music videos and behind-the-scenes content</div>
+                    </div>
+                </a>
+                
+                <a href="https://music.apple.com" class="link-card" aria-label="Listen on Apple Music">
+                    <div class="link-icon">🍎</div>
+                    <div class="link-content">
+                        <div class="link-title">Apple Music</div>
+                        <div class="link-description">Complete discography available for streaming</div>
+                    </div>
+                </a>
+                
+                <a href="https://example.com/merch" class="link-card" aria-label="Purchase merchandise">
+                    <div class="link-icon">👕</div>
+                    <div class="link-content">
+                        <div class="link-title">Official Merch</div>
+                        <div class="link-description">Exclusive clothing and accessories</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Connect With Me</h2>
+            <div class="social-grid">
+                <a href="https://instagram.com" class="social-card" aria-label="Follow on Instagram">
+                    <div class="social-icon">📷</div>
+                    <div class="social-name">Instagram</div>
+                </a>
+                
+                <a href="https://twitter.com" class="social-card" aria-label="Follow on Twitter">
+                    <div class="social-icon">🐦</div>
+                    <div class="social-name">Twitter</div>
+                </a>
+                
+                <a href="https://facebook.com" class="social-card" aria-label="Like on Facebook">
+                    <div class="social-icon">👥</div>
+                    <div class="social-name">Facebook</div>
+                </a>
+                
+                <a href="https://tiktok.com" class="social-card" aria-label="Connect on TikTok">
+                    <div class="social-icon">🎬</div>
+                    <div class="social-name">TikTok</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Audio player functionality
+        const playBtn = document.getElementById('playBtn');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const progressFill = document.getElementById('progressFill');
+        let isPlaying = false;
+        let progressInterval;
+
+        // Update progress bar based on audio playback
+        function updateProgress() {
+            if (audioPlayer.duration) {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                progressFill.style.width = progress + '%';
+            }
+        }
+
+        // Handle audio events
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            progressFill.style.width = '0%';
+        });
+
+        audioPlayer.addEventListener('timeupdate', updateProgress);
+
+        audioPlayer.addEventListener('ended', () => {
+            // Reset when audio ends (though it's set to loop)
+            playBtn.textContent = '▶';
+            playBtn.setAttribute('aria-label', 'Play audio track');
+            isPlaying = false;
+            progressFill.style.width = '0%';
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+        });
+
+        playBtn.addEventListener('click', function() {
+            if (!isPlaying) {
+                // Play
+                audioPlayer.play().then(() => {
+                    playBtn.textContent = '⏸';
+                    playBtn.setAttribute('aria-label', 'Pause audio track');
+                    isPlaying = true;
+                }).catch(error => {
+                    console.log('Audio play failed:', error);
+                });
+            } else {
+                // Pause
+                audioPlayer.pause();
+                playBtn.textContent = '▶';
+                playBtn.setAttribute('aria-label', 'Play audio track');
+                isPlaying = false;
+            }
+        });
+
+        // Particle background animation
+        function createParticles() {
+            const particleBackground = document.getElementById('particleBackground');
+            const particleCount = window.innerWidth < 768 ? 15 : 25;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                
+                particleBackground.appendChild(particle);
+            }
+        }
+
+        // Initialize particles if motion is preferred
+        if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+            createParticles();
+        }
+
+        // Handle reduced motion preference changes
+        window.matchMedia('(prefers-reduced-motion: no-preference)').addEventListener('change', (e) => {
+            const particleBackground = document.getElementById('particleBackground');
+            if (e.matches) {
+                createParticles();
+            } else {
+                particleBackground.innerHTML = '';
+            }
+        });
+
+        // Keyboard navigation improvements
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (e.target.classList.contains('link-card') || e.target.classList.contains('social-card')) {
+                    e.preventDefault();
+                    e.target.click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
