@@ -6,7 +6,7 @@ import { SYS_BUILD, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../confi
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callGPT, callGPTReview } from '../lib/ai.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
-import { addMsg, updatePS, scrollBot } from '../components/message.js'
+import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession } from '../components/message.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
@@ -59,6 +59,7 @@ function notifyUser(title, body) {
 }
 
 export function runPipeline(prompt, existingApp, customName, images) {
+  clearCurrentSession()
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
@@ -175,12 +176,17 @@ export function runPipeline(prompt, existingApp, customName, images) {
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
     if (images && images.length) { userMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — study them carefully and replicate the design, layout, colors, and style as closely as possible]' }
     var charCount = 0
+    var thinkingText = ''
     return callClaudeWithThinkingStream(effectiveSys, userMsg, 2000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
+      else if (type === 'thinking') { thinkingText += text }
     }, images)
   }).then(function (code) {
     v1 = code
     updatePS(pid, 2, 'done', 'Build complete \u2713')
+    if (thinkingText.trim()) {
+      addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
+    }
 
     var canAudit = !!(ST.gptKey && ST.auditEnabled)
     var currentCode = v1
@@ -493,6 +499,8 @@ export function runPipeline(prompt, existingApp, customName, images) {
     notifyUser('Build Failed', safeMsg)
     toast('Error: ' + safeMsg, 5000)
   }).finally(function () {
+    _saveChatSession(appId, prompt)
+    persist()
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
     clearInterval(_keepAlive)
@@ -501,6 +509,17 @@ export function runPipeline(prompt, existingApp, customName, images) {
     if (_lockRelease) { try { _lockRelease() } catch (e) {} _lockRelease = null }
     try { localStorage.removeItem('bldr_ping') } catch (e) {}
   })
+}
+
+function _saveChatSession(appId, prompt) {
+  var session = getCurrentSession()
+  if (!session.length) return
+  var app = null; for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === appId) { app = ST.apps[i]; break } }
+  if (!app) return
+  if (!app.chatHistory) app.chatHistory = []
+  app.chatHistory.unshift({ id: 's' + Date.now(), ts: new Date().toISOString(), prompt: (prompt || '').slice(0, 200), messages: session })
+  if (app.chatHistory.length > 10) app.chatHistory = app.chatHistory.slice(0, 10)
+  clearCurrentSession()
 }
 
 function _saveAppLocally(id, name, icon, ci, code, prompt, existingApp, ghPushed) {

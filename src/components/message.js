@@ -2,6 +2,32 @@ import { $, esc, escAttr } from '../lib/utils.js'
 import { PIPE_NAMES, PIPE_ICONS } from '../config/constants.js'
 import { approveAndMerge, requestChanges, resolveRetry } from './approval-card.js'
 
+// Session tracking for conversation history
+var _currentSession = []
+
+export function getCurrentSession() { return _currentSession.slice() }
+export function clearCurrentSession() { _currentSession = [] }
+
+function _trackMessage(cfg) {
+  // Skip heavy/transient message types
+  if (cfg.type === 'typing' || cfg.type === 'typing-pipeline') return
+  var entry = { role: cfg.role, type: cfg.type || 'text', ts: new Date().toISOString() }
+  if (cfg.role === 'user') { entry.text = cfg.text || '' }
+  else if (cfg.role === 'system') { entry.text = cfg.text || '' }
+  else if (cfg.type === 'text') { entry.text = cfg.text || ''; if (cfg.html) entry.html = cfg.html }
+  else if (cfg.type === 'thinking') { entry.text = (cfg.text || '').slice(0, 2000) }
+  else if (cfg.type === 'checks') { var f = (cfg.checks || []).filter(function (c) { return !c.passed }).length; entry.text = f ? f + ' issue(s) found' : 'All checks passed' }
+  else if (cfg.type === 'audit') { var b = (cfg.bugs || []).length; entry.text = b ? b + ' bug(s) found' : 'No bugs found' }
+  else if (cfg.type === 'pipeline') { entry.text = 'Pipeline started' }
+  else if (cfg.type === 'approval') { entry.text = 'Awaiting approval' }
+  else if (cfg.type === 'merge-status') { entry.text = cfg.status === 'done' ? 'Merged' : 'Merging' }
+  else if (cfg.type === 'preview-card') { entry.text = 'Preview: ' + (cfg.appName || 'App') }
+  else if (cfg.type === 'retry-prompt') { entry.text = (cfg.bugCount || 0) + ' issues remain — retry?' }
+  else if (cfg.type === 'schema') { entry.text = 'Supabase schema generated' }
+  else { entry.text = cfg.text || '' }
+  _currentSession.push(entry)
+}
+
 export function scrollBot() {
   var el = $('chat-scroll')
   setTimeout(function () { el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }) }, 60)
@@ -22,6 +48,7 @@ export function resetChat() {
 }
 
 export function addMsg(cfg) {
+  _trackMessage(cfg)
   var s = $('chat-scroll')
   var w = $('chat-welcome'); if (w) w.style.display = 'none'
   var row = document.createElement('div')
@@ -151,6 +178,22 @@ export function addMsg(cfg) {
             resolveRetry(pid2, choice)
           })
         }
+      }, 0)
+    } else if (cfg.type === 'thinking') {
+      var thinkId = 'think-' + Date.now()
+      row.innerHTML = '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#B44FFF,#7C4DFF)">&#x1F9E0;</div>'
+        + '<div style="flex:1;min-width:0"><div class="thinking-card" id="' + thinkId + '">'
+        + '<div class="thinking-hdr" data-target="' + thinkId + '-body"><div class="thinking-title">&#x1F9E0; Thought Process</div><div class="thinking-toggle">&#x25B6;</div></div>'
+        + '<div class="thinking-body" id="' + thinkId + '-body" style="display:none"><pre class="thinking-pre">' + esc(cfg.text || '') + '</pre></div>'
+        + '</div></div></div>'
+      setTimeout(function () {
+        var hdr = row.querySelector('.thinking-hdr')
+        if (hdr) hdr.addEventListener('click', function () {
+          var body = document.getElementById(this.dataset.target)
+          var tog = this.querySelector('.thinking-toggle')
+          if (body.style.display === 'none') { body.style.display = 'block'; tog.textContent = '\u25BC' }
+          else { body.style.display = 'none'; tog.textContent = '\u25B6' }
+        })
       }, 0)
     }
   }

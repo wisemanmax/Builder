@@ -27,6 +27,48 @@ export function openProjectSheet(id) {
     phhtml += '<div class="ph-item"><div class="ph-meta"><span class="ph-tag">' + (p.type === 'initial' ? '\uD83D\uDD28 Initial Build' : '\u270F\uFE0F Update') + '</span><span class="ph-date">' + fmtDate(p.ts) + '</span></div><div class="ph-text">' + esc(p.text) + '</div></div>'
   }
   ph.innerHTML = phhtml
+
+  // Conversation history
+  var ch = $('chat-history')
+  var sessions = app.chatHistory || []
+  if (!sessions.length) {
+    ch.innerHTML = '<div class="ch-empty">No conversation history yet</div>'
+  } else {
+    var chhtml = ''
+    for (var si = 0; si < sessions.length; si++) {
+      var sess = sessions[si]
+      var sessId = 'ch-sess-' + si
+      chhtml += '<div class="ch-session">'
+        + '<div class="ch-session-hdr" data-target="' + sessId + '">'
+        + '<div class="ch-session-info"><span class="ch-session-prompt">' + esc((sess.prompt || 'Build session').slice(0, 80)) + '</span><span class="ch-session-date">' + fmtDate(sess.ts) + '</span></div>'
+        + '<div class="ch-session-toggle">&#x25B6;</div></div>'
+        + '<div class="ch-session-body" id="' + sessId + '" style="display:none">'
+      var msgs = sess.messages || []
+      for (var mi = 0; mi < msgs.length; mi++) {
+        var m = msgs[mi]
+        var roleClass = m.role === 'user' ? 'ch-user' : m.role === 'system' ? 'ch-sys' : 'ch-asst'
+        var icon = m.role === 'user' ? '&#x1F464;' : m.role === 'system' ? '&#x2699;&#xFE0F;' : '&#x26A1;'
+        var content = m.html ? m.html : esc(m.text || '')
+        if (m.type === 'thinking') {
+          content = '<span class="ch-thinking-label">&#x1F9E0; Thought Process</span><pre class="ch-thinking-text">' + esc(m.text || '') + '</pre>'
+        }
+        chhtml += '<div class="ch-msg ' + roleClass + '"><span class="ch-msg-icon">' + icon + '</span><div class="ch-msg-content">' + content + '</div></div>'
+      }
+      chhtml += '</div></div>'
+    }
+    ch.innerHTML = chhtml
+    // Attach toggle listeners
+    var hdrs = ch.querySelectorAll('.ch-session-hdr')
+    for (var hi = 0; hi < hdrs.length; hi++) {
+      hdrs[hi].addEventListener('click', function () {
+        var body = document.getElementById(this.dataset.target)
+        var tog = this.querySelector('.ch-session-toggle')
+        if (body.style.display === 'none') { body.style.display = 'block'; tog.innerHTML = '&#x25BC;' }
+        else { body.style.display = 'none'; tog.innerHTML = '&#x25B6;' }
+      })
+    }
+  }
+
   $('project-sheet').classList.add('open')
 }
 
