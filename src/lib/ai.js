@@ -62,7 +62,7 @@ export function callClaudeWithThinking(sys, msg, thinkingBudget) {
   var maxTokens = thinkingBudget + 16000
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2025-04-14', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: sys, messages: [{ role: 'user', content: msg }] }),
   }, 180000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
