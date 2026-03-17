@@ -3,7 +3,7 @@ import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/uti
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
 import { SYS_BUILD, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../config/prompts.js'
-import { callClaude, callClaudeRaw, callClaudeWithThinking, callGPT, callGPTReview } from '../lib/ai.js'
+import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callGPT, callGPTReview } from '../lib/ai.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot } from '../components/message.js'
@@ -77,37 +77,45 @@ export function runPipeline(prompt, existingApp, customName) {
     }
 
     var effectiveSys = SYS_BUILD
+    var specText = 'No specification provided'
+    var rulesText = 'No specific rules'
     var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
     if (activeThought) {
       var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
       if (linkedRules) {
-        effectiveSys += '\n\nUSER RULES (follow these constraints strictly):\nMUST DO:\n'
-        effectiveSys += (linkedRules.mustRules || []).map(function (r) { return '- ' + r }).join('\n')
-        effectiveSys += '\nMUST NOT DO:\n'
-        effectiveSys += (linkedRules.mustNotRules || []).map(function (r) { return '- ' + r }).join('\n')
+        rulesText = 'MUST DO:\n' + (linkedRules.mustRules || []).map(function (r) { return '- ' + r }).join('\n')
+          + '\nMUST NOT DO:\n' + (linkedRules.mustNotRules || []).map(function (r) { return '- ' + r }).join('\n')
         if (linkedRules.niceToHave && linkedRules.niceToHave.length) {
-          effectiveSys += '\nNICE TO HAVE:\n'
-          effectiveSys += (linkedRules.niceToHave || []).map(function (r) { return '- ' + r }).join('\n')
+          rulesText += '\nNICE TO HAVE:\n' + (linkedRules.niceToHave || []).map(function (r) { return '- ' + r }).join('\n')
         }
+        effectiveSys += '\n\nUSER RULES (follow these constraints strictly):\n' + rulesText
       }
       if (activeThought.brief) {
-        effectiveSys += '\n\nAPP SPECIFICATION (from user ideation session):\n'
-        effectiveSys += 'App Name: ' + (activeThought.brief.name || 'App') + '\n'
-        effectiveSys += 'What it does: ' + (activeThought.brief.whatItDoes || []).join(', ') + '\n'
-        effectiveSys += 'What it won\'t do: ' + (activeThought.brief.whatItWontDo || []).join(', ') + '\n'
-        effectiveSys += 'Target audience: ' + (activeThought.brief.audience || 'General') + '\n'
-        effectiveSys += 'Key features: ' + (activeThought.brief.features || []).join(', ') + '\n'
+        specText = 'App Name: ' + (activeThought.brief.name || 'App') + '\n'
+          + 'What it does: ' + (activeThought.brief.whatItDoes || []).join(', ') + '\n'
+          + 'What it won\'t do: ' + (activeThought.brief.whatItWontDo || []).join(', ') + '\n'
+          + 'Target audience: ' + (activeThought.brief.audience || 'General') + '\n'
+          + 'Key features: ' + (activeThought.brief.features || []).join(', ')
         if (activeThought.brief.design) {
-          effectiveSys += 'Design: theme=' + (activeThought.brief.design.theme || 'dark') + ', accent=' + (activeThought.brief.design.accent || 'blue') + ', layout=' + (activeThought.brief.design.layout || 'standard') + '\n'
+          specText += '\nDesign: theme=' + (activeThought.brief.design.theme || 'dark') + ', accent=' + (activeThought.brief.design.accent || 'blue') + ', layout=' + (activeThought.brief.design.layout || 'standard')
         }
+        effectiveSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
       }
       if (!existingApp && activeThought.brief) {
         userMsg = 'Build this app based on the specification above.\n\nApp Name: ' + (activeThought.brief.name || customName || 'My App') + '\n\nAdditional notes from user: ' + prompt
       }
     }
 
+    // Helper to inject spec/rules context into fix and enhance prompts
+    function withContext(sysPrompt) {
+      return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
+    }
+
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
-    return callClaudeWithThinking(effectiveSys, userMsg)
+    var charCount = 0
+    return callClaudeWithThinkingStream(effectiveSys, userMsg, 4000, function (type, text) {
+      if (type === 'text') { charCount += text.length; updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
+    })
   }).then(function (code) {
     v1 = code
     updatePS(pid, 2, 'done', 'Build complete \u2713')
@@ -116,6 +124,8 @@ export function runPipeline(prompt, existingApp, customName) {
     var currentCode = v1
     var passNum = 0
     var totalFixed = 0
+    var repairHistory = []
+    var fixSys = withContext(SYS_FIX.replace('{INTENT}', prompt))
 
     function runValidationPass() {
       passNum++
@@ -150,8 +160,19 @@ export function runPipeline(prompt, existingApp, customName) {
 
         if (allIssues.length > 0) {
           updatePS(pid, 5, 'active', 'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026')
-          var fm = 'ISSUES TO FIX:\n' + allIssues.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' \u2014 ' + (b.location || '') }).join('\n') + '\n\nORIGINAL CODE:\n' + currentCode
-          return callClaude(SYS_FIX.replace('{INTENT}', prompt), fm).then(function (fixed) {
+          var issueList = allIssues.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' \u2014 ' + (b.location || '') }).join('\n')
+
+          // Multi-turn: first pass includes full code, subsequent passes only list remaining issues
+          var fm
+          if (passNum === 1) {
+            fm = 'ISSUES TO FIX:\n' + issueList + '\n\nORIGINAL CODE:\n' + currentCode
+          } else {
+            fm = 'REMAINING ISSUES after pass ' + (passNum - 1) + ':\n' + issueList + '\n\nFix these without reintroducing previously resolved issues.'
+          }
+          repairHistory.push({ role: 'user', content: fm })
+
+          return callClaudeMultiTurn(fixSys, repairHistory).then(function (fixed) {
+            repairHistory.push({ role: 'assistant', content: fixed })
             currentCode = fixed
             totalFixed += allIssues.length
             if (passNum < MAX_FIX_PASSES) {
@@ -224,7 +245,7 @@ export function runPipeline(prompt, existingApp, customName) {
       }
       enhanceMsg += '\n\nORIGINAL CODE:\n' + v2
 
-      return callClaude(SYS_ENHANCE, enhanceMsg).then(function (enhanced) {
+      return callClaude(withContext(SYS_ENHANCE), enhanceMsg).then(function (enhanced) {
         v2 = enhanced
         updatePS(pid, 7, 'done', 'Enhancements applied ✓')
 
@@ -250,7 +271,7 @@ export function runPipeline(prompt, existingApp, customName) {
             if (reviewPass < MAX_REVIEW_PASSES) {
               updatePS(pid, 8, 'active', 'Sending ' + criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' back to Claude (pass ' + reviewPass + ')…')
               var fixMsg = 'ISSUES TO FIX:\n' + criticalBugs.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' — ' + (b.location || '') }).join('\n') + '\n\nORIGINAL CODE:\n' + v2
-              return callClaude(SYS_FIX.replace('{INTENT}', prompt), fixMsg).then(function (fixed) {
+              return callClaude(fixSys, fixMsg).then(function (fixed) {
                 v2 = fixed
                 return runFinalReview()
               })

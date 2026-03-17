@@ -48,6 +48,8 @@ export const SYS_FIX = 'You are an expert web developer performing a targeted bu
   + '5. After fixing, mentally verify each fix does not break adjacent functionality\n'
   + '6. Return ONLY the fixed raw HTML starting with <!DOCTYPE html>\n'
   + '\nThe user\'s original intent for this app was: {INTENT}'
+  + '\n\nAPP SPECIFICATION:\n{SPEC}'
+  + '\n\nDESIGN RULES:\n{RULES}'
 
 export const SYS_AUDIT = 'You are a senior code reviewer auditing a single-file HTML app that runs in a sandboxed iframe.\n'
   + '\nAUDIT CATEGORIES (check each):\n'
@@ -73,6 +75,8 @@ export const SYS_BACKEND = 'You are a backend architect. Given a single-file HTM
 export const SYS_ENHANCE_REVIEW = 'You are a senior software architect reviewing a single-file HTML app. Suggest enhancements for code quality, UX, performance, and accessibility, and identify any bugs.\nReturn ONLY a raw JSON object (no markdown, no code fences):\n{"enhancements":[{"priority":"high"|"medium"|"low","suggestion":"what to improve","location":"where in the code","reason":"why this matters"}],"bugs":[{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]}\nBe specific and actionable. Focus on improvements that make the biggest impact. If the code is excellent, return {"enhancements":[],"bugs":[]}.'
 
 export const SYS_ENHANCE = 'You are an expert web developer implementing code improvements. You will receive HTML code along with a list of enhancement suggestions and bug fixes.\nApply ALL the suggested enhancements and fix ALL listed bugs. Maintain the existing design and functionality while improving code quality, UX, performance, and accessibility.\nReturn ONLY the improved raw HTML starting with <!DOCTYPE html>. No markdown, no code fences, no explanation.'
+  + '\n\nAPP SPECIFICATION:\n{SPEC}'
+  + '\n\nDESIGN RULES:\n{RULES}'
 
 export const SYS_PLAN = 'You are a senior web architect. Given an app description, produce a concise implementation plan for a single-file HTML app.\n'
   + 'Return ONLY a JSON object (no markdown, no code fences):\n'
