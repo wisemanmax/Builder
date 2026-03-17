@@ -2,7 +2,7 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
 import { THINK_ROUND_LABELS } from '../config/constants.js'
 import { SYS_THINK } from '../config/prompts.js'
-import { callClaudeRawMultiTurn } from '../lib/ai.js'
+import { callGPTRawMultiTurn } from '../lib/ai.js'
 import { ghSyncThoughtAndRules } from '../lib/github.js'
 import { openBuilder } from './build.js'
 
@@ -102,7 +102,7 @@ export function sendThinkMsg() {
   var inp = $('think-input')
   var text = inp.value.trim()
   if (!text || ST._thinking) return
-  if (!ST.key) { toast('Add your Anthropic API key in Settings first'); return }
+  if (!ST.gptKey) { toast('Add your OpenAI API key in Settings first'); return }
 
   ST._thinking = true
   var sb = $('think-send-btn'); if (sb) sb.disabled = true
@@ -130,7 +130,7 @@ export function sendThinkMsg() {
       + '\n\n' + text
   })
 
-  callClaudeRawMultiTurn(SYS_THINK, apiMessages, 2000).then(function (raw) {
+  callGPTRawMultiTurn(SYS_THINK, apiMessages, 2000).then(function (raw) {
     var ti = $('think-typing'); if (ti) ti.remove()
     var parsed
     try { parsed = JSON.parse(raw) } catch (e) {

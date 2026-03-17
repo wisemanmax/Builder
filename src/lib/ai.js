@@ -247,6 +247,24 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) 
   })
 }
 
+export function callGPTRawMultiTurn(sys, messages, maxTokens) {
+  maxTokens = maxTokens || 4000
+  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
+    body: JSON.stringify({ model: 'gpt-4o-mini', max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }].concat(messages) }),
+  }, 60000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
+    return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('GPT:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'GPT'))
+  })
+}
+
 export function callGPTReview(code) {
   return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
