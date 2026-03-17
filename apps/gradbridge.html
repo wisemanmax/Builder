@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradBridge - Bridging Your Path to Success</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0f0f23;
+            --darker-bg: #0a0a1a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', roboto, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .nav.scrolled {
+            background: rgba(15, 15, 35, 0.98);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: none;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .nav-toggle {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .nav-toggle span,
+        .nav-toggle span::before,
+        .nav-toggle span::after {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: currentColor;
+            transition: var(--transition);
+        }
+
+        .nav-toggle span::before,
+        .nav-toggle span::after {
+            content: '';
+            position: absolute;
+        }
+
+        .nav-toggle span::before {
+            top: -6px;
+        }
+
+        .nav-toggle span::after {
+            top: 6px;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: var(--darker-bg);
+            padding: 2rem;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .mobile-menu.open {
+            display: block;
+        }
+
+        .mobile-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mobile-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.75rem 0;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        .mobile-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding-top: 80px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.25rem);
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: var(--darker-bg);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--border-radius);
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 6rem 0;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .testimonial-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .testimonial-content {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .author-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .author-info p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 0;
+            background: var(--darker-bg);
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 4rem 0 2rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 16px;
+            min-height: 44px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-error {
+            color: #ff6b6b;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            backdrop-filter: blur(20px);
+            z-index: 3000;
+            transform: translateX(400px);
+            transition: var(--transition);
+            max-width: calc(100vw - 40px);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-height: 600px) {
+            .toast {
+                top: 20px;
+                bottom: auto;
+            }
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .nav-links {
+                display: flex;
+            }
+
+            .nav-toggle {
+                display: none;
+            }
+
+            .hero-cta {
+                flex-wrap: nowrap;
+            }
+
+            .btn {
+                min-width: 140px;
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+
+            .testimonials-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                padding: 0 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 1.5rem;
+                margin: 10px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Focus styles */
+        .btn:focus,
+        .nav-cta:focus,
+        .modal-close:focus {
+            outline: 2px solid rgba(102, 126, 234, 0.8);
+            outline-offset: 2px;
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <nav class="nav" id="nav" role="navigation" aria-label="Main navigation">
+            <div class="container">
+                <div class="nav-container">
+                    <div class="nav-logo">GradBridge</div>
+                    <ul class="nav-links" role="menubar">
+                        <li role="none"><a href="#home" class="nav-link active" role="menuitem" aria-current="page">Home</a></li>
+                        <li role="none"><a href="#features" class="nav-link" role="menuitem">Features</a></li>
+                        <li role="none"><a href="#testimonials" class="nav-link" role="menuitem">Testimonials</a></li>
+                        <li role="none"><a href="#about" class="nav-link" role="menuitem">About</a></li>
+                    </ul>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <a href="#contact" class="nav-cta" id="openContactModal">Get Started</a>
+                        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileMenu">
+                            <span></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+                    <ul class="mobile-links" role="menu">
+                        <li role="none"><a href="#home" class="nav-link" role="menuitem">Home</a></li>
+                        <li role="none"><a href="#features" class="nav-link" role="menuitem">Features</a></li>
+                        <li role="none"><a href="#testimonials" class="nav-link" role="menuitem">Testimonials</a></li>
+                        <li role="none"><a href="#about" class="nav-link" role="menuitem">About</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero" id="home">
+                <div class="container">
+                    <div class="hero-content">
+                        <div class="hero-badge">🎓 Trusted by 10,000+ Students</div>
+                        <h1 class="hero-title">Bridge Your Path to Graduate Success</h1>
+                        <p class="hero-subtitle">Connect with top graduate programs, access exclusive resources, and accelerate your academic journey with personalized guidance from industry experts.</p>
+                        <div class="hero-cta">
+                            <a href="#contact" class="btn btn-primary" id="heroGetStarted">Get Started Free</a>
+                            <a href="#features" class="btn btn-secondary">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="features" id="features">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">Everything You Need to Succeed</h2>
+                        <p class="section-subtitle">Comprehensive tools and resources designed specifically for graduate students and recent graduates</p>
+                    </div>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🎯</div>
+                            <h3 class="feature-title">Program Matching</h3>
+                            <p class="feature-description">AI-powered algorithm matches you with graduate programs that align with your academic goals, interests, and career aspirations.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📚</div>
+                            <h3 class="feature-title">Resource Library</h3>
+                            <p class="feature-description">Access thousands of research papers, study guides, and academic resources curated by experts in your field.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">👥</div>
+                            <h3 class="feature-title">Mentorship Network</h3>
+                            <p class="feature-description">Connect with experienced professionals and alumni who can guide your academic and career journey.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🏆</div>
+                            <h3 class="feature-title">Achievement Tracking</h3>
+                            <p class="feature-description">Monitor your progress, set academic goals, and celebrate milestones with our comprehensive tracking system.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">💼</div>
+                            <h3 class="feature-title">Career Services</h3>
+                            <p class="feature-description">Get interview preparation, resume reviews, and job placement assistance from career counselors.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🌐</div>
+                            <h3 class="feature-title">Global Community</h3>
+                            <p class="feature-description">Join a worldwide network of graduate students and professionals sharing knowledge and opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="testimonials" id="testimonials">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">Success Stories</h2>
+                        <p class="section-subtitle">Hear from students and graduates who transformed their careers with GradBridge</p>
+                    </div>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card">
+                            <p class="testimonial-content">"GradBridge helped me find the perfect PhD program that aligned with my research interests. The mentorship network was invaluable during my application process."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">SM</div>
+                                <div class="author-info">
+                                    <h4>Sarah Martinez</h4>
+                                    <p>PhD in Computer Science, Stanford</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-content">"The career services team helped me land my dream job at a Fortune 500 company. Their interview prep and networking events made all the difference."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">DJ</div>
+                                <div class="author-info">
+                                    <h4>David Johnson</h4>
+                                    <p>MBA Graduate, Data Analyst</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-content">"I discovered research opportunities I never knew existed. The platform connected me with professors whose work perfectly matched my interests."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">EP</div>
+                                <div class="author-info">
+                                    <h4>Emily Park</h4>
+                                    <p>Master's in Biology, Research Assistant</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-content">"The global community aspect is incredible. I've made lifelong connections with fellow researchers from around the world through GradBridge."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">MR</div>
+                                <div class="author-info">
+                                    <h4>Michael Rodriguez</h4>
+                                    <p>PhD in Physics, Postdoc Researcher</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section" id="about">
+                <div class="container">
+                    <div class="cta-content">
+                        <h2 class="cta-title">Ready to Bridge Your Future?</h2>
+                        <p class="cta-description">Join thousands of successful graduates who started their journey with GradBridge. Your path to academic and career success begins here.</p>
+                        <a href="#contact" class="btn btn-primary" id="ctaGetStarted">Start Your Journey Today</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>GradBridge</h3>
+                        <p style="color: var(--text-secondary); margin-top: 1rem;">Bridging the gap between education and career success for graduate students worldwide.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Platform</h3>
+                        <ul>
+                            <li><a href="#features">Program Search</a></li>
+                            <li><a href="#testimonials">Mentorship</a></li>
+                            <li><a href="#features">Resources</a></li>
+                            <li><a href="#about">Career Services</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Support</h3>
+                        <ul>
+                            <li><a href="#contact">Help Center</a></li>
+                            <li><a href="#contact">Contact Us</a></li>
+                            <li><a href="#testimonials">Community</a></li>
+                            <li><a href="#about">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Company</h3>
+                        <ul>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#contact">Privacy</a></li>
+                            <li><a href="#contact">Terms</a></li>
+                            <li><a href="#contact">Careers</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 GradBridge. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Contact Modal -->
+        <div class="modal" id="contactModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Get Started with GradBridge</h3>
+                    <button class="modal-close" id="closeModal" aria-label="Close modal">&times;</button>
+                </div>
+                <form id="contactForm" novalidate>
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required aria-required="true" aria-describedby="nameError">
+                        <div class="form-error" id="nameError" role="alert">Please enter your full name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required aria-required="true" aria-describedby="emailError">
+                        <div class="form-error" id="emailError" role="alert">Please enter a valid email address</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="field">Field of Study *</label>
+                        <input type="text" id="field" name="field" required aria-required="true" aria-describedby="fieldError">
+                        <div class="form-error" id="fieldError" role="alert">Please enter your field of study</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Tell us about your goals</label>
+                        <textarea id="message" name="message" placeholder="What are you hoping to achieve with GradBridge?" aria-describedby="messageHelp"></textarea>
+                        <div id="messageHelp" class="sr-only">Optional: Describe your academic and career goals</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Application</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast notification -->
+        <div class="toast" id="toast" role="alert" aria-live="polite" aria-atomic="true">
+            <p id="toastMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        const state = {
+            activeSection: 'home',
+            mobileMenuOpen: false,
+            modalOpen: null,
+            scrollY: 0,
+            focusableElements: [],
+            firstFocusableElement: null,
+            lastFocusableElement: null,
+            formData: {
+                name: '',
+                email: '',
+                field: '',
+                message: ''
+            }
+        };
+
+        // DOM Elements
+        const nav = document.getElementById('nav');
+        const navToggle = document.getElementById('navToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const contactModal = document.getElementById('contactModal');
+        const contactForm = document.getElementById('contactForm');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Focus trap for modal
+        function setupFocusTrap() {
+            const focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]';
+            state.focusableElements = contactModal.querySelectorAll(focusableElementsString);
+            state.firstFocusableElement = state.focusableElements[0];
+            state.lastFocusableElement = state.focusableElements[state.focusableElements.length - 1];
+        }
+
+        function trapFocus(e) {
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === state.firstFocusableElement) {
+                        state.lastFocusableElement.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === state.lastFocusableElement) {
+                        state.firstFocusableElement.focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+        }
+
+        // Navigation Functions
+        function updateActiveNavLink() {
+            const sections = ['home', 'features', 'testimonials', 'about'];
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let currentSection = 'home';
+            const scrollPosition = window.scrollY + 100;
+            
+            sections.forEach(sectionId => {
+                const element = document.getElementById(sectionId);
+                if (element && scrollPosition >= element.offsetTop) {
+                    currentSection = sectionId;
+                }
+            });
+            
+            if (currentSection !== state.activeSection) {
+                state.activeSection = currentSection;
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    link.removeAttribute('aria-current');
+                    if (link.getAttribute('href') === `#${currentSection}`) {
+                        link.classList.add('active');
+                        link.setAttribute('aria-current', 'page');
+                    }
+                });
+            }
+        }
+
+        function handleScroll() {
+            state.scrollY = window.scrollY;
+            
+            // Update nav background
+            if (state.scrollY > 100) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+            
+            // Update active nav link
+            updateActiveNavLink();
+        }
+
+        function toggleMobileMenu() {
+            state.mobileMenuOpen = !state.mobileMenuOpen;
+            mobileMenu.classList.toggle('open', state.mobileMenuOpen);
+            navToggle.setAttribute('aria-expanded', state.mobileMenuOpen);
+            mobileMenu.setAttribute('aria-hidden', !state.mobileMenuOpen);
+        }
+
+        function closeMobileMenu() {
+            state.mobileMenuOpen = false;
+            mobileMenu.classList.remove('open');
+            navToggle.setAttribute('aria-expanded', 'false');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+        }
+
+        // Modal Functions
+        function openModal(modalType) {
+            state.modalOpen = modalType;
+            contactModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            
+            // Setup focus trap
+            setupFocusTrap();
+            
+            // Focus management
+            setTimeout(() => {
+                if (state.firstFocusableElement) {
+                    state.firstFocusableElement.focus();
+                }
+            }, 100);
+            
+            // Add focus trap listener
+            contactModal.addEventListener('keydown', trapFocus);
+        }
+
+        function closeModal() {
+            state.modalOpen = null;
+            contactModal.classList.remove('open');
+            document.body.style.overflow = '';
+            
+            // Remove focus trap listener
+            contactModal.removeEventListener('keydown', trapFocus);
+            
+            // Clear form errors
+            showFormErrors({});
+        }
+
+        // Form Functions
+        function validateForm(formData) {
+            const errors = {};
+            
+            if (!formData.get('name')?.trim()) {
+                errors.name = 'Please enter your full name';
+            }
+            
+            const email = formData.get('email')?.trim();
+            if (!email) {
+                errors.email = 'Please enter your email address';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errors.email = 'Please enter a valid email address';
+            }
+            
+            if (!formData.get('field')?.trim()) {
+                errors.field = 'Please enter your field of study';
+            }
+            
+            return errors;
+        }
+
+        function showFormErrors(errors) {
+            // Clear all previous errors
+            document.querySelectorAll('.form-error').forEach(el => {
+                el.classList.remove('show');
+            });
+            
+            // Show new errors
+            Object.keys(errors).forEach(field => {
+                const errorEl = document.getElementById(`${field}Error`);
+                if (errorEl) {
+                    errorEl.textContent = errors[field];
+                    errorEl.classList.add('show');
+                }
+            });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(contactForm);
+            const errors = validateForm(formData);
+            
+            if (Object.keys(errors).length > 0) {
+                showFormErrors(errors);
+                // Focus first error field
+                const firstErrorField = Object.keys(errors)[0];
+                const field = document.getElementById(firstErrorField);
+                if (field) field.focus();
+                return;
+            }
+            
+            // Clear any previous errors
+            showFormErrors({});
+            
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                field: formData.get('field'),
+                message: formData.get('message')
+            };
+            
+            // Save to localStorage
+            try {
+                const submissions = JSON.parse(localStorage.getItem('gradbridge_submissions') || '[]');
+                submissions.push({
+                    ...data,
+                    timestamp: new Date().toISOString(),
+                    id: Date.now()
+                });
+                localStorage.setItem('gradbridge_submissions', JSON.stringify(submissions));
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+            }
+            
+            // Simulate form submission
+            showToast('Thank you! We\'ll be in touch soon.', 'success');
+            contactForm.reset();
+            closeModal();
+        }
+
+        // Toast Functions
+        function showToast(message, type = 'info') {
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            // Announce to screen readers
+            toast.setAttribute('aria-live', 'assertive');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.setAttribute('aria-live', 'polite');
+            }, 3000);
+        }
+
+        // Smooth Scroll Function
+        function smoothScrollTo(targetId) {
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Event Handlers
+        function handleNavClick(e) {
+            const link = e.target.closest('.nav-link');
+            if (link) {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                smoothScrollTo(targetId);
+                closeMobileMenu();
+            }
+        }
+
+        function handleKeydown(e) {
+            // Escape key closes modal
+            if (e.key === 'Escape' && state.modalOpen) {
+                closeModal();
+            }
+        }
+
+        // Initialize Application
+        function initializeApp() {
+            // Event listeners
+            window.addEventListener('scroll', debounce(handleScroll, 10));
+            window.addEventListener('keydown', handleKeydown);
+            
+            navToggle.addEventListener('click', toggleMobileMenu);
+            
+            // Navigation clicks
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('.nav-link')) {
+                    handleNavClick(e);
+                }
+                
+                if (e.target.matches('#openContactModal') || 
+                    e.target.matches('#heroGetStarted') || 
+                    e.target.matches('#ctaGetStarted')) {
+                    e.preventDefault();
+                    openModal('contact');
+                }
+                
+                if (e.target.matches('#closeModal')) {
+                    closeModal();
+                }
+                
+                // Close modal on backdrop click
+                if (e.target === contactModal) {
+                    closeModal();
+                }
+                
+                // Close mobile menu on outside click
+                if (state.mobileMenuOpen && !e.target.closest('.nav')) {
+                    closeMobileMenu();
+                }
+            });
+            
+            contactForm.addEventListener('submit', handleFormSubmit);
+            
+            // Initial state
+            handleScroll();
+            
+            // Animate in elements
+            const animateElements = document.querySelectorAll('.feature-card, .testimonial-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            animateElements.forEach(el => observer.observe(el));
+        }
+
+        // Utility Functions
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Start the application
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
