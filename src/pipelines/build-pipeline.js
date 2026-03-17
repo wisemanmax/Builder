@@ -2,8 +2,8 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
-import { SYS_BUILD, SYS_FIX, SYS_ENHANCE, SYS_BACKEND } from '../config/prompts.js'
-import { callClaude, callClaudeRaw, callGPT, callGPTReview } from '../lib/ai.js'
+import { SYS_BUILD, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../config/prompts.js'
+import { callClaude, callClaudeRaw, callClaudeWithThinking, callGPT, callGPTReview } from '../lib/ai.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot } from '../components/message.js'
@@ -45,16 +45,35 @@ export function runPipeline(prompt, existingApp, customName) {
     updatePS(pid, 0, 'skip', 'No GitHub \u2014 local-only mode')
   }
 
+  var planJSON = ''
+
   p.then(function () {
-    // Step 1 — Build
-    updatePS(pid, 1, 'active', 'Claude is writing your app\u2026')
+    // Step 1 — Plan
+    updatePS(pid, 1, 'active', 'Claude is planning the architecture\u2026')
+    return callClaudeRaw(SYS_PLAN, 'App description: ' + prompt, 2000).then(function (raw) {
+      planJSON = raw
+      updatePS(pid, 1, 'done', 'Architecture planned \u2713')
+      addMsg({ role: 'asst', type: 'text', text: 'Architecture plan ready.' })
+    }).catch(function (e) {
+      updatePS(pid, 1, 'warn', 'Planning skipped: ' + scrubKeys(e.message || String(e)))
+    })
+  }).then(function () {
+    // Step 2 — Build
+    updatePS(pid, 2, 'active', 'Claude is writing your app\u2026')
     var userMsg
     if (existingApp) {
       var prevPrompts = (existingApp.prompts || []).map(function (p2) { return p2.text }).join('\n\u2192 ')
       var appDesc = prevPrompts || existingApp.desc || existingApp.name || 'an existing app'
       userMsg = 'Rebuild this app from scratch with the following change:\n\nOriginal app: ' + appDesc + '\n\nChange request: ' + prompt + '\n\nRebuild the complete app with this change applied.'
     } else {
-      userMsg = 'Build this app: ' + prompt
+      userMsg = 'BUILD REQUEST: ' + prompt
+        + '\n\nCONTEXT:'
+        + '\n- This will be a single-file HTML app running in a sandboxed iframe'
+        + '\n- It must work completely offline (no backend unless Supabase is configured)'
+        + '\n- Target: mobile-first, 375px minimum width'
+        + '\n- Data persistence: localStorage only'
+        + '\n- Include realistic sample/demo data so the app looks populated on first load'
+        + '\n- Handle edge cases: empty states, error states, loading states'
     }
 
     var effectiveSys = SYS_BUILD
@@ -87,10 +106,11 @@ export function runPipeline(prompt, existingApp, customName) {
       }
     }
 
-    return callClaude(effectiveSys, userMsg)
+    if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
+    return callClaudeWithThinking(effectiveSys, userMsg)
   }).then(function (code) {
     v1 = code
-    updatePS(pid, 1, 'done', 'Build complete \u2713')
+    updatePS(pid, 2, 'done', 'Build complete \u2713')
 
     var canAudit = !!(ST.gptKey && ST.auditEnabled)
     var currentCode = v1
@@ -101,27 +121,27 @@ export function runPipeline(prompt, existingApp, customName) {
       passNum++
       var passLabel = passNum > 1 ? ' (pass ' + passNum + '/' + MAX_FIX_PASSES + ')' : ''
 
-      updatePS(pid, 2, 'active', 'Running checks' + passLabel + '\u2026')
+      updatePS(pid, 3, 'active', 'Running checks' + passLabel + '\u2026')
       var checks = runLocalChecks(currentCode)
-      var criticalFails = checks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles'].indexOf(c.id) === -1 })
+      var criticalFails = checks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'responsive', 'has-main'].indexOf(c.id) === -1 })
       addMsg({ role: 'asst', type: 'checks', checks: checks })
-      updatePS(pid, 2, criticalFails.length ? 'warn' : 'done',
+      updatePS(pid, 3, criticalFails.length ? 'warn' : 'done',
         criticalFails.length ? (criticalFails.length + ' issue' + (criticalFails.length !== 1 ? 's' : '') + ' found' + passLabel) : 'All checks passed' + passLabel + ' \u2713')
 
       var auditPromise
       if (canAudit) {
-        updatePS(pid, 3, 'active', 'GPT-4o reviewing' + passLabel + '\u2026')
+        updatePS(pid, 4, 'active', 'GPT-4o reviewing' + passLabel + '\u2026')
         auditPromise = callGPT(currentCode).then(function (bugs) {
-          updatePS(pid, 3, 'done', bugs.length ? ('Found ' + bugs.length + ' issue' + (bugs.length !== 1 ? 's' : '') + passLabel) : 'Code is clean' + passLabel + ' \u2713')
+          updatePS(pid, 4, 'done', bugs.length ? ('Found ' + bugs.length + ' issue' + (bugs.length !== 1 ? 's' : '') + passLabel) : 'Code is clean' + passLabel + ' \u2713')
           addMsg({ role: 'asst', type: 'audit', bugs: bugs })
           return { criticalFails: criticalFails, bugs: bugs }
         }).catch(function (e) {
           var auditErr = scrubKeys(e.message || String(e))
-          updatePS(pid, 3, 'error', 'Audit failed' + passLabel + ': ' + auditErr)
+          updatePS(pid, 4, 'error', 'Audit failed' + passLabel + ': ' + auditErr)
           return { criticalFails: criticalFails, bugs: [] }
         })
       } else {
-        if (passNum === 1) updatePS(pid, 3, 'skip', ST.gptKey ? 'Audit disabled' : 'No OpenAI key \u2014 skipped')
+        if (passNum === 1) updatePS(pid, 4, 'skip', ST.gptKey ? 'Audit disabled' : 'No OpenAI key \u2014 skipped')
         auditPromise = Promise.resolve({ criticalFails: criticalFails, bugs: [] })
       }
 
@@ -129,35 +149,35 @@ export function runPipeline(prompt, existingApp, customName) {
         var allIssues = result.criticalFails.map(function (c) { return { severity: 'medium', issue: c.label + (c.detail ? ' \u2014 ' + c.detail : ''), location: c.cat } }).concat(result.bugs)
 
         if (allIssues.length > 0) {
-          updatePS(pid, 4, 'active', 'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026')
+          updatePS(pid, 5, 'active', 'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026')
           var fm = 'ISSUES TO FIX:\n' + allIssues.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' \u2014 ' + (b.location || '') }).join('\n') + '\n\nORIGINAL CODE:\n' + currentCode
-          return callClaude(SYS_FIX, fm).then(function (fixed) {
+          return callClaude(SYS_FIX.replace('{INTENT}', prompt), fm).then(function (fixed) {
             currentCode = fixed
             totalFixed += allIssues.length
             if (passNum < MAX_FIX_PASSES) {
-              updatePS(pid, 4, 'active', 'Re-validating fixes' + passLabel + '\u2026')
+              updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
               return runValidationPass()
             } else {
               var finalChecks = runLocalChecks(currentCode)
-              var finalFails = finalChecks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles'].indexOf(c.id) === -1 })
+              var finalFails = finalChecks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'responsive', 'has-main'].indexOf(c.id) === -1 })
               if (finalFails.length > 0) {
-                updatePS(pid, 4, 'warn', finalFails.length + ' issue' + (finalFails.length !== 1 ? 's' : '') + ' remain after ' + MAX_FIX_PASSES + ' passes')
+                updatePS(pid, 5, 'warn', finalFails.length + ' issue' + (finalFails.length !== 1 ? 's' : '') + ' remain after ' + MAX_FIX_PASSES + ' passes')
               } else {
-                updatePS(pid, 4, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
+                updatePS(pid, 5, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
               }
               v2 = currentCode
               addMsg({ role: 'asst', type: 'text', text: 'Validation summary: ' + totalFixed + ' issue' + (totalFixed !== 1 ? 's' : '') + ' addressed across ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + '.' + (finalFails.length > 0 ? ' ' + finalFails.length + ' minor issue' + (finalFails.length !== 1 ? 's' : '') + ' may remain.' : '') })
             }
           }).catch(function () {
             v2 = currentCode
-            updatePS(pid, 4, 'error', 'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original'))
+            updatePS(pid, 5, 'error', 'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original'))
           })
         } else {
           v2 = currentCode
           if (passNum === 1) {
-            updatePS(pid, 4, 'done', 'No fixes needed \u2713')
+            updatePS(pid, 5, 'done', 'No fixes needed \u2713')
           } else {
-            updatePS(pid, 4, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
+            updatePS(pid, 5, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
             addMsg({ role: 'asst', type: 'text', text: 'Validation summary: ' + totalFixed + ' issue' + (totalFixed !== 1 ? 's' : '') + ' addressed across ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + '. Code is clean \u2713' })
           }
           return Promise.resolve()
@@ -167,18 +187,18 @@ export function runPipeline(prompt, existingApp, customName) {
 
     return runValidationPass()
   }).then(function () {
-    // Step 5 — GPT-4o Enhancement Review
+    // Step 6 — GPT-4o Enhancement Review
     var canReview = !!(ST.gptKey && ST.auditEnabled)
     if (!canReview) {
-      updatePS(pid, 5, 'skip', ST.gptKey ? 'Review disabled' : 'No OpenAI key — skipped')
-      updatePS(pid, 6, 'skip', 'Skipped — no review')
+      updatePS(pid, 6, 'skip', ST.gptKey ? 'Review disabled' : 'No OpenAI key — skipped')
       updatePS(pid, 7, 'skip', 'Skipped — no review')
+      updatePS(pid, 8, 'skip', 'Skipped — no review')
       return Promise.resolve()
     }
-    updatePS(pid, 5, 'active', 'GPT-4o reviewing for enhancements…')
+    updatePS(pid, 6, 'active', 'GPT-4o reviewing for enhancements…')
     return callGPTReview(v2).then(function (review) {
       var totalSuggestions = review.enhancements.length + review.bugs.length
-      updatePS(pid, 5, 'done', totalSuggestions ? (review.enhancements.length + ' enhancement' + (review.enhancements.length !== 1 ? 's' : '') + ', ' + review.bugs.length + ' bug' + (review.bugs.length !== 1 ? 's' : '')) : 'Code looks great ✓')
+      updatePS(pid, 6, 'done', totalSuggestions ? (review.enhancements.length + ' enhancement' + (review.enhancements.length !== 1 ? 's' : '') + ', ' + review.bugs.length + ' bug' + (review.bugs.length !== 1 ? 's' : '')) : 'Code looks great ✓')
       if (review.enhancements.length) {
         addMsg({ role: 'asst', type: 'text', text: 'Enhancement suggestions: ' + review.enhancements.map(function (e, i) { return (i + 1) + '. [' + e.priority.toUpperCase() + '] ' + e.suggestion }).join('; ') })
       }
@@ -187,13 +207,13 @@ export function runPipeline(prompt, existingApp, customName) {
       }
 
       if (totalSuggestions === 0) {
-        updatePS(pid, 6, 'done', 'No enhancements needed ✓')
-        updatePS(pid, 7, 'done', 'No review needed ✓')
+        updatePS(pid, 7, 'done', 'No enhancements needed ✓')
+        updatePS(pid, 8, 'done', 'No review needed ✓')
         return Promise.resolve()
       }
 
-      // Step 6 — Claude implements enhancements
-      updatePS(pid, 6, 'active', 'Claude implementing enhancements…')
+      // Step 7 — Claude implements enhancements
+      updatePS(pid, 7, 'active', 'Claude implementing enhancements…')
       var enhanceMsg = 'ENHANCEMENTS TO APPLY:\n'
       enhanceMsg += review.enhancements.map(function (e, i) { return (i + 1) + '. [' + (e.priority || 'medium').toUpperCase() + '] ' + (e.suggestion || '') + ' — ' + (e.location || '') + (e.reason ? ' (Reason: ' + e.reason + ')' : '') }).join('\n')
       if (review.bugs.length) {
@@ -204,10 +224,10 @@ export function runPipeline(prompt, existingApp, customName) {
 
       return callClaude(SYS_ENHANCE, enhanceMsg).then(function (enhanced) {
         v2 = enhanced
-        updatePS(pid, 6, 'done', 'Enhancements applied ✓')
+        updatePS(pid, 7, 'done', 'Enhancements applied ✓')
 
-        // Step 7 — GPT-4o Final Review (bug gate)
-        updatePS(pid, 7, 'active', 'GPT-4o final bug review…')
+        // Step 8 — GPT-4o Final Review (bug gate)
+        updatePS(pid, 8, 'active', 'GPT-4o final bug review…')
         var MAX_REVIEW_PASSES = 2
         var reviewPass = 0
 
@@ -216,7 +236,7 @@ export function runPipeline(prompt, existingApp, customName) {
           return callGPT(v2).then(function (bugs) {
             var criticalBugs = bugs.filter(function (b) { return b.severity === 'high' || b.severity === 'medium' })
             if (criticalBugs.length === 0) {
-              updatePS(pid, 7, 'done', (reviewPass > 1 ? 'Clean after ' + reviewPass + ' passes' : 'Code is clean') + ' ✓')
+              updatePS(pid, 8, 'done', (reviewPass > 1 ? 'Clean after ' + reviewPass + ' passes' : 'Code is clean') + ' ✓')
               if (bugs.length > 0) {
                 addMsg({ role: 'asst', type: 'text', text: 'Final review: ' + bugs.length + ' low-severity note' + (bugs.length !== 1 ? 's' : '') + ' (acceptable).' })
               }
@@ -226,14 +246,14 @@ export function runPipeline(prompt, existingApp, customName) {
             addMsg({ role: 'asst', type: 'audit', bugs: criticalBugs })
 
             if (reviewPass < MAX_REVIEW_PASSES) {
-              updatePS(pid, 7, 'active', 'Sending ' + criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' back to Claude (pass ' + reviewPass + ')…')
+              updatePS(pid, 8, 'active', 'Sending ' + criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' back to Claude (pass ' + reviewPass + ')…')
               var fixMsg = 'ISSUES TO FIX:\n' + criticalBugs.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' — ' + (b.location || '') }).join('\n') + '\n\nORIGINAL CODE:\n' + v2
-              return callClaude(SYS_FIX, fixMsg).then(function (fixed) {
+              return callClaude(SYS_FIX.replace('{INTENT}', prompt), fixMsg).then(function (fixed) {
                 v2 = fixed
                 return runFinalReview()
               })
             } else {
-              updatePS(pid, 7, 'warn', criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' remain after ' + reviewPass + ' passes')
+              updatePS(pid, 8, 'warn', criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' remain after ' + reviewPass + ' passes')
               addMsg({ role: 'asst', type: 'text', text: 'Final review: ' + criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' could not be fully resolved. Proceeding with best version.' })
               return Promise.resolve()
             }
@@ -244,71 +264,71 @@ export function runPipeline(prompt, existingApp, customName) {
       })
     }).catch(function (e) {
       var safeErr = scrubKeys(e.message || String(e))
-      updatePS(pid, 5, 'error', 'Enhancement review failed: ' + safeErr)
-      updatePS(pid, 6, 'skip', 'Skipped — review failed')
+      updatePS(pid, 6, 'error', 'Enhancement review failed: ' + safeErr)
       updatePS(pid, 7, 'skip', 'Skipped — review failed')
+      updatePS(pid, 8, 'skip', 'Skipped — review failed')
       return Promise.resolve()
     })
   }).then(function () {
-    // Step 8 — Backend
+    // Step 9 — Backend
     if (ST.backendEnabled && ST.sbUrl) {
-      updatePS(pid, 8, 'active', 'Generating Supabase backend\u2026')
+      updatePS(pid, 9, 'active', 'Generating Supabase backend\u2026')
       return callClaudeRaw(SYS_BACKEND, 'App code:\n\n' + v2.slice(0, 60000), 4000).then(function (raw) {
         var backend = JSON.parse(raw)
         var tables = backend.tables || []
         var allSql = tables.map(function (t) { return t.sql || '' }).concat(backend.rls || []).filter(Boolean).join('\n\n')
-        updatePS(pid, 8, 'done', tables.length + ' table' + (tables.length !== 1 ? 's' : '') + ' designed \u2713')
+        updatePS(pid, 9, 'done', tables.length + ' table' + (tables.length !== 1 ? 's' : '') + ' designed \u2713')
         addMsg({ role: 'asst', type: 'schema', sql: allSql, tables: tables })
         if (backend.injectedHTML && backend.injectedHTML.indexOf('<!DOCTYPE') >= 0 && backend.injectedHTML.length > 500) { v2 = backend.injectedHTML }
       }).catch(function (e) {
-        updatePS(pid, 8, 'warn', 'Backend gen skipped: ' + scrubKeys(e.message || String(e)))
+        updatePS(pid, 9, 'warn', 'Backend gen skipped: ' + scrubKeys(e.message || String(e)))
       })
     } else {
-      updatePS(pid, 8, 'skip', 'Backend off')
+      updatePS(pid, 9, 'skip', 'Backend off')
       return Promise.resolve()
     }
   }).then(function () {
-    // Step 9 — Push to branch
+    // Step 10 — Push to branch
     if (hasGitHub) {
-      updatePS(pid, 9, 'active', 'Pushing to ' + branchName + '\u2026')
+      updatePS(pid, 10, 'active', 'Pushing to ' + branchName + '\u2026')
       var appPath = 'apps/' + appId + '.html'
       return ghGetFileSha(appPath, branchName).then(function (existingSha) {
         return ghPushFile(appPath, v2, (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [branch]', branchName, existingSha)
       }).then(function () {
-        updatePS(pid, 9, 'done', 'Pushed to branch \u2713')
+        updatePS(pid, 10, 'done', 'Pushed to branch \u2713')
       }).catch(function (e) {
-        updatePS(pid, 9, 'error', e.message)
+        updatePS(pid, 10, 'error', e.message)
         throw new Error('Branch push failed: ' + e.message)
       })
     } else {
-      updatePS(pid, 9, 'skip', 'Local-only')
+      updatePS(pid, 10, 'skip', 'Local-only')
       return Promise.resolve()
     }
   }).then(function () {
-    // Step 10 — Preview
-    updatePS(pid, 10, 'done', 'Preview ready')
+    // Step 11 — Preview
+    updatePS(pid, 11, 'done', 'Preview ready')
     setPreview(appId, v2)
     addMsg({ role: 'asst', type: 'preview-card', code: v2, appName: appName, branch: branchName || 'local', appId: appId, pid: pid })
 
-    // Step 11 — Approval gate
-    updatePS(pid, 11, 'wait', 'Waiting for your approval\u2026')
+    // Step 12 — Approval gate
+    updatePS(pid, 12, 'wait', 'Waiting for your approval\u2026')
     addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
 
     return waitForApproval(pid)
   }).then(function () {
-    updatePS(pid, 11, 'done', 'Approved \u2713')
+    updatePS(pid, 12, 'done', 'Approved \u2713')
 
-    // Step 12 — Merge
+    // Step 13 — Merge
     var mergeStatusId = 'merge-' + Date.now()
     if (hasGitHub) {
-      updatePS(pid, 12, 'active', 'Merging to main\u2026')
+      updatePS(pid, 13, 'active', 'Merging to main\u2026')
       addMsg({ role: 'asst', type: 'merge-status', mergeId: mergeStatusId, status: 'merging' })
       return ghMergeBranch(branchName, appName).then(function () {
         return ghPushManifest('main').catch(function () {})
       }).then(function () {
         ghDeleteBranch(branchName)
         var liveUrl = ghPageUrl(appId)
-        updatePS(pid, 12, 'done', 'Merged & deploying \u2713')
+        updatePS(pid, 13, 'done', 'Merged & deploying \u2713')
         var mc = $(mergeStatusId)
         if (mc) { var card = mc.querySelector('.merge-card'); if (card) card.innerHTML = '<div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">Merged to main \u2713</span><a class="merge-url" href="' + liveUrl + '" target="_blank">' + liveUrl + '</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>' }
         _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, true)
@@ -317,14 +337,14 @@ export function runPipeline(prompt, existingApp, customName) {
         return 'github'
       }).catch(function (e) {
         var safeE = scrubKeys(e.message || String(e))
-        updatePS(pid, 12, 'error', safeE)
+        updatePS(pid, 13, 'error', safeE)
         clearPreview(appId)
         _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
         addMsg({ role: 'asst', type: 'text', html: 'Merge failed: <strong>' + esc(safeE) + '</strong>. App saved locally.' })
         return 'local'
       })
     } else {
-      updatePS(pid, 12, 'done', 'Saved locally \u2713')
+      updatePS(pid, 13, 'done', 'Saved locally \u2713')
       _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
       clearPreview(appId)
       toast('\u2705 ' + appName + ' saved!', 2800)
@@ -353,7 +373,7 @@ export function runPipeline(prompt, existingApp, customName) {
       return
     }
     if (err.message === 'CHANGES_REQUESTED') {
-      updatePS(pid, 11, 'error', 'Changes requested')
+      updatePS(pid, 12, 'error', 'Changes requested')
       clearPreview(appId)
       addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
       _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)

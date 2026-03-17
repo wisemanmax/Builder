@@ -18,6 +18,7 @@ export const EMOJIS = [
 
 export const PIPE_NAMES = [
   'Create Branch',
+  'Claude \u00B7 Plan',
   'Claude \u00B7 Build',
   'Automated Checks',
   'GPT-4o \u00B7 Audit',
@@ -33,7 +34,7 @@ export const PIPE_NAMES = [
 ]
 
 export const PIPE_ICONS = [
-  '\uD83C\uDF3F', '\uD83D\uDD28', '\uD83D\uDCCB', '\uD83D\uDD0D',
+  '\uD83C\uDF3F', '\uD83D\uDCDD', '\uD83D\uDD28', '\uD83D\uDCCB', '\uD83D\uDD0D',
   '\uD83D\uDEE0', '\uD83D\uDCA1', '\u2728', '\uD83D\uDD0E',
   '\uD83D\uDDC4\uFE0F', '\u2B06\uFE0F', '\uD83D\uDC41',
   '\u2705', '\uD83D\uDD00',
