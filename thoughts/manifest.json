@@ -1,24 +1,13 @@
 [
   {
-    "id": "ammtn7y1zzn6",
-    "name": "TI-84 Digital Calculator",
+    "id": "ammtvfgq6nie",
+    "name": "Retro Tiles",
     "status": "complete",
-    "rounds": 6,
-    "linkedRulesId": "ammtndf0kzmv",
-    "linkedAppId": null,
-    "path": "thoughts/ti-84-digital-calculator.json",
-    "createdAt": "2026-03-16T20:36:36.257Z",
-    "updatedAt": "2026-03-16T20:39:57.763Z"
-  },
-  {
-    "id": "ammtmddrsnst",
-    "name": "Simple Recipes",
-    "status": "built",
     "rounds": 5,
-    "linkedRulesId": "ammtmlwp83ia",
-    "linkedAppId": "recipe-app",
-    "path": "thoughts/simple-recipes.json",
-    "createdAt": "2026-03-16T20:12:18.800Z",
-    "updatedAt": "2026-03-16T20:18:34.316Z"
+    "linkedRulesId": "ammtvnpo89fx",
+    "linkedAppId": null,
+    "path": "thoughts/retro-tiles.json",
+    "createdAt": "2026-03-17T00:28:33.746Z",
+    "updatedAt": "2026-03-17T00:31:55.064Z"
   }
 ]
