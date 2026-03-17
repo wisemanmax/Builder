@@ -2,7 +2,7 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
 import { THINK_ROUND_LABELS } from '../config/constants.js'
 import { SYS_THINK } from '../config/prompts.js'
-import { callClaudeRaw } from '../lib/ai.js'
+import { callClaudeRawMultiTurn } from '../lib/ai.js'
 import { ghSyncThoughtAndRules } from '../lib/github.js'
 import { openBuilder } from './build.js'
 
@@ -115,19 +115,22 @@ export function sendThinkMsg() {
 
   addThinkMsg({ type: 'typing' })
 
-  var convSummary = ''
+  // Build proper multi-turn messages from conversation history
+  var apiMessages = []
   for (var i = 0; i < _thinkState.conversation.length; i++) {
     var c = _thinkState.conversation[i]
-    convSummary += (c.role === 'user' ? 'User' : 'AI') + ' (R' + c.round + '): ' + c.text.slice(0, 200) + '\n'
+    apiMessages.push({ role: c.role === 'user' ? 'user' : 'assistant', content: c.text })
   }
+  // Add current user message with round metadata
+  apiMessages.push({
+    role: 'user',
+    content: 'Round: ' + _thinkState.round + '/' + _thinkState.maxRounds
+      + '\nPhase: ' + THINK_ROUND_LABELS[Math.min(_thinkState.round, _thinkState.maxRounds) - 1]
+      + '\nOriginal idea: ' + _thinkState.originalPrompt
+      + '\n\n' + text
+  })
 
-  var aiMsg = 'Round: ' + _thinkState.round + '/' + _thinkState.maxRounds + '\n'
-    + 'Phase: ' + THINK_ROUND_LABELS[Math.min(_thinkState.round, _thinkState.maxRounds) - 1] + '\n'
-    + 'User\'s original idea: ' + _thinkState.originalPrompt + '\n'
-    + 'Conversation so far:\n' + convSummary + '\n'
-    + 'User\'s latest response: ' + text
-
-  callClaudeRaw(SYS_THINK, aiMsg, 2000).then(function (raw) {
+  callClaudeRawMultiTurn(SYS_THINK, apiMessages, 2000).then(function (raw) {
     var ti = $('think-typing'); if (ti) ti.remove()
     var parsed
     try { parsed = JSON.parse(raw) } catch (e) {
