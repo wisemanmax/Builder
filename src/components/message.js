@@ -1,6 +1,6 @@
 import { $, esc, escAttr } from '../lib/utils.js'
 import { PIPE_NAMES, PIPE_ICONS } from '../config/constants.js'
-import { approveAndMerge, requestChanges } from './approval-card.js'
+import { approveAndMerge, requestChanges, resolveRetry } from './approval-card.js'
 
 export function scrollBot() {
   var el = $('chat-scroll')
@@ -114,6 +114,29 @@ export function addMsg(cfg) {
       row.id = cfg.mergeId
       var spinning = cfg.status === 'merging'
       row.innerHTML = '<div class="awrap"><div class="aav" style="background:var(--gh);font-size:14px">\uD83D\uDD00</div><div style="flex:1;min-width:0"><div class="merge-card"><div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">' + (spinning ? 'Merging to main\u2026' : cfg.status === 'done' ? 'Merged &amp; Deploying \u2713' : 'Merge failed') + '</span>' + (cfg.url ? '<a class="merge-url" href="' + cfg.url + '" target="_blank">' + cfg.url + '</a>' : '') + '<span class="merge-meta" id="' + cfg.mergeId + '-meta">' + esc(cfg.meta || '') + '</span></div>' + (spinning ? '<div class="merge-spin"></div>' : '') + '</div></div></div>'
+    } else if (cfg.type === 'retry-prompt') {
+      var rpid = esc(cfg.pid || '')
+      row.innerHTML = '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#FF6D00,#FFD600)">\u26A0\uFE0F</div>'
+        + '<div style="flex:1;min-width:0"><div class="retry-card">'
+        + '<div class="retry-title">' + esc(String(cfg.bugCount || 0)) + ' issue' + ((cfg.bugCount || 0) !== 1 ? 's' : '') + ' remain after final review</div>'
+        + '<div class="retry-sub">Would you like Claude to take another pass at fixing these bugs?</div>'
+        + '<div class="retry-btns">'
+        + '<button class="retry-btn yes" data-pid="' + rpid + '" data-choice="yes">Yes, fix again</button>'
+        + '<button class="retry-btn no" data-pid="' + rpid + '" data-choice="no">No, proceed as-is</button>'
+        + '</div></div></div></div>'
+      setTimeout(function () {
+        var btns = row.querySelectorAll('.retry-btn[data-pid]')
+        for (var ri = 0; ri < btns.length; ri++) {
+          btns[ri].addEventListener('click', function () {
+            var pid2 = this.dataset.pid
+            var choice = this.dataset.choice === 'yes'
+            var allBtns = row.querySelectorAll('.retry-btn')
+            for (var k = 0; k < allBtns.length; k++) allBtns[k].disabled = true
+            this.textContent = choice ? 'Retrying\u2026' : 'Proceeding\u2026'
+            resolveRetry(pid2, choice)
+          })
+        }
+      }, 0)
     }
   }
   if (cfg.id) row.id = cfg.id
