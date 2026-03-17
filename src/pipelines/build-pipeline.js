@@ -58,7 +58,7 @@ function notifyUser(title, body) {
   } catch (e) { /* notifications not available */ }
 }
 
-export function runPipeline(prompt, existingApp, customName) {
+export function runPipeline(prompt, existingApp, customName, images) {
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
@@ -120,7 +120,9 @@ export function runPipeline(prompt, existingApp, customName) {
   p.then(function () {
     // Step 1 — Plan
     updatePS(pid, 1, 'active', 'Claude is planning the architecture\u2026')
-    return retryStep(function () { return callClaudeRaw(SYS_PLAN, 'App description: ' + prompt, 2000) }, 2, 'Plan').then(function (raw) {
+    var planMsg = 'App description: ' + prompt
+    if (images && images.length) planMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — use them to understand the desired design/layout]'
+    return retryStep(function () { return callClaudeRaw(SYS_PLAN, planMsg, 2000, images) }, 2, 'Plan').then(function (raw) {
       planJSON = raw
       updatePS(pid, 1, 'done', 'Architecture planned \u2713')
       addMsg({ role: 'asst', type: 'text', text: 'Architecture plan ready.' })
@@ -171,10 +173,11 @@ export function runPipeline(prompt, existingApp, customName) {
     }
 
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
+    if (images && images.length) { userMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — study them carefully and replicate the design, layout, colors, and style as closely as possible]' }
     var charCount = 0
     return callClaudeWithThinkingStream(effectiveSys, userMsg, 2000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
-    })
+    }, images)
   }).then(function (code) {
     v1 = code
     updatePS(pid, 2, 'done', 'Build complete \u2713')

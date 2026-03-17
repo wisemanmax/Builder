@@ -8,6 +8,55 @@ import { getPreviewPid, getApprovalGates } from '../components/approval-card.js'
 import { runPipeline } from '../pipelines/build-pipeline.js'
 import { runSelfUpdatePipeline } from '../pipelines/builder-plus.js'
 
+// Pending images for next message (array of {base64, mediaType, name})
+var _pendingImages = []
+
+export function getPendingImages() { return _pendingImages }
+export function clearPendingImages() { _pendingImages = []; _renderImagePreviews() }
+
+function _renderImagePreviews() {
+  var row = $('img-preview-row')
+  if (!row) return
+  if (!_pendingImages.length) { row.style.display = 'none'; row.innerHTML = ''; return }
+  row.style.display = 'flex'
+  var html = ''
+  for (var i = 0; i < _pendingImages.length; i++) {
+    html += '<div class="img-thumb" data-idx="' + i + '">'
+      + '<img src="data:' + _pendingImages[i].mediaType + ';base64,' + _pendingImages[i].base64 + '" alt="' + esc(_pendingImages[i].name) + '">'
+      + '<button class="img-thumb-rm" data-idx="' + i + '">&times;</button>'
+      + '</div>'
+  }
+  row.innerHTML = html
+}
+
+export function removeImage(idx) {
+  _pendingImages.splice(idx, 1)
+  _renderImagePreviews()
+}
+
+export function handleImageFiles(files) {
+  if (!files || !files.length) return
+  var maxImages = 5
+  var remaining = maxImages - _pendingImages.length
+  if (remaining <= 0) { toast('Max ' + maxImages + ' images', 2000); return }
+  var toProcess = Math.min(files.length, remaining)
+  var maxSizeMB = 5
+  for (var i = 0; i < toProcess; i++) {
+    var file = files[i]
+    if (!file.type.match(/^image\/(png|jpeg|gif|webp)$/)) { toast('Unsupported format: ' + file.name, 2000); continue }
+    if (file.size > maxSizeMB * 1024 * 1024) { toast(file.name + ' exceeds ' + maxSizeMB + 'MB limit', 2000); continue }
+    ;(function (f) {
+      var reader = new FileReader()
+      reader.onload = function () {
+        var base64 = reader.result.split(',')[1]
+        _pendingImages.push({ base64: base64, mediaType: f.type, name: f.name })
+        _renderImagePreviews()
+      }
+      reader.readAsDataURL(f)
+    })(file)
+  }
+}
+
 export function openBuilder(editId) {
   var app = editId ? ST.apps.find(function (a) { return a.id === editId }) : null
   if (editId && !app) editId = null
@@ -78,10 +127,14 @@ export function chipSend(t) { $('chat-input').value = t; autoResize($('chat-inpu
 export function sendMsg() {
   var inp = $('chat-input')
   var text = inp.value.trim()
-  if (!text || ST._building) return
+  if (!text && !_pendingImages.length) return
+  if (!text && _pendingImages.length) { toast('Add a description with your images', 2000); return }
+  if (ST._building) return
   if (!ST.key) { toast('Add your Anthropic API key in Settings first', 4000); return }
   inp.value = ''; autoResize(inp)
-  addMsg({ role: 'user', text: text })
+  var images = _pendingImages.slice()
+  clearPendingImages()
+  addMsg({ role: 'user', text: text, images: images })
   if (ST._selfUpdateMode) {
     runSelfUpdatePipeline(text)
     return
@@ -89,5 +142,5 @@ export function sendMsg() {
   var customName = $('app-name-input').value.trim()
   $('app-name-input').value = ''
   var existing = ST.activeAppId ? ST.apps.find(function (a) { return a.id === ST.activeAppId }) : null
-  runPipeline(text, existing, customName)
+  runPipeline(text, existing, customName, images)
 }
