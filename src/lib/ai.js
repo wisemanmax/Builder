@@ -75,7 +75,7 @@ export function callClaudeRaw(sys, msg, maxTokens) {
 }
 
 export function callGPT(code) {
-  return fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
     body: JSON.stringify({ model: 'gpt-4o', max_tokens: 2000, temperature: 0.1, messages: [{ role: 'system', content: SYS_AUDIT }, { role: 'user', content: 'Audit:\n\n' + code.slice(0, 20000) }] }),
