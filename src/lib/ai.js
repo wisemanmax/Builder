@@ -3,11 +3,8 @@ import { scrubKeys } from './utils.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
 import { SYS_AUDIT, SYS_ENHANCE_REVIEW } from '../config/prompts.js'
 
-var CLAUDE_HEADERS = { 'Content-Type': 'application/json', 'x-api-key': '', 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'anthropic-dangerous-direct-browser-access': 'true' }
-
 function claudeHeaders() {
-  CLAUDE_HEADERS['x-api-key'] = ST.key
-  return CLAUDE_HEADERS
+  return { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'anthropic-dangerous-direct-browser-access': 'true' }
 }
 
 function logCacheUsage(d, label) {

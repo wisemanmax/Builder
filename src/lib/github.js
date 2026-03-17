@@ -49,7 +49,7 @@ export function ghPushFile(path, content, message, branch, existingSha) {
 export function ghGetFileSha(path, branch) {
   branch = branch || 'main'
   var url = ghApiUrl(path) + (branch !== 'main' ? '?ref=' + encodeURIComponent(branch) : '')
-  return fetch(url, { headers: ghHeaders() }).then(function (res) {
+  return fetchWithRetry(url, { headers: ghHeaders() }, 30000).then(function (res) {
     if (res.status === 404) return null
     if (!res.ok) return null
     return res.json().then(function (d) { return d.sha || null })
@@ -57,10 +57,10 @@ export function ghGetFileSha(path, branch) {
 }
 
 export function ghMergeBranch(branchName, appName) {
-  return fetch('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/merges', {
+  return fetchWithRetry('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/merges', {
     method: 'POST', headers: ghHeaders(),
     body: JSON.stringify({ base: 'main', head: branchName, commit_message: '\u2705 Merge ' + branchName + ' \u2014 ' + appName + ' via The Builder' }),
-  }).then(function (res) {
+  }, 30000).then(function (res) {
     if (res.status === 204) return { noChange: true }
     if (res.status === 409) throw new Error('Merge conflict')
     if (!res.ok) return res.json().catch(function () { return {} }).then(function (e) { throw new Error(e.message || 'Merge failed') })
@@ -69,7 +69,7 @@ export function ghMergeBranch(branchName, appName) {
 }
 
 export function ghDeleteBranch(branchName) {
-  try { fetch('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/git/refs/heads/' + branchName, { method: 'DELETE', headers: ghHeaders() }) } catch (e) { }
+  fetch('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/git/refs/heads/' + branchName, { method: 'DELETE', headers: ghHeaders() }).catch(function () { })
 }
 
 export function ghPushManifest(branch) {
@@ -153,14 +153,14 @@ export function ghSyncThoughtAndRules(thought, rules) {
 }
 
 export function testGitHub() {
-  return fetch('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo, { headers: ghHeaders() }).then(function (res) { return res.ok }).catch(function () { return false })
+  return fetchWithRetry('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo, { headers: ghHeaders() }, 30000).then(function (res) { return res.ok }).catch(function () { return false })
 }
 
 export function pullFromGitHub() {
   if (!ST.ghToken || !ST.ghUser || !ST.ghRepo) { toast('GitHub credentials required \u2014 set them in Settings', 4000); return }
   toast('Syncing from GitHub\u2026', 2000)
   var url = ghApiUrl('apps/manifest.json')
-  fetch(url, { headers: ghHeaders() }).then(function (res) {
+  return fetch(url, { headers: ghHeaders() }).then(function (res) {
     if (res.status === 404) { toast('No apps/manifest.json in repo yet', 3000); return Promise.reject('NO_MANIFEST') }
     if (!res.ok) throw new Error('GitHub HTTP ' + res.status)
     return res.json()

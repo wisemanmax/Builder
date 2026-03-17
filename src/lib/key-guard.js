@@ -15,7 +15,7 @@ export function _validateKeyedRequest(url, opts) {
   var destOk = false
   try {
     var dest = new URL(String(url))
-    destOk = APPROVED_KEY_DOMAINS.some(function (d) { return dest.hostname === d || dest.hostname.indexOf('.' + d) >= 0 })
+    destOk = APPROVED_KEY_DOMAINS.some(function (d) { return dest.hostname === d || dest.hostname.endsWith('.' + d) })
     if (!destOk && ST.sbUrl) {
       try { var sbHost = new URL(ST.sbUrl).hostname; destOk = dest.hostname === sbHost } catch (e) { }
     }
