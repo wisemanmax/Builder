@@ -16,7 +16,11 @@ export function runPipeline(prompt, existingApp, customName) {
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
-  addMsg({ role: 'asst', type: 'pipeline', id: pid })
+  addMsg({ role: 'asst', type: 'typing-pipeline' })
+  setTimeout(function () {
+    var skelEl = $('typing-pipe-skel'); if (skelEl) skelEl.remove()
+    addMsg({ role: 'asst', type: 'pipeline', id: pid })
+  }, 0)
 
   var _wakeLock = null
   function acquireWakeLock() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (wl) { _wakeLock = wl }).catch(function () {}) } catch (e) {} }
