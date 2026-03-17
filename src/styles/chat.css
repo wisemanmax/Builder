@@ -68,3 +68,14 @@
 .td{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);animation:tda 1.2s ease-in-out infinite}
 .td:nth-child(2){animation-delay:.18s}.td:nth-child(3){animation-delay:.36s}
 @keyframes tda{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px);background:var(--pk)}}
+
+/* THINKING CARD */
+.thinking-card{background:rgba(180,79,255,.06);border:1.5px solid rgba(180,79,255,.18);border-radius:14px;overflow:hidden}
+.thinking-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;transition:background .15s}
+.thinking-hdr:hover{background:rgba(180,79,255,.08)}
+.thinking-title{font-family:var(--fh);font-size:12px;font-weight:700;color:rgba(255,255,255,.6)}
+.thinking-toggle{font-size:10px;color:rgba(255,255,255,.35);transition:transform .2s}
+.thinking-body{padding:0 13px 12px;border-top:1px solid rgba(180,79,255,.12)}
+.thinking-pre{font-family:var(--fm);font-size:11px;color:rgba(255,255,255,.5);line-height:1.65;white-space:pre-wrap;word-wrap:break-word;max-height:300px;overflow-y:auto;margin:10px 0 0;padding:0}
+.thinking-pre::-webkit-scrollbar{width:3px}
+.thinking-pre::-webkit-scrollbar-thumb{background:rgba(180,79,255,.2);border-radius:2px}
