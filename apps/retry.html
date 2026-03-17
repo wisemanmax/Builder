@@ -1,1911 +1,1208 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GradBridge – Second Chances, Brighter Futures</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --navy: #0a1628;
-    --navy-mid: #102040;
-    --teal: #00b4c8;
-    --teal-dark: #0099aa;
-    --teal-light: #e0f7fa;
-    --accent: #00c2a0;
-    --white: #ffffff;
-    --off-white: #f7f9fc;
-    --gray-100: #f0f4f8;
-    --gray-300: #c8d3de;
-    --gray-500: #6b7c93;
-    --gray-700: #344054;
-    --text: #1a2535;
-    --radius: 12px;
-    --radius-lg: 20px;
-    --shadow: 0 4px 24px rgba(10,22,40,0.10);
-    --shadow-lg: 0 12px 48px rgba(10,22,40,0.16);
-  }
-
-- { margin:0; padding:0; box-sizing:border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-font-family: ‘DM Sans’, sans-serif;
-color: var(–text);
-background: var(–white);
-overflow-x: hidden;
-}
-
-h1,h2,h3,h4 { font-family: ‘Playfair Display’, serif; }
-
-a { text-decoration: none; color: inherit; }
-
-img { max-width: 100%; display: block; }
-
-/* ── NAV ── */
-nav {
-position: fixed; top:0; left:0; right:0; z-index:1000;
-background: var(–white);
-border-bottom: 1px solid rgba(10,22,40,0.08);
-box-shadow: 0 2px 16px rgba(10,22,40,0.06);
-}
-
-.nav-inner {
-max-width: 1200px; margin: 0 auto;
-display: flex; align-items: center; justify-content: space-between;
-padding: 0 24px; height: 72px;
-}
-
-.logo {
-display: flex; align-items: center; gap: 10px;
-font-family: ‘Playfair Display’, serif;
-font-size: 1.5rem; font-weight: 700;
-color: var(–navy);
-cursor: pointer;
-}
-
-.logo-icon {
-width: 36px; height: 36px;
-background: linear-gradient(135deg, var(–teal), var(–accent));
-border-radius: 8px;
-display: flex; align-items: center; justify-content: center;
-color: white; font-size: 1rem; font-weight: 900;
-}
-
-.nav-links {
-display: flex; align-items: center; gap: 8px;
-list-style: none;
-}
-
-.nav-links > li { position: relative; }
-
-.nav-links > li > a {
-display: flex; align-items: center; gap: 4px;
-padding: 8px 14px;
-font-size: 0.9rem; font-weight: 500;
-color: var(–gray-700);
-border-radius: 8px;
-transition: all 0.2s;
-}
-
-.nav-links > li > a:hover { color: var(–teal); background: var(–teal-light); }
-
-.nav-links > li > a svg { width:14px; height:14px; transition: transform 0.2s; }
-.nav-links > li:hover > a svg { transform: rotate(180deg); }
-
-.dropdown {
-display: none;
-position: absolute; top: calc(100% + 8px); left: 0;
-background: var(–white);
-border: 1px solid var(–gray-100);
-border-radius: var(–radius);
-box-shadow: var(–shadow-lg);
-min-width: 220px;
-overflow: hidden;
-z-index: 100;
-}
-
-.nav-links > li:hover .dropdown { display: block; }
-
-.dropdown a {
-display: block; padding: 12px 18px;
-font-size: 0.875rem; font-weight: 500;
-color: var(–gray-700);
-transition: all 0.15s;
-}
-
-.dropdown a:hover { background: var(–teal-light); color: var(–teal); }
-
-.nav-actions {
-display: flex; align-items: center; gap: 12px;
-}
-
-.btn-ghost {
-padding: 9px 18px;
-font-size: 0.875rem; font-weight: 600;
-color: var(–navy);
-border: 1.5px solid var(–gray-300);
-border-radius: 8px;
-background: transparent;
-cursor: pointer;
-transition: all 0.2s;
-font-family: ‘DM Sans’, sans-serif;
-}
-
-.btn-ghost:hover { border-color: var(–teal); color: var(–teal); }
-
-.btn-primary {
-padding: 10px 22px;
-font-size: 0.875rem; font-weight: 600;
-color: var(–white);
-background: linear-gradient(135deg, var(–teal), var(–accent));
-border: none;
-border-radius: 8px;
-cursor: pointer;
-transition: all 0.2s;
-font-family: ‘DM Sans’, sans-serif;
-box-shadow: 0 4px 12px rgba(0,180,200,0.3);
-}
-
-.btn-primary:hover {
-transform: translateY(-1px);
-box-shadow: 0 6px 20px rgba(0,180,200,0.4);
-}
-
-/* ── SIGN-IN MODAL ── */
-.modal-overlay {
-display: none;
-position: fixed; inset: 0;
-background: rgba(10,22,40,0.5);
-z-index: 2000;
-align-items: center;
-justify-content: center;
-backdrop-filter: blur(4px);
-}
-
-.modal-overlay.open { display: flex; }
-
-.modal {
-background: var(–white);
-border-radius: var(–radius-lg);
-padding: 40px;
-max-width: 460px; width: 90%;
-box-shadow: var(–shadow-lg);
-position: relative;
-animation: modalIn 0.25s ease;
-}
-
-@keyframes modalIn {
-from { opacity:0; transform:translateY(16px) scale(0.97); }
-to   { opacity:1; transform:none; }
-}
-
-.modal-close {
-position: absolute; top:16px; right:16px;
-background: var(–gray-100); border: none;
-width:32px; height:32px; border-radius:50%;
-cursor:pointer; font-size:1.1rem; color:var(–gray-500);
-display:flex; align-items:center; justify-content:center;
-transition: all 0.2s;
-}
-
-.modal-close:hover { background:var(–gray-300); }
-
-.modal h3 { font-size:1.4rem; color:var(–navy); margin-bottom:8px; }
-.modal p { font-size:0.875rem; color:var(–gray-500); margin-bottom:24px; }
-
-.modal-section { margin-bottom: 28px; }
-
-.modal-section h4 {
-font-size: 0.95rem; font-weight: 600;
-color: var(–gray-700); margin-bottom:12px;
-font-family: ‘DM Sans’, sans-serif;
-}
-
-.modal-section .provider-badge {
-font-size:0.8rem; color:var(–teal); font-weight:600;
-}
-
-.modal-or {
-text-align:center; position:relative; margin:20px 0;
-color:var(–gray-500); font-size:0.8rem;
-}
-
-.modal-or::before,.modal-or::after {
-content:’’; position:absolute; top:50%;
-width:42%; height:1px; background:var(–gray-300);
-}
-
-.modal-or::before { left:0; }
-.modal-or::after { right:0; }
-
-/* ── PAGE SYSTEM ── */
-.page { display:none; }
-.page.active { display:block; }
-
-/* ── SECTIONS COMMON ── */
-.container {
-max-width:1200px; margin:0 auto; padding:0 24px;
-}
-
-.section-label {
-display:inline-block;
-font-size:0.75rem; font-weight:700; letter-spacing:0.1em;
-text-transform:uppercase; color:var(–teal);
-margin-bottom:8px;
-}
-
-.section-title {
-font-size: clamp(2rem, 4vw, 3rem);
-line-height: 1.1;
-color: var(–navy);
-margin-bottom: 16px;
-}
-
-.section-sub {
-font-size:1rem; color:var(–gray-500);
-max-width:560px; line-height:1.7;
-margin-bottom:48px;
-}
-
-.underline-accent {
-display:inline-block; position:relative;
-}
-
-.underline-accent::after {
-content:’’;
-position:absolute; bottom:-4px; left:0; right:0; height:4px;
-background: linear-gradient(90deg, var(–teal), var(–accent));
-border-radius:2px;
-}
-
-/* ── HERO ── */
-.hero {
-padding: 160px 0 100px;
-background: linear-gradient(160deg, #f0f9fb 0%, #ffffff 60%);
-position: relative; overflow: hidden;
-}
-
-.hero::before {
-content:’’;
-position:absolute; top:-100px; right:-100px;
-width:600px; height:600px;
-background: radial-gradient(circle, rgba(0,180,200,0.08) 0%, transparent 70%);
-pointer-events:none;
-}
-
-.hero-inner {
-max-width:1200px; margin:0 auto; padding:0 24px;
-display:grid; grid-template-columns:1fr 1fr; gap:60px;
-align-items:center;
-}
-
-.hero-content {}
-
-.hero-tag {
-display:inline-flex; align-items:center; gap:8px;
-background: var(–teal-light); color:var(–teal-dark);
-font-size:0.8rem; font-weight:600;
-padding:6px 14px; border-radius:20px; margin-bottom:24px;
-}
-
-.hero-tag span { width:6px;height:6px;background:var(–teal);border-radius:50%;display:inline-block; }
-
-.hero h1 {
-font-size: clamp(2.4rem, 5vw, 3.6rem);
-line-height:1.1; color:var(–navy);
-margin-bottom:20px;
-}
-
-.hero h1 em {
-font-style:normal;
-background: linear-gradient(135deg, var(–teal), var(–accent));
--webkit-background-clip:text; -webkit-text-fill-color:transparent;
-background-clip:text;
-}
-
-.hero-desc {
-font-size:1.05rem; color:var(–gray-500);
-line-height:1.7; margin-bottom:36px;
-max-width:480px;
-}
-
-.hero-ctas { display:flex; gap:14px; flex-wrap:wrap; }
-
-.hero-ctas .btn-primary { padding:14px 28px; font-size:1rem; }
-
-.hero-stats {
-display:flex; gap:32px; margin-top:48px;
-padding-top:32px;
-border-top: 1px solid var(–gray-100);
-}
-
-.hero-stat {}
-
-.hero-stat strong {
-display:block;
-font-family:‘Playfair Display’,serif;
-font-size:1.8rem; color:var(–navy);
-}
-
-.hero-stat span { font-size:0.8rem; color:var(–gray-500); }
-
-.hero-visual {
-position:relative;
-}
-
-.hero-card {
-background: var(–white);
-border-radius: var(–radius-lg);
-padding: 32px;
-box-shadow: var(–shadow-lg);
-border: 1px solid var(–gray-100);
-}
-
-.hero-card-header {
-display:flex; align-items:center; gap:14px; margin-bottom:28px;
-}
-
-.hero-card-icon {
-width:48px; height:48px;
-background: linear-gradient(135deg, var(–teal), var(–accent));
-border-radius:12px;
-display:flex; align-items:center; justify-content:center;
-color:white; font-size:1.3rem;
-}
-
-.hero-card-header div strong { display:block; font-size:1rem; color:var(–navy); }
-.hero-card-header div span { font-size:0.8rem; color:var(–gray-500); }
-
-.hero-progress { margin-bottom:20px; }
-.hero-progress label {
-display:flex; justify-content:space-between;
-font-size:0.8rem; color:var(–gray-500); margin-bottom:6px;
-}
-
-.progress-bar {
-height:8px; background:var(–gray-100);
-border-radius:4px; overflow:hidden;
-}
-
-.progress-fill {
-height:100%;
-background: linear-gradient(90deg, var(–teal), var(–accent));
-border-radius:4px;
-transition: width 1s ease;
-}
-
-.hero-card-badge {
-display:inline-flex; align-items:center; gap:6px;
-background: #e8fdf5; color:#00a878;
-font-size:0.8rem; font-weight:600;
-padding:6px 12px; border-radius:8px;
-margin-top:8px;
-}
-
-.hero-float {
-position:absolute;
-background:white;
-border-radius:12px;
-padding:12px 16px;
-box-shadow: var(–shadow-lg);
-font-size:0.8rem; font-weight:600;
-display:flex; align-items:center; gap:8px;
-}
-
-.hero-float.top { top:-20px; right:30px; }
-.hero-float.bottom { bottom:-20px; left:10px; }
-
-.hero-float .dot {
-width:8px; height:8px; border-radius:50%;
-background:var(–accent);
-}
-
-/* ── WHY SECTION ── */
-.why-section {
-padding: 100px 0;
-background: var(–white);
-}
-
-.why-section .section-title { text-align:center; }
-.why-section .section-sub { text-align:center; margin:0 auto 56px; }
-
-.features-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-gap: 24px;
-}
-
-.feature-card {
-background: var(–off-white);
-border-radius: var(–radius-lg);
-padding: 32px 24px;
-border: 1px solid transparent;
-transition: all 0.3s;
-position:relative; overflow:hidden;
-}
-
-.feature-card::before {
-content:’’;
-position:absolute; top:0; left:0; right:0; height:3px;
-background: linear-gradient(90deg, var(–teal), var(–accent));
-opacity:0; transition:0.3s;
-}
-
-.feature-card:hover {
-border-color:var(–gray-100);
-box-shadow:var(–shadow);
-transform:translateY(-4px);
-}
-
-.feature-card:hover::before { opacity:1; }
-
-.feature-icon {
-width:52px; height:52px;
-background: linear-gradient(135deg, rgba(0,180,200,0.12), rgba(0,194,160,0.12));
-border-radius:14px;
-display:flex; align-items:center; justify-content:center;
-font-size:1.4rem; margin-bottom:20px;
-}
-
-.feature-card h4 {
-font-size:1rem; color:var(–navy); margin-bottom:10px;
-font-family:‘DM Sans’,sans-serif; font-weight:700;
-}
-
-.feature-card p { font-size:0.875rem; color:var(–gray-500); line-height:1.6; }
-
-/* ── STAT BANNER ── */
-.stat-banner {
-padding: 80px 0;
-background: var(–navy);
-position:relative; overflow:hidden;
-}
-
-.stat-banner::before {
-content:’’;
-position:absolute; inset:0;
-background: url(“data:image/svg+xml,%3Csvg width=‘60’ height=‘60’ viewBox=‘0 0 60 60’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cg fill=‘none’ fill-rule=‘evenodd’%3E%3Cg fill=’%2300b4c8’ fill-opacity=‘0.05’%3E%3Cpath d=‘M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z’/%3E%3C/g%3E%3C/g%3E%3C/svg%3E”);
-}
-
-.stat-banner-inner {
-max-width:1200px; margin:0 auto; padding:0 24px;
-text-align:center; position:relative;
-}
-
-.stat-banner h2 {
-font-size:clamp(1.6rem, 3.5vw, 2.4rem);
-color:var(–white); line-height:1.3; margin-bottom:20px;
-}
-
-.stat-banner h2 em {
-font-style:normal; color:var(–teal);
-}
-
-.stat-banner p {
-font-size:1.1rem; color:rgba(255,255,255,0.7);
-max-width:600px; margin:0 auto;
-line-height:1.6;
-}
-
-/* ── HOW IT WORKS ── */
-.how-section { padding:100px 0; background:var(–off-white); }
-
-.how-section .container > .section-sub { max-width:560px; }
-
-.steps {
-display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr));
-gap:0; position:relative;
-}
-
-.steps::before {
-content:’’;
-position:absolute; top:32px; left:10%; right:10%; height:2px;
-background: linear-gradient(90deg, var(–teal), var(–accent));
-z-index:0;
-}
-
-.step {
-padding:0 24px; text-align:center;
-position:relative; z-index:1;
-}
-
-.step-num {
-width:64px; height:64px;
-background: linear-gradient(135deg, var(–teal), var(–accent));
-color:white;
-font-family:‘Playfair Display’,serif;
-font-size:1.5rem; font-weight:700;
-border-radius:50%;
-display:flex; align-items:center; justify-content:center;
-margin:0 auto 24px;
-box-shadow: 0 4px 16px rgba(0,180,200,0.35);
-position:relative;
-}
-
-.step h4 {
-font-size:1rem; font-weight:700; color:var(–navy);
-margin-bottom:12px; font-family:‘DM Sans’,sans-serif;
-}
-
-.step p { font-size:0.875rem; color:var(–gray-500); line-height:1.6; }
-
-/* ── RESOURCES ── */
-.resources-section { padding:100px 0; background:var(–white); }
-
-.resources-header {
-display:flex; justify-content:space-between; align-items:flex-end;
-margin-bottom:48px; flex-wrap:wrap; gap:24px;
-}
-
-.posts-grid {
-display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr));
-gap:24px; margin-bottom:48px;
-}
-
-.post-card {
-background:var(–off-white);
-border-radius:var(–radius-lg);
-overflow:hidden;
-border:1px solid var(–gray-100);
-transition:all 0.3s;
-}
-
-.post-card:hover { box-shadow:var(–shadow-lg); transform:translateY(-4px); }
-
-.post-img {
-height:180px;
-background:linear-gradient(135deg, var(–navy-mid), var(–teal-dark));
-position:relative; overflow:hidden;
-display:flex; align-items:center; justify-content:center;
-}
-
-.post-img-icon { font-size:3rem; opacity:0.5; }
-
-.post-img-1 { background:linear-gradient(135deg,#1a3a5c,#0099aa); }
-.post-img-2 { background:linear-gradient(135deg,#1a3a5c,#00a878); }
-.post-img-3 { background:linear-gradient(135deg,#102040,#0077bb); }
-
-.post-body { padding:24px; }
-
-.post-tag {
-display:inline-block;
-font-size:0.7rem; font-weight:700; letter-spacing:0.08em;
-text-transform:uppercase; color:var(–teal);
-background:var(–teal-light); padding:4px 10px;
-border-radius:20px; margin-bottom:12px;
-}
-
-.post-card h3 {
-font-size:1rem; color:var(–navy); margin-bottom:10px;
-font-family:‘DM Sans’,sans-serif; font-weight:700;
-line-height:1.4;
-}
-
-.post-card p { font-size:0.875rem; color:var(–gray-500); line-height:1.6; margin-bottom:16px; }
-
-.post-link {
-font-size:0.875rem; font-weight:600; color:var(–teal);
-display:inline-flex; align-items:center; gap:6px;
-transition:gap 0.2s;
-}
-
-.post-card:hover .post-link { gap:10px; }
-
-/* ── TESTIMONIALS ── */
-.testimonials-section { padding:100px 0; background:var(–navy); }
-
-.testimonials-section .section-title { color:var(–white); text-align:center; }
-.testimonials-section .section-label { text-align:center; display:block; }
-
-.testimonials-wrap { position:relative; overflow:hidden; margin-top:48px; }
-
-.testimonials-track {
-display:flex; gap:24px;
-transition:transform 0.5s ease;
-}
-
-.testimonial-card {
-min-width:360px;
-background: rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.1);
-border-radius:var(–radius-lg);
-padding:32px;
-flex-shrink:0;
-}
-
-.stars { color:var(–teal); font-size:1rem; margin-bottom:16px; }
-
-.testimonial-card p {
-font-size:0.9rem; color:rgba(255,255,255,0.75);
-line-height:1.7; margin-bottom:24px;
-}
-
-.testimonial-author { display:flex; align-items:center; gap:12px; }
-
-.author-avatar {
-width:40px; height:40px; border-radius:50%;
-background:linear-gradient(135deg,var(–teal),var(–accent));
-display:flex; align-items:center; justify-content:center;
-color:white; font-weight:700; font-size:0.9rem;
-}
-
-.author-info strong { display:block; font-size:0.875rem; color:var(–white); font-weight:600; }
-.author-info span { font-size:0.75rem; color:rgba(255,255,255,0.5); }
-
-.testimonials-nav {
-display:flex; justify-content:center; gap:8px; margin-top:32px;
-}
-
-.t-dot {
-width:8px; height:8px; border-radius:50%;
-background:rgba(255,255,255,0.2);
-border:none; cursor:pointer; transition:all 0.2s;
-}
-
-.t-dot.active { background:var(–teal); width:24px; border-radius:4px; }
-
-/* ── NEWSLETTER ── */
-.newsletter-section {
-padding: 80px 0;
-background: linear-gradient(135deg, var(–teal) 0%, var(–accent) 100%);
-position:relative; overflow:hidden;
-}
-
-.newsletter-section::before {
-content:’’;
-position:absolute; top:-60px; right:-60px;
-width:300px; height:300px;
-background:rgba(255,255,255,0.08);
-border-radius:50%;
-}
-
-.newsletter-inner {
-max-width:600px; margin:0 auto; padding:0 24px;
-text-align:center; position:relative;
-}
-
-.newsletter-inner h2 { color:var(–white); font-size:2rem; margin-bottom:12px; }
-.newsletter-inner p { color:rgba(255,255,255,0.85); margin-bottom:32px; line-height:1.6; }
-
-.newsletter-form {
-display:flex; gap:12px; flex-wrap:wrap;
-}
-
-.newsletter-form input {
-flex:1; min-width:200px;
-padding:14px 18px;
-border:none; border-radius:10px;
-font-size:0.9rem; font-family:‘DM Sans’,sans-serif;
-outline:none;
-}
-
-.newsletter-form button {
-padding:14px 28px;
-background:var(–navy);
-color:white;
-border:none; border-radius:10px;
-font-size:0.9rem; font-weight:600;
-font-family:‘DM Sans’,sans-serif;
-cursor:pointer; transition:all 0.2s;
-}
-
-.newsletter-form button:hover { background:#1a2f50; }
-
-/* ── FOOTER ── */
-footer {
-background: var(–navy);
-padding:60px 0 32px;
-}
-
-.footer-inner {
-max-width:1200px; margin:0 auto; padding:0 24px;
-}
-
-.footer-top {
-display:grid; grid-template-columns:1.5fr repeat(4,1fr);
-gap:40px; margin-bottom:48px;
-}
-
-.footer-brand .logo { color:white; margin-bottom:16px; }
-.footer-brand p { font-size:0.85rem; color:rgba(255,255,255,0.5); line-height:1.6; margin-bottom:20px; }
-
-.social-links { display:flex; gap:10px; }
-
-.social-link {
-width:36px; height:36px;
-border:1px solid rgba(255,255,255,0.15);
-border-radius:8px;
-display:flex; align-items:center; justify-content:center;
-color:rgba(255,255,255,0.5); font-size:0.85rem;
-transition:all 0.2s; cursor:pointer;
-}
-
-.social-link:hover { border-color:var(–teal); color:var(–teal); }
-
-.footer-col h5 {
-font-size:0.8rem; font-weight:700; letter-spacing:0.08em;
-text-transform:uppercase; color:rgba(255,255,255,0.4);
-margin-bottom:16px; font-family:‘DM Sans’,sans-serif;
-}
-
-.footer-col ul { list-style:none; }
-
-.footer-col li { margin-bottom:10px; }
-
-.footer-col a {
-font-size:0.875rem; color:rgba(255,255,255,0.65);
-transition:color 0.2s;
-}
-
-.footer-col a:hover { color:var(–teal); }
-
-.footer-bottom {
-border-top:1px solid rgba(255,255,255,0.08);
-padding-top:28px;
-display:flex; justify-content:space-between; align-items:center;
-flex-wrap:wrap; gap:16px;
-}
-
-.footer-bottom p { font-size:0.8rem; color:rgba(255,255,255,0.35); }
-
-.footer-bottom-links { display:flex; gap:20px; }
-
-.footer-bottom-links a {
-font-size:0.8rem; color:rgba(255,255,255,0.4);
-transition:color 0.2s;
-}
-
-.footer-bottom-links a:hover { color:var(–teal); }
-
-.footer-disclaimer {
-margin-top:24px; padding-top:24px;
-border-top:1px solid rgba(255,255,255,0.06);
-}
-
-.footer-disclaimer p {
-font-size:0.75rem; color:rgba(255,255,255,0.3);
-line-height:1.7; margin-bottom:8px;
-}
-
-/* ── STUDENT LOANS PAGE ── */
-.page-hero {
-padding:140px 0 80px;
-background:linear-gradient(160deg,#f0f9fb 0%,#ffffff 60%);
-position:relative; overflow:hidden;
-}
-
-.page-hero::before {
-content:’’;
-position:absolute; top:-80px; right:-80px;
-width:500px; height:500px;
-background:radial-gradient(circle,rgba(0,180,200,0.07) 0%,transparent 70%);
-}
-
-.page-hero-inner {
-max-width:1200px; margin:0 auto; padding:0 24px;
-display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
-}
-
-.page-hero h1 { font-size:clamp(2.2rem,4.5vw,3.2rem); line-height:1.1; color:var(–navy); margin-bottom:20px; }
-
-.page-hero p { font-size:1.05rem; color:var(–gray-500); line-height:1.7; margin-bottom:32px; }
-
-.products-section { padding:100px 0; }
-
-.products-grid {
-display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:60px;
-}
-
-.product-card {
-border-radius:var(–radius-lg);
-overflow:hidden;
-border:1px solid var(–gray-100);
-transition:all 0.3s;
-cursor:pointer;
-}
-
-.product-card:hover { box-shadow:var(–shadow-lg); transform:translateY(-4px); }
-
-.product-img {
-height:200px;
-display:flex; align-items:center; justify-content:center;
-font-size:4rem;
-}
-
-.product-img-1 { background:linear-gradient(135deg,#0f2744,#1a5276); }
-.product-img-2 { background:linear-gradient(135deg,#0f3422,#1a7f5a); }
-
-.product-body { padding:28px; }
-
-.product-body h3 { font-size:1.2rem; color:var(–navy); margin-bottom:10px; font-family:‘DM Sans’,sans-serif; font-weight:700; }
-.product-body p { font-size:0.875rem; color:var(–gray-500); line-height:1.6; margin-bottom:20px; }
-
-.expenses-section { padding:80px 0; background:var(–off-white); }
-
-.expenses-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:48px; }
-
-.expense-box {
-background:var(–white); border-radius:var(–radius-lg);
-padding:32px; border:1px solid var(–gray-100);
-}
-
-.expense-box h4 {
-font-size:1rem; font-weight:700; color:var(–navy);
-margin-bottom:20px; font-family:‘DM Sans’,sans-serif;
-display:flex; align-items:center; gap:8px;
-}
-
-.expense-box ul { list-style:none; }
-
-.expense-box li {
-padding:10px 0; font-size:0.875rem; color:var(–gray-700);
-border-bottom:1px solid var(–gray-100);
-display:flex; align-items:center; gap:10px;
-}
-
-.expense-box li:last-child { border-bottom:none; }
-
-.check { color:var(–accent); font-size:1rem; }
-.cross { color:#f44; font-size:1rem; }
-
-/* ── FAQ ACCORDION ── */
-.faq-section { padding:80px 0; }
-
-.faq-list { max-width:800px; margin:0 auto; margin-top:48px; }
-
-.faq-item {
-border-bottom:1px solid var(–gray-100);
-}
-
-.faq-q {
-padding:20px 0;
-display:flex; justify-content:space-between; align-items:center;
-cursor:pointer;
-font-size:0.95rem; font-weight:600; color:var(–navy);
-gap:16px;
-}
-
-.faq-q .arrow { font-size:1.2rem; transition:transform 0.25s; color:var(–teal); flex-shrink:0; }
-
-.faq-a {
-max-height:0; overflow:hidden; transition:max-height 0.35s ease, padding 0.2s;
-font-size:0.875rem; color:var(–gray-500); line-height:1.7;
-}
-
-.faq-item.open .faq-q .arrow { transform:rotate(180deg); }
-.faq-item.open .faq-a { max-height:400px; padding-bottom:20px; }
-
-/* ── RESOURCES PAGE ── */
-.resources-page-grid {
-display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-gap:28px; margin-top:48px;
-}
-
-/* ── ABOUT PAGE ── */
-.about-hero { padding:140px 0 80px; background:linear-gradient(160deg,#f0f9fb 0%,#fff 60%); }
-
-.about-mission { padding:100px 0; }
-
-.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
-
-.about-values { padding:80px 0; background:var(–off-white); }
-
-.values-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; }
-
-.value-card {
-background:var(–white); border-radius:var(–radius-lg);
-padding:28px; border:1px solid var(–gray-100);
-text-align:center;
-}
-
-.value-icon { font-size:2rem; margin-bottom:16px; }
-.value-card h4 { font-size:1rem; font-weight:700; color:var(–navy); margin-bottom:10px; font-family:‘DM Sans’,sans-serif; }
-.value-card p { font-size:0.875rem; color:var(–gray-500); line-height:1.6; }
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px) {
-.hero-inner, .page-hero-inner, .about-grid { grid-template-columns:1fr; }
-.hero-visual, .page-hero .visual-side { display:none; }
-.footer-top { grid-template-columns:1fr 1fr; }
-.steps::before { display:none; }
-.products-grid, .expenses-grid, .values-grid { grid-template-columns:1fr; }
-.nav-links { display:none; }
-.testimonials-track { flex-direction:column; }
-.testimonial-card { min-width:100%; }
-}
-
-/* ── ANIMATIONS ── */
-@keyframes fadeUp {
-from { opacity:0; transform:translateY(24px); }
-to { opacity:1; transform:none; }
-}
-
-.animate { animation:fadeUp 0.6s ease both; }
-.delay-1 { animation-delay:0.1s; }
-.delay-2 { animation-delay:0.2s; }
-.delay-3 { animation-delay:0.3s; }
-.delay-4 { animation-delay:0.4s; }
-
-/* ── CTA SECTION ── */
-.cta-section {
-padding:80px 0;
-background:var(–off-white);
-text-align:center;
-}
-
-.cta-section h2 { font-size:2.2rem; color:var(–navy); margin-bottom:16px; }
-.cta-section p { font-size:1rem; color:var(–gray-500); margin-bottom:32px; }
-.cta-section .btn-primary { padding:16px 36px; font-size:1.05rem; }
-
-/* ── PARTNERS PAGE ── */
-.partners-section { padding:100px 0; }
-.partner-types { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; }
-.partner-card {
-background:var(–off-white); border-radius:var(–radius-lg);
-padding:36px 28px; text-align:center;
-border:1px solid var(–gray-100); transition:all 0.3s;
-}
-.partner-card:hover { box-shadow:var(–shadow); transform:translateY(-4px); }
-.partner-card .icon { font-size:2.5rem; margin-bottom:20px; }
-.partner-card h3 { font-size:1.1rem; color:var(–navy); margin-bottom:12px; font-family:‘DM Sans’,sans-serif; font-weight:700; }
-.partner-card p { font-size:0.875rem; color:var(–gray-500); line-height:1.6; }
-
-/* apply page link */
-.apply-link {
-display:inline-block;
-padding:14px 32px;
-background: linear-gradient(135deg,var(–teal),var(–accent));
-color:white; border-radius:10px;
-font-weight:600; font-size:1rem;
-box-shadow:0 4px 16px rgba(0,180,200,0.3);
-transition:all 0.2s;
-}
-
-.apply-link:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,180,200,0.4); }
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retry - Task Management with Theme Toggle</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        :root {
+            /* Light theme colors */
+            --bg-primary-light: #ffffff;
+            --bg-secondary-light: #f8fafc;
+            --bg-tertiary-light: #f1f5f9;
+            --text-primary-light: #0f172a;
+            --text-secondary-light: #475569;
+            --text-tertiary-light: #64748b;
+            --border-light: #e2e8f0;
+            --accent-light: #3b82f6;
+            --accent-hover-light: #2563eb;
+            --success-light: #059669;
+            --error-light: #dc2626;
+            --warning-light: #d97706;
+
+            /* Dark theme colors - improved contrast */
+            --bg-primary-dark: #0f172a;
+            --bg-secondary-dark: #1e293b;
+            --bg-tertiary-dark: #334155;
+            --text-primary-dark: #ffffff;
+            --text-secondary-dark: #e2e8f0;
+            --text-tertiary-dark: #cbd5e1;
+            --border-dark: #334155;
+            --accent-dark: #60a5fa;
+            --accent-hover-dark: #3b82f6;
+            --success-dark: #10b981;
+            --error-dark: #ef4444;
+            --warning-dark: #f59e0b;
+
+            /* Active theme variables (default to dark) */
+            --bg-primary: var(--bg-primary-dark);
+            --bg-secondary: var(--bg-secondary-dark);
+            --bg-tertiary: var(--bg-tertiary-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --text-tertiary: var(--text-tertiary-dark);
+            --border: var(--border-dark);
+            --accent: var(--accent-dark);
+            --accent-hover: var(--accent-hover-dark);
+            --success: var(--success-dark);
+            --error: var(--error-dark);
+            --warning: var(--warning-dark);
+
+            /* Other design tokens */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --transition: all 200ms ease;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: var(--bg-primary-light);
+            --bg-secondary: var(--bg-secondary-light);
+            --bg-tertiary: var(--bg-tertiary-light);
+            --text-primary: var(--text-primary-light);
+            --text-secondary: var(--text-secondary-light);
+            --text-tertiary: var(--text-tertiary-light);
+            --border: var(--border-light);
+            --accent: var(--accent-light);
+            --accent-hover: var(--accent-hover-light);
+            --success: var(--success-light);
+            --error: var(--error-light);
+            --warning: var(--warning-light);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 300ms ease, color 300ms ease;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: min(100%, 1200px);
+            margin: 0 auto;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0 2.5rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2.5rem;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 300ms ease;
+            min-width: 48px;
+            min-height: 48px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .theme-toggle:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .theme-icon {
+            font-size: 1.25rem;
+            transition: transform 300ms ease;
+        }
+
+        .theme-toggle:hover .theme-icon {
+            transform: scale(1.1);
+        }
+
+        /* Main Content */
+        .main {
+            display: grid;
+            gap: 2.5rem;
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 300ms ease;
+            width: 100%;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        /* Task Form */
+        .task-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-input {
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 300ms ease;
+            min-height: 48px;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .form-input.error {
+            border-color: var(--error);
+        }
+
+        .form-error {
+            color: var(--error);
+            font-size: 14px;
+            margin-top: 0.25rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 300ms ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 48px;
+            text-decoration: none;
+        }
+
+        .btn:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-primary);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--error) 90%, black);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Task List */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .task-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            transition: all 300ms ease;
+            width: 100%;
+        }
+
+        .task-item:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1.5rem;
+        }
+
+        .task-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 14px;
+            color: var(--text-tertiary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .task-status {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .status-pending {
+            background: color-mix(in srgb, var(--warning) 20%, transparent);
+            color: var(--warning);
+        }
+
+        .status-success {
+            background: color-mix(in srgb, var(--success) 20%, transparent);
+            color: var(--success);
+        }
+
+        .status-error {
+            background: color-mix(in srgb, var(--error) 20%, transparent);
+            color: var(--error);
+        }
+
+        .task-error {
+            color: var(--text-primary);
+            background: color-mix(in srgb, var(--error) 10%, transparent);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            margin: 0.75rem 0;
+            border-left: 3px solid var(--error);
+        }
+
+        .task-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            opacity: 0.7;
+        }
+
+        .empty-state-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem 3rem 1rem 1rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 300ms ease;
+            max-width: min(400px, calc(100vw - 2rem));
+            z-index: 1000;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--error);
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+            line-height: 1;
+            border-radius: var(--radius-sm);
+            min-width: 24px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 200ms ease;
+        }
+
+        .toast-close:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .toast-close:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 320px) {
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .header {
+                padding: 1rem 0 1.5rem;
+                margin-bottom: 1.5rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .task-header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .task-meta {
+                text-align: left;
+            }
+            
+            .task-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .toast {
+                bottom: 0.5rem;
+                right: 0.5rem;
+                left: 0.5rem;
+                max-width: none;
+            }
+        }
+
+        @media (min-width: 321px) and (max-width: 479px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .task-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .task-meta {
+                text-align: left;
+            }
+        }
+
+        @media (min-width: 480px) {
+            .task-form {
+                flex-direction: row;
+                align-items: end;
+            }
+
+            .form-group {
+                flex: 1;
+            }
+
+            .form-group:last-child {
+                flex: 0 0 auto;
+            }
+
+            .task-actions {
+                justify-content: flex-end;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+
+            .main {
+                grid-template-columns: 1fr 1fr;
+                gap: 3rem;
+            }
+            
+            .header {
+                padding: 2rem 0 3rem;
+                margin-bottom: 3rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .main {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                padding: 2.5rem;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<!-- ── NAVBAR ── -->
-
-<nav>
-  <div class="nav-inner">
-    <div class="logo" onclick="showPage('home')">
-      <div class="logo-icon">G</div>
-      GradBridge
-    </div>
-
-```
-<ul class="nav-links">
-  <li>
-    <a href="#" onclick="showPage('loans');return false">
-      Student Loans
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-    </a>
-    <div class="dropdown">
-      <a href="#" onclick="showPage('undergrad');return false">Undergraduate Student Loans</a>
-      <a href="#" onclick="showPage('grad');return false">Graduate Student Loans</a>
-    </div>
-  </li>
-  <li><a href="#" onclick="showPage('resources');return false">Resources</a></li>
-  <li><a href="#" onclick="showPage('partners');return false">Partners</a></li>
-  <li><a href="#" onclick="showPage('about');return false">About Us</a></li>
-</ul>
-
-<div class="nav-actions">
-  <button class="btn-ghost" onclick="openModal()">Sign In</button>
-  <a class="btn-primary" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-</div>
-```
-
-  </div>
-</nav>
-
-<!-- ── SIGN IN MODAL ── -->
-
-<div class="modal-overlay" id="signinModal" onclick="closeModalOutside(event)">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <h3>Sign In</h3>
-    <p>Choose where you'd like to sign in.</p>
-
-```
-<div class="modal-section">
-  <h4>My Existing Application</h4>
-  <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:12px;">
-    Complete or check the status of your existing loan application.<br>
-    GradBridge uses <span class="provider-badge">CampusDoor</span> to process applications.
-  </p>
-  <a href="https://www.campusdoor.com/GradBridge/Login.aspx" target="_blank" class="btn-primary" style="display:inline-block;font-size:0.875rem;">Sign in to CampusDoor</a>
-</div>
-
-<div class="modal-or">OR</div>
-
-<div class="modal-section">
-  <h4>My Loan Account</h4>
-  <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:12px;">
-    View, manage and pay down your GradBridge loan(s).<br>
-    GradBridge uses <span class="provider-badge">Firstmark</span> to service loans.
-  </p>
-  <a href="https://secure.firstmarkservices.com/Account/Login" target="_blank" class="btn-ghost" style="display:inline-block;font-size:0.875rem;">Sign in to Firstmark</a>
-</div>
-```
-
-  </div>
-</div>
-
-<!-- ════════════════════════════════
-     HOME PAGE
-════════════════════════════════ -->
-
-<div class="page active" id="page-home">
-
-  <!-- HERO -->
-
-  <section class="hero">
-    <div class="hero-inner">
-      <div class="hero-content animate">
-        <div class="hero-tag"><span></span> Second-Look Private Student Loans</div>
-        <h1>Second Chances,<br><em>Brighter Futures.</em></h1>
-        <p class="hero-desc">We bridge the gap when traditional lenders have denied your student loan — providing the financial support you need to continue your education and build a brighter future.</p>
-        <div class="hero-ctas">
-          <a class="btn-primary" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-          <button class="btn-ghost" onclick="showPage('loans')">Learn More</button>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <strong>2,000+</strong>
-            <span>Eligible Schools</span>
-          </div>
-          <div class="hero-stat">
-            <strong>&lt;15 min</strong>
-            <span>Decision Time</span>
-          </div>
-          <div class="hero-stat">
-            <strong>$0</strong>
-            <span>Application Fee</span>
-          </div>
-        </div>
-      </div>
-
-```
-  <div class="hero-visual animate delay-2">
-    <div class="hero-float top">
-      <div class="dot"></div> Application Approved ✓
-    </div>
-    <div class="hero-card">
-      <div class="hero-card-header">
-        <div class="hero-card-icon">🎓</div>
-        <div>
-          <strong>Loan Application</strong>
-          <span>GradBridge Second-Look</span>
-        </div>
-      </div>
-      <div class="hero-progress">
-        <label><span>Application Review</span><span>Complete</span></label>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
-      </div>
-      <div class="hero-progress">
-        <label><span>Credit Assessment</span><span>Complete</span></label>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
-      </div>
-      <div class="hero-progress">
-        <label><span>School Certification</span><span>In Progress</span></label>
-        <div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div>
-      </div>
-      <div class="hero-card-badge">✓ Approved — Congratulations!</div>
-    </div>
-    <div class="hero-float bottom">
-      <div class="dot"></div> 42% drop out due to finances
-    </div>
-  </div>
-</div>
-```
-
-  </section>
-
-  <!-- WHY GRADBRIDGE -->
-
-  <section class="why-section">
     <div class="container">
-      <div class="section-label">Why GradBridge</div>
-      <h2 class="section-title">Achieve Your <span class="underline-accent">Education Dreams.</span></h2>
-      <p class="section-sub">If you've been denied for a traditional private student loan, GradBridge is here to help. Our second-look program is designed for students who fall just outside traditional lending criteria.</p>
+        <header class="header">
+            <h1>Retry</h1>
+            <button 
+                class="theme-toggle" 
+                id="themeToggle" 
+                role="switch"
+                aria-checked="true"
+                aria-label="Toggle between light and dark theme"
+                tabindex="0"
+            >
+                <span class="theme-icon" id="themeIcon" aria-hidden="true">🌙</span>
+                <span class="theme-text" id="themeText">Dark</span>
+            </button>
+        </header>
 
-```
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">⚡</div>
-      <h4>Simple Application</h4>
-      <p>Our digital application process gives you a decision in less than 15 minutes.</p>
+        <main class="main">
+            <section class="card">
+                <h2 class="card-title">Add New Task</h2>
+                <form class="task-form" id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle" class="form-label">Task Title</label>
+                        <input 
+                            type="text" 
+                            id="taskTitle" 
+                            class="form-input" 
+                            placeholder="Enter task title"
+                            maxlength="200"
+                            aria-describedby="taskTitleError"
+                            required
+                        >
+                        <div id="taskTitleError" class="form-error" style="display: none;" role="alert"></div>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" id="addTaskBtn">
+                            <span id="addTaskText">Add Task</span>
+                            <span id="addTaskSpinner" class="loading-spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2 class="card-title">Task Queue</h2>
+                <div id="taskList" class="task-list" role="region" aria-label="List of tasks" aria-live="polite">
+                    <!-- Tasks will be rendered here -->
+                </div>
+            </section>
+        </main>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏫</div>
-      <h4>Over 2,000 Schools</h4>
-      <p>We support undergraduate and graduate programs from over 2,000 schools across the country.</p>
+
+    <div id="toast" class="toast" role="alert" aria-live="assertive" tabindex="-1">
+        <span id="toastMessage"></span>
+        <button class="toast-close" id="toastClose" aria-label="Close notification" tabindex="0">
+            <span aria-hidden="true">×</span>
+        </button>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔄</div>
-      <h4>Second Chances</h4>
-      <p>Expanded eligibility through unique underwriting — even students declined by other lenders may qualify.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💳</div>
-      <h4>Flexible Repayment</h4>
-      <p>Choose from interest only, $25 fixed, or no payments while in school.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🤝</div>
-      <h4>Cosigner Support</h4>
-      <p>We make it easy to apply with a cosigner to maximize your chances of approval.</p>
-    </div>
-  </div>
-</div>
-```
-
-  </section>
-
-  <!-- STAT BANNER -->
-
-  <section class="stat-banner">
-    <div class="stat-banner-inner">
-      <h2>Approximately <em>42%</em> of college dropouts cite financial struggles<br>as the primary reason for leaving school.</h2>
-      <p>GradBridge removes the financial barriers to graduation — providing second-look private student loans for students who fall just outside traditional approval criteria.</p>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-
-  <section class="how-section">
-    <div class="container">
-      <div class="section-label">Process</div>
-      <h2 class="section-title">How it <span class="underline-accent">Works.</span></h2>
-      <p class="section-sub">With a simple application process and expanded eligibility, we provide access to the funding you need to continue your education.</p>
-
-```
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <h4>Get Started</h4>
-      <p>Applied for a private student loan and didn't get approved? Apply with GradBridge. We specialize in applications that fall just outside traditional criteria.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <h4>Short Application</h4>
-      <p>Fast, secure, and only a few minutes. Most students need a creditworthy cosigner — a parent, guardian, or trusted adult.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <h4>We Work with Your School</h4>
-      <p>If approved, we coordinate directly with your school to certify the loan amount and send funds on your behalf.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <h4>Stay on Track</h4>
-      <p>You'll receive regular updates and easy-to-understand repayment options. Signing up for autopay can lower your rate.</p>
-    </div>
-  </div>
-</div>
-```
-
-  </section>
-
-  <!-- RESOURCES -->
-
-  <section class="resources-section">
-    <div class="container">
-      <div class="resources-header">
-        <div>
-          <div class="section-label">Resources</div>
-          <h2 class="section-title">Free <span class="underline-accent">Resources.</span></h2>
-          <p class="section-sub" style="margin-bottom:0;">Plan for college with confidence using our guides and tips.</p>
-        </div>
-        <button class="btn-ghost" onclick="showPage('resources')">View All Resources →</button>
-      </div>
-
-```
-  <div class="posts-grid">
-    <div class="post-card">
-      <div class="post-img post-img-1"><div class="post-img-icon">💸</div></div>
-      <div class="post-body">
-        <span class="post-tag">Blog</span>
-        <h3>The Hidden Costs of College You Should Plan For</h3>
-        <p>College costs more than just tuition. Learn about the hidden expenses that can catch students off guard — and how to plan ahead.</p>
-        <span class="post-link">Read Full Article →</span>
-      </div>
-    </div>
-    <div class="post-card">
-      <div class="post-img post-img-2"><div class="post-img-icon">📋</div></div>
-      <div class="post-body">
-        <span class="post-tag">Student Loan Tips</span>
-        <h3>Student Loan Denied? Here's What to Do Next</h3>
-        <p>If your student loan application was denied, don't panic. Learn why it happens and how you can still get the funding you need.</p>
-        <span class="post-link">Read Full Article →</span>
-      </div>
-    </div>
-    <div class="post-card">
-      <div class="post-img post-img-3"><div class="post-img-icon">📊</div></div>
-      <div class="post-body">
-        <span class="post-tag">Student Loan Tips</span>
-        <h3>How Your Credit Score Affects Private Student Loan Approval</h3>
-        <p>Learn how credit scores impact private student loan approval and why most students need a cosigner to qualify.</p>
-        <span class="post-link">Read Full Article →</span>
-      </div>
-    </div>
-  </div>
-</div>
-```
-
-  </section>
-
-  <!-- TESTIMONIALS -->
-
-  <section class="testimonials-section">
-    <div class="container">
-      <div class="section-label">Testimonials</div>
-      <h2 class="section-title" style="color:white;">Why customers like GradBridge.</h2>
-
-```
-  <div class="testimonials-wrap">
-    <div class="testimonials-track" id="tTrack">
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <p>"GradBridge gave me the second chance I needed to continue my education when other lenders said no. The process was simple, and their team was supportive every step of the way. Thanks to GradBridge, I'm now on track to graduate."</p>
-        <div class="testimonial-author">
-          <div class="author-avatar">SM</div>
-          <div class="author-info">
-            <strong>Susan M.</strong>
-            <span>Student</span>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <p>"I was denied twice by other lenders and thought my education was over. GradBridge approved me within minutes. Their team walked me through every step and I couldn't be more grateful."</p>
-        <div class="testimonial-author">
-          <div class="author-avatar">JR</div>
-          <div class="author-info">
-            <strong>James R.</strong>
-            <span>Graduate Student</span>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <p>"The application literally took 10 minutes. I had my answer almost immediately. For anyone who's been turned down elsewhere — try GradBridge. They actually want to help you succeed."</p>
-        <div class="testimonial-author">
-          <div class="author-avatar">AL</div>
-          <div class="author-info">
-            <strong>Alicia L.</strong>
-            <span>Undergraduate</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="testimonials-nav">
-    <button class="t-dot active" onclick="goToSlide(0)"></button>
-    <button class="t-dot" onclick="goToSlide(1)"></button>
-    <button class="t-dot" onclick="goToSlide(2)"></button>
-  </div>
-</div>
-```
-
-  </section>
-
-  <!-- NEWSLETTER -->
-
-  <section class="newsletter-section">
-    <div class="newsletter-inner">
-      <h2>Stay in the Know.</h2>
-      <p>Receive resources on paying for college and information about GradBridge, delivered straight to your inbox.</p>
-      <div class="newsletter-form">
-        <input type="email" placeholder="Enter your email address">
-        <button>Subscribe</button>
-      </div>
-    </div>
-  </section>
-
-</div><!-- /home page -->
-
-<!-- ════════════════════════════════
-     STUDENT LOANS PAGE
-════════════════════════════════ -->
-
-<div class="page" id="page-loans">
-
-  <section class="page-hero">
-    <div class="page-hero-inner">
-      <div>
-        <div class="section-label">Student Loans</div>
-        <h1>Private Student Loans for Students Who Need a Second Chance.</h1>
-        <p>Our program is built to help students like you stay on track to graduation with a simple, fast application process.</p>
-        <a class="apply-link" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;">
-        <div style="font-size:9rem;opacity:0.15">🎓</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="products-section">
-    <div class="container">
-      <div class="section-label">Our Products</div>
-      <h2 class="section-title">Our <span class="underline-accent">Products.</span></h2>
-      <p class="section-sub">Choose the loan that fits your educational level and goals.</p>
-
-```
-  <div class="products-grid">
-    <div class="product-card" onclick="showPage('undergrad')">
-      <div class="product-img product-img-1"><span style="font-size:4rem">🏛️</span></div>
-      <div class="product-body">
-        <h3>Undergraduate Student Loans</h3>
-        <p>For juniors and seniors working toward their bachelor's degree. Expanded credit criteria with cosigner support to maximize your chances.</p>
-        <span class="post-link">Learn More →</span>
-      </div>
-    </div>
-    <div class="product-card" onclick="showPage('grad')">
-      <div class="product-img product-img-2"><span style="font-size:4rem">📚</span></div>
-      <div class="product-body">
-        <h3>Graduate Student Loans</h3>
-        <p>For students seeking loans for MBA, law, medical, dental, health professions, and master's / doctorate degrees.</p>
-        <span class="post-link">Learn More →</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="features-grid" style="margin-bottom:0">
-    <div class="feature-card">
-      <div class="feature-icon">⚡</div>
-      <h4>Simple Application</h4>
-      <p>Digital process gives you a decision in less than 15 minutes.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏫</div>
-      <h4>Over 2,000 Schools</h4>
-      <p>Supporting undergraduate and graduate programs nationwide.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔄</div>
-      <h4>Second Chances</h4>
-      <p>Expanded eligibility — declined students may still qualify.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💳</div>
-      <h4>Flexible Repayment</h4>
-      <p>Interest only, $25 fixed, or no payments while in school.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🤝</div>
-      <h4>Cosigner Support</h4>
-      <p>Easy cosigner process to maximize approval chances.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏠</div>
-      <h4>Cover More Than Tuition</h4>
-      <p>Funds all cost of attendance: tuition, housing, food, books, and supplies.</p>
-    </div>
-  </div>
-</div>
-```
-
-  </section>
-
-  <section class="stat-banner">
-    <div class="stat-banner-inner">
-      <h2>Each year, over <em>one million students</em> are declined for private student loans due to narrowly missing traditional lenders' credit requirements.</h2>
-      <p>GradBridge offers a second chance with a second-look loan — helping students stay enrolled and on track to graduate.</p>
-    </div>
-  </section>
-
-  <!-- EXPENSES -->
-
-  <section class="expenses-section">
-    <div class="container">
-      <div class="section-label">Loan Coverage</div>
-      <h2 class="section-title">What Expenses are <span class="underline-accent">Covered?</span></h2>
-      <p class="section-sub">Your GradBridge loan can be used to cover school-certified cost of attendance expenses.</p>
-
-```
-  <div class="expenses-grid">
-    <div class="expense-box">
-      <h4>✅ Typically Includes</h4>
-      <ul>
-        <li><span class="check">✓</span> Tuition and academic fees</li>
-        <li><span class="check">✓</span> On-campus or off-campus housing</li>
-        <li><span class="check">✓</span> Rent, utilities, and groceries</li>
-        <li><span class="check">✓</span> Meal plans or dining expenses</li>
-        <li><span class="check">✓</span> Books, supplies, and lab materials</li>
-        <li><span class="check">✓</span> A computer, software, or academic equipment</li>
-        <li><span class="check">✓</span> Transportation and commuting costs</li>
-        <li><span class="check">✓</span> Required study-abroad program expenses</li>
-      </ul>
-    </div>
-    <div class="expense-box">
-      <h4>❌ Doesn't Include</h4>
-      <ul>
-        <li><span class="cross">✗</span> Non-educational travel or vacations</li>
-        <li><span class="cross">✗</span> Clothing, electronics unrelated to school</li>
-        <li><span class="cross">✗</span> Gym memberships or entertainment</li>
-        <li><span class="cross">✗</span> Security deposits or off-campus furniture</li>
-        <li><span class="cross">✗</span> Non-education subscriptions (streaming, etc.)</li>
-      </ul>
-    </div>
-  </div>
-</div>
-```
-
-  </section>
-
-  <!-- FAQs -->
-
-  <section class="faq-section">
-    <div class="container">
-      <div class="section-label">FAQs</div>
-      <h2 class="section-title" style="text-align:center;">Frequently Asked <span class="underline-accent">Questions.</span></h2>
-
-```
-  <div class="faq-list" id="faqList">
-    <div class="faq-item">
-      <div class="faq-q">Who is eligible for a GradBridge Student Loan?<span class="arrow">⌄</span></div>
-      <div class="faq-a">You are eligible if you are a U.S. Citizen or permanent resident, at least the age of majority in your state, and an undergraduate (junior or greater) or graduate student enrolled in an eligible U.S. school seeking a bachelor's or graduate/post-graduate degree.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Do I need a credit history to get a private student loan?<span class="arrow">⌄</span></div>
-      <div class="faq-a">Yes, there are credit history requirements. Since most students have limited credit history, you will likely need a cosigner who has established credit history and income.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">What is a cosigner and do I need one?<span class="arrow">⌄</span></div>
-      <div class="faq-a">A cosigner can be a parent, grandparent, aunt or uncle, guardian, or mentor with established credit history and income. A cosigner agrees to take responsibility for repayment if you can't make payments. All undergraduate students will need a cosigner. For graduate students, applying with a cosigner can increase approval chances and may result in a lower interest rate.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">How quickly can I get a decision?<span class="arrow">⌄</span></div>
-      <div class="faq-a">The GradBridge application generally takes less than 15 minutes to complete. After submitting, you'll receive a credit decision immediately. Once approved, the entire process — from application to funds at your school — can take as few as 10 business days.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Will loan funds be sent to me or to my school?<span class="arrow">⌄</span></div>
-      <div class="faq-a">All loans are disbursed directly to the school. The funds may be divided into multiple disbursements, usually one per semester. Your school will refund any excess money to you following their refund procedures.</div>
-    </div>
-  </div>
-</div>
-```
-
-  </section>
-
-  <section class="cta-section">
-    <div class="container">
-      <h2>Ready to Apply?</h2>
-      <p>Most undergraduate students will need a cosigner. The process takes less than 15 minutes.</p>
-      <a class="apply-link" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-    </div>
-  </section>
-
-</div><!-- /loans page -->
-
-<!-- ════════════════════════════════
-     UNDERGRAD PAGE
-════════════════════════════════ -->
-
-<div class="page" id="page-undergrad">
-  <section class="page-hero">
-    <div class="page-hero-inner">
-      <div>
-        <div class="section-label">Undergraduate</div>
-        <h1>Undergraduate Student Loans.</h1>
-        <p>For juniors and seniors working toward their bachelor's degree. When other lenders say no, GradBridge gives you a second look.</p>
-        <a class="apply-link" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;font-size:8rem;opacity:0.12">🏛️</div>
-    </div>
-  </section>
-  <section style="padding:80px 0;">
-    <div class="container">
-      <div class="features-grid">
-        <div class="feature-card"><div class="feature-icon">📋</div><h4>Eligibility</h4><p>Junior or senior undergraduate students at an eligible school pursuing a bachelor's degree. U.S. citizens or permanent residents.</p></div>
-        <div class="feature-card"><div class="feature-icon">🤝</div><h4>Cosigner Required</h4><p>All undergraduate applicants must apply with a creditworthy cosigner — a parent, guardian, or trusted adult.</p></div>
-        <div class="feature-card"><div class="feature-icon">⚡</div><h4>Fast Decisions</h4><p>Complete your application in under 15 minutes and receive an instant credit decision.</p></div>
-        <div class="feature-card"><div class="feature-icon">💰</div><h4>Full Cost Coverage</h4><p>Covers all school-certified cost of attendance including tuition, housing, food, books, and supplies.</p></div>
-      </div>
-    </div>
-  </section>
-  <section class="cta-section">
-    <div class="container">
-      <h2>Start Your Application</h2>
-      <p>The process is fast, simple, and only takes a few minutes.</p>
-      <a class="apply-link" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-    </div>
-  </section>
-</div>
-
-<!-- ════════════════════════════════
-     GRAD PAGE
-════════════════════════════════ -->
-
-<div class="page" id="page-grad">
-  <section class="page-hero">
-    <div class="page-hero-inner">
-      <div>
-        <div class="section-label">Graduate</div>
-        <h1>Graduate Student Loans.</h1>
-        <p>For MBA, law, medical, dental, health professions, and master's / doctorate programs. Expanded eligibility when traditional lenders say no.</p>
-        <a class="apply-link" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;font-size:8rem;opacity:0.12">📚</div>
-    </div>
-  </section>
-  <section style="padding:80px 0;">
-    <div class="container">
-      <div class="features-grid">
-        <div class="feature-card"><div class="feature-icon">🏥</div><h4>Professional Programs</h4><p>MBA, JD, MD, DMD, and other health professions — we cover a wide range of graduate disciplines.</p></div>
-        <div class="feature-card"><div class="feature-icon">🎓</div><h4>Master's & Doctorates</h4><p>Supporting students in master's and doctorate programs at eligible institutions nationwide.</p></div>
-        <div class="feature-card"><div class="feature-icon">✓</div><h4>Cosigner Optional</h4><p>Graduate students can apply independently, though applying with a cosigner can increase approval odds and lower your rate.</p></div>
-        <div class="feature-card"><div class="feature-icon">💳</div><h4>Flexible Repayment</h4><p>Interest only, $25 fixed, or deferred in-school payments. You choose what works during your studies.</p></div>
-      </div>
-    </div>
-  </section>
-  <section class="cta-section">
-    <div class="container">
-      <h2>Ready to Continue Your Education?</h2>
-      <p>Apply now and receive a decision in less than 15 minutes.</p>
-      <a class="apply-link" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-    </div>
-  </section>
-</div>
-
-<!-- ════════════════════════════════
-     RESOURCES PAGE
-════════════════════════════════ -->
-
-<div class="page" id="page-resources">
-  <section class="page-hero" style="padding-bottom:60px;">
-    <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
-      <div class="section-label">Resources</div>
-      <h1 style="font-size:clamp(2.2rem,4.5vw,3.2rem);color:var(--navy);margin-bottom:16px;">Free Resources.</h1>
-      <p style="font-size:1rem;color:var(--gray-500);max-width:520px;line-height:1.7;">Plan for college with confidence using our guides, tips, and student loan resources.</p>
-    </div>
-  </section>
-
-  <section style="padding:60px 0 100px;">
-    <div class="container">
-      <div class="resources-page-grid">
-        <div class="post-card">
-          <div class="post-img post-img-1"><div class="post-img-icon">💸</div></div>
-          <div class="post-body">
-            <span class="post-tag">Blog</span>
-            <h3>The Hidden Costs of College You Should Plan For</h3>
-            <p>College costs more than just tuition. Learn about the hidden expenses that can catch students off guard — and how to plan ahead.</p>
-            <span class="post-link">Read Full Article →</span>
-          </div>
-        </div>
-        <div class="post-card">
-          <div class="post-img post-img-2"><div class="post-img-icon">📋</div></div>
-          <div class="post-body">
-            <span class="post-tag">Student Loan Tips</span>
-            <h3>Student Loan Denied? Here's What to Do Next</h3>
-            <p>If your student loan application was denied, don't panic. Learn why it happens and how you can still get the funding you need.</p>
-            <span class="post-link">Read Full Article →</span>
-          </div>
-        </div>
-        <div class="post-card">
-          <div class="post-img post-img-3"><div class="post-img-icon">📊</div></div>
-          <div class="post-body">
-            <span class="post-tag">Student Loan Tips</span>
-            <h3>How Your Credit Score Affects Private Student Loan Approval</h3>
-            <p>Learn how credit scores impact private student loan approval and why most students need a cosigner to qualify.</p>
-            <span class="post-link">Read Full Article →</span>
-          </div>
-        </div>
-        <div class="post-card">
-          <div class="post-img post-img-1"><div class="post-img-icon">📅</div></div>
-          <div class="post-body">
-            <span class="post-tag">Blog</span>
-            <h3>Understanding Your Student Loan Repayment Options</h3>
-            <p>A breakdown of the repayment plans available — interest only, fixed payments, and deferred — and what each means for your total loan cost.</p>
-            <span class="post-link">Read Full Article →</span>
-          </div>
-        </div>
-        <div class="post-card">
-          <div class="post-img post-img-2"><div class="post-img-icon">👨‍👩‍👧</div></div>
-          <div class="post-body">
-            <span class="post-tag">Student Loan Tips</span>
-            <h3>How to Choose the Right Cosigner for Your Student Loan</h3>
-            <p>Picking the right cosigner can make the difference between approval and denial. Here's what to look for and how to have the conversation.</p>
-            <span class="post-link">Read Full Article →</span>
-          </div>
-        </div>
-        <div class="post-card">
-          <div class="post-img post-img-3"><div class="post-img-icon">🏦</div></div>
-          <div class="post-body">
-            <span class="post-tag">Blog</span>
-            <h3>Federal vs. Private Student Loans: What's the Difference?</h3>
-            <p>Learn how federal and private student loans differ in terms of rates, repayment options, and who should consider each type.</p>
-            <span class="post-link">Read Full Article →</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- ════════════════════════════════
-     PARTNERS PAGE
-════════════════════════════════ -->
-
-<div class="page" id="page-partners">
-  <section class="page-hero" style="padding-bottom:60px;">
-    <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
-      <div class="section-label">Partners</div>
-      <h1 style="font-size:clamp(2.2rem,4.5vw,3.2rem);color:var(--navy);margin-bottom:16px;">Partner with GradBridge.</h1>
-      <p style="font-size:1rem;color:var(--gray-500);max-width:560px;line-height:1.7;">We work with lenders, schools, and financial institutions to give more students a second chance at funding their education.</p>
-    </div>
-  </section>
-
-  <section class="partners-section">
-    <div class="container">
-      <div class="section-label">Who We Work With</div>
-      <h2 class="section-title">Our <span class="underline-accent">Partners.</span></h2>
-      <div class="partner-types">
-        <div class="partner-card">
-          <div class="icon">🏦</div>
-          <h3>Lending Partners</h3>
-          <p>Financial institutions that refer applicants who fall just outside their approval criteria. Your declined applicants may qualify with GradBridge.</p>
-        </div>
-        <div class="partner-card">
-          <div class="icon">🏫</div>
-          <h3>Schools & Universities</h3>
-          <p>Eligible institutions that certify and coordinate loan disbursements for enrolled students. We support 2,000+ schools nationwide.</p>
-        </div>
-        <div class="partner-card">
-          <div class="icon">🤝</div>
-          <h3>Financial Aid Offices</h3>
-          <p>We partner with financial aid professionals to ensure students have access to every possible funding option before considering dropping out.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta-section">
-    <div class="container">
-      <h2>Interested in Partnering?</h2>
-      <p>Reach out to learn more about how we can work together to support students.</p>
-      <a class="apply-link" href="mailto:partners@gradbridge.com">Contact Us</a>
-    </div>
-  </section>
-</div>
-
-<!-- ════════════════════════════════
-     ABOUT PAGE
-════════════════════════════════ -->
-
-<div class="page" id="page-about">
-  <section class="page-hero">
-    <div style="max-width:1200px;margin:0 auto;padding:0 24px;">
-      <div class="section-label">About Us</div>
-      <h1 style="font-size:clamp(2.2rem,4.5vw,3.2rem);color:var(--navy);margin-bottom:20px;">We believe every student deserves a chance to finish what they started.</h1>
-      <p style="font-size:1.05rem;color:var(--gray-500);max-width:600px;line-height:1.7;margin-bottom:32px;">GradBridge was built to solve a real problem: too many talented, driven students are forced to leave school simply because a single lender said no.</p>
-    </div>
-  </section>
-
-  <section class="about-mission">
-    <div class="container">
-      <div class="about-grid">
-        <div>
-          <div class="section-label">Our Mission</div>
-          <h2 class="section-title">Removing <span class="underline-accent">Financial Barriers</span> to Graduation.</h2>
-          <p style="font-size:1rem;color:var(--gray-500);line-height:1.8;margin-bottom:20px;">GradBridge offers second-look private student loans — designed specifically for students who fall just outside traditional lending criteria. We use unique underwriting models to look beyond a single credit score.</p>
-          <p style="font-size:1rem;color:var(--gray-500);line-height:1.8;">Based in Wilmington, Delaware, GradBridge loans are originated by Hatch Bank. We're committed to transparency, simplicity, and giving students the support they need to cross the finish line.</p>
-        </div>
-        <div style="background:var(--off-white);border-radius:var(--radius-lg);padding:40px;border:1px solid var(--gray-100);">
-          <div style="margin-bottom:28px;">
-            <strong style="font-size:2.4rem;font-family:'Playfair Display',serif;color:var(--teal);">42%</strong>
-            <p style="font-size:0.85rem;color:var(--gray-500);margin-top:4px;">of college dropouts cite financial struggles as their primary reason for leaving</p>
-          </div>
-          <div style="margin-bottom:28px;">
-            <strong style="font-size:2.4rem;font-family:'Playfair Display',serif;color:var(--teal);">1M+</strong>
-            <p style="font-size:0.85rem;color:var(--gray-500);margin-top:4px;">students declined annually for private student loans due to narrow credit criteria</p>
-          </div>
-          <div>
-            <strong style="font-size:2.4rem;font-family:'Playfair Display',serif;color:var(--teal);">2,000+</strong>
-            <p style="font-size:0.85rem;color:var(--gray-500);margin-top:4px;">eligible schools across the United States</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="about-values">
-    <div class="container">
-      <div class="section-label">Our Values</div>
-      <h2 class="section-title" style="text-align:center;">What We <span class="underline-accent">Stand For.</span></h2>
-      <div class="values-grid">
-        <div class="value-card">
-          <div class="value-icon">🎯</div>
-          <h4>Second Chances</h4>
-          <p>We believe a single denial shouldn't define a student's future. Our mission is to look further and find the path forward.</p>
-        </div>
-        <div class="value-card">
-          <div class="value-icon">🔍</div>
-          <h4>Transparency</h4>
-          <p>No hidden fees, no fine print surprises. We believe students deserve to understand exactly what they're signing up for.</p>
-        </div>
-        <div class="value-card">
-          <div class="value-icon">🚀</div>
-          <h4>Simplicity</h4>
-          <p>A 15-minute application. Instant decisions. We've removed every unnecessary hurdle from the process.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta-section">
-    <div class="container">
-      <h2>Ready for Your Second Chance?</h2>
-      <p>Apply in minutes and get a decision right away.</p>
-      <a class="apply-link" href="https://www.campusdoor.com/gradbridge/qualify.aspx" target="_blank">Apply Now</a>
-    </div>
-  </section>
-</div>
-
-<!-- ── FOOTER (shared across all pages) ── -->
-
-<footer>
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <div class="logo">
-          <div class="logo-icon">G</div>
-          GradBridge
-        </div>
-        <p>Second-look private student loans for students who fall just outside traditional lending criteria. Originated by Hatch Bank.</p>
-        <div class="social-links">
-          <div class="social-link" title="Instagram">in</div>
-          <div class="social-link" title="LinkedIn">Li</div>
-          <div class="social-link" title="Facebook">f</div>
-          <div class="social-link" title="X">𝕏</div>
-          <div class="social-link" title="TikTok">tt</div>
-        </div>
-      </div>
-
-```
-  <div class="footer-col">
-    <h5>Student Loans</h5>
-    <ul>
-      <li><a href="#" onclick="showPage('loans');return false">All Student Loans</a></li>
-      <li><a href="#" onclick="showPage('undergrad');return false">Undergraduate Loans</a></li>
-      <li><a href="#" onclick="showPage('grad');return false">Graduate Loans</a></li>
-    </ul>
-  </div>
-
-  <div class="footer-col">
-    <h5>Company</h5>
-    <ul>
-      <li><a href="#" onclick="showPage('about');return false">About Us</a></li>
-      <li><a href="#" onclick="showPage('partners');return false">Partners</a></li>
-      <li><a href="#">In the News</a></li>
-      <li><a href="#">Careers</a></li>
-      <li><a href="#">For Schools</a></li>
-    </ul>
-  </div>
-
-  <div class="footer-col">
-    <h5>Resources</h5>
-    <ul>
-      <li><a href="#" onclick="showPage('resources');return false">All Resources</a></li>
-      <li><a href="#">Blog</a></li>
-      <li><a href="#">Student Loan Tips</a></li>
-      <li><a href="#">FAQs</a></li>
-    </ul>
-  </div>
-
-  <div class="footer-col">
-    <h5>Contact</h5>
-    <ul>
-      <li><a href="tel:8774275123">(877) 427-5123</a></li>
-      <li><a href="#">800 N King Street</a></li>
-      <li><a href="#">Suite 304 3596</a></li>
-      <li><a href="#">Wilmington, DE 19801</a></li>
-    </ul>
-  </div>
-</div>
-
-<div class="footer-bottom">
-  <p>© 2025 GradBridge, LLC. All rights reserved.</p>
-  <div class="footer-bottom-links">
-    <a href="#">Privacy Policy</a>
-    <a href="#">Terms of Service</a>
-    <a href="#">Accessibility</a>
-  </div>
-</div>
-
-<div class="footer-disclaimer">
-  <p><strong style="color:rgba(255,255,255,0.4);">1</strong> — GradBridge loans are second-look private student loans and are not affiliated with the federal student loan program. As such, they do not offer the same repayment benefits that may be available with federal loans.</p>
-  <p><strong style="color:rgba(255,255,255,0.4);">2</strong> — Source: Based on data from Education Data, report on College Dropout Rates as of 12/09/2025.</p>
-  <p><strong style="color:rgba(255,255,255,0.4);">3</strong> — Repayment Options: For the $25 repayment example, assume a $10,000 loan with an APR of 20.36%, a 5% originations fee, and a .25% ACH discount applied and 10-year term.</p>
-  <p>GradBridge Student Loans are originated by Hatch Bank, a California-chartered industrial bank.</p>
-</div>
-```
-
-  </div>
-</footer>
-
-<script>
-  // ── PAGE ROUTING ──
-  function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById('page-' + id);
-    if (target) {
-      target.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
-  // ── MODAL ──
-  function openModal() {
-    document.getElementById('signinModal').classList.add('open');
-  }
-
-  function closeModal() {
-    document.getElementById('signinModal').classList.remove('open');
-  }
-
-  function closeModalOutside(e) {
-    if (e.target === document.getElementById('signinModal')) closeModal();
-  }
-
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-  // ── TESTIMONIALS CAROUSEL ──
-  let currentSlide = 0;
-  const cards = document.querySelectorAll('.testimonial-card');
-
-  function goToSlide(n) {
-    currentSlide = n;
-    const cardWidth = 360 + 24;
-    document.getElementById('tTrack').style.transform = `translateX(-${n * cardWidth}px)`;
-    document.querySelectorAll('.t-dot').forEach((d, i) => d.classList.toggle('active', i === n));
-  }
-
-  // Auto-advance
-  setInterval(() => {
-    currentSlide = (currentSlide + 1) % 3;
-    goToSlide(currentSlide);
-  }, 5000);
-
-  // ── FAQ ACCORDION ──
-  document.getElementById('faqList').addEventListener('click', function(e) {
-    const q = e.target.closest('.faq-q');
-    if (!q) return;
-    const item = q.closest('.faq-item');
-    const wasOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-    if (!wasOpen) item.classList.add('open');
-  });
-
-  // ── NEWSLETTER ──
-  document.querySelector('.newsletter-form button').addEventListener('click', function() {
-    const input = document.querySelector('.newsletter-form input');
-    if (input.value) {
-      this.textContent = '✓ Subscribed!';
-      this.style.background = '#00a878';
-      input.value = '';
-      setTimeout(() => { this.textContent = 'Subscribe'; this.style.background = ''; }, 3000);
-    }
-  });
-
-  // ── PROGRESS BAR ANIMATION ──
-  setTimeout(() => {
-    document.querySelectorAll('.progress-fill').forEach((bar, i) => {
-      const widths = ['100%', '100%', '65%'];
-      bar.style.width = widths[i] || '80%';
-    });
-  }, 500);
-</script>
 
+    <script>
+        // Application State
+        const state = {
+            theme: 'dark',
+            systemPreference: 'dark',
+            tasks: [
+                {
+                    id: 1,
+                    title: 'Deploy to production',
+                    status: 'success',
+                    attempts: 1,
+                    maxAttempts: 3,
+                    lastAttempt: new Date(Date.now() - 1000 * 60 * 5).toISOString()
+                },
+                {
+                    id: 2,
+                    title: 'Send email notifications',
+                    status: 'error',
+                    attempts: 2,
+                    maxAttempts: 3,
+                    lastAttempt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
+                    error: 'Connection timeout'
+                },
+                {
+                    id: 3,
+                    title: 'Process payment batch',
+                    status: 'pending',
+                    attempts: 0,
+                    maxAttempts: 5,
+                    lastAttempt: null
+                },
+                {
+                    id: 4,
+                    title: 'Generate monthly reports',
+                    status: 'error',
+                    attempts: 3,
+                    maxAttempts: 3,
+                    lastAttempt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+                    error: 'Database connection failed'
+                }
+            ],
+            nextTaskId: 5,
+            retryingTasks: new Set(),
+            addingTask: false,
+            activeToasts: new Set()
+        };
+
+        // DOM Elements
+        const elements = {
+            themeToggle: document.getElementById('themeToggle'),
+            themeIcon: document.getElementById('themeIcon'),
+            themeText: document.getElementById('themeText'),
+            taskForm: document.getElementById('taskForm'),
+            taskTitle: document.getElementById('taskTitle'),
+            taskTitleError: document.getElementById('taskTitleError'),
+            taskList: document.getElementById('taskList'),
+            toast: document.getElementById('toast'),
+            toastMessage: document.getElementById('toastMessage'),
+            toastClose: document.getElementById('toastClose'),
+            addTaskBtn: document.getElementById('addTaskBtn'),
+            addTaskText: document.getElementById('addTaskText'),
+            addTaskSpinner: document.getElementById('addTaskSpinner')
+        };
+
+        // Theme Management
+        function detectSystemTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                return 'light';
+            }
+            return 'dark';
+        }
+
+        function loadThemeFromStorage() {
+            try {
+                const saved = localStorage.getItem('theme');
+                return saved || detectSystemTheme();
+            } catch (e) {
+                return detectSystemTheme();
+            }
+        }
+
+        function saveThemeToStorage(theme) {
+            try {
+                localStorage.setItem('theme', theme);
+            } catch (e) {
+                console.warn('Failed to save theme preference');
+            }
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            // Update toggle button
+            const isLight = theme === 'light';
+            elements.themeIcon.textContent = isLight ? '☀️' : '🌙';
+            elements.themeText.textContent = isLight ? 'Light' : 'Dark';
+            elements.themeToggle.setAttribute('aria-checked', isLight.toString());
+            elements.themeToggle.setAttribute('aria-label', 
+                `Switch to ${isLight ? 'dark' : 'light'} theme. Currently using ${theme} theme.`);
+            
+            state.theme = theme;
+            saveThemeToStorage(theme);
+        }
+
+        function toggleTheme() {
+            const newTheme = state.theme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            showToast(`Switched to ${newTheme} theme`, 'success');
+        }
+
+        // Validation
+        function validateTaskTitle(title) {
+            const trimmed = title.trim();
+            if (!trimmed) {
+                return { valid: false, error: 'Task title is required' };
+            }
+            if (trimmed.length > 200) {
+                return { valid: false, error: 'Task title must be 200 characters or less' };
+            }
+            
+            // Check for duplicate titles
+            const existingTask = state.tasks.find(task => 
+                task.title.toLowerCase() === trimmed.toLowerCase()
+            );
+            if (existingTask) {
+                return { valid: false, error: 'A task with this title already exists' };
+            }
+            
+            return { valid: true, error: null };
+        }
+
+        function showValidationError(message) {
+            elements.taskTitleError.textContent = message;
+            elements.taskTitleError.style.display = 'block';
+            elements.taskTitle.classList.add('error');
+        }
+
+        function clearValidationError() {
+            elements.taskTitleError.style.display = 'none';
+            elements.taskTitle.classList.remove('error');
+        }
+
+        function setAddTaskLoading(loading) {
+            state.addingTask = loading;
+            elements.addTaskBtn.disabled = loading;
+            elements.addTaskText.style.display = loading ? 'none' : 'inline';
+            elements.addTaskSpinner.style.display = loading ? 'inline-block' : 'none';
+        }
+
+        // Task Management
+        function generateTaskId() {
+            return state.nextTaskId++;
+        }
+
+        function addTask(title) {
+            const validation = validateTaskTitle(title);
+            if (!validation.valid) {
+                showValidationError(validation.error);
+                showToast(validation.error, 'error');
+                return;
+            }
+
+            clearValidationError();
+            setAddTaskLoading(true);
+
+            // Simulate async operation
+            setTimeout(() => {
+                const newTask = {
+                    id: generateTaskId(),
+                    title: title.trim(),
+                    status: 'pending',
+                    attempts: 0,
+                    maxAttempts: 3,
+                    lastAttempt: null
+                };
+
+                state.tasks.unshift(newTask);
+                saveTasksToStorage();
+                renderTasks();
+                setAddTaskLoading(false);
+                showToast('Task added successfully', 'success');
+                
+                // Announce to screen readers
+                announceToScreenReader(`Task "${title.trim()}" added to queue`);
+            }, 500);
+        }
+
+        function retryTask(taskId) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            if (task.attempts >= task.maxAttempts) {
+                showToast('Maximum retry attempts reached', 'error');
+                return;
+            }
+
+            if (state.retryingTasks.has(taskId)) {
+                return; // Already retrying
+            }
+
+            state.retryingTasks.add(taskId);
+            task.attempts++;
+            task.lastAttempt = new Date().toISOString();
+            task.status = 'pending';
+            delete task.error;
+
+            saveTasksToStorage();
+            renderTasks();
+            showToast('Retrying task...', 'success');
+            
+            // Announce to screen readers
+            announceToScreenReader(`Retrying task "${task.title}"`);
+
+            // Simulate task execution
+            setTimeout(() => {
+                const success = Math.random() > 0.4; // 60% success rate
+                task.status = success ? 'success' : 'error';
+                
+                if (!success) {
+                    const errors = [
+                        'Connection timeout',
+                        'Database error',
+                        'Authentication failed',
+                        'Rate limit exceeded',
+                        'Service unavailable'
+                    ];
+                    task.error = errors[Math.floor(Math.random() * errors.length)];
+                }
+
+                state.retryingTasks.delete(taskId);
+                saveTasksToStorage();
+                renderTasks();
+                showToast(
+                    success ? 'Task completed successfully' : 'Task failed - can retry',
+                    success ? 'success' : 'error'
+                );
+                
+                // Announce to screen readers
+                announceToScreenReader(
+                    success ? `Task "${task.title}" completed successfully` : `Task "${task.title}" failed with error: ${task.error}`
+                );
+            }, 1500);
+        }
+
+        function deleteTask(taskId) {
+            const index = state.tasks.findIndex(t => t.id === taskId);
+            if (index > -1) {
+                const taskTitle = state.tasks[index].title;
+                state.tasks.splice(index, 1);
+                state.retryingTasks.delete(taskId);
+                saveTasksToStorage();
+                renderTasks();
+                showToast(`Task "${taskTitle}" deleted`, 'success');
+                
+                // Announce to screen readers
+                announceToScreenReader(`Task "${taskTitle}" deleted`);
+            }
+        }
+
+        function formatTimeAgo(dateString) {
+            if (!dateString) return 'Never';
+            
+            const now = new Date();
+            const date = new Date(dateString);
+            const diff = now - date;
+            
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (days > 0) return `${days}d ago`;
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return 'Just now';
+        }
+
+        function renderTasks() {
+            const taskList = elements.taskList;
+            
+            if (state.tasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⏱️</div>
+                        <h3 class="empty-state-title">No tasks yet</h3>
+                        <p>Add your first task to get started with retry management.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            taskList.innerHTML = state.tasks.map(task => {
+                const isRetrying = state.retryingTasks.has(task.id);
+                const retryButtonId = `retry-${task.id}`;
+                const deleteButtonId = `delete-${task.id}`;
+                
+                return `
+                    <div class="task-item">
+                        <div class="task-header">
+                            <h3 class="task-title">${escapeHtml(task.title)}</h3>
+                            <div class="task-meta">
+                                <span class="task-status status-${task.status}">${task.status.toUpperCase()}</span>
+                                <span>${task.attempts}/${task.maxAttempts} attempts</span>
+                                <span>Last: ${formatTimeAgo(task.lastAttempt)}</span>
+                            </div>
+                        </div>
+                        ${task.error ? `<div class="task-error">Error: ${escapeHtml(task.error)}</div>` : ''}
+                        <div class="task-actions">
+                            ${task.status === 'error' && task.attempts < task.maxAttempts ? 
+                                `<button 
+                                    class="btn btn-primary" 
+                                    id="${retryButtonId}"
+                                    onclick="retryTask(${task.id})" 
+                                    ${isRetrying ? 'disabled' : ''}
+                                    aria-label="Retry task: ${escapeHtml(task.title)}"
+                                >
+                                    ${isRetrying ? '<span class="loading-spinner"></span>' : ''}
+                                    ${isRetrying ? 'Retrying...' : `Retry (${task.maxAttempts - task.attempts} left)`}
+                                </button>` : ''}
+                            ${task.status === 'pending' && !isRetrying ? 
+                                `<button class="btn btn-secondary" disabled>Processing...</button>` : ''}
+                            <button 
+                                class="btn btn-danger" 
+                                id="${deleteButtonId}"
+                                onclick="deleteTask(${task.id})"
+                                aria-label="Delete task: ${escapeHtml(task.title)}"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function announceToScreenReader(message) {
+            // Create a temporary element for screen reader announcements
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.setAttribute('aria-atomic', 'true');
+            announcement.className = 'sr-only';
+            announcement.textContent = message;
+            
+            document.body.appendChild(announcement);
+            
+            // Remove after announcement
+            setTimeout(() => {
+                document.body.removeChild(announcement);
+            }, 1000);
+        }
+
+        // Storage Management
+        function saveTasksToStorage() {
+            try {
+                localStorage.setItem('retryTasks', JSON.stringify(state.tasks));
+                localStorage.setItem('retryNextTaskId', state.nextTaskId.toString());
+            } catch (e) {
+                console.warn('Failed to save tasks to localStorage');
+            }
+        }
+
+        function loadTasksFromStorage() {
+            try {
+                const savedTasks = localStorage.getItem('retryTasks');
+                const savedNextId = localStorage.getItem('retryNextTaskId');
+                
+                if (savedTasks && savedTasks !== 'null') {
+                    const parsedTasks = JSON.parse(savedTasks);
+                    if (Array.isArray(parsedTasks)) {
+                        state.tasks = parsedTasks;
+                    }
+                }
+                if (savedNextId && savedNextId !== 'null') {
+                    const parsedId = parseInt(savedNextId, 10);
+                    if (!isNaN(parsedId)) {
+                        state.nextTaskId = parsedId;
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to load tasks from localStorage');
+            }
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            // Clear any existing active toasts to prevent stacking
+            state.activeToasts.forEach(toastId => {
+                clearTimeout(toastId);
+            });
+            state.activeToasts.clear();
+            
+            const toast = elements.toast;
+            elements.toastMessage.textContent = message;
+            toast.className = `toast toast-${type}`;
+            
+            // Show toast
+            const showTimeout = setTimeout(() => {
+                toast.classList.add('show');
+                // Focus management for accessibility
+                const previousFocus = document.activeElement;
+                toast.focus();
+                
+                // Store reference to return focus
+                toast.setAttribute('data-previous-focus', previousFocus ? previousFocus.id || 'body' : 'body');
+            }, 10);
+            
+            // Auto-hide toast after 5 seconds
+            const hideTimeout = setTimeout(() => {
+                hideToast();
+            }, 5000);
+            
+            state.activeToasts.add(showTimeout);
+            state.activeToasts.add(hideTimeout);
+        }
+
+        function hideToast() {
+            const toast = elements.toast;
+            toast.classList.remove('show');
+            
+            // Return focus to previous element
+            const previousFocusId = toast.getAttribute('data-previous-focus');
+            if (previousFocusId && previousFocusId !== 'body') {
+                const previousElement = document.getElementById(previousFocusId);
+                if (previousElement) {
+                    previousElement.focus();
+                }
+            }
+        }
+
+        // Event Handlers
+        function handleTaskFormSubmit(e) {
+            e.preventDefault();
+            
+            if (state.addingTask) return;
+            
+            const title = elements.taskTitle.value.trim();
+            
+            if (!title) {
+                showValidationError('Task title is required');
+                showToast('Please enter a task title', 'error');
+                return;
+            }
+            
+            addTask(title);
+            elements.taskTitle.value = '';
+        }
+
+        function handleSystemThemeChange(e) {
+            const newSystemPreference = e.matches ? 'light' : 'dark';
+            state.systemPreference = newSystemPreference;
+            
+            // If user hasn't manually set a theme, follow system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (!savedTheme) {
+                applyTheme(newSystemPreference);
+            }
+        }
+
+        function handleThemeToggleKeydown(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        }
+
+        function handleTaskTitleInput() {
+            clearValidationError();
+        }
+
+        function handleToastClose() {
+            hideToast();
+        }
+
+        function handleToastKeydown(e) {
+            if (e.key === 'Escape') {
+                hideToast();
+            }
+        }
+
+        // Global functions for inline event handlers
+        window.retryTask = retryTask;
+        window.deleteTask = deleteTask;
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load data from storage
+            loadTasksFromStorage();
+            
+            // Initialize theme
+            state.systemPreference = detectSystemTheme();
+            const initialTheme = loadThemeFromStorage();
+            applyTheme(initialTheme);
+            
+            // Set up theme toggle
+            elements.themeToggle.addEventListener('click', toggleTheme);
+            elements.themeToggle.addEventListener('keydown', handleThemeToggleKeydown);
+            
+            // Listen for system theme changes
+            if (window.matchMedia) {
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+                mediaQuery.addListener(handleSystemThemeChange);
+            }
+            
+            // Set up form submission and validation
+            elements.taskForm.addEventListener('submit', handleTaskFormSubmit);
+            elements.taskTitle.addEventListener('input', handleTaskTitleInput);
+            
+            // Set up toast close functionality
+            elements.toastClose.addEventListener('click', handleToastClose);
+            elements.toast.addEventListener('keydown', handleToastKeydown);
+            
+            // Initial render
+            renderTasks();
+            
+            // Show welcome message
+            setTimeout(() => {
+                showToast('Welcome to Retry! Toggle themes with the button above.', 'success');
+            }, 500);
+        });
+    </script>
 </body>
 </html>
