@@ -7,6 +7,10 @@
 .bs-top{padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
 .bs-info .bs-title{font-family:var(--fh);font-size:17px;font-weight:800}
 .bs-info .bs-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px}
+.pipe-toggle{display:flex;gap:2px;margin-top:6px;background:rgba(255,255,255,.06);border-radius:8px;padding:2px;width:fit-content}
+.pt-btn{padding:4px 12px;border-radius:6px;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:var(--fh);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.pt-btn.active{background:var(--g1);color:#fff;box-shadow:0 2px 8px rgba(255,60,172,.3)}
+.pt-btn:not(.active):hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.06)}
 .bs-actions{display:flex;gap:6px}
 .bs-btn{width:30px;height:30px;border-radius:9px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .bs-btn:hover{background:rgba(255,255,255,.1);color:#fff}

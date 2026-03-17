@@ -323,6 +323,22 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
   return attemptStream(0)
 }
 
+export function callClaudeAudit(code) {
+  return callClaudeRaw(SYS_AUDIT, 'Audit:\n\n' + code.slice(0, 40000), 2000)
+    .then(function (raw) {
+      try { var p = JSON.parse(raw); return Array.isArray(p) ? p : [] }
+      catch (e) { return [] }
+    })
+}
+
+export function callClaudeEnhanceReview(code) {
+  return callClaudeRaw(SYS_ENHANCE_REVIEW, 'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 40000), 3000)
+    .then(function (raw) {
+      try { var p = JSON.parse(raw); return { enhancements: Array.isArray(p.enhancements) ? p.enhancements : [], bugs: Array.isArray(p.bugs) ? p.bugs : [] } }
+      catch (e) { return { enhancements: [], bugs: [] } }
+    })
+}
+
 export function callGPTRawMultiTurn(sys, messages, maxTokens) {
   maxTokens = maxTokens || 4000
   return fetchWithRetry('https://api.openai.com/v1/chat/completions', {

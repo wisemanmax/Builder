@@ -6,6 +6,7 @@ import { addMsg, resetChat } from '../components/message.js'
 import { renderThoughtSelector } from '../components/thought-card.js'
 import { getPreviewPid, getApprovalGates } from '../components/approval-card.js'
 import { runPipeline } from '../pipelines/build-pipeline.js'
+import { runPipeline2 } from '../pipelines/build-pipeline2.js'
 import { runSelfUpdatePipeline } from '../pipelines/builder-plus.js'
 
 // Pending images for next message (array of {base64, mediaType, name})
@@ -65,7 +66,8 @@ export function openBuilder(editId) {
   ST.pendingColor = app ? app.ci : Math.floor(Math.random() * GRADS.length)
   $('emoji-pick-btn').textContent = ST.pendingIcon
   $('bs-title').textContent = app ? 'Editing: ' + app.name : 'Build an App'
-  $('bs-sub').textContent = app ? 'Describe changes' : 'Branch \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Preview \u2192 Approve \u2192 Merge'
+  _updatePipelineSub(app)
+  _syncToggle()
   $('bs-proj-btn').style.display = app ? 'flex' : 'none'
   var nameRow = $('name-row'), nameInp = $('app-name-input')
   if (app) { nameRow.style.display = 'none'; nameInp.value = '' }
@@ -142,5 +144,43 @@ export function sendMsg() {
   var customName = $('app-name-input').value.trim()
   $('app-name-input').value = ''
   var existing = ST.activeAppId ? ST.apps.find(function (a) { return a.id === ST.activeAppId }) : null
-  runPipeline(text, existing, customName, images)
+  if (ST.pipelineMode === 'builder2') {
+    runPipeline2(text, existing, customName, images)
+  } else {
+    runPipeline(text, existing, customName, images)
+  }
+}
+
+// Pipeline mode toggle helpers
+function _updatePipelineSub(app) {
+  if (app) {
+    $('bs-sub').textContent = 'Describe changes'
+  } else if (ST.pipelineMode === 'builder2') {
+    $('bs-sub').textContent = 'Plan \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Push \u2192 Preview \u2192 Approve \u2192 Merge'
+  } else {
+    $('bs-sub').textContent = 'Branch \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Preview \u2192 Approve \u2192 Merge'
+  }
+}
+
+function _syncToggle() {
+  var btns = document.querySelectorAll('#pipe-toggle .pt-btn')
+  for (var i = 0; i < btns.length; i++) {
+    if (btns[i].dataset.mode === ST.pipelineMode) btns[i].classList.add('active')
+    else btns[i].classList.remove('active')
+  }
+}
+
+export function initPipelineToggle() {
+  var toggle = $('pipe-toggle')
+  if (!toggle) return
+  toggle.addEventListener('click', function (e) {
+    var btn = e.target.closest('.pt-btn')
+    if (!btn || !btn.dataset.mode) return
+    ST.pipelineMode = btn.dataset.mode
+    try { localStorage.setItem('bldr_pipeline', ST.pipelineMode) } catch (x) {}
+    _syncToggle()
+    var app = ST.activeAppId ? ST.apps.find(function (a) { return a.id === ST.activeAppId }) : null
+    _updatePipelineSub(app)
+  })
+  _syncToggle()
 }
