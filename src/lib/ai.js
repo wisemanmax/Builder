@@ -1,7 +1,7 @@
 import { ST } from './state.js'
 import { scrubKeys } from './utils.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
-import { SYS_AUDIT } from '../config/prompts.js'
+import { SYS_AUDIT, SYS_ENHANCE_REVIEW } from '../config/prompts.js'
 
 export function fetchWithTimeout(url, opts, ms) {
   ms = ms || 120000
@@ -71,6 +71,24 @@ export function callClaudeRaw(sys, msg, maxTokens) {
   }).catch(function (e) {
     if (e.message && e.message.indexOf('Claude:') === 0) throw e
     throw new Error(classifyFetchError(e, 'Claude'))
+  })
+}
+
+export function callGPTReview(code) {
+  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 3000, temperature: 0.2, messages: [{ role: 'system', content: SYS_ENHANCE_REVIEW }, { role: 'user', content: 'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 20000) }] }),
+  }, 60000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '{}'
+    raw = raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+    try { var p = JSON.parse(raw); return { enhancements: Array.isArray(p.enhancements) ? p.enhancements : [], bugs: Array.isArray(p.bugs) ? p.bugs : [] } } catch (e) { return { enhancements: [], bugs: [] } }
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('GPT:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'GPT'))
   })
 }
 
