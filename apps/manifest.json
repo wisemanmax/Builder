@@ -1,25 +1,8 @@
 [
   {
-    "id": "budget-tracker-2",
-    "name": "Budget tracker 2",
-    "icon": "🎯",
-    "ci": 3,
-    "url": "https://Wisemanmax.github.io/Builder/apps/budget-tracker-2.html",
-    "path": "apps/budget-tracker-2.html",
-    "prompts": [
-      {
-        "ts": "2026-03-17T14:54:50.556Z",
-        "type": "initial",
-        "text": "A modern budget tracker"
-      }
-    ],
-    "createdAt": "2026-03-17T14:54:50.556Z",
-    "updatedAt": "2026-03-17T14:54:50.556Z"
-  },
-  {
     "id": "2048bw",
     "name": "2048BW",
-    "icon": "🎯",
+    "icon": "ð¯",
     "ci": 1,
     "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
     "path": "apps/2048bw.html",
@@ -37,5 +20,137 @@
     ],
     "createdAt": "2026-03-17T00:39:04.950Z",
     "updatedAt": "2026-03-17T05:12:37.534Z"
+  },
+  {
+    "id": "amms6xfi60w2",
+    "name": "amms6xfi60w2",
+    "icon": "📦",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/amms6xfi60w2.html",
+    "path": "apps/amms6xfi60w2.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.671Z",
+    "updatedAt": "2026-03-17T20:36:01.671Z"
+  },
+  {
+    "id": "amms8jy7rj07",
+    "name": "amms8jy7rj07",
+    "icon": "📦",
+    "ci": 6,
+    "url": "https://Wisemanmax.github.io/Builder/apps/amms8jy7rj07.html",
+    "path": "apps/amms8jy7rj07.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.633Z",
+    "updatedAt": "2026-03-17T20:36:01.633Z"
+  },
+  {
+    "id": "ammshyw3prp9",
+    "name": "ammshyw3prp9",
+    "icon": "📦",
+    "ci": 7,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammshyw3prp9.html",
+    "path": "apps/ammshyw3prp9.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.535Z",
+    "updatedAt": "2026-03-17T20:36:01.535Z"
+  },
+  {
+    "id": "ammsi8x61fxu",
+    "name": "ammsi8x61fxu",
+    "icon": "📦",
+    "ci": 6,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammsi8x61fxu.html",
+    "path": "apps/ammsi8x61fxu.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.707Z",
+    "updatedAt": "2026-03-17T20:36:01.707Z"
+  },
+  {
+    "id": "ammsjb9o0dux",
+    "name": "ammsjb9o0dux",
+    "icon": "📦",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammsjb9o0dux.html",
+    "path": "apps/ammsjb9o0dux.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.479Z",
+    "updatedAt": "2026-03-17T20:36:01.479Z"
+  },
+  {
+    "id": "ammt9qh612ux",
+    "name": "ammt9qh612ux",
+    "icon": "📦",
+    "ci": 3,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammt9qh612ux.html",
+    "path": "apps/ammt9qh612ux.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.481Z",
+    "updatedAt": "2026-03-17T20:36:01.481Z"
+  },
+  {
+    "id": "ammteubbmev4",
+    "name": "ammteubbmev4",
+    "icon": "📦",
+    "ci": 6,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammteubbmev4.html",
+    "path": "apps/ammteubbmev4.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.787Z",
+    "updatedAt": "2026-03-17T20:36:01.787Z"
+  },
+  {
+    "id": "ammtgse7utaw",
+    "name": "ammtgse7utaw",
+    "icon": "📦",
+    "ci": 6,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammtgse7utaw.html",
+    "path": "apps/ammtgse7utaw.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.480Z",
+    "updatedAt": "2026-03-17T20:36:01.480Z"
+  },
+  {
+    "id": "recipe-app",
+    "name": "recipe-app",
+    "icon": "📦",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/recipe-app.html",
+    "path": "apps/recipe-app.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.837Z",
+    "updatedAt": "2026-03-17T20:36:01.837Z"
+  },
+  {
+    "id": "retry",
+    "name": "retry",
+    "icon": "📦",
+    "ci": 4,
+    "url": "https://Wisemanmax.github.io/Builder/apps/retry.html",
+    "path": "apps/retry.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.579Z",
+    "updatedAt": "2026-03-17T20:36:01.579Z"
+  },
+  {
+    "id": "ti84bill",
+    "name": "ti84bill",
+    "icon": "📦",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/ti84bill.html",
+    "path": "apps/ti84bill.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.616Z",
+    "updatedAt": "2026-03-17T20:36:01.616Z"
+  },
+  {
+    "id": "waterapp",
+    "name": "waterapp",
+    "icon": "📦",
+    "ci": 0,
+    "url": "https://Wisemanmax.github.io/Builder/apps/waterapp.html",
+    "path": "apps/waterapp.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.728Z",
+    "updatedAt": "2026-03-17T20:36:01.728Z"
   }
 ]
