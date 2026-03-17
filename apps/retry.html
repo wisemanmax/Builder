@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Loan Info - Complete Guide to Student Loans</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --accent: #0ea5e9;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border: #cbd5e1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 8px;
+            --radius-lg: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: clamp(14px, 1vw, 16px);
+        }
+        
+        .container {
+            max-width: min(1200px, 100% - 2rem);
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            min-height: 64px;
+            gap: 1rem;
+        }
+        
+        .logo {
+            font-size: clamp(18px, 2vw, 24px);
+            font-weight: 700;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        
+        .nav-menu {
+            display: none;
+            list-style: none;
+            gap: 1.5rem;
+            margin: 0;
+        }
+        
+        .nav-menu a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 200ms ease;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .nav-menu a:hover, .nav-menu a.active {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            transform: translateY(-1px);
+        }
+        
+        .nav-menu a:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        .mobile-menu-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            min-height: 44px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 200ms ease;
+            flex-shrink: 0;
+        }
+        
+        .mobile-menu-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+        }
+        
+        .mobile-menu-btn:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 200ms ease;
+        }
+        
+        .mobile-menu.open {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+            min-height: 44px;
+            transition: all 200ms ease;
+        }
+        
+        .mobile-menu a:hover, .mobile-menu a.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+        
+        .mobile-menu a:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        /* Search */
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: min(280px, 100%);
+            flex-shrink: 0;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 3.5rem 0.75rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 16px;
+            min-height: 44px;
+            transition: all 200ms ease;
+        }
+        
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: var(--primary);
+            border: none;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            color: white;
+            cursor: pointer;
+            padding: 0 1rem;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 200ms ease;
+        }
+        
+        .search-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .search-btn:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        /* Main Content */
+        main {
+            min-height: calc(100vh - 64px);
+        }
+        
+        .section {
+            display: none;
+            padding: 2rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 300ms ease;
+        }
+        
+        .section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+        }
+        
+        .hero h1 {
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: clamp(16px, 1.5vw, 20px);
+            color: var(--text-secondary);
+            max-width: min(600px, 100%);
+            margin: 0 auto 2rem;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 200ms ease;
+            font-size: 16px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 300ms ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 300ms ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+        
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 24px;
+            color: white;
+            transition: all 200ms ease;
+        }
+        
+        .card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        /* Calculator */
+        .calculator {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 16px;
+            min-height: 44px;
+            transition: all 200ms ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .calculator-results {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            position: relative;
+            border: 1px solid var(--border);
+            transition: all 200ms ease;
+        }
+        
+        .calculator-results.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .calculator-results.loading::after {
+            content: 'Calculating...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 14px;
+            color: var(--text-secondary);
+            z-index: 1;
+            border: 1px solid var(--border);
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .form-help {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        /* FAQ */
+        .faq-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 200ms ease;
+        }
+        
+        .faq-item:hover {
+            border-color: var(--primary);
+        }
+        
+        .faq-question {
+            width: 100%;
+            padding: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            text-align: left;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 60px;
+            transition: all 200ms ease;
+        }
+        
+        .faq-question:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .faq-question:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: -2px;
+        }
+        
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 300ms ease;
+        }
+        
+        .faq-item.open .faq-answer {
+            max-height: 500px;
+            opacity: 1;
+        }
+        
+        .faq-item.open .faq-question::after {
+            transform: rotate(180deg);
+        }
+        
+        .faq-question::after {
+            content: '▼';
+            transition: transform 300ms ease;
+            flex-shrink: 0;
+            color: var(--primary);
+        }
+        
+        /* Testimonials */
+        .testimonial {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 200ms ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .testimonial::before {
+            content: '"';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.1;
+            font-family: serif;
+        }
+        
+        .testimonial:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .testimonial-content {
+            font-style: italic;
+            font-size: 18px;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .testimonial-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+        
+        .testimonial-info p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        /* Comparison Table */
+        .comparison-table {
+            overflow-x: auto;
+            margin: 2rem 0;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        
+        table {
+            width: 100%;
+            min-width: min(600px, 100%);
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        td {
+            color: var(--text-secondary);
+        }
+        
+        tr:hover {
+            background: var(--bg-primary);
+        }
+        
+        /* Resources */
+        .resource-link {
+            display: block;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 200ms ease;
+            min-height: 44px;
+        }
+        
+        .resource-link:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .resource-link:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        .resource-link h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .resource-link p {
+            color: var(--text-secondary);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 300ms ease;
+            z-index: 1000;
+            max-width: calc(100vw - 4rem);
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.warning {
+            background: var(--warning);
+        }
+        
+        .toast.error {
+            background: var(--error);
+        }
+        
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 479px) {
+            .container {
+                padding: 0 0.5rem;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .search-container {
+                order: 3;
+                flex-basis: 100%;
+                max-width: 100%;
+                margin-top: 0.5rem;
+            }
+            
+            .hero {
+                padding: 2rem 1rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        @media (min-width: 480px) {
+            .search-container {
+                width: auto;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .nav-menu {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: none;
+            }
+            
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
+            }
+            
+            nav {
+                flex-wrap: nowrap;
+            }
+            
+            .search-container {
+                order: initial;
+                flex-basis: auto;
+                margin-top: 0;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container {
+                padding: 0 2rem;
+            }
+            
+            .hero {
+                padding: 6rem 0;
+            }
+            
+            .section {
+                padding: 4rem 0;
+            }
+        }
+        
+        /* Lazy Loading */
+        .lazy-load {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 300ms ease;
+        }
+        
+        .lazy-load.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* High Contrast Mode Support */
+        @media (prefers-contrast: high) {
+            :root {
+                --border: #000000;
+                --text-secondary: #000000;
+                --bg-secondary: #ffffff;
+                --bg-tertiary: #f0f0f0;
+            }
+        }
+        
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">StudentLoanInfo</div>
+            <ul class="nav-menu" id="navMenu" role="navigation" aria-label="Main navigation">
+                <li><a href="#home" class="nav-link active" role="menuitem" aria-label="Go to Home section">Home</a></li>
+                <li><a href="#loan-types" class="nav-link" role="menuitem" aria-label="Go to Loan Types section">Loan Types</a></li>
+                <li><a href="#calculator" class="nav-link" role="menuitem" aria-label="Go to Calculator section">Calculator</a></li>
+                <li><a href="#process" class="nav-link" role="menuitem" aria-label="Go to Process section">Process</a></li>
+                <li><a href="#comparison" class="nav-link" role="menuitem" aria-label="Go to Comparison section">Compare</a></li>
+                <li><a href="#faq" class="nav-link" role="menuitem" aria-label="Go to FAQ section">FAQ</a></li>
+                <li><a href="#testimonials" class="nav-link" role="menuitem" aria-label="Go to Reviews section">Reviews</a></li>
+                <li><a href="#resources" class="nav-link" role="menuitem" aria-label="Go to Resources section">Resources</a></li>
+            </ul>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search..." id="searchInput" aria-label="Search site content">
+                <button class="search-btn" id="searchBtn" aria-label="Perform search">🔍</button>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu" aria-expanded="false">☰</button>
+            <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
+                <a href="#home" class="nav-link active" role="menuitem" aria-label="Go to Home section">Home</a>
+                <a href="#loan-types" class="nav-link" role="menuitem" aria-label="Go to Loan Types section">Loan Types</a>
+                <a href="#calculator" class="nav-link" role="menuitem" aria-label="Go to Calculator section">Calculator</a>
+                <a href="#process" class="nav-link" role="menuitem" aria-label="Go to Process section">Process</a>
+                <a href="#comparison" class="nav-link" role="menuitem" aria-label="Go to Comparison section">Compare</a>
+                <a href="#faq" class="nav-link" role="menuitem" aria-label="Go to FAQ section">FAQ</a>
+                <a href="#testimonials" class="nav-link" role="menuitem" aria-label="Go to Reviews section">Reviews</a>
+                <a href="#resources" class="nav-link" role="menuitem" aria-label="Go to Resources section">Resources</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <div class="container">
+                    <h1>Your Complete Guide to Student Loans</h1>
+                    <p>Navigate your educational financing with confidence. Get expert insights, compare options, and make informed decisions about your future.</p>
+                    <div class="cta-buttons">
+                        <a href="#calculator" class="btn btn-primary nav-link" role="button" aria-label="Go to loan calculator">Calculate Loans</a>
+                        <a href="#loan-types" class="btn btn-secondary nav-link" role="button" aria-label="Explore loan options">Explore Options</a>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="cards-grid">
+                    <div class="card lazy-load">
+                        <div class="card-icon">🏦</div>
+                        <h3>Federal Loans</h3>
+                        <p>Learn about government-backed loans with fixed rates and flexible repayment options.</p>
+                        <a href="#loan-types" class="btn btn-secondary nav-link" role="button" aria-label="Learn more about federal loans">Learn More</a>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">📊</div>
+                        <h3>Loan Calculator</h3>
+                        <p>Calculate monthly payments, interest costs, and repayment schedules for different loan amounts.</p>
+                        <a href="#calculator" class="btn btn-secondary nav-link" role="button" aria-label="Use loan calculator">Calculate</a>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">📋</div>
+                        <h3>Application Process</h3>
+                        <p>Step-by-step guidance through the loan application process and required documentation.</p>
+                        <a href="#process" class="btn btn-secondary nav-link" role="button" aria-label="Learn about application process">Get Started</a>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">⚖️</div>
+                        <h3>Compare Options</h3>
+                        <p>Side-by-side comparison of federal vs private loans to help you choose the best option.</p>
+                        <a href="#comparison" class="btn btn-secondary nav-link" role="button" aria-label="Compare loan options">Compare</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loan Types Section -->
+        <section id="loan-types" class="section">
+            <div class="container">
+                <h2>Types of Student Loans</h2>
+                <div class="cards-grid">
+                    <div class="card lazy-load">
+                        <div class="card-icon">🇺🇸</div>
+                        <h3>Federal Direct Subsidized Loans</h3>
+                        <p><strong>For:</strong> Undergraduate students with financial need</p>
+                        <p><strong>Interest:</strong> Government pays interest while in school</p>
+                        <p><strong>Rate:</strong> 5.50% (2023-24)</p>
+                        <p><strong>Limit:</strong> $3,500-$5,500 annually</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">📚</div>
+                        <h3>Federal Direct Unsubsidized Loans</h3>
+                        <p><strong>For:</strong> All undergraduate and graduate students</p>
+                        <p><strong>Interest:</strong> Accrues from disbursement</p>
+                        <p><strong>Rate:</strong> 5.50% undergrad, 7.05% grad (2023-24)</p>
+                        <p><strong>Limit:</strong> Higher limits than subsidized loans</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">👨‍👩‍👧‍👦</div>
+                        <h3>Federal PLUS Loans</h3>
+                        <p><strong>For:</strong> Parents of undergraduates and graduate students</p>
+                        <p><strong>Interest:</strong> 8.05% (2023-24)</p>
+                        <p><strong>Limit:</strong> Up to cost of attendance minus other aid</p>
+                        <p><strong>Credit:</strong> Credit check required</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">🏢</div>
+                        <h3>Private Student Loans</h3>
+                        <p><strong>For:</strong> Students who need additional funding</p>
+                        <p><strong>Interest:</strong> Variable or fixed rates (varies by lender)</p>
+                        <p><strong>Rate:</strong> 3.22%-15.49% (varies by creditworthiness)</p>
+                        <p><strong>Limit:</strong> Up to cost of attendance</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">🎓</div>
+                        <h3>Perkins Loans (Discontinued)</h3>
+                        <p><strong>Status:</strong> No longer available for new borrowers</p>
+                        <p><strong>For:</strong> Students with exceptional financial need</p>
+                        <p><strong>Interest:</strong> 5% fixed rate</p>
+                        <p><strong>Note:</strong> Still in repayment for existing borrowers</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">💼</div>
+                        <h3>State & Institutional Loans</h3>
+                        <p><strong>For:</strong> Students at participating schools</p>
+                        <p><strong>Interest:</strong> Varies by program</p>
+                        <p><strong>Benefits:</strong> Often favorable terms</p>
+                        <p><strong>Availability:</strong> Limited to specific states/schools</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculator Section -->
+        <section id="calculator" class="section">
+            <div class="container">
+                <h2>Student Loan Calculator</h2>
+                <div class="calculator lazy-load">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 2rem;">
+                        <div>
+                            <div class="form-group">
+                                <label for="loanAmount">Loan Amount ($)</label>
+                                <input type="number" id="loanAmount" value="10000" min="1000" step="500" aria-describedby="loanAmountHelp">
+                                <div id="loanAmountHelp" class="form-help">Enter the total amount you plan to borrow</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="interestRate">Annual Interest Rate (%)</label>
+                                <input type="number" id="interestRate" value="5.5" min="0" max="20" step="0.1" aria-describedby="interestRateHelp">
+                                <div id="interestRateHelp" class="form-help">Current federal rates: 5.50% undergrad, 7.05% grad</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="loanTerm">Repayment Term (years)</label>
+                                <select id="loanTerm" aria-describedby="loanTermHelp">
+                                    <option value="10" selected>10 years</option>
+                                    <option value="15">15 years</option>
+                                    <option value="20">20 years</option>
+                                    <option value="25">25 years</option>
+                                </select>
+                                <div id="loanTermHelp" class="form-help">Standard repayment is 10 years</div>
+                            </div>
+                            <button class="btn btn-primary" onclick="calculateLoan()" aria-describedby="calculateHelp">Calculate</button>
+                            <div id="calculateHelp" class="form-help">Results update automatically as you change values</div>
+                        </div>
+                        <div class="calculator-results" id="calculatorResults">
+                            <h3>Loan Details</h3>
+                            <div class="result-item">
+                                <span>Monthly Payment</span>
+                                <span class="result-value" id="monthlyPayment">$106.07</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Total Interest</span>
+                                <span class="result-value" id="totalInterest">$2,728.40</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Total Amount</span>
+                                <span class="result-value" id="totalAmount">$12,728.40</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Interest as % of Principal</span>
+                                <span class="result-value" id="interestPercentage">27.28%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Application Process Section -->
+        <section id="process" class="section">
+            <div class="container">
+                <h2>Application Process Guide</h2>
+                <div class="cards-grid">
+                    <div class="card lazy-load">
+                        <div class="card-icon">1️⃣</div>
+                        <h3>Complete FAFSA</h3>
+                        <p>Fill out the Free Application for Federal Student Aid (FAFSA) online. This determines your eligibility for federal aid including grants, work-study, and loans.</p>
+                        <p><strong>Deadline:</strong> June 30 of the award year</p>
+                        <p><strong>Required:</strong> Tax returns, bank statements, Social Security card</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">2️⃣</div>
+                        <h3>Review Aid Offers</h3>
+                        <p>Schools will send financial aid award letters detailing grants, scholarships, work-study, and loan options. Compare offers carefully.</p>
+                        <p><strong>Consider:</strong> Total cost, loan amounts, interest rates</p>
+                        <p><strong>Timeline:</strong> Typically received 2-4 weeks after admission</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">3️⃣</div>
+                        <h3>Accept Loans</h3>
+                        <p>Accept only what you need. You can accept partial amounts or decline loans entirely. Federal loans are typically better than private loans.</p>
+                        <p><strong>Priority:</strong> Subsidized → Unsubsidized → PLUS → Private</p>
+                        <p><strong>Tip:</strong> Borrow conservatively to minimize debt</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">4️⃣</div>
+                        <h3>Complete Entrance Counseling</h3>
+                        <p>First-time federal loan borrowers must complete online entrance counseling to understand loan terms and responsibilities.</p>
+                        <p><strong>Platform:</strong> StudentLoans.gov</p>
+                        <p><strong>Duration:</strong> About 30 minutes</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">5️⃣</div>
+                        <h3>Sign Master Promissory Note</h3>
+                        <p>The MPN is a legal document where you promise to repay your loans. One MPN covers multiple loans during your education.</p>
+                        <p><strong>Location:</strong> StudentLoans.gov</p>
+                        <p><strong>Valid:</strong> Up to 10 years for multiple loans</p>
+                    </div>
+                    <div class="card lazy-load">
+                        <div class="card-icon">6️⃣</div>
+                        <h3>Receive Funds</h3>
+                        <p>Loan funds are sent directly to your school and applied to tuition, fees, and room & board. Any remaining amount is refunded to you.</p>
+                        <p><strong>Timing:</strong> Usually at beginning of each term</p>
+                        <p><strong>Use:</strong> Education-related expenses only</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Section -->
+        <section id="comparison" class="section">
+            <div class="container">
+                <h2>Federal vs Private Loans Comparison</h2>
+                <div class="comparison-table lazy-load">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Federal Loans</th>
+                                <th>Private Loans</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Interest Rates</td>
+                                <td>Fixed rates set by Congress</td>
+                                <td>Variable or fixed, set by lender</td>
+                            </tr>
+                            <tr>
+                                <td>Credit Check</td>
+                                <td>Not required (except PLUS loans)</td>
+                                <td>Required</td>
+                            </tr>
+                            <tr>
+                                <td>Borrowing Limits</td>
+                                <td>Set annual and aggregate limits</td>
+                                <td>Up to cost of attendance</td>
+                            </tr>
+                            <tr>
+                                <td>Repayment Options</td>
+                                <td>Multiple plans including income-driven</td>
+                                <td>Limited options, varies by lender</td>
+                            </tr>
+                            <tr>
+                                <td>Grace Period</td>
+                                <td>6 months after graduation</td>
+                                <td>Varies (0-9 months typically)</td>
+                            </tr>
+                            <tr>
+                                <td>Forbearance/Deferment</td>
+                                <td>Available in financial hardship</td>
+                                <td>Limited, varies by lender</td>
+                            </tr>
+                            <tr>
+                                <td>Loan Forgiveness</td>
+                                <td>Available for qualifying careers</td>
+                                <td>Generally not available</td>
+                            </tr>
+                            <tr>
+                                <td>Death/Disability</td>
+                                <td>Loan discharge available</td>
+                                <td>Varies by lender</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 3rem;">
+                    <h3>Recommendation</h3>
+                    <div class="card lazy-load">
+                        <p style="font-size: 18px; margin-bottom: 1rem;"><strong>Always exhaust federal options first</strong> before considering private loans. Federal loans offer better protections and more flexible repayment options.</p>
+                        <p><strong>Borrowing Order:</strong></p>
+                        <ol style="margin-left: 2rem; color: var(--text-secondary);">
+                            <li>Grants and scholarships (free money)</li>
+                            <li>Federal Direct Subsidized Loans</li>
+                            <li>Federal Direct Unsubsidized Loans</li>
+                            <li>Federal PLUS Loans (parents/graduate students)</li>
+                            <li>Private loans (as a last resort)</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="section">
+            <div class="container">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-item lazy-load">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq1" tabindex="0">What is the difference between subsidized and unsubsidized loans?</button>
+                    <div class="faq-answer" id="faq1">
+                        <p>Subsidized loans are need-based, and the government pays the interest while you're in school at least half-time, during grace periods, and deferment. Unsubsidized loans are available regardless of financial need, but interest accrues from the time the loan is disbursed.</p>
+                    </div>
+                </div>
+                <div class="faq-item lazy-load">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq2" tabindex="0">How much can I borrow in student loans?</button>
+                    <div class="faq-answer" id="faq2">
+                        <p>Federal loan limits depend on your year in school and dependency status. Dependent undergraduates can borrow $5,500-$7,500 annually in federal loans. Independent students and graduate students have higher limits. Private loan limits are typically up to the cost of attendance.</p>
+                    </div>
+                </div>
+                <div class="faq-item lazy-load">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq3" tabindex="0">Do I need a cosigner for federal student loans?</button>
+                    <div class="faq-answer" id="faq3">
+                        <p>No, federal Direct Loans (subsidized and unsubsidized) do not require a cosigner or credit check. However, PLUS loans do require a credit check, and if you don't qualify, you may need an endorser (similar to a cosigner).</p>
+                    </div>
+                </div>
+                <div class="faq-item lazy-load">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq4" tabindex="0">When do I start repaying my student loans?</button>
+                    <div class="faq-answer" id="faq4">
+                        <p>Federal student loans typically have a 6-month grace period after you graduate, leave school, or drop below half-time enrollment. Private loan grace periods vary by lender. Interest may accrue during the grace period for unsubsidized and private loans.</p>
+                    </div>
+                </div>
+                <div class="faq-item lazy-load">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq5" tabindex="0">Can student loans be forgiven?</button>
+                    <div class="faq-answer" id="faq5">
+                        <p>Yes, federal loans offer several forgiveness programs including Public Service Loan Forgiveness (PSLF), Teacher Loan Forgiveness, and income-driven repayment plan forgiveness after 20-25 years of payments. Private loans generally do not offer forgiveness options.</p>
+                    </div>
+                </div>
+                <div class="faq-item lazy-load">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq6" tabindex="0">Should I pay interest while in school?</button>
+                    <div class="faq-answer" id="faq6">
+                        <p>If you can afford it, paying interest on unsubsidized loans while in school can save you money over the life of the loan. This prevents capitalization (interest being added to your principal balance) when you enter repayment.</p>
+                    </div>
+                </div>
+                <div class="faq-item lazy-load">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq7" tabindex="0">What happens if I can't make my loan payments?</button>
+                    <div class="faq-answer" id="faq7">
+                        <p>Contact your loan servicer immediately if you're having trouble making payments. Federal loans offer options like deferment, forbearance, and income-driven repayment plans. Defaulting on loans can severely damage your credit and make you ineligible for future financial aid.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="section">
+            <div class="container">
+                <h2>Student & Parent Reviews</h2>
+                <div class="testimonial lazy-load">
+                    <div class="testimonial-content">
+                        "The information on federal loan options helped me avoid taking out expensive private loans. I was able to complete my degree with much less debt than I originally thought I'd need."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">SJ</div>
+                        <div class="testimonial-info">
+                            <h4>Sarah Johnson</h4>
+                            <p>Biology Major, Class of 2023</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial lazy-load">
+                    <div class="testimonial-content">
+                        "As a parent, understanding the PLUS loan process was crucial. The step-by-step application guide made it much less intimidating, and we were able to help our daughter through college without financial stress."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">MR</div>
+                        <div class="testimonial-info">
+                            <h4>Michael Rodriguez</h4>
+                            <p>Parent, University of Texas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial lazy-load">
+                    <div class="testimonial-content">
+                        "The loan calculator helped me understand exactly what my monthly payments would be. I was able to make an informed decision about how much to borrow and chose a repayment plan that fits my budget."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">EL</div>
+                        <div class="testimonial-info">
+                            <h4>Emily Liu</h4>
+                            <p>Graduate Student, Engineering</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial lazy-load">
+                    <div class="testimonial-content">
+                        "I wish I had found this resource earlier! The comparison between federal and private loans saved me from making a costly mistake. Federal loans' income-driven repayment options are a lifesaver."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">DT</div>
+                        <div class="testimonial-info">
+                            <h4>David Thompson</h4>
+                            <p>MBA Student, Class of 2024</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial lazy-load">
+                    <div class="testimonial-content">
+                        "The FAFSA process seemed overwhelming, but the detailed guide made it manageable. I completed it in one sitting and received more aid than I expected. Thank you for making this so clear!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">AC</div>
+                        <div class="testimonial-info">
+                            <h4>Ashley Chen</h4>
+                            <p>First-year Student, Psychology</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial lazy-load">
+                    <div class="testimonial-content">
+                        "Understanding loan forgiveness options early in my career helped me choose a path in public service. The detailed explanations of PSLF requirements gave me confidence in my decision."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">JW</div>
+                        <div class="testimonial-info">
+                            <h4>James Wilson</h4>
+                            <p>Teacher, Social Work Graduate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section id="resources" class="section">
+            <div class="container">
+                <h2>Helpful Resources</h2>
+                <div class="cards-grid">
+                    <div class="card lazy-load">
+                        <h3>Official Government Resources</h3>
+                        <div style="margin-top: 1rem;">
+                            <a href="https://studentaid.gov" class="resource-link" target="_blank" rel="noopener" aria-label="Visit Federal Student Aid website">
+                                <h4>Federal Student Aid</h4>
+                                <p>Official U.S. government site for federal student aid information, FAFSA, and loan management.</p>
+                            </a>
+                            <a href="https://studentloans.gov" class="resource-link" target="_blank" rel="noopener" aria-label="Visit StudentLoans.gov website">
+                                <h4>StudentLoans.gov</h4>
+                                <p>Complete entrance counseling, sign promissory notes, and manage your federal student loans.</p>
+                            </a>
+                            <a href="https://nslds.ed.gov" class="resource-link" target="_blank" rel="noopener" aria-label="Visit National Student Loan Data System">
+                                <h4>National Student Loan Data System</h4>
+                                <p>View your complete federal student aid history in one centralized database.</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card lazy-load">
+                        <h3>Financial Literacy</h3>
+                        <div style="margin-top: 1rem;">
+                            <a href="https://mappingyourfuture.org" class="resource-link" target="_blank" rel="noopener" aria-label="Visit Mapping Your Future website">
+                                <h4>Mapping Your Future</h4>
+                                <p>Nonprofit providing career, college, and financial aid guidance for students and families.</p>
+                            </a>
+                            <a href="https://studentloanherox.com" class="resource-link" target="_blank" rel="noopener" aria-label="Visit Student Loan Hero website">
+                                <h4>Student Loan Hero</h4>
+                                <p>Tools, calculators, and advice for managing student loan debt and repayment strategies.</p>
+                            </a>
+                            <a href="https://finaid.org" class="resource-link" target="_blank" rel="noopener" aria-label="Visit FinAid website">
+                                <h4>FinAid</h4>
+                                <p>Comprehensive guide to student financial aid, scholarships, and education financing.</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card lazy-load">
+                        <h3>Scholarship Resources</h3>
+                        <div style="margin-top: 1rem;">
+                            <a href="https://www.fastweb.com" class="resource-link" target="_blank" rel="noopener" aria-label="Visit Fastweb website">
+                                <h4>Fastweb</h4>
+                                <p>Free scholarship search engine with personalized scholarship matching.</p>
+                            </a>
+                            <a href="https://www.scholarships.com" class="resource-link" target="_blank" rel="noopener" aria-label="Visit Scholarships.com website">
+                                <h4>Scholarships.com</h4>
+                                <p>Database of scholarships, grants, and financial aid opportunities.</p>
+                            </a>
+                            <a href="https://www.collegebound.net" class="resource-link" target="_blank" rel="noopener" aria-label="Visit College Bound Network website">
+                                <h4>College Bound Network</h4>
+                                <p>Scholarship search and college planning resources for students and families.</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 3rem;">
+                    <h3>Emergency Contacts</h3>
+                    <div class="card lazy-load">
+                        <p><strong>Federal Student Aid Information Center:</strong><br>
+                        1-800-433-3243 (TTY: 1-800-730-8913)</p>
+                        <p><strong>Hours:</strong> Monday-Friday, 8:00 AM - 11:00 PM ET</p>
+                        <p style="margin-top: 1rem;"><strong>For loan servicing issues:</strong><br>
+                        Contact your loan servicer directly (information available on StudentLoans.gov)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+    <script>
+        // Application State
+        const state = {
+            currentSection: 'home',
+            searchResults: [],
+            calculatorData: {
+                amount: 10000,
+                rate: 5.5,
+                term: 10
+            },
+            faqOpenItems: new Set(),
+            isCalculating: false
+        };
+
+        // DOM Elements
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const toast = document.getElementById('toast');
+
+        // Navigation Handler with smooth transitions and focus management
+        function handleNavigation(e) {
+            e.preventDefault();
+            const targetId = e.target.getAttribute('href').substring(1);
+            
+            // Add fade out transition
+            const currentSection = document.querySelector('.section.active');
+            if (currentSection) {
+                currentSection.style.opacity = '0';
+                currentSection.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    showSection(targetId);
+                }, 150);
+            } else {
+                showSection(targetId);
+            }
+            
+            // Close mobile menu with animation
+            if (mobileMenu.classList.contains('open')) {
+                mobileMenu.classList.remove('open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileMenuBtn.innerHTML = '☰';
+            }
+            
+            // Update active states
+            navLinks.forEach(link => link.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            // Update mobile nav active states
+            const mobileLinks = document.querySelectorAll('#mobileMenu .nav-link');
+            mobileLinks.forEach(link => link.classList.remove('active'));
+            document.querySelector(`#mobileMenu [href="#${targetId}"]`)?.classList.add('active');
+        }
+
+        // Show Section with smooth transitions and focus management
+        function showSection(sectionId) {
+            sections.forEach(section => {
+                section.classList.remove('active');
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+            });
+            
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                
+                // Trigger reflow
+                targetSection.offsetHeight;
+                
+                // Animate in
+                setTimeout(() => {
+                    targetSection.style.opacity = '1';
+                    targetSection.style.transform = 'translateY(0)';
+                    
+                    // Focus management - focus the section heading for screen readers
+                    const heading = targetSection.querySelector('h1, h2');
+                    if (heading) {
+                        heading.setAttribute('tabindex', '-1');
+                        heading.focus();
+                        // Remove tabindex after focus to prevent tab navigation issues
+                        setTimeout(() => heading.removeAttribute('tabindex'), 100);
+                    }
+                }, 50);
+            }
+            
+            state.currentSection = sectionId;
+            
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Update localStorage
+            try {
+                localStorage.setItem('studentLoanApp_currentSection', sectionId);
+            } catch (e) {
+                console.warn('localStorage not available');
+            }
+            
+            // Trigger lazy loading for new section
+            triggerLazyLoad();
+        }
+
+        // Mobile Menu Toggle with improved accessibility
+        function toggleMobileMenu() {
+            const isOpen = mobileMenu.classList.contains('open');
+            
+            if (isOpen) {
+                mobileMenu.classList.remove('open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileMenuBtn.innerHTML = '☰';
+            } else {
+                mobileMenu.classList.add('open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'true');
+                mobileMenuBtn.innerHTML = '✕';
+                // Focus first menu item for keyboard navigation
+                const firstLink = mobileMenu.querySelector('.nav-link');
+                if (firstLink) {
+                    setTimeout(() => firstLink.focus(), 100);
+                }
+            }
+        }
+
+        // Calculator with automatic updates and loading states
+        function calculateLoan() {
+            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const rate = parseFloat(document.getElementById('interestRate').value) || 0;
+            const term = parseInt(document
