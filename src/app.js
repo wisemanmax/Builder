@@ -11,7 +11,7 @@ import { renderThoughtSelector, detachThought, showThoughtPicker, pickThought } 
 
 import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
-import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage } from './screens/build.js'
+import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle } from './screens/build.js'
 import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, initThinkSheet } from './screens/think.js'
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
@@ -67,6 +67,7 @@ export function init() {
   initStudio()
   initSettings()
   initContextMenu(openApp, openProjectSheet, openBuilder, delApp)
+  initPipelineToggle()
 
   // Builder sheet
   $('bs-close').addEventListener('click', closeBuilder)

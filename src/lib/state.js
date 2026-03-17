@@ -11,6 +11,7 @@ export const ST = {
   _studioFullscreen: false,
   thoughts: [], rules: [], activeThoughtId: null, _thinking: false,
   _selfUpdateMode: false,
+  pipelineMode: 'builder1',
 }
 
 export function persist() {
@@ -46,6 +47,7 @@ export function hydrate() {
   ST.sbEnabled = localStorage.getItem(KEY_STORE.SB_ON) === 'true'
   ST.auditEnabled = localStorage.getItem(KEY_STORE.AUDIT) !== 'false'
   ST.backendEnabled = localStorage.getItem(KEY_STORE.BACKEND) === 'true'
+  ST.pipelineMode = localStorage.getItem(KEY_STORE.PIPELINE) || 'builder1'
 }
 
 export function saveKeys() {
@@ -59,6 +61,7 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.SB_ON, String(ST.sbEnabled))
   localStorage.setItem(KEY_STORE.AUDIT, String(ST.auditEnabled))
   localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled))
+  localStorage.setItem(KEY_STORE.PIPELINE, ST.pipelineMode)
 }
 
 export function keyStatusHTML() {

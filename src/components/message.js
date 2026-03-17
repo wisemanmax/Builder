@@ -1,6 +1,10 @@
 import { $, esc, escAttr } from '../lib/utils.js'
-import { PIPE_NAMES, PIPE_ICONS } from '../config/constants.js'
+import { PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS } from '../config/constants.js'
 import { approveAndMerge, requestChanges, resolveRetry } from './approval-card.js'
+
+// Pipeline type registry — maps pid to 'builder1' | 'builder2'
+var _pipeTypes = {}
+export function registerPipeType(pid, type) { _pipeTypes[pid] = type }
 
 // Session tracking for conversation history
 var _currentSession = []
@@ -82,9 +86,12 @@ export function addMsg(cfg) {
       row.innerHTML = '<div class="awrap"><div class="aav">\u26A1</div><div class="abub">' + (cfg.html || esc(cfg.text || '')) + '</div></div>'
     } else if (cfg.type === 'pipeline') {
       row.id = cfg.id
+      var pNames = cfg.pipelineType === 'builder2' ? PIPE2_NAMES : PIPE_NAMES
+      var pIcons = cfg.pipelineType === 'builder2' ? PIPE2_ICONS : PIPE_ICONS
+      if (cfg.pipelineType) _pipeTypes[cfg.id] = cfg.pipelineType
       var phtml = '<div class="awrap"><div class="aav">\u26A1</div><div style="flex:1;min-width:0"><div class="pipe-card" id="' + cfg.id + '-inner">'
-      for (var i = 0; i < PIPE_NAMES.length; i++) {
-        phtml += '<div class="ps s-idle" id="' + cfg.id + '-s' + i + '"><div class="psico">' + PIPE_ICONS[i] + '</div><div class="pstxt"><div class="psname">' + PIPE_NAMES[i] + '</div><div class="psdet">Waiting</div></div></div>'
+      for (var i = 0; i < pNames.length; i++) {
+        phtml += '<div class="ps s-idle" id="' + cfg.id + '-s' + i + '"><div class="psico">' + pIcons[i] + '</div><div class="pstxt"><div class="psname">' + pNames[i] + '</div><div class="psdet">Waiting</div></div></div>'
       }
       phtml += '</div></div></div>'
       row.innerHTML = phtml
@@ -116,7 +123,11 @@ export function addMsg(cfg) {
       } else {
         bhtml = '<div class="audit-clean">\u2705 No bugs found \u2014 code looks clean!</div>'
       }
-      row.innerHTML = '<div class="awrap"><div class="aav" style="background:var(--gg);font-family:var(--fh);font-size:10px;font-weight:800">G</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge">G</div><div class="audit-title">GPT-4o Audit Report</div><span class="ab ' + (bugs.length ? 'bugs' : 'clean') + '">' + (bugs.length ? bugs.length + ' Bug' + (bugs.length !== 1 ? 's' : '') : '\u2713 Clean') + '</span></div>' + bhtml + '</div></div></div>'
+      var isClaudeAudit = cfg.source === 'claude'
+      var auditBadge = isClaudeAudit ? '\u26A1' : 'G'
+      var auditTitle = isClaudeAudit ? 'Claude Audit Report' : 'GPT-4o Audit Report'
+      var auditAvStyle = isClaudeAudit ? 'background:var(--g1)' : 'background:var(--gg);font-family:var(--fh);font-size:10px;font-weight:800'
+      row.innerHTML = '<div class="awrap"><div class="aav" style="' + auditAvStyle + '">' + auditBadge + '</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge" style="' + (isClaudeAudit ? 'background:var(--g1)' : '') + '">' + auditBadge + '</div><div class="audit-title">' + auditTitle + '</div><span class="ab ' + (bugs.length ? 'bugs' : 'clean') + '">' + (bugs.length ? bugs.length + ' Bug' + (bugs.length !== 1 ? 's' : '') : '\u2713 Clean') + '</span></div>' + bhtml + '</div></div></div>'
     } else if (cfg.type === 'preview-card') {
       row.innerHTML = '<div class="awrap"><div class="aav">\uD83D\uDC41</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview \u2014 ' + esc(cfg.appName || 'App') + '</div><span class="pcc-branch">' + esc(cfg.branch || 'local') + '</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="' + escAttr(cfg.code || '') + '"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\'' + esc(cfg.appId || '') + '\',\'' + esc(cfg.pid || '') + '\');">\uD83D\uDD0D Full Screen</button></div></div></div></div></div>'
     } else if (cfg.type === 'approval') {
@@ -204,8 +215,11 @@ export function addMsg(cfg) {
 
 export function updatePS(pid, step, state, det) {
   var el = $(pid + '-s' + step); if (!el) return
-  var ico = state === 'done' ? '\u2713' : state === 'error' ? '\u2717' : state === 'wait' ? '\u23F8' : PIPE_ICONS[step] || '\u00B7'
+  var isB2 = _pipeTypes[pid] === 'builder2'
+  var names = isB2 ? PIPE2_NAMES : PIPE_NAMES
+  var icons = isB2 ? PIPE2_ICONS : PIPE_ICONS
+  var ico = state === 'done' ? '\u2713' : state === 'error' ? '\u2717' : state === 'wait' ? '\u23F8' : icons[step] || '\u00B7'
   el.className = 'ps s-' + state
-  el.innerHTML = '<div class="psico">' + ico + '</div><div class="pstxt"><div class="psname">' + esc(PIPE_NAMES[step] || 'Step ' + step) + '</div><div class="psdet">' + esc(det) + '</div></div>' + (state === 'active' ? '<div class="spin"></div>' : '')
+  el.innerHTML = '<div class="psico">' + ico + '</div><div class="pstxt"><div class="psname">' + esc(names[step] || 'Step ' + step) + '</div><div class="psdet">' + esc(det) + '</div></div>' + (state === 'active' ? '<div class="spin"></div>' : '')
   scrollBot()
 }
