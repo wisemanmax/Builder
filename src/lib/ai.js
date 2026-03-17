@@ -22,25 +22,73 @@ function logCacheUsage(d, label) {
   }
 }
 
+// Background-aware timeout: pauses the countdown while the page is hidden
+// so that browser timer throttling doesn't cause premature timeouts.
 export function fetchWithTimeout(url, opts, ms) {
-  ms = ms || 120000
+  ms = ms || 300000 // 5 min default (up from 2 min)
   _validateKeyedRequest(url, opts)
-  var timer
-  var req = _nativeFetch.call(window, url, opts).then(function (r) { clearTimeout(timer); return r }, function (e) { clearTimeout(timer); throw e })
-  var timeout = new Promise(function (_, reject) {
-    timer = setTimeout(function () { reject(new Error('Request timed out')) }, ms)
-  })
-  return Promise.race([req, timeout])
+  var controller = new AbortController()
+  if (!opts.signal) {
+    opts = Object.assign({}, opts, { signal: controller.signal })
+  }
+  var elapsed = 0
+  var lastTick = Date.now()
+  var timer = null
+  var settled = false
+
+  function tick() {
+    if (settled) return
+    var now = Date.now()
+    // Only count time while page is visible (hidden tabs throttle timers)
+    if (document.visibilityState === 'visible') {
+      elapsed += now - lastTick
+    }
+    lastTick = now
+    if (elapsed >= ms) {
+      controller.abort()
+      return
+    }
+    timer = setTimeout(tick, 1000)
+  }
+  tick()
+
+  return _nativeFetch.call(window, url, opts).then(
+    function (r) { settled = true; clearTimeout(timer); return r },
+    function (e) {
+      settled = true; clearTimeout(timer)
+      if (e && e.name === 'AbortError') throw new Error('Request timed out')
+      throw e
+    }
+  )
 }
 
 export function fetchWithRetry(url, opts, ms, retries) {
-  retries = retries || 2
+  retries = retries || 4 // up from 2
   function attempt(n) {
     return fetchWithTimeout(url, opts, ms).catch(function (e) {
       var msg = String(e && e.message || e || '').toLowerCase()
-      var isNetwork = msg.indexOf('failed to fetch') >= 0 || msg.indexOf('load failed') >= 0 || msg.indexOf('timed out') >= 0 || msg.indexOf('network') >= 0
-      if (isNetwork && n < retries) {
-        return new Promise(function (resolve) { setTimeout(resolve, (n + 1) * 1500) }).then(function () { return attempt(n + 1) })
+      var isRetryable = msg.indexOf('failed to fetch') >= 0
+        || msg.indexOf('load failed') >= 0
+        || msg.indexOf('timed out') >= 0
+        || msg.indexOf('network') >= 0
+        || msg.indexOf('aborted') >= 0
+        || msg.indexOf('err_internet_disconnected') >= 0
+      if (isRetryable && n < retries) {
+        var delay = Math.min(2000 * Math.pow(2, n), 30000) // 2s, 4s, 8s, 16s (exp backoff, cap 30s)
+        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
+          // If we were hidden when the error happened, wait until visible before retrying
+          if (document.visibilityState !== 'visible') {
+            return new Promise(function (resolve) {
+              function onVisible() {
+                if (document.visibilityState === 'visible') {
+                  document.removeEventListener('visibilitychange', onVisible)
+                  resolve()
+                }
+              }
+              document.addEventListener('visibilitychange', onVisible)
+            })
+          }
+        }).then(function () { return attempt(n + 1) })
       }
       throw e
     })
@@ -62,7 +110,7 @@ export function callClaude(sys, msg, temperature) {
     method: 'POST',
     headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
-  }, 120000).then(function (r) {
+  }, 300000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
@@ -88,7 +136,7 @@ export function callClaudeWithThinking(sys, msg, thinkingBudget) {
     method: 'POST',
     headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
-  }, 180000).then(function (r) {
+  }, 600000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
@@ -114,7 +162,7 @@ export function callClaudeRaw(sys, msg, maxTokens) {
     method: 'POST',
     headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
-  }, 60000).then(function (r) {
+  }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
@@ -133,7 +181,7 @@ export function callClaudeMultiTurn(sys, messages, temperature) {
     method: 'POST',
     headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: messages }),
-  }, 120000).then(function (r) {
+  }, 300000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
@@ -232,19 +280,37 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) 
 
   _validateKeyedRequest(url, opts)
 
-  return _nativeFetch.call(window, url, opts).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return parseSSE(r.body)
-  }).then(function (code) {
-    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
-    return code
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('Claude:') === 0) throw e
-    // Fall back to non-streaming on stream errors
-    console.warn('Streaming failed, falling back to non-streaming:', e.message)
-    return callClaudeWithThinking(sys, msg, thinkingBudget)
-  })
+  function attemptStream(n) {
+    return _nativeFetch.call(window, url, opts).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+      return parseSSE(r.body)
+    }).then(function (code) {
+      code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+      if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
+      return code
+    }).catch(function (e) {
+      if (e.message && e.message.indexOf('Claude:') === 0) throw e
+      var msg2 = String(e && e.message || e || '').toLowerCase()
+      var isRetryable = msg2.indexOf('failed to fetch') >= 0 || msg2.indexOf('load failed') >= 0 || msg2.indexOf('network') >= 0 || msg2.indexOf('aborted') >= 0
+      if (isRetryable && n < 3) {
+        var delay = Math.min(2000 * Math.pow(2, n), 16000)
+        console.warn('Stream attempt ' + (n + 1) + ' failed, retrying in ' + delay + 'ms:', e.message)
+        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
+          if (document.visibilityState !== 'visible') {
+            return new Promise(function (resolve) {
+              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
+              document.addEventListener('visibilitychange', onVis)
+            })
+          }
+        }).then(function () { return attemptStream(n + 1) })
+      }
+      // Fall back to non-streaming on persistent stream errors
+      console.warn('Streaming failed, falling back to non-streaming:', e.message)
+      return callClaudeWithThinking(sys, msg, thinkingBudget)
+    })
+  }
+
+  return attemptStream(0)
 }
 
 export function callGPTRawMultiTurn(sys, messages, maxTokens) {
@@ -253,7 +319,7 @@ export function callGPTRawMultiTurn(sys, messages, maxTokens) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
     body: JSON.stringify({ model: 'gpt-4o-mini', max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }].concat(messages) }),
-  }, 60000).then(function (r) {
+  }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
@@ -270,7 +336,7 @@ export function callGPTReview(code) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
     body: JSON.stringify({ model: 'gpt-4o', max_tokens: 3000, temperature: 0.2, messages: [{ role: 'system', content: SYS_ENHANCE_REVIEW }, { role: 'user', content: 'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 40000) }] }),
-  }, 60000).then(function (r) {
+  }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
@@ -288,7 +354,7 @@ export function callGPT(code) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
     body: JSON.stringify({ model: 'gpt-4o', max_tokens: 2000, temperature: 0.1, messages: [{ role: 'system', content: SYS_AUDIT }, { role: 'user', content: 'Audit:\n\n' + code.slice(0, 40000) }] }),
-  }, 60000).then(function (r) {
+  }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
