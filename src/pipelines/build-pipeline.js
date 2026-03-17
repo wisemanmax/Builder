@@ -12,6 +12,9 @@ import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 
+// Check IDs that are advisory-only and should not count as critical failures
+var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
+
 // Retry wrapper for pipeline steps — retries on network/timeout errors
 function retryStep(fn, maxRetries, label) {
   maxRetries = maxRetries || 2
@@ -189,7 +192,7 @@ export function runPipeline(prompt, existingApp, customName) {
 
       updatePS(pid, 3, 'active', 'Running checks' + passLabel + '\u2026')
       var checks = runLocalChecks(currentCode)
-      var criticalFails = checks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs'].indexOf(c.id) === -1 })
+      var criticalFails = checks.filter(function (c) { return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1 })
       addMsg({ role: 'asst', type: 'checks', checks: checks })
       updatePS(pid, 3, criticalFails.length ? 'warn' : 'done',
         criticalFails.length ? (criticalFails.length + ' issue' + (criticalFails.length !== 1 ? 's' : '') + ' found' + passLabel) : 'All checks passed' + passLabel + ' \u2713')
@@ -236,7 +239,7 @@ export function runPipeline(prompt, existingApp, customName) {
               return runValidationPass()
             } else {
               var finalChecks = runLocalChecks(currentCode)
-              var finalFails = finalChecks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'responsive', 'has-main'].indexOf(c.id) === -1 })
+              var finalFails = finalChecks.filter(function (c) { return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1 })
               if (finalFails.length > 0) {
                 updatePS(pid, 5, 'warn', finalFails.length + ' issue' + (finalFails.length !== 1 ? 's' : '') + ' remain after ' + MAX_FIX_PASSES + ' passes')
               } else {
