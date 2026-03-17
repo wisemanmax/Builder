@@ -17,8 +17,14 @@ export function openApp(id) {
   var url = ghPageUrl(id)
   $('vbar-url').textContent = url || 'Saved locally'
   $('vbar-url').dataset.url = url || ''
-  $('viewer-iframe').removeAttribute('src')
-  $('viewer-iframe').srcdoc = app.code || '<html><body style="background:#111;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>No code found.</p></body></html>'
+  // Show skeleton overlay while iframe loads
+  var oldSkel = $('viewer-skel'); if (oldSkel) oldSkel.remove()
+  var skelHtml = '<div id="viewer-skel"><div class="skel skel-rect" style="height:18px;width:55%;margin:0 auto 4px"></div><div class="skel skel-rect" style="height:10px;width:35%;margin:0 auto 8px"></div><div class="skel skel-rect" style="height:140px"></div><div style="display:flex;gap:8px"><div class="skel skel-rect" style="height:36px;flex:1"></div><div class="skel skel-rect" style="height:36px;flex:1"></div></div><div class="skel skel-rect" style="height:80px"></div><div class="skel skel-rect" style="height:12px;width:60%"></div><div class="skel skel-rect" style="height:12px;width:40%"></div></div>'
+  $('studio-preview').insertAdjacentHTML('beforeend', skelHtml)
+  var iframe = $('viewer-iframe')
+  iframe.onload = function () { var s = $('viewer-skel'); if (s) { s.classList.add('hide'); setTimeout(function () { if (s.parentNode) s.remove() }, 350) } }
+  iframe.removeAttribute('src')
+  iframe.srcdoc = app.code || '<html><body style="background:#111;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>No code found.</p></body></html>'
   $('se-textarea').value = ''
   autoResizeSe($('se-textarea'))
   var liveBtn = $('se-liveurl-btn')

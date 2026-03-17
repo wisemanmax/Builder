@@ -35,7 +35,14 @@ export function addMsg(cfg) {
     row.className = 'mrow asst'
     if (cfg.type === 'typing') {
       row.id = 'typing-ind'
-      row.innerHTML = '<div class="awrap"><div class="aav">\u26A1</div><div class="tbub"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>'
+      row.innerHTML = '<div class="awrap"><div class="skel skel-circle" style="width:28px;height:28px;flex-shrink:0;margin-top:2px"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px;padding:9px 13px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:4px 18px 18px 18px"><div class="skel skel-line" style="width:82%"></div><div class="skel skel-line" style="width:55%"></div><div class="skel skel-line" style="width:38%"></div></div></div>'
+    } else if (cfg.type === 'typing-pipeline') {
+      row.id = 'typing-pipe-skel'
+      var skelRows = ''
+      for (var si = 0; si < 4; si++) {
+        skelRows += '<div class="ps" style="padding:8px 12px;display:flex;align-items:center;gap:8px' + (si < 3 ? ';border-bottom:1px solid rgba(255,255,255,.05)' : '') + '"><div class="skel skel-circle" style="width:26px;height:26px;border-radius:8px;flex-shrink:0"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skel skel-line" style="width:' + [50, 65, 40, 55][si] + '%;height:10px"></div><div class="skel skel-line" style="width:' + [30, 35, 25, 40][si] + '%;height:8px"></div></div></div>'
+      }
+      row.innerHTML = '<div class="awrap"><div class="skel skel-circle" style="width:28px;height:28px;flex-shrink:0;margin-top:2px"></div><div style="flex:1;min-width:0"><div class="pipe-card">' + skelRows + '</div></div></div>'
     } else if (cfg.type === 'text') {
       row.innerHTML = '<div class="awrap"><div class="aav">\u26A1</div><div class="abub">' + (cfg.html || esc(cfg.text || '')) + '</div></div>'
     } else if (cfg.type === 'pipeline') {

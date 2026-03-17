@@ -85,3 +85,11 @@
 .thought-picker-item .tpi-icon{font-size:16px}
 .thought-picker-item .tpi-name{flex:1}
 .thought-picker-item .tpi-status{font-size:10px;color:rgba(255,255,255,.25)}
+
+/* ======== SKELETON SCREENS ======== */
+@keyframes skelShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skel{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:skelShimmer 1.6s ease-in-out infinite;border-radius:6px}
+.skel-line{height:12px;border-radius:6px}
+.skel-circle{border-radius:50%}
+.skel-rect{border-radius:8px}
+.skel-row{display:flex;align-items:center;gap:8px}

@@ -40,4 +40,13 @@ export function renderGrid() {
   }
 }
 
+export function renderGridSkeleton(count) {
+  var grid = $('app-grid')
+  var html = ''
+  for (var i = 0; i < (count || 4); i++) {
+    html += '<div class="aicon skel-aicon" style="animation-delay:' + i * .04 + 's"><div class="skel" style="width:66px;height:66px;border-radius:17px"></div><div class="skel skel-line" style="width:42px;height:8px;margin-top:2px"></div></div>'
+  }
+  grid.innerHTML = html
+}
+
 export function handleTap(id) { closeCtx(); window.openApp(id) }
