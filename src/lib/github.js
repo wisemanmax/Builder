@@ -162,35 +162,92 @@ export function pullFromGitHub() {
   if (!ST.ghToken || !ST.ghUser || !ST.ghRepo) { toast('GitHub credentials required \u2014 set them in Settings', 4000); return }
   _syncing = true
   toast('Syncing from GitHub\u2026', 2000)
-  var url = ghApiUrl('apps/manifest.json')
-  return fetch(url, { headers: ghHeaders() }).then(function (res) {
-    if (res.status === 404) { toast('No apps/manifest.json in repo yet', 3000); return Promise.reject('NO_MANIFEST') }
+
+  // Fetch both the directory listing and the manifest in parallel
+  var dirUrl = ghApiUrl('apps')
+  var manifestUrl = ghApiUrl('apps/manifest.json')
+
+  var dirPromise = fetch(dirUrl, { headers: ghHeaders() }).then(function (res) {
+    if (res.status === 404) return []
     if (!res.ok) throw new Error('GitHub HTTP ' + res.status)
     return res.json()
-  }).then(function (file) {
-    var raw = atob(file.content.replace(/\n/g, ''))
-    var manifest = JSON.parse(raw)
-    if (!Array.isArray(manifest)) { toast('Invalid manifest format', 3000); return }
-    var localIds = {}; ST.apps.forEach(function (a) { localIds[a.id] = true })
-    var newApps = manifest.filter(function (a) { return !localIds[a.id] })
-    if (!newApps.length) { toast('All apps already synced \u2714\uFE0F', 2500); return }
-    var fetches = newApps.map(function (app) {
-      return fetch(ghApiUrl('apps/' + app.id + '.html'), { headers: ghHeaders() }).then(function (r) {
+  }).catch(function () { return [] })
+
+  var manifestPromise = fetch(manifestUrl, { headers: ghHeaders() }).then(function (res) {
+    if (res.status === 404) return []
+    if (!res.ok) return []
+    return res.json().then(function (file) {
+      try {
+        var raw = atob(file.content.replace(/\n/g, ''))
+        var parsed = JSON.parse(raw)
+        return Array.isArray(parsed) ? parsed : []
+      } catch (e) { return [] }
+    })
+  }).catch(function () { return [] })
+
+  return Promise.all([dirPromise, manifestPromise]).then(function (results) {
+    var dirEntries = results[0]
+    var manifest = results[1]
+
+    // Build a lookup from manifest for metadata
+    var manifestById = {}
+    manifest.forEach(function (m) { manifestById[m.id] = m })
+
+    // Find all .html files from the directory listing (excluding manifest.json)
+    var htmlFiles = []
+    if (Array.isArray(dirEntries)) {
+      dirEntries.forEach(function (entry) {
+        if (entry.name && entry.name.endsWith('.html') && entry.type === 'file') {
+          var id = entry.name.replace(/\.html$/, '')
+          htmlFiles.push({ id: id, name: entry.name, download_url: entry.download_url })
+        }
+      })
+    }
+
+    if (!htmlFiles.length) { toast('No apps found in GitHub repo', 3000); return }
+
+    // Build local ID set
+    var localById = {}
+    ST.apps.forEach(function (a) { localById[a.id] = true })
+
+    // Fetch code for every app not yet in local state
+    var newFiles = htmlFiles.filter(function (f) { return !localById[f.id] })
+
+    if (!newFiles.length) { toast('All ' + htmlFiles.length + ' apps already synced \u2714\uFE0F', 2500); return }
+
+    var fetches = newFiles.map(function (file) {
+      return fetch(ghApiUrl('apps/' + file.name), { headers: ghHeaders() }).then(function (r) {
         if (!r.ok) return null
         return r.json().then(function (f) {
           var code = decodeURIComponent(escape(atob(f.content.replace(/\n/g, ''))))
-          return { id: app.id, name: app.name, icon: app.icon || '\uD83D\uDCE6', ci: app.ci || 0, desc: (app.prompts && app.prompts[0] ? app.prompts[0].text : '').slice(0, 90), code: code, versions: [], prompts: app.prompts || [], createdAt: app.createdAt || new Date().toISOString(), updatedAt: app.updatedAt || new Date().toISOString(), ghPushed: true }
+          var meta = manifestById[file.id]
+          var name = (meta && meta.name) || file.id
+          var icon = (meta && meta.icon) || '\uD83D\uDCE6'
+          var ci = (meta && typeof meta.ci === 'number') ? meta.ci : Math.floor(Math.random() * 8)
+          var prompts = (meta && meta.prompts) || []
+          var desc = (prompts[0] ? prompts[0].text : '').slice(0, 90)
+          return {
+            id: file.id, name: name, icon: icon, ci: ci, desc: desc,
+            code: code, versions: [], prompts: prompts,
+            createdAt: (meta && meta.createdAt) || new Date().toISOString(),
+            updatedAt: (meta && meta.updatedAt) || new Date().toISOString(),
+            ghPushed: true,
+          }
         })
       }).catch(function () { return null })
     })
+
     return Promise.all(fetches).then(function (results) {
       var added = 0
       results.forEach(function (a) { if (a) { ST.apps.push(a); added++ } })
-      if (added > 0) { persist(); /* renderGrid called from settings */ }
-      toast('Synced ' + added + ' app' + (added === 1 ? '' : 's') + ' from GitHub \uD83D\uDD04', 3000)
+      if (added > 0) {
+        persist()
+        // Update manifest on GitHub to include all apps
+        ghPushManifest('main').catch(function (e) { console.warn('Manifest update after sync:', e) })
+      }
+      toast('Synced ' + added + ' app' + (added === 1 ? '' : 's') + ' from GitHub (' + htmlFiles.length + ' total) \uD83D\uDD04', 3000)
     })
   }).catch(function (e) {
-    if (e === 'NO_MANIFEST') return
     toast('Sync failed: ' + scrubKeys(String(e.message || e)), 4000)
   }).finally(function () { _syncing = false })
 }
