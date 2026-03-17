@@ -37,16 +37,43 @@ export function classifyFetchError(e, api) {
   return api + ': ' + msg
 }
 
-export function callClaude(sys, msg) {
+export function callClaude(sys, msg, temperature) {
+  temperature = temperature !== undefined ? temperature : 0.3
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, system: sys, messages: [{ role: 'user', content: msg }] }),
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, temperature: temperature, system: sys, messages: [{ role: 'user', content: msg }] }),
   }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
     var code = (d.content && d.content[0] && d.content[0].text) || ''
+    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
+    return code
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('Claude:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'Claude'))
+  })
+}
+
+export function callClaudeWithThinking(sys, msg, thinkingBudget) {
+  thinkingBudget = thinkingBudget || 4000
+  var maxTokens = thinkingBudget + 16000
+  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2025-04-14', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: sys, messages: [{ role: 'user', content: msg }] }),
+  }, 180000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var code = ''
+    if (d.content && Array.isArray(d.content)) {
+      for (var i = 0; i < d.content.length; i++) {
+        if (d.content[i].type === 'text') { code = d.content[i].text; break }
+      }
+    }
     code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
     return code
@@ -78,7 +105,7 @@ export function callGPTReview(code) {
   return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 3000, temperature: 0.2, messages: [{ role: 'system', content: SYS_ENHANCE_REVIEW }, { role: 'user', content: 'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 20000) }] }),
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 3000, temperature: 0.2, messages: [{ role: 'system', content: SYS_ENHANCE_REVIEW }, { role: 'user', content: 'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 40000) }] }),
   }, 60000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
@@ -96,7 +123,7 @@ export function callGPT(code) {
   return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 2000, temperature: 0.1, messages: [{ role: 'system', content: SYS_AUDIT }, { role: 'user', content: 'Audit:\n\n' + code.slice(0, 20000) }] }),
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 2000, temperature: 0.1, messages: [{ role: 'system', content: SYS_AUDIT }, { role: 'user', content: 'Audit:\n\n' + code.slice(0, 40000) }] }),
   }, 60000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()

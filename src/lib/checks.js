@@ -12,6 +12,24 @@ export function runLocalChecks(code) {
     add('Accessibility', 'lang', 'html[lang] attribute', /<html[^>]{0,300}lang\s*=/i.test(code))
     add('Security', 'no-eval', 'No eval() usage', !/\beval\s*\(/.test(code))
     add('Security', 'no-docwrite', 'No document.write()', !/document\.write\s*\(/.test(code))
+
+    // New checks
+    add('Accessibility', 'button-text', 'Buttons have text content',
+      !/<button[^>]*>\s*<\/button>/i.test(code), 'Empty button elements found')
+    add('Accessibility', 'no-div-onclick', 'No <div onclick> patterns',
+      !/<div[^>]+onclick\s*=/i.test(code), 'Use <button> instead of <div onclick>')
+    add('Structure', 'has-title', 'Has <title> element',
+      /<title>[^<]+<\/title>/i.test(code))
+    add('Structure', 'has-main', 'Uses semantic <main> element',
+      /<main[\s>]/i.test(code))
+    add('Security', 'no-innerhtml-xss', 'No innerHTML with concatenation',
+      !(/\.innerHTML\s*=\s*[^'"<]/.test(code) && /\.innerHTML\s*=\s*.*\+/.test(code)),
+      'innerHTML with concatenation may indicate XSS risk')
+    add('Design', 'has-css-vars', 'Uses CSS custom properties',
+      /--[\w-]+\s*:/.test(code), 'CSS variables enable consistent theming')
+    add('Design', 'responsive', 'Has responsive CSS',
+      /@media/.test(code) || /max-width\s*:\s*100%/.test(code),
+      'No media queries or responsive patterns detected')
   } catch (e) {
     add('Syntax', 'check-error', 'Check engine error', false, String(e.message || '').slice(0, 80))
   }
