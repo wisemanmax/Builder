@@ -1,5 +1,22 @@
 [
   {
+    "id": "budget-tracker-2",
+    "name": "Budget tracker 2",
+    "icon": "🎯",
+    "ci": 3,
+    "url": "https://Wisemanmax.github.io/Builder/apps/budget-tracker-2.html",
+    "path": "apps/budget-tracker-2.html",
+    "prompts": [
+      {
+        "ts": "2026-03-17T14:54:50.556Z",
+        "type": "initial",
+        "text": "A modern budget tracker"
+      }
+    ],
+    "createdAt": "2026-03-17T14:54:50.556Z",
+    "updatedAt": "2026-03-17T14:54:50.556Z"
+  },
+  {
     "id": "2048bw",
     "name": "2048BW",
     "icon": "🎯",
@@ -11,9 +28,14 @@
         "ts": "2026-03-17T00:39:04.950Z",
         "type": "initial",
         "text": "2048 puzzle game"
+      },
+      {
+        "ts": "2026-03-17T05:12:37.534Z",
+        "type": "update",
+        "text": "Fix ui and make it less buggy"
       }
     ],
     "createdAt": "2026-03-17T00:39:04.950Z",
-    "updatedAt": "2026-03-17T00:39:04.950Z"
+    "updatedAt": "2026-03-17T05:12:37.534Z"
   }
 ]
