@@ -152,12 +152,15 @@
       <div class="name-row" id="name-row">
         <input class="fi" type="text" id="app-name-input" placeholder="App name (optional)" maxlength="40" autocomplete="off">
       </div>
+      <div id="img-preview-row" class="img-preview-row" style="display:none"></div>
       <div class="ibox">
         <textarea id="chat-input" rows="1" placeholder="Describe an app to build, or ask to update the current one..."></textarea>
         <div class="iacts">
+          <button class="ia-btn" id="img-upload-btn" title="Upload reference images">&#x1F4F7;</button>
           <button class="ia-btn" id="emoji-pick-btn" title="Pick icon">&#x1F3AF;</button>
           <button id="send-btn">&uarr;</button>
         </div>
+        <input type="file" id="img-file-input" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden>
       </div>
       <div class="ihint" id="ihint">&#x1F33F; Branch &rarr; &#x1F528; Build &rarr; &#x1F4CB; Checks &rarr; &#x1F50D; Audit &rarr; &#x1F6E0; Fix &rarr; &#x1F441; Preview &rarr; &#x2705; Approve &rarr; &#x1F500; Merge</div>
     </div>

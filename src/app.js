@@ -11,7 +11,7 @@ import { renderThoughtSelector, detachThought, showThoughtPicker, pickThought } 
 
 import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
-import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg } from './screens/build.js'
+import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage } from './screens/build.js'
 import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, initThinkSheet } from './screens/think.js'
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
@@ -76,6 +76,31 @@ export function init() {
   inp.addEventListener('input', function () { autoResize(inp) })
   inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg() } })
   $('send-btn').addEventListener('click', sendMsg)
+
+  // Image upload
+  $('img-upload-btn').addEventListener('click', function () { $('img-file-input').click() })
+  $('img-file-input').addEventListener('change', function () { handleImageFiles(this.files); this.value = '' })
+  $('img-preview-row').addEventListener('click', function (e) {
+    var rmBtn = e.target.closest('.img-thumb-rm')
+    if (rmBtn) removeImage(parseInt(rmBtn.dataset.idx, 10))
+  })
+  // Drag-and-drop images onto the input area
+  var ibox = $('chat-input').closest('.ibox')
+  ibox.addEventListener('dragover', function (e) { e.preventDefault(); ibox.style.borderColor = 'rgba(255,60,172,.6)' })
+  ibox.addEventListener('dragleave', function () { ibox.style.borderColor = '' })
+  ibox.addEventListener('drop', function (e) { e.preventDefault(); ibox.style.borderColor = ''; if (e.dataTransfer.files.length) handleImageFiles(e.dataTransfer.files) })
+  // Paste images from clipboard
+  inp.addEventListener('paste', function (e) {
+    var files = []
+    if (e.clipboardData && e.clipboardData.items) {
+      for (var i = 0; i < e.clipboardData.items.length; i++) {
+        if (e.clipboardData.items[i].type.indexOf('image/') === 0) {
+          files.push(e.clipboardData.items[i].getAsFile())
+        }
+      }
+    }
+    if (files.length) handleImageFiles(files)
+  })
 
   // PWA install banner
   $('ib-add').addEventListener('click', function () { if (_installPrompt) _installPrompt.prompt(); $('install-banner').classList.remove('on') })

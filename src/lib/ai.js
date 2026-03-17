@@ -153,12 +153,13 @@ export function callClaudeWithThinking(sys, msg, thinkingBudget) {
   })
 }
 
-export function callClaudeRaw(sys, msg, maxTokens) {
+export function callClaudeRaw(sys, msg, maxTokens, images) {
   maxTokens = maxTokens || 4000
+  var userContent = _buildUserContent(msg, images)
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: userContent }] }),
   }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
@@ -216,7 +217,18 @@ export function callClaudeRawMultiTurn(sys, messages, maxTokens) {
   })
 }
 
-export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) {
+// Build user content array with optional images for Claude vision
+function _buildUserContent(msg, images) {
+  if (!images || !images.length) return msg
+  var content = []
+  for (var i = 0; i < images.length; i++) {
+    content.push({ type: 'image', source: { type: 'base64', media_type: images[i].mediaType, data: images[i].base64 } })
+  }
+  content.push({ type: 'text', text: msg })
+  return content
+}
+
+export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, images) {
   thinkingBudget = thinkingBudget || 2000
   var maxTokens = thinkingBudget + 16000
 
@@ -268,11 +280,12 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) 
     return processChunks()
   }
 
+  var userContent = _buildUserContent(msg, images)
   var url = 'https://api.anthropic.com/v1/messages'
   var opts = {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, stream: true, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, stream: true, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: userContent }] }),
   }
 
   _validateKeyedRequest(url, opts)
@@ -303,7 +316,7 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) 
       }
       // Fall back to non-streaming on persistent stream errors
       console.warn('Streaming failed, falling back to non-streaming:', e.message)
-      return callClaudeWithThinking(sys, msg, thinkingBudget)
+      return callClaudeWithThinking(sys, _buildUserContent(msg, images), thinkingBudget)
     })
   }
 

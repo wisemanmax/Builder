@@ -27,7 +27,15 @@ export function addMsg(cfg) {
   var row = document.createElement('div')
   if (cfg.role === 'user') {
     row.className = 'mrow user'
-    row.innerHTML = '<div class="ubub">' + esc(cfg.text) + '</div>'
+    var imgHtml = ''
+    if (cfg.images && cfg.images.length) {
+      imgHtml = '<div class="user-imgs">'
+      for (var ii = 0; ii < cfg.images.length; ii++) {
+        imgHtml += '<img src="data:' + cfg.images[ii].mediaType + ';base64,' + cfg.images[ii].base64 + '" alt="' + esc(cfg.images[ii].name || 'image') + '">'
+      }
+      imgHtml += '</div>'
+    }
+    row.innerHTML = '<div class="ubub">' + imgHtml + esc(cfg.text) + '</div>'
   } else if (cfg.role === 'system') {
     row.className = 'mrow sys'
     row.innerHTML = '<div class="sysbub">' + esc(cfg.text) + '</div>'
