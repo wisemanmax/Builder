@@ -124,6 +124,10 @@
         <div class="di-img" style="background:linear-gradient(135deg,#B44FFF,#3D5AFE)">&#x1F527;</div>
         <div class="di-lbl">Builder+</div>
       </div>
+      <div class="di" onclick="syncFromGitHub()">
+        <div class="di-img" style="background:rgba(255,255,255,.12)">&#x1F504;</div>
+        <div class="di-lbl">Sync</div>
+      </div>
       <div class="di" onclick="openSettings()">
         <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
         <div class="di-lbl">Settings</div>
@@ -300,6 +304,7 @@
         <div class="fl"><label>GitHub Username</label><input class="fi fi-mono" type="text" id="s-gh-user" placeholder="yourusername"></div>
         <div class="fl"><label>Repository Name</label><input class="fi fi-mono" type="text" id="s-gh-repo" placeholder="my-builder-apps"></div>
         <button class="btn-p" id="s-save-gh" style="background:var(--gh);box-shadow:none">Save &amp; Test GitHub</button>
+        <button class="btn-p" id="s-gh-sync" style="background:rgba(255,255,255,.08);box-shadow:none;font-size:12px;padding:11px;border:1.5px solid rgba(255,255,255,.12);margin-top:6px">&#x1F504; Sync Apps from GitHub</button>
       </div>
       <span class="ssec">Pipeline</span>
       <div class="sscard">

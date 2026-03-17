@@ -1,7 +1,7 @@
 import { ST, saveKeys, keyStatusHTML } from '../lib/state.js'
 import { $, toast } from '../lib/utils.js'
 import { persist } from '../lib/state.js'
-import { testGitHub } from '../lib/github.js'
+import { testGitHub, pullFromGitHub } from '../lib/github.js'
 import { pullFromSupabase } from '../lib/storage.js'
 import { renderGrid } from '../components/app-icon.js'
 
@@ -32,6 +32,10 @@ export function initSettings() {
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
     toast('Testing GitHub connection\u2026')
     testGitHub().then(function (ok) { toast(ok ? '\u2713 GitHub connected: ' + ST.ghUser + '/' + ST.ghRepo : '\u2717 GitHub test failed', 4000) })
+  })
+  $('s-gh-sync').addEventListener('click', function () {
+    var p = pullFromGitHub()
+    if (p && p.then) p.then(function () { renderGrid() })
   })
   $('s-audit-pill').addEventListener('click', function () { ST.auditEnabled = !ST.auditEnabled; saveKeys(); $('s-audit-pill').classList.toggle('on', ST.auditEnabled); toast(ST.auditEnabled ? 'GPT audit enabled' : 'GPT audit disabled') })
   $('s-sync-pill').addEventListener('click', function () { ST.sbEnabled = !ST.sbEnabled; saveKeys(); $('s-sync-pill').classList.toggle('on', ST.sbEnabled); $('s-sb-exp').style.display = ST.sbEnabled ? 'flex' : 'none'; toast(ST.sbEnabled ? 'Supabase sync enabled' : 'Sync disabled') })

@@ -55,6 +55,11 @@ export function init() {
   if (ST.key) { showScreen('home'); renderGrid() }
   else showScreen('onboard')
 
+  // Auto-sync from GitHub on startup if credentials exist but no local apps
+  if (ST.key && ST.ghToken && ST.ghUser && ST.ghRepo && ST.apps.length === 0) {
+    pullFromGitHub().then(function () { renderGrid() })
+  }
+
   // Init modules
   initOnboarding()
   initHome()
@@ -141,6 +146,10 @@ export function init() {
   window.renderGrid = renderGrid
   window.selfUpdateBuilder = selfUpdateBuilder
   window.pullFromGitHub = pullFromGitHub
+  window.syncFromGitHub = function () {
+    var p = pullFromGitHub()
+    if (p && p.then) p.then(function () { renderGrid() })
+  }
   window.pullFromSupabase = pullFromSupabase
   window.copyToClipboard = copyToClipboard
   window.toast = toast
