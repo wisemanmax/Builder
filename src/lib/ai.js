@@ -49,7 +49,11 @@ export function callClaude(sys, msg, temperature) {
   }).then(function (d) {
     var code = (d.content && d.content[0] && d.content[0].text) || ''
     code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
+    var docIdx = code.indexOf('<!DOCTYPE')
+    if (docIdx < 0) docIdx = code.indexOf('<!doctype')
+    if (docIdx < 0) docIdx = code.indexOf('<html')
+    if (docIdx > 0) code = code.substring(docIdx)
+    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0 && code.indexOf('<!doctype') < 0) throw new Error('Claude returned an unexpected response format')
     return code
   }).catch(function (e) {
     if (e.message && e.message.indexOf('Claude:') === 0) throw e
