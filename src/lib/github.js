@@ -156,8 +156,11 @@ export function testGitHub() {
   return fetchWithRetry('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo, { headers: ghHeaders() }, 30000).then(function (res) { return res.ok }).catch(function () { return false })
 }
 
+var _syncing = false
 export function pullFromGitHub() {
+  if (_syncing) return Promise.resolve()
   if (!ST.ghToken || !ST.ghUser || !ST.ghRepo) { toast('GitHub credentials required \u2014 set them in Settings', 4000); return }
+  _syncing = true
   toast('Syncing from GitHub\u2026', 2000)
   var url = ghApiUrl('apps/manifest.json')
   return fetch(url, { headers: ghHeaders() }).then(function (res) {
@@ -189,5 +192,5 @@ export function pullFromGitHub() {
   }).catch(function (e) {
     if (e === 'NO_MANIFEST') return
     toast('Sync failed: ' + scrubKeys(String(e.message || e)), 4000)
-  })
+  }).finally(function () { _syncing = false })
 }
