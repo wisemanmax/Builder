@@ -1,58 +1,19 @@
 [
   {
-    "id": "recipe-app",
-    "name": "Recipe app",
+    "id": "2048bw",
+    "name": "2048BW",
     "icon": "🎯",
     "ci": 1,
-    "url": "https://Wisemanmax.github.io/Builder/apps/recipe-app.html",
-    "path": "apps/recipe-app.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
+    "path": "apps/2048bw.html",
     "prompts": [
       {
-        "ts": "2026-03-16T20:21:08.712Z",
+        "ts": "2026-03-17T00:39:04.950Z",
         "type": "initial",
-        "text": "Beginner recipe app"
+        "text": "2048 puzzle game"
       }
     ],
-    "createdAt": "2026-03-16T20:21:08.712Z",
-    "updatedAt": "2026-03-16T20:21:08.712Z"
-  },
-  {
-    "id": "ammtgse7utaw",
-    "name": "gym app",
-    "icon": "🎯",
-    "ci": 4,
-    "url": "https://Wisemanmax.github.io/Builder/apps/ammtgse7utaw.html",
-    "path": "apps/ammtgse7utaw.html",
-    "prompts": [
-      {
-        "ts": "2026-03-16T17:37:30.495Z",
-        "type": "initial",
-        "text": "Create a gym app the creates logs and tracks PR"
-      }
-    ],
-    "createdAt": "2026-03-16T17:37:30.495Z",
-    "updatedAt": "2026-03-16T17:37:30.495Z"
-  },
-  {
-    "id": "ammteubbmev4",
-    "name": "Ti84",
-    "icon": "🎯",
-    "ci": 2,
-    "url": "https://Wisemanmax.github.io/Builder/apps/ammteubbmev4.html",
-    "path": "apps/ammteubbmev4.html",
-    "prompts": [
-      {
-        "ts": "2026-03-16T16:42:38.002Z",
-        "type": "initial",
-        "text": "Create a fully functional ti84 calculator"
-      },
-      {
-        "ts": "2026-03-16T16:43:53.550Z",
-        "type": "update",
-        "text": "Make the app work"
-      }
-    ],
-    "createdAt": "2026-03-16T16:42:38.002Z",
-    "updatedAt": "2026-03-16T16:43:53.550Z"
+    "createdAt": "2026-03-17T00:39:04.950Z",
+    "updatedAt": "2026-03-17T00:39:04.950Z"
   }
 ]
