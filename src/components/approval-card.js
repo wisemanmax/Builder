@@ -4,6 +4,7 @@ import { $, toast, showScreen } from '../lib/utils.js'
 var _previewCache = {}
 var _previewPid = null
 var _approvalGates = {}
+var _retryGates = {}
 
 export function setPreview(id, code) { _previewCache[id] = code }
 export function clearPreview(id) { delete _previewCache[id] }
@@ -50,3 +51,12 @@ export function requestChanges(pid) {
 }
 
 export function getApprovalGates() { return _approvalGates }
+
+export function waitForRetryDecision(pid) {
+  return new Promise(function (resolve) { _retryGates[pid] = { resolve: resolve } })
+}
+
+export function resolveRetry(pid, doRetry) {
+  if (_retryGates[pid]) _retryGates[pid].resolve(doRetry)
+  delete _retryGates[pid]
+}

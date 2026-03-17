@@ -7,7 +7,7 @@ import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingS
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot } from '../components/message.js'
-import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
+import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
@@ -275,9 +275,23 @@ export function runPipeline(prompt, existingApp, customName) {
                 return runFinalReview()
               })
             } else {
-              updatePS(pid, 8, 'warn', criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' remain after ' + reviewPass + ' passes')
-              addMsg({ role: 'asst', type: 'text', text: 'Final review: ' + criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' could not be fully resolved. Proceeding with best version.' })
-              return Promise.resolve()
+              updatePS(pid, 8, 'wait', criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' remain after ' + reviewPass + ' passes')
+              addMsg({ role: 'asst', type: 'retry-prompt', pid: pid, bugCount: criticalBugs.length })
+              return waitForRetryDecision(pid).then(function (doRetry) {
+                if (doRetry) {
+                  updatePS(pid, 8, 'active', 'Claude is fixing remaining issues…')
+                  var retryFixMsg = 'ISSUES TO FIX:\n' + criticalBugs.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' — ' + (b.location || '') }).join('\n') + '\n\nORIGINAL CODE:\n' + v2
+                  return callClaude(fixSys, retryFixMsg).then(function (fixed) {
+                    v2 = fixed
+                    reviewPass = 0
+                    return runFinalReview()
+                  })
+                } else {
+                  updatePS(pid, 8, 'warn', criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' remain — proceeding')
+                  addMsg({ role: 'asst', type: 'text', text: 'Proceeding with best version.' })
+                  return Promise.resolve()
+                }
+              })
             }
           })
         }
