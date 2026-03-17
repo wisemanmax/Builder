@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ammtvnpo89fx",
+    "name": "Retro Tiles Rules",
+    "linkedThoughtId": "ammtvfgq6nie",
+    "ruleCount": 12,
+    "path": "rules/retro-tiles-rules.json",
+    "createdAt": "2026-03-17T00:31:55.064Z",
+    "updatedAt": "2026-03-17T00:31:55.064Z"
+  },
+  {
+    "id": "ammuff1go6ei",
+    "name": "Hip-Hop Link Tree Rules",
+    "linkedThoughtId": "ammuf7o4505v",
+    "ruleCount": 12,
+    "path": "rules/hip-hop-link-tree-rules.json",
+    "createdAt": "2026-03-17T09:45:02.760Z",
+    "updatedAt": "2026-03-17T09:45:02.760Z"
+  }
+]
