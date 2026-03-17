@@ -168,9 +168,11 @@ export function runPipeline(prompt, existingApp, customName) {
               v2 = currentCode
               addMsg({ role: 'asst', type: 'text', text: 'Validation summary: ' + totalFixed + ' issue' + (totalFixed !== 1 ? 's' : '') + ' addressed across ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + '.' + (finalFails.length > 0 ? ' ' + finalFails.length + ' minor issue' + (finalFails.length !== 1 ? 's' : '') + ' may remain.' : '') })
             }
-          }).catch(function () {
+          }).catch(function (e) {
             v2 = currentCode
+            var errMsg = scrubKeys(e.message || String(e))
             updatePS(pid, 5, 'error', 'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original'))
+            addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
           })
         } else {
           v2 = currentCode
