@@ -134,26 +134,7 @@ export function runPipeline(prompt, existingApp, customName) {
       userMsg = 'Rebuild this app from scratch with the following change:\n\nOriginal app: ' + appDesc + '\n\nChange request: ' + prompt + '\n\nRebuild the complete app with this change applied.'
     } else {
       userMsg = 'BUILD REQUEST: ' + prompt
-        + '\n\nCONTEXT:'
-        + '\n- This will be a single-file HTML app running in a sandboxed iframe'
-        + '\n- It must work completely offline (no backend unless Supabase is configured)'
-        + '\n- Data persistence: localStorage only'
-        + '\n\nRESPONSIVE DESIGN REQUIREMENTS (NON-NEGOTIABLE):'
-        + '\n- Mobile-first: design for 320px minimum, scale up with min-width media queries'
-        + '\n- Required breakpoints: 480px, 768px, 1024px minimum'
-        + '\n- Grids must use auto-fill/auto-fit with minmax() to naturally reflow'
-        + '\n- Navigation must collapse to hamburger/bottom nav on mobile'
-        + '\n- Modals must be full-screen on mobile, centered card on desktop'
-        + '\n- All touch targets 44x44px minimum, inputs 44px+ height with 16px+ font-size'
-        + '\n- Use clamp() for fluid typography'
-        + '\n- No fixed widths on containers — use max-width + width: 100%'
-        + '\n\nQUALITY REQUIREMENTS:'
-        + '\n- Must look like a polished, professional SaaS product'
-        + '\n- Include 5-8 realistic sample/demo data items so the app looks populated on first load'
-        + '\n- Handle edge cases: empty states with helpful CTAs, error states with recovery, loading skeletons'
-        + '\n- Smooth transitions on all view/state changes (200-300ms ease)'
-        + '\n- Complete CSS custom property color system for theming'
-        + '\n- Professional font pairing from Google Fonts'
+        + '\n\nCONTEXT: Single-file HTML app in sandboxed iframe. Offline-only, localStorage for persistence.'
     }
 
     var effectiveSys = SYS_BUILD
@@ -188,7 +169,7 @@ export function runPipeline(prompt, existingApp, customName) {
 
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
     var charCount = 0
-    return callClaudeWithThinkingStream(effectiveSys, userMsg, 4000, function (type, text) {
+    return callClaudeWithThinkingStream(effectiveSys, userMsg, 2000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
     })
   }).then(function (code) {
@@ -246,7 +227,7 @@ export function runPipeline(prompt, existingApp, customName) {
           }
           repairHistory.push({ role: 'user', content: fm })
 
-          return callClaudeMultiTurn(fixSys, repairHistory).then(function (fixed) {
+          return retryStep(function () { return callClaudeMultiTurn(fixSys, repairHistory) }, 2, 'Fix').then(function (fixed) {
             repairHistory.push({ role: 'assistant', content: fixed })
             currentCode = fixed
             totalFixed += allIssues.length
@@ -294,7 +275,7 @@ export function runPipeline(prompt, existingApp, customName) {
       return Promise.resolve()
     }
     updatePS(pid, 6, 'active', 'GPT-4o reviewing for enhancements…')
-    return callGPTReview(v2).then(function (review) {
+    return retryStep(function () { return callGPTReview(v2) }, 2, 'EnhReview').then(function (review) {
       var totalSuggestions = review.enhancements.length + review.bugs.length
       updatePS(pid, 6, 'done', totalSuggestions ? (review.enhancements.length + ' enhancement' + (review.enhancements.length !== 1 ? 's' : '') + ', ' + review.bugs.length + ' bug' + (review.bugs.length !== 1 ? 's' : '')) : 'Code looks great ✓')
       if (review.enhancements.length) {
@@ -320,7 +301,7 @@ export function runPipeline(prompt, existingApp, customName) {
       }
       enhanceMsg += '\n\nORIGINAL CODE:\n' + v2
 
-      return callClaude(withContext(SYS_ENHANCE), enhanceMsg).then(function (enhanced) {
+      return retryStep(function () { return callClaude(withContext(SYS_ENHANCE), enhanceMsg) }, 2, 'Enhance').then(function (enhanced) {
         v2 = enhanced
         updatePS(pid, 7, 'done', 'Enhancements applied ✓')
 
@@ -331,7 +312,7 @@ export function runPipeline(prompt, existingApp, customName) {
 
         function runFinalReview() {
           reviewPass++
-          return callGPT(v2).then(function (bugs) {
+          return retryStep(function () { return callGPT(v2) }, 2, 'FinalReview').then(function (bugs) {
             var criticalBugs = bugs.filter(function (b) { return b.severity === 'high' || b.severity === 'medium' })
             if (criticalBugs.length === 0) {
               updatePS(pid, 8, 'done', (reviewPass > 1 ? 'Clean after ' + reviewPass + ' passes' : 'Code is clean') + ' ✓')
@@ -346,7 +327,7 @@ export function runPipeline(prompt, existingApp, customName) {
             if (reviewPass < MAX_REVIEW_PASSES) {
               updatePS(pid, 8, 'active', 'Sending ' + criticalBugs.length + ' issue' + (criticalBugs.length !== 1 ? 's' : '') + ' back to Claude (pass ' + reviewPass + ')…')
               var fixMsg = 'ISSUES TO FIX:\n' + criticalBugs.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' — ' + (b.location || '') }).join('\n') + '\n\nORIGINAL CODE:\n' + v2
-              return callClaude(fixSys, fixMsg).then(function (fixed) {
+              return retryStep(function () { return callClaude(fixSys, fixMsg) }, 2, 'ReviewFix').then(function (fixed) {
                 v2 = fixed
                 return runFinalReview()
               })
@@ -358,7 +339,7 @@ export function runPipeline(prompt, existingApp, customName) {
                 if (doRetry) {
                   updatePS(pid, 8, 'active', 'Claude is fixing remaining issues…')
                   var retryFixMsg = 'ISSUES TO FIX:\n' + criticalBugs.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' — ' + (b.location || '') }).join('\n') + '\n\nORIGINAL CODE:\n' + v2
-                  return callClaude(fixSys, retryFixMsg).then(function (fixed) {
+                  return retryStep(function () { return callClaude(fixSys, retryFixMsg) }, 2, 'RetryFix').then(function (fixed) {
                     v2 = fixed
                     reviewPass = 0
                     return runFinalReview()
@@ -377,9 +358,10 @@ export function runPipeline(prompt, existingApp, customName) {
       })
     }).catch(function (e) {
       var safeErr = scrubKeys(e.message || String(e))
-      updatePS(pid, 6, 'error', 'Enhancement review failed: ' + safeErr)
-      updatePS(pid, 7, 'skip', 'Skipped — review failed')
-      updatePS(pid, 8, 'skip', 'Skipped — review failed')
+      updatePS(pid, 6, 'warn', 'Enhancement review skipped: ' + safeErr)
+      updatePS(pid, 7, 'skip', 'Skipped — review unavailable')
+      updatePS(pid, 8, 'skip', 'Skipped — review unavailable')
+      addMsg({ role: 'asst', type: 'text', text: 'Enhancement review skipped — continuing with current build.' })
       return Promise.resolve()
     })
   }).then(function () {

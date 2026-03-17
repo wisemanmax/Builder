@@ -44,7 +44,7 @@ export const THINK_ROUND_LABELS = [
   'What to Build', 'Who & How', 'Differentiators', 'Boundaries', 'Confirm & Lock',
 ]
 
-export const MAX_FIX_PASSES = 3
+export const MAX_FIX_PASSES = 2
 
 export const KEY_STORE = {
   ANTH: 'bldr_key',
