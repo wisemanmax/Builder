@@ -29,7 +29,11 @@ export function runPipeline(prompt, existingApp, customName) {
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? ('builder/app-' + appId + '-' + Date.now().toString(36)) : ''
 
-  var v1, v2
+  var v1, v2, specText, rulesText, fixSys
+
+  function withContext(sysPrompt) {
+    return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
+  }
 
   // Step 0 — Branch
   var p = Promise.resolve()
@@ -77,8 +81,8 @@ export function runPipeline(prompt, existingApp, customName) {
     }
 
     var effectiveSys = SYS_BUILD
-    var specText = 'No specification provided'
-    var rulesText = 'No specific rules'
+    specText = 'No specification provided'
+    rulesText = 'No specific rules'
     var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
     if (activeThought) {
       var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
@@ -106,11 +110,6 @@ export function runPipeline(prompt, existingApp, customName) {
       }
     }
 
-    // Helper to inject spec/rules context into fix and enhance prompts
-    function withContext(sysPrompt) {
-      return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
-    }
-
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
     var charCount = 0
     return callClaudeWithThinkingStream(effectiveSys, userMsg, 4000, function (type, text) {
@@ -125,7 +124,7 @@ export function runPipeline(prompt, existingApp, customName) {
     var passNum = 0
     var totalFixed = 0
     var repairHistory = []
-    var fixSys = withContext(SYS_FIX.replace('{INTENT}', prompt))
+    fixSys = withContext(SYS_FIX.replace('{INTENT}', prompt))
 
     function runValidationPass() {
       passNum++
