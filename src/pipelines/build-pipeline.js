@@ -78,10 +78,23 @@ export function runPipeline(prompt, existingApp, customName) {
         + '\n\nCONTEXT:'
         + '\n- This will be a single-file HTML app running in a sandboxed iframe'
         + '\n- It must work completely offline (no backend unless Supabase is configured)'
-        + '\n- Target: mobile-first, 375px minimum width'
         + '\n- Data persistence: localStorage only'
-        + '\n- Include realistic sample/demo data so the app looks populated on first load'
-        + '\n- Handle edge cases: empty states, error states, loading states'
+        + '\n\nRESPONSIVE DESIGN REQUIREMENTS (NON-NEGOTIABLE):'
+        + '\n- Mobile-first: design for 320px minimum, scale up with min-width media queries'
+        + '\n- Required breakpoints: 480px, 768px, 1024px minimum'
+        + '\n- Grids must use auto-fill/auto-fit with minmax() to naturally reflow'
+        + '\n- Navigation must collapse to hamburger/bottom nav on mobile'
+        + '\n- Modals must be full-screen on mobile, centered card on desktop'
+        + '\n- All touch targets 44x44px minimum, inputs 44px+ height with 16px+ font-size'
+        + '\n- Use clamp() for fluid typography'
+        + '\n- No fixed widths on containers — use max-width + width: 100%'
+        + '\n\nQUALITY REQUIREMENTS:'
+        + '\n- Must look like a polished, professional SaaS product'
+        + '\n- Include 5-8 realistic sample/demo data items so the app looks populated on first load'
+        + '\n- Handle edge cases: empty states with helpful CTAs, error states with recovery, loading skeletons'
+        + '\n- Smooth transitions on all view/state changes (200-300ms ease)'
+        + '\n- Complete CSS custom property color system for theming'
+        + '\n- Professional font pairing from Google Fonts'
     }
 
     var effectiveSys = SYS_BUILD
@@ -136,7 +149,7 @@ export function runPipeline(prompt, existingApp, customName) {
 
       updatePS(pid, 3, 'active', 'Running checks' + passLabel + '\u2026')
       var checks = runLocalChecks(currentCode)
-      var criticalFails = checks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'responsive', 'has-main'].indexOf(c.id) === -1 })
+      var criticalFails = checks.filter(function (c) { return !c.passed && ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs'].indexOf(c.id) === -1 })
       addMsg({ role: 'asst', type: 'checks', checks: checks })
       updatePS(pid, 3, criticalFails.length ? 'warn' : 'done',
         criticalFails.length ? (criticalFails.length + ' issue' + (criticalFails.length !== 1 ? 's' : '') + ' found' + passLabel) : 'All checks passed' + passLabel + ' \u2713')
