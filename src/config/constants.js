@@ -22,6 +22,9 @@ export const PIPE_NAMES = [
   'Automated Checks',
   'GPT-4o \u00B7 Audit',
   'Claude \u00B7 Fix',
+  'GPT-4o \u00B7 Enhancement Review',
+  'Claude \u00B7 Enhance',
+  'GPT-4o \u00B7 Final Review',
   '\uD83D\uDDC4 Backend Setup',
   'Push to Branch',
   'Preview',
@@ -31,7 +34,8 @@ export const PIPE_NAMES = [
 
 export const PIPE_ICONS = [
   '\uD83C\uDF3F', '\uD83D\uDD28', '\uD83D\uDCCB', '\uD83D\uDD0D',
-  '\uD83D\uDEE0', '\uD83D\uDDC4\uFE0F', '\u2B06\uFE0F', '\uD83D\uDC41',
+  '\uD83D\uDEE0', '\uD83D\uDCA1', '\u2728', '\uD83D\uDD0E',
+  '\uD83D\uDDC4\uFE0F', '\u2B06\uFE0F', '\uD83D\uDC41',
   '\u2705', '\uD83D\uDD00',
 ]
 
