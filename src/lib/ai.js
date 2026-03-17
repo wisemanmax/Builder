@@ -3,6 +3,25 @@ import { scrubKeys } from './utils.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
 import { SYS_AUDIT, SYS_ENHANCE_REVIEW } from '../config/prompts.js'
 
+var CLAUDE_HEADERS = { 'Content-Type': 'application/json', 'x-api-key': '', 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'anthropic-dangerous-direct-browser-access': 'true' }
+
+function claudeHeaders() {
+  CLAUDE_HEADERS['x-api-key'] = ST.key
+  return CLAUDE_HEADERS
+}
+
+function logCacheUsage(d, label) {
+  if (d && d.usage) {
+    var u = d.usage
+    var cached = u.cache_read_input_tokens || 0
+    var created = u.cache_creation_input_tokens || 0
+    var total = u.input_tokens || 0
+    if (cached > 0 || created > 0) {
+      console.log('[Cache ' + (label || 'Claude') + '] input=' + total + ' cached=' + cached + ' created=' + created + ' savings~' + (total > 0 ? Math.round(cached / total * 100) : 0) + '%')
+    }
+  }
+}
+
 export function fetchWithTimeout(url, opts, ms) {
   ms = ms || 120000
   _validateKeyedRequest(url, opts)
@@ -41,12 +60,13 @@ export function callClaude(sys, msg, temperature) {
   temperature = temperature !== undefined ? temperature : 0.3
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
   }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    logCacheUsage(d, 'callClaude')
     var code = (d.content && d.content[0] && d.content[0].text) || ''
     code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     var docIdx = code.indexOf('<!DOCTYPE')
@@ -66,12 +86,13 @@ export function callClaudeWithThinking(sys, msg, thinkingBudget) {
   var maxTokens = thinkingBudget + 16000
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
   }, 180000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    logCacheUsage(d, 'callClaudeWithThinking')
     var code = ''
     if (d.content && Array.isArray(d.content)) {
       for (var i = 0; i < d.content.length; i++) {
@@ -91,12 +112,13 @@ export function callClaudeRaw(sys, msg, maxTokens) {
   maxTokens = maxTokens || 4000
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
   }, 60000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    logCacheUsage(d, 'callClaudeRaw')
     var raw = (d.content && d.content[0] && d.content[0].text) || ''
     return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
   }).catch(function (e) {
@@ -109,12 +131,13 @@ export function callClaudeMultiTurn(sys, messages, temperature) {
   temperature = temperature !== undefined ? temperature : 0.3
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: messages }),
   }, 120000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    logCacheUsage(d, 'callClaudeMultiTurn')
     var code = (d.content && d.content[0] && d.content[0].text) || ''
     code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     var docIdx = code.indexOf('<!DOCTYPE')
@@ -133,12 +156,13 @@ export function callClaudeRawMultiTurn(sys, messages, maxTokens) {
   maxTokens = maxTokens || 4000
   return fetchWithRetry('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: messages }),
   }, 60000).then(function (r) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    logCacheUsage(d, 'callClaudeRawMultiTurn')
     var raw = (d.content && d.content[0] && d.content[0].text) || ''
     return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
   }).catch(function (e) {
@@ -180,6 +204,10 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) 
               } else if (evt.delta && evt.delta.type === 'thinking_delta' && evt.delta.thinking) {
                 if (onChunk) onChunk('thinking', evt.delta.thinking)
               }
+            } else if (evt.type === 'message_delta' && evt.usage) {
+              logCacheUsage({ usage: evt.usage }, 'callClaudeStream')
+            } else if (evt.type === 'message_start' && evt.message) {
+              logCacheUsage(evt.message, 'callClaudeStream')
             } else if (evt.type === 'error') {
               throw new Error('Claude stream error: ' + (evt.error && evt.error.message || 'unknown'))
             }
@@ -198,7 +226,7 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk) 
   var url = 'https://api.anthropic.com/v1/messages'
   var opts = {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, stream: true, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
   }
 
