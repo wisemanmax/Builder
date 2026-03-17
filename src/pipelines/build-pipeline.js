@@ -96,7 +96,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? ('builder/app-' + appId + '-' + Date.now().toString(36)) : ''
 
-  var v1, v2, specText, rulesText, fixSys
+  var v1, v2, specText, rulesText, fixSys, thinkingText
 
   function withContext(sysPrompt) {
     return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
@@ -176,7 +176,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
     if (images && images.length) { userMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — study them carefully and replicate the design, layout, colors, and style as closely as possible]' }
     var charCount = 0
-    var thinkingText = ''
+    thinkingText = ''
     return callClaudeWithThinkingStream(effectiveSys, userMsg, 2000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
       else if (type === 'thinking') { thinkingText += text }
