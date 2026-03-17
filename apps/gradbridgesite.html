@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradeBridge - Streamline Your Grading Process</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --color-primary: #2563eb;
+            --color-primary-dark: #1d4ed8;
+            --color-secondary: #64748b;
+            --color-accent: #0ea5e9;
+            --color-background: #0f172a;
+            --color-surface: #1e293b;
+            --color-surface-light: #334155;
+            --color-text: #f8fafc;
+            --color-text-secondary: #e2e8f0;
+            --color-text-muted: #cbd5e1;
+            --color-border: #475569;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --border-radius: 0.5rem;
+            --border-radius-lg: 0.75rem;
+            --border-radius-xl: 1rem;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            
+            --container-max-width: min(1200px, 100vw);
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+            font-size: clamp(14px, 1rem, 18px);
+        }
+        
+        .container {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+            width: 100%;
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 1000;
+            transition: background-color 200ms ease;
+            width: 100%;
+        }
+        
+        .header-scrolled {
+            background: rgba(15, 23, 42, 0.98);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md) 0;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+        
+        nav {
+            display: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: var(--spacing-xl);
+        }
+        
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 200ms ease;
+            position: relative;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--color-text);
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-primary);
+            border-radius: 1px;
+        }
+        
+        .mobile-menu-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: none;
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            transition: all 200ms ease;
+            position: relative;
+        }
+        
+        .mobile-menu-toggle:focus {
+            outline: 3px solid var(--color-primary);
+            outline-offset: 2px;
+            border-color: var(--color-primary);
+        }
+        
+        .mobile-menu-toggle:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: var(--color-primary);
+        }
+        
+        .mobile-menu-toggle[aria-expanded="true"] {
+            background: rgba(37, 99, 235, 0.15);
+            border-color: var(--color-primary);
+        }
+        
+        .hamburger-line {
+            width: 24px;
+            height: 2px;
+            background: var(--color-text);
+            transition: all 200ms ease;
+        }
+        
+        .mobile-menu-open .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .mobile-menu-open .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-open .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--spacing-lg) 0;
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            transition: all 200ms ease;
+            width: 100%;
+        }
+        
+        .mobile-menu:not(.open) {
+            transform: translateY(-100%);
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .mobile-nav-links {
+            list-style: none;
+            padding: 0 var(--spacing-md);
+        }
+        
+        .mobile-nav-links li {
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .mobile-nav-links li:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: calc(80px + var(--spacing-3xl)) 0 var(--spacing-3xl);
+            text-align: center;
+            background: linear-gradient(135deg, var(--color-background) 0%, var(--color-surface) 100%);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            opacity: 1;
+            transition: opacity 300ms ease;
+        }
+        
+        .hero.section-transition {
+            opacity: 0;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(14, 165, 233, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.1;
+            color: var(--color-text);
+        }
+        
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-2xl);
+            max-width: min(600px, 100%);
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            align-items: center;
+            width: 100%;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md) var(--spacing-xl);
+            border-radius: var(--border-radius-lg);
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 200ms ease;
+            font-size: 1rem;
+            min-height: 44px;
+            min-width: 160px;
+            width: 100%;
+            max-width: 280px;
+            position: relative;
+        }
+        
+        .btn:focus {
+            outline: 3px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 2px solid var(--color-border);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .btn-loading span {
+            opacity: 0;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: var(--spacing-3xl) 0;
+            width: 100%;
+            opacity: 1;
+            transition: opacity 300ms ease;
+        }
+        
+        .features.section-transition {
+            opacity: 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--spacing-3xl);
+            width: 100%;
+        }
+        
+        .section-header h2 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text);
+        }
+        
+        .section-header p {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            max-width: min(600px, 100%);
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-xl);
+            width: 100%;
+        }
+        
+        .features-grid:empty::after {
+            content: 'Features will be available soon.';
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--color-text-muted);
+            font-style: italic;
+            padding: var(--spacing-3xl);
+        }
+        
+        .feature-card {
+            background: var(--color-surface);
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius-xl);
+            border: 1px solid var(--color-border);
+            transition: all 200ms ease;
+            width: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-primary);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            border-radius: var(--border-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-lg);
+            font-size: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text);
+        }
+        
+        .feature-card p {
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* Testimonials Section */
+        .testimonials {
+            padding: var(--spacing-3xl) 0;
+            background: var(--color-surface);
+            width: 100%;
+            opacity: 1;
+            transition: opacity 300ms ease;
+        }
+        
+        .testimonials.section-transition {
+            opacity: 0;
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-xl);
+            width: 100%;
+        }
+        
+        .testimonials-grid:empty::after {
+            content: 'Testimonials will be available soon.';
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--color-text-muted);
+            font-style: italic;
+            padding: var(--spacing-3xl);
+        }
+        
+        .testimonial-card {
+            background: var(--color-background);
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius-xl);
+            border: 1px solid var(--color-border);
+            width: 100%;
+        }
+        
+        .testimonial-quote {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text);
+            font-style: italic;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+        
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .author-info h4 {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        
+        .author-info p {
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--color-background);
+            padding: var(--spacing-3xl) 0 var(--spacing-xl);
+            border-top: 1px solid var(--color-border);
+            width: 100%;
+            opacity: 1;
+            transition: opacity 300ms ease;
+        }
+        
+        footer.section-transition {
+            opacity: 0;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-2xl);
+            width: 100%;
+        }
+        
+        .footer-section h3 {
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text);
+        }
+        
+        .contact-form {
+            display: grid;
+            gap: var(--spacing-md);
+            width: 100%;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            width: 100%;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: var(--color-text);
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            padding: var(--spacing-md);
+            border: 2px solid var(--color-border);
+            border-radius: var(--border-radius);
+            background: var(--color-surface);
+            color: var(--color-text);
+            font-family: inherit;
+            font-size: 1rem;
+            min-height: 44px;
+            transition: border-color 200ms ease;
+            width: 100%;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: 3px solid var(--color-primary);
+            outline-offset: 2px;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-error {
+            color: var(--color-error);
+            font-size: 0.875rem;
+            margin-top: var(--spacing-xs);
+        }
+        
+        .footer-bottom {
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-xl);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+            color: var(--color-text-muted);
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: var(--spacing-md);
+            color: white;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 300ms ease;
+            max-width: calc(100vw - 2rem);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background: var(--color-success);
+        }
+        
+        .toast.error {
+            background: var(--color-error);
+        }
+        
+        /* Loading indicator */
+        .section-loading {
+            position: relative;
+        }
+        
+        .section-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 32px;
+            height: 32px;
+            margin: -16px 0 0 -16px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 10;
+        }
+        
+        /* Responsive Design */
+        @media (min-width: 320px) {
+            .mobile-menu {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 480px) {
+            .container {
+                padding: 0 var(--spacing-lg);
+            }
+            
+            .cta-buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .btn {
+                width: auto;
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (min-width: 768px) {
+            nav {
+                display: block;
+            }
+            
+            .mobile-menu-toggle {
+                display: none;
+            }
+            
+            .hero {
+                padding: calc(80px + var(--spacing-3xl)) 0 calc(var(--spacing-3xl) * 1.5);
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+            
+            .footer-content {
+                grid-template-columns: 2fr 1fr;
+                align-items: start;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container {
+                padding: 0 var(--spacing-xl);
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 1440px) {
+            .container {
+                padding: 0 var(--spacing-2xl);
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .animate-in {
+            animation: fadeInUp 600ms ease forwards;
+        }
+        
+        /* Focus styles for better accessibility */
+        *:focus {
+            outline: 3px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --color-border: #94a3b8;
+                --color-text-secondary: #f1f5f9;
+                --color-text: #ffffff;
+            }
+            
+            .hero h1 {
+                color: #ffffff;
+            }
+            
+            .section-header p {
+                color: #ffffff;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <a href="#" class="logo" aria-label="GradeBridge homepage">GradeBridge</a>
+                    <nav>
+                        <ul class="nav-links">
+                            <li><a href="#home" class="nav-link active" aria-label="Navigate to home section">Home</a></li>
+                            <li><a href="#features" class="nav-link" aria-label="Navigate to features section">Features</a></li>
+                            <li><a href="#testimonials" class="nav-link" aria-label="Navigate to testimonials section">Testimonials</a></li>
+                            <li><a href="#contact" class="nav-link" aria-label="Navigate to contact section">Contact</a></li>
+                        </ul>
+                    </nav>
+                    <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                    <div class="mobile-menu">
+                        <ul class="mobile-nav-links">
+                            <li><a href="#home" class="mobile-nav-link" aria-label="Navigate to home section">Home</a></li>
+                            <li><a href="#features" class="mobile-nav-link" aria-label="Navigate to features section">Features</a></li>
+                            <li><a href="#testimonials" class="mobile-nav-link" aria-label="Navigate to testimonials section">Testimonials</a></li>
+                            <li><a href="#contact" class="mobile-nav-link" aria-label="Navigate to contact section">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section id="home" class="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1>Streamline Your Grading Process</h1>
+                        <p>Save time, provide better feedback, and transform how you evaluate student work with our intelligent grading platform.</p>
+                        <div class="cta-buttons">
+                            <a href="#" class="btn btn-primary" aria-label="Start your free trial of GradeBridge">Start Free Trial</a>
+                            <a href="#" class="btn btn-secondary" aria-label="Watch a demo of GradeBridge">Watch Demo</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="features" class="features">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>Powerful Features for Modern Educators</h2>
+                        <p>Everything you need to grade efficiently and provide meaningful feedback to your students.</p>
+                    </div>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon" aria-hidden="true">🚀</div>
+                            <h3>Smart Auto-Grading</h3>
+                            <p>Leverage AI-powered grading for objective assessments, saving hours of manual work while maintaining accuracy.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" aria-hidden="true">💬</div>
+                            <h3>Rich Feedback Tools</h3>
+                            <p>Provide detailed, personalized feedback with audio comments, annotations, and rubric-based evaluations.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" aria-hidden="true">📊</div>
+                            <h3>Analytics Dashboard</h3>
+                            <p>Track student progress, identify learning gaps, and make data-driven decisions with comprehensive analytics.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" aria-hidden="true">🔒</div>
+                            <h3>Secure & Private</h3>
+                            <p>Bank-level security ensures your student data is protected with end-to-end encryption and FERPA compliance.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" aria-hidden="true">🔄</div>
+                            <h3>LMS Integration</h3>
+                            <p>Seamlessly integrate with Canvas, Blackboard, Google Classroom, and other popular learning management systems.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" aria-hidden="true">📱</div>
+                            <h3>Mobile Ready</h3>
+                            <p>Grade anywhere, anytime with our responsive design and dedicated mobile apps for iOS and Android.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="testimonials" class="testimonials">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>Trusted by Educators Worldwide</h2>
+                        <p>See what teachers and professors are saying about their experience with GradeBridge.</p>
+                    </div>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card">
+                            <p class="testimonial-quote">"GradeBridge has transformed how I approach grading. I can now provide more detailed feedback in half the time, and my students are more engaged with their learning."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar" aria-hidden="true">SM</div>
+                                <div class="author-info">
+                                    <h4>Sarah Mitchell</h4>
+                                    <p>High School English Teacher</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-quote">"The analytics features help me identify students who need extra support before they fall behind. It's like having a teaching assistant that never sleeps."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar" aria-hidden="true">DR</div>
+                                <div class="author-info">
+                                    <h4>Dr. Robert Chen</h4>
+                                    <p>University Mathematics Professor</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-quote">"The mobile app lets me grade during my commute. I've never been more efficient with my time, and my work-life balance has improved dramatically."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar" aria-hidden="true">AL</div>
+                                <div class="author-info">
+                                    <h4>Amanda Lopez</h4>
+                                    <p>Middle School Science Teacher</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer id="contact">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Ready to Transform Your Grading?</h3>
+                        <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">Join thousands of educators who have already streamlined their grading process with GradeBridge.</p>
+                        <a href="#" class="btn btn-primary" aria-label="Start your free trial of GradeBridge">Start Your Free Trial</a>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Get in Touch</h3>
+                        <form class="contact-form" id="contactForm" aria-label="Contact form">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required aria-describedby="name-error">
+                                <div id="name-error" class="form-error" style="display: none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required aria-describedby="email-error">
+                                <div id="email-error" class="form-error" style="display: none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message</label>
+                                <textarea id="message" name="message" required placeholder="Tell us about your grading challenges..." aria-describedby="message-error"></textarea>
+                                <div id="message-error" class="form-error" style="display: none;"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" aria-label="Send your message">
+                                <span>Send Message</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 GradeBridge. All rights reserved. | Privacy Policy | Terms of Service</p>
+                </div>
+            </div>
+        </footer>
+
+        <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+    </div>
+
+    <script>
+        // Application State
+        const state = {
+            mobileMenuOpen: false,
+            scrollY: 0,
+            activeSection: 'home',
+            formSubmissions: JSON.parse(localStorage.getItem('gradebridge_submissions') || '[]'),
+            isSubmitting: false
+        };
+
+        // DOM Elements
+        let elements = {};
+
+        // Utility Functions
+        const debounce = (func, wait) => {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        };
+
+        const showToast = (message, type = 'success') => {
+            const toast = elements.toast;
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        };
+
+        const saveToStorage = () => {
+            try {
+                localStorage.setItem('gradebridge_submissions', JSON.stringify(state.formSubmissions));
+                return true;
+            } catch (error) {
+                console.error('Failed to save to localStorage:', error);
+                showToast('Failed to save your message. Please try again.', 'error');
+                return false;
+            }
+        };
+
+        const smoothScrollTo = (targetId) => {
+            const target = document.getElementById(targetId.replace('#', ''));
+            if (target) {
+                const headerHeight = elements.header.offsetHeight;
+                const targetPosition = target.offsetTop - headerHeight - 20;
+                
+                // Add loading state to target section
+                target.classList.add('section-loading');
+                
+                // Add section transition effect
+                const sections = document.querySelectorAll('section, footer');
+                sections.forEach(section => section.classList.add('section-transition'));
+                
+                setTimeout(() => {
+                    sections.forEach(section => section.classList.remove('section-transition'));
+                    target.classList.remove('section-loading');
+                }, 150);
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        };
+
+        const setFormLoading = (isLoading) => {
+            const form = elements.contactForm;
+            const submitButton = form.querySelector('button[type="submit"]');
+            
+            if (isLoading) {
+                submitButton.disabled = true;
+                submitButton.classList.add('btn-loading');
+                submitButton.setAttribute('aria-busy', 'true');
+            } else {
+                submitButton.disabled = false;
+                submitButton.classList.remove('btn-loading');
+                submitButton.setAttribute('aria-busy', 'false');
+            }
+        };
+
+        const clearFormErrors = () => {
+            const errorElements = elements.contactForm.querySelectorAll('.form-error');
+            errorElements.forEach(error => {
+                error.style.display = 'none';
+                error.textContent = '';
+            });
+        };
+
+        const showFormError = (fieldName, message) => {
+            const errorElement = document.getElementById(`${fieldName}-error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        };
+
+        // Event Handlers
+        const handleMobileMenuToggle = () => {
+            state.mobileMenuOpen = !state.mobileMenuOpen;
+            render();
+        };
+
+        const handleClickOutside = (e) => {
+            if (state.mobileMenuOpen && 
+                !e.target.closest('.mobile-menu') && 
+                !e.target.closest('.mobile-menu-toggle')) {
+                state.mobileMenuOpen = false;
+                render();
+            }
+        };
+
+        const handleNavClick = (e) => {
+            e.preventDefault();
+            const href = e.target.getAttribute('href');
+            
+            if (href && href.startsWith('#')) {
+                state.activeSection = href.replace('#', '');
+                state.mobileMenuOpen = false;
+                render();
+                smoothScrollTo(href);
+            }
+        };
+
+        const handleScroll = debounce(() => {
+            state.scrollY = window.scrollY;
+            
+            // Update header appearance
+            if (state.scrollY > 50) {
+                elements.header.classList.add('header-scrolled');
+            } else {
+                elements.header.classList.remove('header-scrolled');
+            }
+            
+            // Update active section based on scroll position
+            const sections = ['home', 'features', 'testimonials', 'contact'];
+            const headerHeight = elements.header.offsetHeight;
+            
+            for (const sectionId of sections) {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const rect = section.getBoundingClientRect();
+                    const sectionTop = rect.top + window.scrollY - headerHeight - 100;
+                    const sectionBottom = sectionTop + section.offsetHeight;
+                    
+                    if (window.scrollY >= sectionTop && window.scrollY < sectionBottom) {
+                        if (state.activeSection !== sectionId) {
+                            state.activeSection = sectionId;
+                            render();
+                        }
+                        break;
+                    }
+                }
+            }
+        }, 100);
+
+        const handleFormSubmit = async (e) => {
+            e.preventDefault();
+            
+            if (state.isSubmitting) return;
+            
+            state.isSubmitting = true;
+            setFormLoading(true);
+            clearFormErrors();
+            
+            try {
+                const formData = new FormData(e.target);
+                const submission = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    message: formData.get('message')
+                };
+                
+                // Validate form data
+                let hasErrors = false;
+                
+                if (!submission.name.trim()) {
+                    showFormError('name', 'Name is required');
+                    hasErrors = true;
+                }
+                
+                if (!submission.email.trim()) {
+                    showFormError('email', 'Email is required');
+                    hasErrors = true;
+                } else {
+                    // Email validation
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(submission.email)) {
+                        showFormError('email', 'Please enter a valid email address');
+                        hasErrors = true;
+                    }
+                }
+                
+                if (!submission.message.trim()) {
+                    showFormError('message', 'Message is required');
+                    hasErrors = true;
+                }
+                
+                if (hasErrors) {
+                    showToast('Please correct the errors below', 'error');
+                    return;
+                }
+                
+                // Simulate network delay and potential network error
+                await new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // Simulate 10% chance of network error
+                        if (Math.random() < 0.1) {
+                            reject(new Error('Network error'));
+                        } else {
+                            resolve();
+                        }
+                    }, 1000);
+                });
+                
+                // Save submission
+                state.formSubmissions.push(submission);
+                const saved = saveToStorage();
+                
+                if (saved) {
+                    // Reset form
+                    e.target.reset();
+                    showToast('Thank you for your message! We\'ll get back to you soon.');
+                }
+                
+            } catch (error) {
+                console.error('Form submission error:', error);
+                if (error.message === 'Network error') {
+                    showToast('Network error. Please check your connection and try again.', 'error');
+                } else {
+                    showToast('An error occurred. Please try again.', 'error');
+                }
+            } finally {
+                state.isSubmitting = false;
+                setFormLoading(false);
+            }
+        };
+
+        // Render Functions
+        const renderNavigation = () => {
+            // Update desktop nav
+            const navLinks = elements.navLinks?.querySelectorAll('.nav-link') || [];
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href')?.replace('#', '');
+                link.classList.toggle('active', href === state.activeSection);
+            });
+            
+            // Update mobile nav
+            const mobileNavLinks = elements.mobileNavLinks?.querySelectorAll('.mobile-nav-link') || [];
+            mobileNavLinks.forEach(link => {
+                const href = link.getAttribute('href')?.replace('#', '');
+                link.classList.toggle('active', href === state.activeSection);
+            });
+        };
+
+        const renderMobileMenu = () => {
+            if (elements.mobileMenuToggle && elements.mobileMenu) {
+                elements.mobileMenuToggle.classList.toggle('mobile-menu-open', state.mobileMenuOpen);
+                elements.mobileMenu.classList.toggle('open', state.mobileMenuOpen);
+                
+                // Update ARIA attributes
+                elements.mobileMenuToggle.setAttribute('aria-expanded', state.mobileMenuOpen.toString());
+            }
+        };
+
+        const render = () => {
+            renderNavigation();
+            renderMobileMenu();
+        };
+
+        // Animation Observer
+        const observeAnimations = () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            const animateElements = document.querySelectorAll('.feature-card, .testimonial-card');
+            animateElements.forEach(el => observer.observe(el));
+        };
+
+        // Event Delegation
+        const setupEventListeners = () => {
+            const app = document.getElementById('app');
+            
+            app.addEventListener('click', (e) => {
+                // Mobile menu toggle
+                if (e.target.closest('.mobile-menu-toggle')) {
+                    handleMobileMenuToggle();
+                }
+                
+                // Navigation links
+                if (e.target.matches('.nav-link, .mobile-nav-link')) {
+                    handleNavClick(e);
+                }
+                
+                // Click outside mobile menu
+                handleClickOutside(e);
+            });
+            
+            app.addEventListener('submit', (e) => {
+                if (e.target.matches('#contactForm')) {
+                    handleFormSubmit(e);
+                }
+            });
+            
+            // Scroll event
+            window.addEventListener('scroll', handleScroll);
+            
+            // Keyboard navigation
+            app.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && state.mobileMenuOpen) {
+                    state.mobileMenuOpen = false;
+                    render();
+                }
+            });
+        };
+
+        // Initialize Application
+        const init = () => {
+            // Cache DOM elements
+            elements = {
+                header: document.querySelector('header'),
+                navLinks: document.querySelector('.nav-links'),
+                mobileNavLinks: document.querySelector('.mobile-nav-links'),
+                mobileMenuToggle: document.querySelector('.mobile-menu-toggle'),
+                mobileMenu: document.querySelector('.mobile-menu'),
+                toast: document.getElementById('toast'),
+                contactForm: document.getElementById('contactForm')
+            };
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Initialize animations
+            observeAnimations();
+            
+            // Initial render
+            render();
+            
+            // Handle initial scroll position
+            handleScroll();
+            
+            console.log('GradeBridge homepage initialized');
+        };
+
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
