@@ -3,12 +3,14 @@ import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/uti
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
 import { SYS_BUILD, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../config/prompts.js'
+import { injectProfileContext, mergeRulesWithProfile } from '../lib/profile-context.js'
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callGPT, callGPTReview } from '../lib/ai.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
 import { persistBuildSession, clearBuildSession } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
+import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
@@ -162,11 +164,13 @@ export function runPipeline(prompt, existingApp, customName, images) {
     var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
     if (activeThought) {
       var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
-      if (linkedRules) {
-        rulesText = 'MUST DO:\n' + (linkedRules.mustRules || []).map(function (r) { return '- ' + r }).join('\n')
-          + '\nMUST NOT DO:\n' + (linkedRules.mustNotRules || []).map(function (r) { return '- ' + r }).join('\n')
-        if (linkedRules.niceToHave && linkedRules.niceToHave.length) {
-          rulesText += '\nNICE TO HAVE:\n' + (linkedRules.niceToHave || []).map(function (r) { return '- ' + r }).join('\n')
+      // Merge profile global rules with per-thought project rules
+      var merged = mergeRulesWithProfile(linkedRules)
+      if (merged.mustRules.length || merged.mustNotRules.length) {
+        rulesText = 'MUST DO:\n' + merged.mustRules.map(function (r) { return '- ' + r }).join('\n')
+          + '\nMUST NOT DO:\n' + merged.mustNotRules.map(function (r) { return '- ' + r }).join('\n')
+        if (merged.niceToHave.length) {
+          rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
         }
         effectiveSys += '\n\nUSER RULES (follow these constraints strictly):\n' + rulesText
       }
@@ -185,6 +189,8 @@ export function runPipeline(prompt, existingApp, customName, images) {
         userMsg = 'Build this app based on the specification above.\n\nApp Name: ' + (activeThought.brief.name || customName || 'My App') + '\n\nAdditional notes from user: ' + prompt
       }
     }
+    // Inject profile context (org identity, global rules if no thought, learned preferences)
+    effectiveSys = injectProfileContext(effectiveSys)
 
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
     if (images && images.length) { userMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — study them carefully and replicate the design, layout, colors, and style as closely as possible]' }
@@ -490,6 +496,8 @@ export function runPipeline(prompt, existingApp, customName, images) {
         + '<button onclick="openProjectSheet(\'' + appId + '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>'
         + '</div>'
     })
+    // Show feedback card if a profile is active
+    return showFeedbackCard(appId, appName, prompt)
   }).catch(function (err) {
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)

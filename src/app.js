@@ -16,6 +16,10 @@ import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, re
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
 import { openSettings, initSettings } from './screens/settings.js'
+import { openOrgThink, closeOrgThink, sendOrgMsg, orgOptionSelect, finishOrgThink, refineOrgThink, initOrgThinkSheet } from './screens/org-think.js'
+import { renderProfileChip, showProfilePicker, initProfilePicker, cycleProfile } from './components/profile-switcher.js'
+import { initFeedbackCard } from './components/feedback-card.js'
+import { renderProfilesSettings, initProfilesSettings } from './screens/profiles.js'
 import { selfUpdateBuilder } from './pipelines/builder-plus.js'
 import { pullFromGitHub } from './lib/github.js'
 import { pullFromSupabase } from './lib/storage.js'
@@ -53,7 +57,7 @@ export function init() {
 
   // Initial screen
   if (ST.key) {
-    showScreen('home'); renderGrid()
+    showScreen('home'); renderGrid(); renderProfileChip()
     // Check for interrupted builds after a short delay to let UI settle
     setTimeout(function () {
       var interrupted = checkInterruptedBuild()
@@ -74,8 +78,12 @@ export function init() {
   initOnboarding()
   initHome()
   initThinkSheet()
+  initOrgThinkSheet()
   initStudio()
   initSettings()
+  initFeedbackCard()
+  initProfilePicker()
+  initProfilesSettings()
   initContextMenu(openApp, openProjectSheet, openBuilder, delApp)
   initPipelineToggle()
 
@@ -155,6 +163,14 @@ export function init() {
   window.editCurrentApp = editCurrentApp
   window.openPreview = openPreview
   window.renderGrid = renderGrid
+  window.openOrgThink = openOrgThink
+  window.closeOrgThink = closeOrgThink
+  window.sendOrgMsg = sendOrgMsg
+  window.orgOptionSelect = orgOptionSelect
+  window.finishOrgThink = finishOrgThink
+  window.refineOrgThink = refineOrgThink
+  window.showProfilePicker = showProfilePicker
+  window.cycleProfile = cycleProfile
   window.selfUpdateBuilder = selfUpdateBuilder
   window.pullFromGitHub = pullFromGitHub
   window.syncFromGitHub = function () {
