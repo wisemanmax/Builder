@@ -52,6 +52,7 @@ export const KEY_STORE = {
   GH_TOKEN: 'bldr_ghToken',
   GH_USER: 'bldr_ghUser',
   GH_REPO: 'bldr_ghRepo',
+  GH_DOMAIN: 'bldr_ghDomain',
   SB_URL: 'bldr_sbUrl',
   SB_ANON: 'bldr_sbAnon',
   SB_ON: 'bldr_sbOn',

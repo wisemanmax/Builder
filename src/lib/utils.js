@@ -86,6 +86,6 @@ export function fallbackCopy(text, label) {
   } catch (e) { toast('Could not copy', 4000) }
 }
 
-export function ghPageUrl(id) { return ST.ghUser && ST.ghRepo ? 'https://' + ST.ghUser + '.github.io/' + ST.ghRepo + '/apps/' + id + '.html' : '' }
+export function ghPageUrl(id) { return ST.ghCustomDomain ? 'https://' + ST.ghCustomDomain + '/apps/' + id + '.html' : ST.ghUser && ST.ghRepo ? 'https://' + ST.ghUser + '.github.io/' + ST.ghRepo + '/apps/' + id + '.html' : '' }
 export function ghApiUrl(path) { return 'https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/contents/' + path }
 export function ghHeaders() { return { 'Authorization': 'token ' + ST.ghToken, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' } }

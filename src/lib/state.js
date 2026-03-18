@@ -3,7 +3,7 @@ import { KEY_STORE } from '../config/constants.js'
 export const ST = {
   apps: [],
   key: '', gptKey: '',
-  ghToken: '', ghUser: '', ghRepo: '',
+  ghToken: '', ghUser: '', ghRepo: '', ghCustomDomain: '',
   sbUrl: '', sbAnon: '', sbEnabled: false, auditEnabled: true,
   backendEnabled: false,
   website2Provider: 'claude',
@@ -68,6 +68,7 @@ export function hydrate() {
   ST.ghToken = localStorage.getItem(KEY_STORE.GH_TOKEN) || ''
   ST.ghUser = localStorage.getItem(KEY_STORE.GH_USER) || ''
   ST.ghRepo = localStorage.getItem(KEY_STORE.GH_REPO) || ''
+  ST.ghCustomDomain = localStorage.getItem(KEY_STORE.GH_DOMAIN) || ''
   ST.sbUrl = localStorage.getItem(KEY_STORE.SB_URL) || ''
   ST.sbAnon = localStorage.getItem(KEY_STORE.SB_ANON) || ''
   ST.sbEnabled = localStorage.getItem(KEY_STORE.SB_ON) === 'true'
@@ -83,6 +84,7 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.GH_TOKEN, ST.ghToken)
   localStorage.setItem(KEY_STORE.GH_USER, ST.ghUser)
   localStorage.setItem(KEY_STORE.GH_REPO, ST.ghRepo)
+  localStorage.setItem(KEY_STORE.GH_DOMAIN, ST.ghCustomDomain)
   localStorage.setItem(KEY_STORE.SB_URL, ST.sbUrl)
   localStorage.setItem(KEY_STORE.SB_ANON, ST.sbAnon)
   localStorage.setItem(KEY_STORE.SB_ON, String(ST.sbEnabled))
