@@ -393,6 +393,142 @@ export function callGPT(code) {
   })
 }
 
+// --- GPT equivalents for Website2 provider toggle ---
+
+function _gptBuildUserContent(msg, images) {
+  if (!images || !images.length) return [{ type: 'text', text: msg }]
+  var content = []
+  for (var i = 0; i < images.length; i++) {
+    content.push({ type: 'image_url', image_url: { url: 'data:' + images[i].mediaType + ';base64,' + images[i].base64 } })
+  }
+  content.push({ type: 'text', text: msg })
+  return content
+}
+
+export function callGPTRaw2(sys, msg, maxTokens, images) {
+  maxTokens = maxTokens || 4000
+  var userContent = (images && images.length) ? _gptBuildUserContent(msg, images) : msg
+  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }, { role: 'user', content: userContent }] }),
+  }, 120000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
+    return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('GPT:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'GPT'))
+  })
+}
+
+export function callGPTMultiTurn2(sys, messages, temperature) {
+  temperature = temperature !== undefined ? temperature : 0.3
+  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 16000, temperature: temperature, messages: [{ role: 'system', content: sys }].concat(messages) }),
+  }, 300000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+    return r.json()
+  }).then(function (d) {
+    var code = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
+    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+    var docIdx = code.indexOf('<!DOCTYPE')
+    if (docIdx < 0) docIdx = code.indexOf('<!doctype')
+    if (docIdx < 0) docIdx = code.indexOf('<html')
+    if (docIdx > 0) code = code.substring(docIdx)
+    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0 && code.indexOf('<!doctype') < 0) throw new Error('GPT returned an unexpected response format')
+    return code
+  }).catch(function (e) {
+    if (e.message && e.message.indexOf('GPT:') === 0) throw e
+    throw new Error(classifyFetchError(e, 'GPT'))
+  })
+}
+
+export function callGPTWithStream(sys, msg, onChunk, images) {
+  var userContent = (images && images.length) ? _gptBuildUserContent(msg, images) : msg
+  var url = 'https://api.openai.com/v1/chat/completions'
+  var opts = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 16000, stream: true, temperature: 0.3, messages: [{ role: 'system', content: sys }, { role: 'user', content: userContent }] }),
+  }
+
+  _validateKeyedRequest(url, opts)
+
+  function parseSSE(responseBody) {
+    var reader = responseBody.getReader()
+    var decoder = new TextDecoder()
+    var buffer = ''
+    var fullText = ''
+
+    function processChunks() {
+      return reader.read().then(function (result) {
+        if (result.done) return fullText
+        buffer += decoder.decode(result.value, { stream: true })
+        var lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim()
+          if (line.indexOf('data: ') !== 0) continue
+          var data = line.substring(6)
+          if (data === '[DONE]') continue
+          try {
+            var evt = JSON.parse(data)
+            if (evt.choices && evt.choices[0] && evt.choices[0].delta && evt.choices[0].delta.content) {
+              var chunk = evt.choices[0].delta.content
+              fullText += chunk
+              if (onChunk) onChunk('text', chunk)
+            }
+          } catch (parseErr) {}
+        }
+        return processChunks()
+      })
+    }
+    return processChunks()
+  }
+
+  function attemptStream(n) {
+    return _nativeFetch.call(window, url, opts).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+      return parseSSE(r.body)
+    }).then(function (code) {
+      code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+      if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('GPT returned an unexpected response format')
+      return code
+    }).catch(function (e) {
+      if (e.message && e.message.indexOf('GPT:') === 0) throw e
+      var msg2 = String(e && e.message || e || '').toLowerCase()
+      var isRetryable = msg2.indexOf('failed to fetch') >= 0 || msg2.indexOf('load failed') >= 0 || msg2.indexOf('network') >= 0 || msg2.indexOf('aborted') >= 0 || msg2.indexOf('timed out') >= 0
+      if (isRetryable && n < 3) {
+        var delay = Math.min(2000 * Math.pow(2, n), 16000)
+        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
+          if (document.visibilityState !== 'visible') {
+            return new Promise(function (resolve) {
+              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
+              document.addEventListener('visibilitychange', onVis)
+            })
+          }
+        }).then(function () { return attemptStream(n + 1) })
+      }
+      throw new Error(classifyFetchError(e, 'GPT'))
+    })
+  }
+
+  return attemptStream(0)
+}
+
+export function callGPTAudit2(code, customSysPrompt) {
+  return callGPTRaw2(customSysPrompt || SYS_AUDIT, 'Audit:\n\n' + code.slice(0, 40000), 2000)
+    .then(function (raw) {
+      try { var p = JSON.parse(raw); return Array.isArray(p) ? p : [] }
+      catch (e) { return [] }
+    })
+}
+
 export function classifyIntent(msg, images) {
   return callClaudeRaw(SYS_CLASSIFY, msg, 100, images).then(function (raw) {
     try {

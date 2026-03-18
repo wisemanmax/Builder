@@ -2,7 +2,7 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
-import { callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit } from '../lib/ai.js'
+import { callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit, callGPTRaw2, callGPTMultiTurn2, callGPTWithStream, callGPTAudit2 } from '../lib/ai.js'
 import { injectProfileContext } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
@@ -17,6 +17,22 @@ import {
   SYS_WEB2_RECON, SYS_WEB2_BRAND, SYS_WEB2_STRUCTURE, SYS_WEB2_DESIGN, SYS_WEB2_BUILD, SYS_WEB2_UPDATE, SYS_WEB2_FIX, SYS_WEB2_AUDIT
 } from '../config/prompts-website2.js'
 import { SYS_AUDIT } from '../config/prompts.js'
+
+// Provider-aware wrappers — route to Claude or GPT based on user toggle
+function _raw(sys, msg, maxTokens, images) {
+  return ST.website2Provider === 'chatgpt' ? callGPTRaw2(sys, msg, maxTokens, images) : callClaudeRaw(sys, msg, maxTokens, images)
+}
+function _multiTurn(sys, messages, temperature) {
+  return ST.website2Provider === 'chatgpt' ? callGPTMultiTurn2(sys, messages, temperature) : callClaudeMultiTurn(sys, messages, temperature)
+}
+function _buildStream(sys, msg, thinkingBudget, onChunk, images) {
+  if (ST.website2Provider === 'chatgpt') return callGPTWithStream(sys, msg, onChunk, images)
+  return callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, images)
+}
+function _audit(code, customSysPrompt) {
+  return ST.website2Provider === 'chatgpt' ? callGPTAudit2(code, customSysPrompt) : callClaudeAudit(code, customSysPrompt)
+}
+function _providerName() { return ST.website2Provider === 'chatgpt' ? 'ChatGPT' : 'Claude' }
 
 // Check IDs that are advisory-only
 var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
@@ -69,6 +85,15 @@ function notifyUser(title, body) {
  * 8: Push  9: Preview  10: Approval  11: Merge
  */
 export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
+  // Validate API key for selected provider
+  if (ST.website2Provider === 'chatgpt' && !ST.gptKey) {
+    addMsg({ role: 'asst', type: 'text', text: 'OpenAI API key is required to use ChatGPT. Add it in Settings, or switch to Claude.' })
+    return
+  }
+  if (ST.website2Provider !== 'chatgpt' && !ST.key) {
+    addMsg({ role: 'asst', type: 'text', text: 'Anthropic API key is required. Add it in Settings.' })
+    return
+  }
   clearCurrentSession()
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
@@ -132,7 +157,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     updatePS(pid, 0, 'active', 'Analyzing site content and structure\u2026')
     var reconMsg = 'Analyze this website/site description and extract all content, navigation, branding, and structure. Build a CONTENT_MANIFEST of every stat, name, number, and claim found:\n\n' + prompt
     if (images && images.length) reconMsg += '\n\n[' + images.length + ' screenshot' + (images.length > 1 ? 's' : '') + ' attached \u2014 analyze the visual design, layout, colors, typography, and content from these images]'
-    return retryStep(function () { return callClaudeRaw(SYS_WEB2_RECON, reconMsg, 6000, images) }, 2, 'Recon').then(function (raw) {
+    return retryStep(function () { return _raw(SYS_WEB2_RECON, reconMsg, 6000, images) }, 2, 'Recon').then(function (raw) {
       reconJSON = raw
       updatePS(pid, 0, 'done', 'Recon complete \u2713'); _persistProgress(0)
       addMsg({ role: 'asst', type: 'text', text: 'Site content, structure, and content manifest extracted.' })
@@ -145,7 +170,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     // Step 1 — Brand Extraction (locks brand tokens BEFORE design decisions)
     updatePS(pid, 1, 'active', 'Extracting brand identity tokens\u2026')
     var brandSys = SYS_WEB2_BRAND.replace('{RECON}', reconJSON)
-    return retryStep(function () { return callClaudeRaw(brandSys, 'Extract brand tokens from the recon data. Scan for fonts, colors, border-radius, shadows, and gradients. If not found in CSS, derive from brand name + industry context. Never default to Inter.', 3000, images) }, 2, 'Brand').then(function (raw) {
+    return retryStep(function () { return _raw(brandSys, 'Extract brand tokens from the recon data. Scan for fonts, colors, border-radius, shadows, and gradients. If not found in CSS, derive from brand name + industry context. Never default to Inter.', 3000, images) }, 2, 'Brand').then(function (raw) {
       brandJSON = raw
       updatePS(pid, 1, 'done', 'Brand tokens locked \u2713'); _persistProgress(1)
       addMsg({ role: 'asst', type: 'text', text: 'Brand colors, fonts, and design tokens extracted.' })
@@ -157,7 +182,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     // Step 2 — Structural Mapping (no invented pages)
     updatePS(pid, 2, 'active', 'Building site map and component tree\u2026')
     var structSys = SYS_WEB2_STRUCTURE.replace('{RECON}', reconJSON)
-    return retryStep(function () { return callClaudeRaw(structSys, 'Create the structural map for this site based on the recon data above. Only include pages found in the real site navigation — do not invent pages.', 4000, null) }, 2, 'Structure').then(function (raw) {
+    return retryStep(function () { return _raw(structSys, 'Create the structural map for this site based on the recon data above. Only include pages found in the real site navigation — do not invent pages.', 4000, null) }, 2, 'Structure').then(function (raw) {
       structureJSON = raw
       updatePS(pid, 2, 'done', 'Structure mapped \u2713'); _persistProgress(2)
       addMsg({ role: 'asst', type: 'text', text: 'Site map and component tree ready.' })
@@ -169,7 +194,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     // Step 3 — Design Decisions (uses BRAND_TOKENS as required input)
     updatePS(pid, 3, 'active', 'Deciding colors, typography, and layout\u2026')
     var designSys = SYS_WEB2_DESIGN.replace('{BRAND}', brandJSON).replace('{STRUCTURE}', structureJSON)
-    return retryStep(function () { return callClaudeRaw(designSys, 'Make all design decisions using the brand tokens provided. Use BRAND_TOKENS colors verbatim. Do not override with generic palettes. Inter/Roboto/Arial are banned.', 4000, images) }, 2, 'Design').then(function (raw) {
+    return retryStep(function () { return _raw(designSys, 'Make all design decisions using the brand tokens provided. Use BRAND_TOKENS colors verbatim. Do not override with generic palettes. Inter/Roboto/Arial are banned.', 4000, images) }, 2, 'Design').then(function (raw) {
       designJSON = raw
       updatePS(pid, 3, 'done', 'Design system defined \u2713'); _persistProgress(3)
       addMsg({ role: 'asst', type: 'text', text: 'Color palette, typography, and layout locked in.' })
@@ -179,7 +204,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     })
   }).then(function () {
     // Step 4 — Build (single-file HTML)
-    updatePS(pid, 4, 'active', 'Claude is building the website\u2026')
+    updatePS(pid, 4, 'active', _providerName() + ' is building the website\u2026')
     var buildMsg
     if (existingApp) {
       var currentCode = existingApp.code || ''
@@ -201,7 +226,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
     var charCount = 0
     thinkingText = ''
-    return callClaudeWithThinkingStream(existingApp ? SYS_WEB2_UPDATE : SYS_WEB2_BUILD, buildMsg, 4000, function (type, text) {
+    return _buildStream(existingApp ? SYS_WEB2_UPDATE : SYS_WEB2_BUILD, buildMsg, 4000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 4, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
@@ -232,11 +257,11 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         criticalFails.length ? (criticalFails.length + ' issue' + (criticalFails.length !== 1 ? 's' : '') + ' found' + passLabel) : 'All checks passed' + passLabel + ' \u2713')
 
       // Step 6 — Claude Audit (compares against real source content)
-      updatePS(pid, 6, 'active', 'Claude auditing website' + passLabel + '\u2026')
+      updatePS(pid, 6, 'active', _providerName() + ' auditing website' + passLabel + '\u2026')
       var auditSys = SYS_WEB2_AUDIT.replace('{BRAND}', brandJSON || '{}').replace('{MANIFEST}', reconJSON || '{}')
-      return retryStep(function () { return callClaudeAudit(currentCode, auditSys) }, 2, 'ClaudeAudit').then(function (bugs) {
+      return retryStep(function () { return _audit(currentCode, auditSys) }, 2, 'Audit').then(function (bugs) {
         updatePS(pid, 6, 'done', bugs.length ? ('Found ' + bugs.length + ' issue' + (bugs.length !== 1 ? 's' : '') + passLabel) : 'Website is clean' + passLabel + ' \u2713')
-        if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: 'claude' })
+        if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: ST.website2Provider === 'chatgpt' ? 'chatgpt' : 'claude' })
         return { criticalFails: criticalFails, bugs: bugs }
       }).catch(function (e) {
         var auditErr = scrubKeys(e.message || String(e))
@@ -258,7 +283,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
           }
           repairHistory.push({ role: 'user', content: fm })
 
-          return retryStep(function () { return callClaudeMultiTurn(fixSys, repairHistory) }, 2, 'Fix').then(function (fixed) {
+          return retryStep(function () { return _multiTurn(fixSys, repairHistory) }, 2, 'Fix').then(function (fixed) {
             repairHistory.push({ role: 'assistant', content: fixed })
             currentCode = fixed
             totalFixed += allIssues.length
