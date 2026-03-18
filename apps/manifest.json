@@ -1,10 +1,49 @@
 [
   {
+    "id": "knucklebones",
+    "name": "Knucklebones",
+    "icon": "🎯",
+    "ci": 0,
+    "url": "https://Wisemanmax.github.io/Builder/apps/knucklebones.html",
+    "path": "apps/knucklebones.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T23:23:08.641Z",
+        "type": "initial",
+        "text": "Your task is to rebuild “Knucklebones” as seen in Cult of the Lamb. Do not simplify. Build it as a polished, production "
+      }
+    ],
+    "createdAt": "2026-03-18T23:23:08.641Z",
+    "updatedAt": "2026-03-18T23:23:08.641Z"
+  },
+  {
+    "id": "test2",
+    "name": "Test2",
+    "icon": "🎯",
+    "ci": 5,
+    "url": "https://Wisemanmax.github.io/Builder/apps/test2.html",
+    "path": "apps/test2.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T19:51:32.240Z",
+        "type": "initial",
+        "text": "Build a copy of gradbridge.con home page"
+      },
+      {
+        "ts": "2026-03-18T19:55:52.763Z",
+        "type": "update",
+        "text": "Make it more like gradbridge.com"
+      }
+    ],
+    "createdAt": "2026-03-18T19:51:32.240Z",
+    "updatedAt": "2026-03-18T19:55:52.763Z"
+  },
+  {
     "id": "2048bw",
     "name": "2048BW",
-    "icon": "🎯",
+    "icon": "📦",
     "ci": 1,
-    "url": "https://www.wiseforge.dev/apps/2048bw.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
     "path": "apps/2048bw.html",
     "prompts": [
       {
@@ -29,9 +68,9 @@
   {
     "id": "gradbridgeapp3",
     "name": "Gradbridgeapp3",
-    "icon": "🎯",
+    "icon": "📦",
     "ci": 1,
-    "url": "https://www.wiseforge.dev/apps/gradbridgeapp3.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgeapp3.html",
     "path": "apps/gradbridgeapp3.html",
     "prompts": [
       {
@@ -43,17 +82,22 @@
         "ts": "2026-03-18T18:14:10.249Z",
         "type": "update",
         "text": "Keep structure the same just make it all assets desktop compatible and visually better"
+      },
+      {
+        "ts": "2026-03-18T18:17:08.214Z",
+        "type": "update",
+        "text": "Keep structure the same just make it all assets desktop compatible and visually better"
       }
     ],
     "createdAt": "2026-03-18T16:31:58.785Z",
-    "updatedAt": "2026-03-18T18:14:10.249Z"
+    "updatedAt": "2026-03-18T18:17:08.214Z"
   },
   {
     "id": "gradbridgesite",
     "name": "Gradbridgesite",
-    "icon": "🎯",
+    "icon": "📦",
     "ci": 2,
-    "url": "https://www.wiseforge.dev/apps/gradbridgesite.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
     "path": "apps/gradbridgesite.html",
     "prompts": [
       {
@@ -68,9 +112,9 @@
   {
     "id": "lasttest",
     "name": "Lasttest",
-    "icon": "🎯",
+    "icon": "📦",
     "ci": 4,
-    "url": "https://www.wiseforge.dev/apps/lasttest.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
     "path": "apps/lasttest.html",
     "prompts": [
       {
@@ -87,7 +131,7 @@
     "name": "ti84bill",
     "icon": "📦",
     "ci": 2,
-    "url": "https://www.wiseforge.dev/apps/ti84bill.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ti84bill.html",
     "path": "apps/ti84bill.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.616Z",
@@ -98,7 +142,7 @@
     "name": "waterapp",
     "icon": "📦",
     "ci": 0,
-    "url": "https://www.wiseforge.dev/apps/waterapp.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/waterapp.html",
     "path": "apps/waterapp.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.728Z",
