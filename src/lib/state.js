@@ -36,8 +36,28 @@ export function persist() {
   }
 }
 
+// Detect mojibake icons (corrupted UTF-8 emoji decoded as Latin-1)
+function isBadIcon(icon) {
+  if (!icon || typeof icon !== 'string') return true
+  // Mojibake from UTF-8 → Latin-1 misinterpretation produces Â, Ã, etc.
+  if (/[\u00C0-\u00FF]{2,}/.test(icon)) return true
+  // Valid emoji icons should be short (≤ 8 chars covers ZWJ sequences)
+  if (icon.length > 8) return true
+  return false
+}
+
 export function hydrate() {
   try { ST.apps = JSON.parse(localStorage.getItem('bldr_apps') || '[]') } catch (e) { ST.apps = [] }
+  var iconFixed = false
+  for (var i = 0; i < ST.apps.length; i++) {
+    if (isBadIcon(ST.apps[i].icon)) {
+      ST.apps[i].icon = '\uD83D\uDCE6'
+      iconFixed = true
+    }
+  }
+  if (iconFixed) {
+    try { localStorage.setItem('bldr_apps', JSON.stringify(ST.apps)) } catch (e) {}
+  }
   try { ST.thoughts = JSON.parse(localStorage.getItem('bldr_thoughts') || '[]') } catch (e) { ST.thoughts = [] }
   try { ST.rules = JSON.parse(localStorage.getItem('bldr_rules') || '[]') } catch (e) { ST.rules = [] }
   try { ST.profiles = JSON.parse(localStorage.getItem('bldr_profiles') || '[]') } catch (e) { ST.profiles = [] }
