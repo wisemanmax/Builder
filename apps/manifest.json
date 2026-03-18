@@ -1,5 +1,39 @@
 [
   {
+    "id": "gradbridge",
+    "name": "Gradbridge",
+    "icon": "🎯",
+    "ci": 1,
+    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridge.html",
+    "path": "apps/gradbridge.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T00:13:30.850Z",
+        "type": "initial",
+        "text": "I want you to just recreate gradbridge.com to the closet accuracy"
+      }
+    ],
+    "createdAt": "2026-03-18T00:13:30.850Z",
+    "updatedAt": "2026-03-18T00:13:30.850Z"
+  },
+  {
+    "id": "gradbridgesite",
+    "name": "Gradbridgesite",
+    "icon": "🎯",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
+    "path": "apps/gradbridgesite.html",
+    "prompts": [
+      {
+        "ts": "2026-03-17T22:31:34.695Z",
+        "type": "initial",
+        "text": "Copy gradebridge.com home page"
+      }
+    ],
+    "createdAt": "2026-03-17T22:31:34.695Z",
+    "updatedAt": "2026-03-17T22:31:34.695Z"
+  },
+  {
     "id": "2048bw",
     "name": "2048BW",
     "icon": "ð¯",
