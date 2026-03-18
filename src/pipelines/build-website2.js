@@ -12,7 +12,7 @@ import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 import {
-  SYS_WEB2_RECON, SYS_WEB2_STRUCTURE, SYS_WEB2_DESIGN, SYS_WEB2_BUILD, SYS_WEB2_FIX
+  SYS_WEB2_RECON, SYS_WEB2_BRAND, SYS_WEB2_STRUCTURE, SYS_WEB2_DESIGN, SYS_WEB2_BUILD, SYS_WEB2_FIX, SYS_WEB2_AUDIT
 } from '../config/prompts-website2.js'
 import { SYS_AUDIT } from '../config/prompts.js'
 
@@ -61,10 +61,10 @@ function notifyUser(title, body) {
 }
 
 /**
- * Website Builder 2 — Claude-only single-file website recreation pipeline (11 steps)
- * 0: Recon  1: Structure Map  2: Design Decisions  3: Build
- * 4: Checks  5: Claude Audit  6: Fix
- * 7: Push  8: Preview  9: Approval  10: Merge
+ * Website Builder 2 — Claude-Only Single-File Pipeline (Revised, 12 steps)
+ * 0: Recon  1: Brand Extraction  2: Structure Map  3: Design Decisions  4: Build
+ * 5: Checks  6: Claude Audit  7: Fix
+ * 8: Push  9: Preview  10: Approval  11: Merge
  */
 export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
   clearCurrentSession()
@@ -102,7 +102,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? ('builder/site2-' + appId + '-' + Date.now().toString(36)) : ''
 
-  var v1, v2, reconJSON, structureJSON, designJSON, thinkingText
+  var v1, v2, reconJSON, brandJSON, structureJSON, designJSON, thinkingText
 
   function _persistProgress(lastStep) {
     persistBuildSession({
@@ -126,46 +126,58 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
   }
 
   p.then(function () {
-    // Step 0 — Recon (Data Gathering)
+    // Step 0 — Recon (Data Gathering + Content Manifest)
     updatePS(pid, 0, 'active', 'Analyzing site content and structure\u2026')
-    var reconMsg = 'Analyze this website/site description and extract all content, navigation, branding, and structure:\n\n' + prompt
+    var reconMsg = 'Analyze this website/site description and extract all content, navigation, branding, and structure. Build a CONTENT_MANIFEST of every stat, name, number, and claim found:\n\n' + prompt
     if (images && images.length) reconMsg += '\n\n[' + images.length + ' screenshot' + (images.length > 1 ? 's' : '') + ' attached \u2014 analyze the visual design, layout, colors, typography, and content from these images]'
     return retryStep(function () { return callClaudeRaw(SYS_WEB2_RECON, reconMsg, 6000, images) }, 2, 'Recon').then(function (raw) {
       reconJSON = raw
       updatePS(pid, 0, 'done', 'Recon complete \u2713'); _persistProgress(0)
-      addMsg({ role: 'asst', type: 'text', text: 'Site content and structure extracted.' })
+      addMsg({ role: 'asst', type: 'text', text: 'Site content, structure, and content manifest extracted.' })
     }).catch(function (e) {
       // If recon fails, use the prompt as-is for later steps
-      reconJSON = '{"siteName":"' + appName + '","description":"' + prompt.slice(0, 200).replace(/"/g, '\\"') + '"}'
+      reconJSON = '{"siteName":"' + appName + '","description":"' + prompt.slice(0, 200).replace(/"/g, '\\"') + '","contentManifest":{"stats":[],"names":[],"claims":[],"urls":[]}}'
       updatePS(pid, 0, 'warn', 'Recon partial: ' + scrubKeys(e.message || String(e)))
     })
   }).then(function () {
-    // Step 1 — Structural Mapping
-    updatePS(pid, 1, 'active', 'Building site map and component tree\u2026')
+    // Step 1 — Brand Extraction (locks brand tokens BEFORE design decisions)
+    updatePS(pid, 1, 'active', 'Extracting brand identity tokens\u2026')
+    var brandSys = SYS_WEB2_BRAND.replace('{RECON}', reconJSON)
+    return retryStep(function () { return callClaudeRaw(brandSys, 'Extract brand tokens from the recon data. Scan for fonts, colors, border-radius, shadows, and gradients. If not found in CSS, derive from brand name + industry context. Never default to Inter.', 3000, images) }, 2, 'Brand').then(function (raw) {
+      brandJSON = raw
+      updatePS(pid, 1, 'done', 'Brand tokens locked \u2713'); _persistProgress(1)
+      addMsg({ role: 'asst', type: 'text', text: 'Brand colors, fonts, and design tokens extracted.' })
+    }).catch(function (e) {
+      brandJSON = '{}'
+      updatePS(pid, 1, 'warn', 'Brand extraction partial: ' + scrubKeys(e.message || String(e)))
+    })
+  }).then(function () {
+    // Step 2 — Structural Mapping (no invented pages)
+    updatePS(pid, 2, 'active', 'Building site map and component tree\u2026')
     var structSys = SYS_WEB2_STRUCTURE.replace('{RECON}', reconJSON)
-    return retryStep(function () { return callClaudeRaw(structSys, 'Create the structural map for this site based on the recon data above.', 4000, null) }, 2, 'Structure').then(function (raw) {
+    return retryStep(function () { return callClaudeRaw(structSys, 'Create the structural map for this site based on the recon data above. Only include pages found in the real site navigation — do not invent pages.', 4000, null) }, 2, 'Structure').then(function (raw) {
       structureJSON = raw
-      updatePS(pid, 1, 'done', 'Structure mapped \u2713'); _persistProgress(1)
+      updatePS(pid, 2, 'done', 'Structure mapped \u2713'); _persistProgress(2)
       addMsg({ role: 'asst', type: 'text', text: 'Site map and component tree ready.' })
     }).catch(function (e) {
       structureJSON = '{}'
-      updatePS(pid, 1, 'warn', 'Structure partial: ' + scrubKeys(e.message || String(e)))
+      updatePS(pid, 2, 'warn', 'Structure partial: ' + scrubKeys(e.message || String(e)))
     })
   }).then(function () {
-    // Step 2 — Design Decisions
-    updatePS(pid, 2, 'active', 'Deciding colors, typography, and layout\u2026')
-    var designSys = SYS_WEB2_DESIGN.replace('{RECON}', reconJSON).replace('{STRUCTURE}', structureJSON)
-    return retryStep(function () { return callClaudeRaw(designSys, 'Make all design decisions based on the brand signals and structure above.', 4000, images) }, 2, 'Design').then(function (raw) {
+    // Step 3 — Design Decisions (uses BRAND_TOKENS as required input)
+    updatePS(pid, 3, 'active', 'Deciding colors, typography, and layout\u2026')
+    var designSys = SYS_WEB2_DESIGN.replace('{BRAND}', brandJSON).replace('{STRUCTURE}', structureJSON)
+    return retryStep(function () { return callClaudeRaw(designSys, 'Make all design decisions using the brand tokens provided. Use BRAND_TOKENS colors verbatim. Do not override with generic palettes. Inter/Roboto/Arial are banned.', 4000, images) }, 2, 'Design').then(function (raw) {
       designJSON = raw
-      updatePS(pid, 2, 'done', 'Design system defined \u2713'); _persistProgress(2)
+      updatePS(pid, 3, 'done', 'Design system defined \u2713'); _persistProgress(3)
       addMsg({ role: 'asst', type: 'text', text: 'Color palette, typography, and layout locked in.' })
     }).catch(function (e) {
       designJSON = '{}'
-      updatePS(pid, 2, 'warn', 'Design partial: ' + scrubKeys(e.message || String(e)))
+      updatePS(pid, 3, 'warn', 'Design partial: ' + scrubKeys(e.message || String(e)))
     })
   }).then(function () {
-    // Step 3 — Build (single-file HTML)
-    updatePS(pid, 3, 'active', 'Claude is building the website\u2026')
+    // Step 4 — Build (single-file HTML)
+    updatePS(pid, 4, 'active', 'Claude is building the website\u2026')
     var buildMsg
     if (existingApp) {
       var prevPrompts = (existingApp.prompts || []).map(function (p2) { return p2.text }).join('\n\u2192 ')
@@ -176,7 +188,8 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         + '\n\nCONTEXT: Single-file HTML website with multi-page routing via showPage(). All pages in one file.'
     }
 
-    buildMsg += '\n\nRECON DATA:\n' + reconJSON
+    buildMsg += '\n\nRECON DATA (SOURCE CONTENT — use this, do not invent):\n' + reconJSON
+    buildMsg += '\n\nBRAND TOKENS:\n' + brandJSON
     buildMsg += '\n\nSTRUCTURE MAP:\n' + structureJSON
     buildMsg += '\n\nDESIGN DECISIONS:\n' + designJSON
 
@@ -185,12 +198,12 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     var charCount = 0
     thinkingText = ''
     return callClaudeWithThinkingStream(SYS_WEB2_BUILD, buildMsg, 4000, function (type, text) {
-      if (type === 'text') { charCount += text.length; updatePS(pid, 3, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
+      if (type === 'text') { charCount += text.length; updatePS(pid, 4, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
   }).then(function (code) {
     v1 = code
-    updatePS(pid, 3, 'done', 'Build complete \u2713'); _persistProgress(3)
+    updatePS(pid, 4, 'done', 'Build complete \u2713'); _persistProgress(4)
     _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
     if (thinkingText.trim()) {
       addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
@@ -206,30 +219,31 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
       passNum++
       var passLabel = passNum > 1 ? ' (pass ' + passNum + '/' + MAX_FIX_PASSES + ')' : ''
 
-      // Step 4 — Automated Checks
-      updatePS(pid, 4, 'active', 'Running checks' + passLabel + '\u2026')
+      // Step 5 — Automated Checks (+ hallucination, brand fidelity, URL integrity)
+      updatePS(pid, 5, 'active', 'Running checks' + passLabel + '\u2026')
       var checks = runLocalChecks(currentCode)
       var criticalFails = checks.filter(function (c) { return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1 })
       addMsg({ role: 'asst', type: 'checks', checks: checks })
-      updatePS(pid, 4, criticalFails.length ? 'warn' : 'done',
+      updatePS(pid, 5, criticalFails.length ? 'warn' : 'done',
         criticalFails.length ? (criticalFails.length + ' issue' + (criticalFails.length !== 1 ? 's' : '') + ' found' + passLabel) : 'All checks passed' + passLabel + ' \u2713')
 
-      // Step 5 — Claude Audit
-      updatePS(pid, 5, 'active', 'Claude auditing website' + passLabel + '\u2026')
-      return retryStep(function () { return callClaudeAudit(currentCode) }, 2, 'ClaudeAudit').then(function (bugs) {
-        updatePS(pid, 5, 'done', bugs.length ? ('Found ' + bugs.length + ' issue' + (bugs.length !== 1 ? 's' : '') + passLabel) : 'Website is clean' + passLabel + ' \u2713')
+      // Step 6 — Claude Audit (compares against real source content)
+      updatePS(pid, 6, 'active', 'Claude auditing website' + passLabel + '\u2026')
+      var auditSys = SYS_WEB2_AUDIT.replace('{BRAND}', brandJSON || '{}').replace('{MANIFEST}', reconJSON || '{}')
+      return retryStep(function () { return callClaudeAudit(currentCode, auditSys) }, 2, 'ClaudeAudit').then(function (bugs) {
+        updatePS(pid, 6, 'done', bugs.length ? ('Found ' + bugs.length + ' issue' + (bugs.length !== 1 ? 's' : '') + passLabel) : 'Website is clean' + passLabel + ' \u2713')
         if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: 'claude' })
         return { criticalFails: criticalFails, bugs: bugs }
       }).catch(function (e) {
         var auditErr = scrubKeys(e.message || String(e))
-        updatePS(pid, 5, 'error', 'Audit failed' + passLabel + ': ' + auditErr)
+        updatePS(pid, 6, 'error', 'Audit failed' + passLabel + ': ' + auditErr)
         return { criticalFails: criticalFails, bugs: [] }
       }).then(function (result) {
         var allIssues = result.criticalFails.map(function (c) { return { severity: 'medium', issue: c.label + (c.detail ? ' \u2014 ' + c.detail : ''), location: c.cat } }).concat(result.bugs)
 
-        // Step 6 — Claude Fix
+        // Step 7 — Claude Fix
         if (allIssues.length > 0) {
-          updatePS(pid, 6, 'active', 'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026')
+          updatePS(pid, 7, 'active', 'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026')
           var issueList = allIssues.map(function (b, i) { return (i + 1) + '. [' + ((b.severity || 'medium').toUpperCase()) + '] ' + (b.issue || '') + ' \u2014 ' + (b.location || '') }).join('\n')
 
           var fm
@@ -245,30 +259,30 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
             currentCode = fixed
             totalFixed += allIssues.length
             if (passNum < MAX_FIX_PASSES) {
-              updatePS(pid, 6, 'active', 'Re-validating fixes' + passLabel + '\u2026')
+              updatePS(pid, 7, 'active', 'Re-validating fixes' + passLabel + '\u2026')
               return runValidationPass()
             } else {
               var finalChecks = runLocalChecks(currentCode)
               var finalFails = finalChecks.filter(function (c) { return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1 })
               if (finalFails.length > 0) {
-                updatePS(pid, 6, 'warn', finalFails.length + ' issue' + (finalFails.length !== 1 ? 's' : '') + ' remain after ' + MAX_FIX_PASSES + ' passes')
+                updatePS(pid, 7, 'warn', finalFails.length + ' issue' + (finalFails.length !== 1 ? 's' : '') + ' remain after ' + MAX_FIX_PASSES + ' passes')
               } else {
-                updatePS(pid, 6, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
+                updatePS(pid, 7, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
               }
               v2 = currentCode
               addMsg({ role: 'asst', type: 'text', text: 'Validation summary: ' + totalFixed + ' issue' + (totalFixed !== 1 ? 's' : '') + ' addressed across ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + '.' + (finalFails.length > 0 ? ' ' + finalFails.length + ' minor issue' + (finalFails.length !== 1 ? 's' : '') + ' may remain.' : '') })
             }
           }).catch(function (e) {
             v2 = currentCode
-            updatePS(pid, 6, 'error', 'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original'))
+            updatePS(pid, 7, 'error', 'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original'))
             addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + scrubKeys(e.message || String(e)) })
           })
         } else {
           v2 = currentCode
           if (passNum === 1) {
-            updatePS(pid, 6, 'done', 'No fixes needed \u2713')
+            updatePS(pid, 7, 'done', 'No fixes needed \u2713')
           } else {
-            updatePS(pid, 6, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
+            updatePS(pid, 7, 'done', 'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713')
             addMsg({ role: 'asst', type: 'text', text: 'Validation summary: ' + totalFixed + ' issue' + (totalFixed !== 1 ? 's' : '') + ' addressed across ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + '. Website is clean \u2713' })
           }
           return Promise.resolve()
@@ -278,50 +292,50 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
     return runValidationPass()
   }).then(function () {
-    // Step 7 — Push to branch
+    // Step 8 — Push to branch
     if (hasGitHub) {
-      updatePS(pid, 7, 'active', 'Pushing to ' + branchName + '\u2026')
+      updatePS(pid, 8, 'active', 'Pushing to ' + branchName + '\u2026')
       var appPath = 'apps/' + appId + '.html'
       return retryStep(function () {
         return ghGetFileSha(appPath, branchName).then(function (existingSha) {
           return ghPushFile(appPath, v2, (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [website2]', branchName, existingSha)
         })
       }, 3, 'Push').then(function () {
-        updatePS(pid, 7, 'done', 'Pushed to branch \u2713'); _persistProgress(7)
+        updatePS(pid, 8, 'done', 'Pushed to branch \u2713'); _persistProgress(8)
       }).catch(function (e) {
-        updatePS(pid, 7, 'error', e.message)
+        updatePS(pid, 8, 'error', e.message)
         throw new Error('Branch push failed: ' + e.message)
       })
     } else {
-      updatePS(pid, 7, 'skip', 'Local-only')
+      updatePS(pid, 8, 'skip', 'Local-only')
       return Promise.resolve()
     }
   }).then(function () {
-    // Step 8 — Preview
-    updatePS(pid, 8, 'done', 'Preview ready')
+    // Step 9 — Preview
+    updatePS(pid, 9, 'done', 'Preview ready')
     setPreview(appId, v2)
     addMsg({ role: 'asst', type: 'preview-card', code: v2, appName: appName, branch: branchName || 'local', appId: appId, pid: pid })
 
-    // Step 9 — Final Validation (approval gate)
-    updatePS(pid, 9, 'wait', 'Waiting for your approval\u2026')
+    // Step 10 — Final Validation (approval gate)
+    updatePS(pid, 10, 'wait', 'Waiting for your approval\u2026')
     addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
     notifyUser('Website Ready for Review', appName + ' is waiting for your approval.')
 
     return waitForApproval(pid)
   }).then(function () {
-    updatePS(pid, 9, 'done', 'Approved \u2713')
+    updatePS(pid, 10, 'done', 'Approved \u2713')
 
-    // Step 10 — Merge to main
+    // Step 11 — Merge to main
     var mergeStatusId = 'merge-' + Date.now()
     if (hasGitHub) {
-      updatePS(pid, 10, 'active', 'Merging to main\u2026')
+      updatePS(pid, 11, 'active', 'Merging to main\u2026')
       addMsg({ role: 'asst', type: 'merge-status', mergeId: mergeStatusId, status: 'merging' })
       return retryStep(function () { return ghMergeBranch(branchName, appName) }, 3, 'Merge').then(function () {
         return ghPushManifest('main').catch(function () {})
       }).then(function () {
         ghDeleteBranch(branchName)
         var liveUrl = ghPageUrl(appId)
-        updatePS(pid, 10, 'done', 'Merged & deploying \u2713')
+        updatePS(pid, 11, 'done', 'Merged & deploying \u2713')
         var mc = $(mergeStatusId)
         if (mc) { var card = mc.querySelector('.merge-card'); if (card) card.innerHTML = '<div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">Merged to main \u2713</span><a class="merge-url" href="' + liveUrl + '" target="_blank">' + liveUrl + '</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>' }
         _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, true)
@@ -330,14 +344,14 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         return 'github'
       }).catch(function (e) {
         var safeE = scrubKeys(e.message || String(e))
-        updatePS(pid, 10, 'error', safeE)
+        updatePS(pid, 11, 'error', safeE)
         clearPreview(appId)
         _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
         addMsg({ role: 'asst', type: 'text', html: 'Merge failed: <strong>' + esc(safeE) + '</strong>. Website saved locally.' })
         return 'local'
       })
     } else {
-      updatePS(pid, 10, 'done', 'Saved locally \u2713')
+      updatePS(pid, 11, 'done', 'Saved locally \u2713')
       _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
       clearPreview(appId)
       toast('\u2705 ' + appName + ' saved!', 2800)
@@ -367,7 +381,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
       return
     }
     if (err.message === 'CHANGES_REQUESTED') {
-      updatePS(pid, 9, 'error', 'Changes requested')
+      updatePS(pid, 10, 'error', 'Changes requested')
       clearPreview(appId)
       addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
       _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)

@@ -105,6 +105,7 @@ export const PIPE3_ICONS = [
 
 export const PIPE4_NAMES = [
   'Claude \u00B7 Recon',
+  'Claude \u00B7 Brand Extraction',
   'Claude \u00B7 Structure Map',
   'Claude \u00B7 Design Decisions',
   'Claude \u00B7 Build',
@@ -118,7 +119,7 @@ export const PIPE4_NAMES = [
 ]
 
 export const PIPE4_ICONS = [
-  '\uD83D\uDD0D', '\uD83D\uDDFA', '\uD83C\uDFA8', '\uD83D\uDD28', '\uD83D\uDCCB',
+  '\uD83D\uDD0D', '\uD83C\uDFA8', '\uD83D\uDDFA', '\uD83C\uDFA8', '\uD83D\uDD28', '\uD83D\uDCCB',
   '\uD83D\uDD0E', '\uD83D\uDEE0', '\u2B06\uFE0F', '\uD83D\uDC41',
   '\u2705', '\uD83D\uDD00',
 ]
