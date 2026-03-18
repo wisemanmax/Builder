@@ -1,7 +1,7 @@
 import { ST } from './state.js'
 import { scrubKeys } from './utils.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
-import { SYS_AUDIT, SYS_ENHANCE_REVIEW } from '../config/prompts.js'
+import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CHAT } from '../config/prompts.js'
 
 function claudeHeaders() {
   return { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'anthropic-dangerous-direct-browser-access': 'true' }
@@ -391,4 +391,21 @@ export function callGPT(code) {
     if (e.message && e.message.indexOf('GPT:') === 0) throw e
     throw new Error(classifyFetchError(e, 'GPT'))
   })
+}
+
+export function classifyIntent(msg) {
+  return callClaudeRaw(SYS_CLASSIFY, msg, 100).then(function (raw) {
+    try {
+      var parsed = JSON.parse(raw)
+      return (parsed.intent === 'chat') ? 'chat' : 'build'
+    } catch (e) {
+      return 'build'
+    }
+  }).catch(function () {
+    return 'build'
+  })
+}
+
+export function callClaudeChat(msg) {
+  return callClaudeRaw(SYS_CHAT, msg, 2000)
 }
