@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Source+Sans+Pro:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>GradBridge</title>
+    <style>
+        :root {
+            --color-primary: #004080;
+            --color-secondary: #00A1E0;
+            --color-accent: #00A1E0;
+            --color-dark: #002040;
+            --color-light: #E0F7FF;
+            --color-text: #002040;
+            --color-text-muted: #004080;
+            --color-border: #00A1E0;
+            --font-heading: 'Merriweather', serif;
+            --font-body: 'Source Sans Pro', sans-serif;
+            --radius: 8px;
+            --transition-default: all 0.3s ease;
+        }
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: var(--color-text);
+            background-color: var(--color-light);
+        }
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            letter-spacing: -0.02em;
+        }
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+        }
+        h3 {
+            font-size: clamp(1.2rem, 2vw, 1.75rem);
+        }
+        p {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: clamp(1rem, 5vw, 3rem);
+        }
+        .nav {
+            background-color: var(--color-primary);
+            color: white;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+        }
+        .nav .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+        .nav ul li {
+            margin: 0;
+        }
+        .nav ul li a {
+            color: white;
+            text-decoration: none;
+            transition: var(--transition-default);
+        }
+        .nav ul li a:hover {
+            color: var(--color-accent);
+        }
+        .hero {
+            background-color: var(--color-primary);
+            color: white;
+            padding: clamp(3rem, 8vw, 6rem) 0;
+            text-align: center;
+        }
+        .hero h1 {
+            margin-bottom: 1rem;
+        }
+        .hero .cta-button {
+            background-color: var(--color-accent);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-default);
+        }
+        .hero .cta-button:hover {
+            background-color: var(--color-secondary);
+        }
+        .section {
+            padding: clamp(3rem, 8vw, 6rem) 0;
+        }
+        .section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .about-us, .programs, .testimonials, .contact {
+            background-color: var(--color-light);
+        }
+        .programs .program-card {
+            background-color: white;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            transition: var(--transition-default);
+        }
+        .testimonials .testimonial {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .contact form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .contact form input, .contact form textarea {
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+        }
+        .contact form button {
+            background-color: var(--color-accent);
+            border: none;
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-default);
+        }
+        .contact form button:hover {
+            background-color: var(--color-secondary);
+        }
+        .footer {
+            background-color: var(--color-dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        .footer .social-links a {
+            color: white;
+            margin: 0 0.5rem;
+            transition: var(--transition-default);
+        }
+        .footer .social-links a:hover {
+            color: var(--color-accent);
+        }
+        .footer .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+        .footer .footer-links div {
+            text-align: left;
+        }
+        .footer .footer-links a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .footer .footer-links a:hover {
+            color: var(--color-accent);
+        }
+        @media (max-width: 768px) {
+            .nav ul {
+                display: none;
+            }
+            .nav .mobile-menu {
+                display: block;
+                cursor: pointer;
+            }
+        }
+        @media (min-width: 769px) {
+            .nav .mobile-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="nav">
+        <div class="logo">GradBridge</div>
+        <div class="mobile-menu" aria-label="Mobile Menu" aria-expanded="false" role="button" tabindex="0">☰</div>
+        <ul>
+            <li><a href="/" onclick="showPage('home')">Home</a></li>
+            <li><a href="/programs" onclick="showPage('programs')">Programs</a></li>
+            <li><a href="/contact" onclick="showPage('contact')">Contact</a></li>
+        </ul>
+    </header>
+    <main>
+        <div id="home" class="page">
+            <section class="hero">
+                <div class="container">
+                    <h1>Bridge Your Future with GradBridge</h1>
+                    <button class="cta-button" onclick="showPage('programs')">Learn More</button>
+                </div>
+            </section>
+            <section class="about-us section">
+                <div class="container">
+                    <h2>About Us</h2>
+                    <p>GradBridge connects students with top graduate programs worldwide.</p>
+                </div>
+            </section>
+            <section class="programs section">
+                <div class="container">
+                    <h2>Our Programs</h2>
+                </div>
+            </section>
+            <section class="testimonials section">
+                <div class="container">
+                    <h2>What Our Students Say</h2>
+                    <div class="testimonial">
+                        <p>Join thousands of successful alumni who have advanced their careers with us.</p>
+                    </div>
+                    <div class="testimonial">
+                        <p>"GradBridge provided me with the guidance I needed to choose the right program."</p>
+                    </div>
+                </div>
+            </section>
+            <section class="cta section">
+                <div class="container">
+                    <h2>Get Started Today</h2>
+                    <button class="cta-button" onclick="showPage('contact')">Contact Us</button>
+                </div>
+            </section>
+        </div>
+        <div id="programs" class="page" style="display: none;">
+            <section class="programs section">
+                <div class="container">
+                    <h2>Program List</h2>
+                    <p>Explore a variety of programs tailored to your career goals.</p>
+                </div>
+            </section>
+            <section class="program-details section">
+                <div class="container">
+                    <h2>Program Details</h2>
+                    <p>Discover detailed information about each program, including curriculum, faculty, and career opportunities.</p>
+                </div>
+            </section>
+            <section class="cta section">
+                <div class="container">
+                    <h2>Get Started Today</h2>
+                    <button class="cta-button" onclick="showPage('contact')">Apply Now</button>
+                </div>
+            </section>
+        </div>
+        <div id="contact" class="page" style="display: none;">
+            <section class="contact-form section">
+                <div class="container">
+                    <h2>Contact Us</h2>
+                    <form>
+                        <input type="text" name="name" placeholder="Your Name" required>
+                        <input type="email" name="email" placeholder="Your Email" required>
+                        <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+                        <button type="submit">Contact Us</button>
+                    </form>
+                </div>
+            </section>
+            <section class="social-media section">
+                <div class="container">
+                    <h2>Connect with Us</h2>
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/company/gradbridge">LinkedIn</a>
+                        <a href="https://www.facebook.com/gradbridge">Facebook</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <div>
+                    <h3>Company</h3>
+                    <a href="#">About Us</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press</a>
+                </div>
+                <div>
+                    <h3>Resources</h3>
+                    <a href="#">Blog</a>
+                    <a href="#">Help Center</a>
+                    <a href="#">Contact Support</a>
+                </div>
+            </div>
+            <div class="social-links">
+                <a href="https://www.linkedin.com/company/gradbridge">LinkedIn</a>
+                <a href="https://www.facebook.com/gradbridge">Facebook</a>
+            </div>
+            <p>© 2023 GradBridge. All rights reserved.</p>
+            <p>Terms and conditions apply. See our privacy policy for more details.</p>
+        </div>
+    </footer>
+    <script>
+        function showPage(id) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('home');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const navLinks = document.querySelector('.nav ul');
+            mobileMenu.addEventListener('click', () => {
+                const expanded = mobileMenu.getAttribute('aria-expanded') === 'true' || false;
+                mobileMenu.setAttribute('aria-expanded', !expanded);
+                navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+            });
+        });
+    </script>
+</body>
+</html>
