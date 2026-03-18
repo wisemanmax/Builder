@@ -213,7 +213,7 @@ export function pullFromGitHub() {
     if (!res.ok) return []
     return res.json().then(function (file) {
       try {
-        var raw = atob(file.content.replace(/\n/g, ''))
+        var raw = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))))
         var parsed = JSON.parse(raw)
         return Array.isArray(parsed) ? parsed : []
       } catch (e) { return [] }

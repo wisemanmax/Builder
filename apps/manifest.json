@@ -2,7 +2,7 @@
   {
     "id": "2048bw",
     "name": "2048BW",
-    "icon": "ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ¯",
+    "icon": "🎯",
     "ci": 1,
     "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
     "path": "apps/2048bw.html",
@@ -29,7 +29,7 @@
   {
     "id": "gradbridgeapp3",
     "name": "Gradbridgeapp3",
-    "icon": "ÃÂ°ÃÂÃÂÃÂ¯",
+    "icon": "🎯",
     "ci": 1,
     "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgeapp3.html",
     "path": "apps/gradbridgeapp3.html",
@@ -51,7 +51,7 @@
   {
     "id": "gradbridgesite",
     "name": "Gradbridgesite",
-    "icon": "ÃÂ°ÃÂÃÂÃÂ¯",
+    "icon": "🎯",
     "ci": 2,
     "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
     "path": "apps/gradbridgesite.html",
@@ -68,7 +68,7 @@
   {
     "id": "lasttest",
     "name": "Lasttest",
-    "icon": "ÃÂ°ÃÂÃÂÃÂ¯",
+    "icon": "🎯",
     "ci": 4,
     "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
     "path": "apps/lasttest.html",
@@ -85,7 +85,7 @@
   {
     "id": "ti84bill",
     "name": "ti84bill",
-    "icon": "ÃÂ°ÃÂÃÂÃÂ¦",
+    "icon": "📦",
     "ci": 2,
     "url": "https://Wisemanmax.github.io/Builder/apps/ti84bill.html",
     "path": "apps/ti84bill.html",
@@ -96,7 +96,7 @@
   {
     "id": "waterapp",
     "name": "waterapp",
-    "icon": "ÃÂ°ÃÂÃÂÃÂ¦",
+    "icon": "📦",
     "ci": 0,
     "url": "https://Wisemanmax.github.io/Builder/apps/waterapp.html",
     "path": "apps/waterapp.html",
