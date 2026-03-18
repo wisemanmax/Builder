@@ -11,7 +11,7 @@ import { renderThoughtSelector, detachThought, showThoughtPicker, pickThought } 
 
 import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
-import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle } from './screens/build.js'
+import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle, checkInterruptedBuild, recoverInterruptedBuild, dismissRecovery } from './screens/build.js'
 import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, initThinkSheet } from './screens/think.js'
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
@@ -52,7 +52,17 @@ export function init() {
   initEmojiPicker()
 
   // Initial screen
-  if (ST.key) { showScreen('home'); renderGrid() }
+  if (ST.key) {
+    showScreen('home'); renderGrid()
+    // Check for interrupted builds after a short delay to let UI settle
+    setTimeout(function () {
+      var interrupted = checkInterruptedBuild()
+      if (interrupted) {
+        toast('Recovering interrupted build\u2026', 3000)
+        recoverInterruptedBuild(interrupted)
+      }
+    }, 600)
+  }
   else showScreen('onboard')
 
   // Auto-sync from GitHub on startup if credentials exist but no local apps
@@ -154,4 +164,5 @@ export function init() {
   window.pullFromSupabase = pullFromSupabase
   window.copyToClipboard = copyToClipboard
   window.toast = toast
+  window.dismissRecovery = dismissRecovery
 }

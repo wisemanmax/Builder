@@ -1,8 +1,9 @@
-import { ST } from '../lib/state.js'
+import { ST, persist } from '../lib/state.js'
+import { hydrateBuildSession, clearBuildSession } from '../lib/state.js'
 import { $, esc, toast, autoResize } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
-import { GRADS } from '../config/constants.js'
-import { addMsg, resetChat } from '../components/message.js'
+import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS } from '../config/constants.js'
+import { addMsg, resetChat, hydrateLiveChat } from '../components/message.js'
 import { renderThoughtSelector } from '../components/thought-card.js'
 import { getPreviewPid, getApprovalGates } from '../components/approval-card.js'
 import { runPipeline } from '../pipelines/build-pipeline.js'
@@ -201,6 +202,113 @@ function _syncToggle() {
     if (btns[i].dataset.mode === ST.pipelineMode) btns[i].classList.add('active')
     else btns[i].classList.remove('active')
   }
+}
+
+// --- Interrupted build recovery ---
+export function checkInterruptedBuild() {
+  var session = hydrateBuildSession()
+  if (!session) return false
+  // If the build completed normally, clearBuildSession was called, so we won't get here.
+  // This means the build was interrupted.
+  return session
+}
+
+export function recoverInterruptedBuild(session) {
+  var app = session.appId ? ST.apps.find(function (a) { return a.id === session.appId }) : null
+  ST.activeAppId = session.appId || null
+  ST.pendingIcon = session.appIcon || '\uD83C\uDFAF'
+  ST.pendingColor = session.appCi || 0
+  $('emoji-pick-btn').textContent = ST.pendingIcon
+  $('bs-title').textContent = 'Interrupted Build: ' + (session.appName || 'App')
+  $('bs-sub').textContent = 'This build was interrupted. Review progress below.'
+  $('bs-proj-btn').style.display = app ? 'flex' : 'none'
+  $('name-row').style.display = 'none'
+  $('app-name-input').value = ''
+  resetChat()
+
+  // Add a system message about the interruption
+  addMsg({ role: 'system', text: 'Build interrupted — showing recovered progress for "' + (session.appName || 'App') + '"' })
+
+  // Restore the saved chat messages
+  var savedChat = hydrateLiveChat()
+  if (savedChat && savedChat.length) {
+    for (var i = 0; i < savedChat.length; i++) {
+      var m = savedChat[i]
+      if (m.role === 'user') {
+        addMsg({ role: 'user', text: m.text || '' })
+      } else if (m.role === 'system') {
+        addMsg({ role: 'system', text: m.text || '' })
+      } else {
+        // Restore assistant messages as text
+        addMsg({ role: 'asst', type: 'text', html: m.html || undefined, text: m.text || '' })
+      }
+    }
+  }
+
+  // Show pipeline progress summary
+  if (session.steps) {
+    var isB2 = session.pipelineMode === 'builder2'
+    var names = isB2 ? PIPE2_NAMES : PIPE_NAMES
+    var icons = isB2 ? PIPE2_ICONS : PIPE_ICONS
+    var summaryHtml = '<div style="margin-top:4px"><strong>Pipeline Progress</strong> <span style="font-size:10px;color:rgba(255,255,255,.35)">(' + (isB2 ? 'Claude-Only' : 'Standard') + ')</span></div>'
+    summaryHtml += '<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">'
+    var pid = session.pid || 'recovered'
+    var stepData = session.steps[pid] || {}
+    for (var si = 0; si < names.length; si++) {
+      var sd = stepData[si]
+      var stateClass = sd ? sd.state : 'idle'
+      var stateIcon = stateClass === 'done' ? '\u2713' : stateClass === 'error' ? '\u2717' : stateClass === 'warn' ? '\u26A0' : stateClass === 'active' ? '\u25CF' : '\u00B7'
+      var stateColor = stateClass === 'done' ? 'rgba(0,230,118,.8)' : stateClass === 'error' ? 'rgba(255,82,82,.8)' : stateClass === 'warn' ? 'rgba(255,214,0,.8)' : stateClass === 'active' ? 'rgba(61,90,254,.8)' : 'rgba(255,255,255,.2)'
+      summaryHtml += '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px">'
+        + '<span style="width:16px;text-align:center;color:' + stateColor + '">' + stateIcon + '</span>'
+        + '<span style="color:rgba(255,255,255,.5)">' + (icons[si] || '') + '</span>'
+        + '<span style="color:rgba(255,255,255,.7)">' + esc(names[si]) + '</span>'
+        + (sd && sd.detail ? '<span style="margin-left:auto;font-size:10px;font-family:var(--fm);color:rgba(255,255,255,.3)">' + esc(sd.detail) + '</span>' : '')
+        + '</div>'
+    }
+    summaryHtml += '</div>'
+    addMsg({ role: 'asst', type: 'text', html: summaryHtml })
+  }
+
+  // Add action buttons
+  var hasCode = session.hasCode
+  var actionHtml = '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:4px">'
+  if (hasCode && app) {
+    actionHtml += '<button onclick="openApp(\'' + esc(session.appId) + '\')" style="padding:8px 16px;border-radius:9px;background:var(--g1);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDE80 Open Saved Version</button>'
+  }
+  actionHtml += '<button onclick="dismissRecovery()" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u2713 Dismiss</button>'
+  if (app) {
+    actionHtml += '<button onclick="openBuilder(\'' + esc(session.appId) + '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u270F\uFE0F Retry Build</button>'
+  }
+  actionHtml += '</div>'
+  addMsg({ role: 'asst', type: 'text', html: actionHtml })
+
+  // Save chat session to the app's history so it persists permanently
+  if (app) {
+    if (!app.chatHistory) app.chatHistory = []
+    var recoveredMessages = savedChat || []
+    if (recoveredMessages.length) {
+      app.chatHistory.unshift({
+        id: 's' + Date.now(), ts: session.ts || new Date().toISOString(),
+        prompt: '(Interrupted) ' + (session.prompt || '').slice(0, 180),
+        messages: recoveredMessages
+      })
+      if (app.chatHistory.length > 10) app.chatHistory = app.chatHistory.slice(0, 10)
+      persist()
+    }
+  }
+
+  // Clear the interrupted session data (now saved to chat history)
+  clearBuildSession()
+  try { localStorage.removeItem('bldr_live_chat') } catch (e) {}
+
+  // Open the builder sheet
+  $('think-sheet').classList.remove('open')
+  $('builder-sheet').classList.add('open')
+}
+
+export function dismissRecovery() {
+  closeBuilder()
 }
 
 export function initPipelineToggle() {

@@ -64,6 +64,25 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.PIPELINE, ST.pipelineMode)
 }
 
+// --- Active build session persistence ---
+// Saves in-progress build state so it survives crashes/closes
+export function persistBuildSession(data) {
+  try {
+    localStorage.setItem('bldr_active_build', JSON.stringify(data))
+  } catch (e) { /* quota exceeded — non-critical */ }
+}
+
+export function hydrateBuildSession() {
+  try {
+    var raw = localStorage.getItem('bldr_active_build')
+    return raw ? JSON.parse(raw) : null
+  } catch (e) { return null }
+}
+
+export function clearBuildSession() {
+  try { localStorage.removeItem('bldr_active_build') } catch (e) {}
+}
+
 export function keyStatusHTML() {
   var items = [
     ['Anthropic', ST.key], ['OpenAI', ST.gptKey],

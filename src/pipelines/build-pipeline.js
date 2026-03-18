@@ -6,7 +6,8 @@ import { SYS_BUILD, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../confi
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callGPT, callGPTReview } from '../lib/ai.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
-import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession } from '../components/message.js'
+import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
+import { persistBuildSession, clearBuildSession } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
@@ -102,12 +103,24 @@ export function runPipeline(prompt, existingApp, customName, images) {
     return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
   }
 
+  // Persist build session for crash recovery
+  function _persistProgress(lastStep) {
+    persistBuildSession({
+      pid: pid, appId: appId, appName: appName, appIcon: appIcon,
+      appCi: appCi, prompt: prompt, pipelineMode: 'builder1',
+      branchName: branchName, lastStep: lastStep,
+      steps: getPipelineSteps(), ts: new Date().toISOString(),
+      existingAppId: existingApp ? existingApp.id : null,
+      hasCode: !!(v2 || v1)
+    })
+  }
+
   // Step 0 — Branch
   var p = Promise.resolve()
   if (hasGitHub) {
     updatePS(pid, 0, 'active', 'Creating feature branch\u2026')
     p = retryStep(function () { return ghCreateBranch(branchName) }, 3, 'Branch').then(function () {
-      updatePS(pid, 0, 'done', branchName)
+      updatePS(pid, 0, 'done', branchName); _persistProgress(0)
     }).catch(function (e) {
       updatePS(pid, 0, 'error', e.message)
       throw new Error('Branch creation failed: ' + e.message)
@@ -125,7 +138,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
     if (images && images.length) planMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — use them to understand the desired design/layout]'
     return retryStep(function () { return callClaudeRaw(SYS_PLAN, planMsg, 2000, images) }, 2, 'Plan').then(function (raw) {
       planJSON = raw
-      updatePS(pid, 1, 'done', 'Architecture planned \u2713')
+      updatePS(pid, 1, 'done', 'Architecture planned \u2713'); _persistProgress(1)
       addMsg({ role: 'asst', type: 'text', text: 'Architecture plan ready.' })
     }).catch(function (e) {
       updatePS(pid, 1, 'warn', 'Planning skipped: ' + scrubKeys(e.message || String(e)))
@@ -183,7 +196,9 @@ export function runPipeline(prompt, existingApp, customName, images) {
     }, images)
   }).then(function (code) {
     v1 = code
-    updatePS(pid, 2, 'done', 'Build complete \u2713')
+    updatePS(pid, 2, 'done', 'Build complete \u2713'); _persistProgress(2)
+    // Save app locally early so code survives a crash
+    _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
     if (thinkingText.trim()) {
       addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
     }
@@ -404,7 +419,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
           return ghPushFile(appPath, v2, (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [branch]', branchName, existingSha)
         })
       }, 3, 'Push').then(function () {
-        updatePS(pid, 10, 'done', 'Pushed to branch \u2713')
+        updatePS(pid, 10, 'done', 'Pushed to branch \u2713'); _persistProgress(10)
       }).catch(function (e) {
         updatePS(pid, 10, 'error', e.message)
         throw new Error('Branch push failed: ' + e.message)
@@ -501,6 +516,8 @@ export function runPipeline(prompt, existingApp, customName, images) {
   }).finally(function () {
     _saveChatSession(appId, prompt)
     persist()
+    clearBuildSession()
+    clearPipelineSteps()
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
     clearInterval(_keepAlive)
