@@ -1,5 +1,6 @@
 import { $, esc, escAttr } from '../lib/utils.js'
 import { PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS } from '../config/constants.js'
+import { TEMPLATES, TEMPLATE_CATEGORIES } from '../config/templates.js'
 import { approveAndMerge, requestChanges, resolveRetry } from './approval-card.js'
 import { costCardHTML } from '../lib/cost.js'
 
@@ -68,7 +69,53 @@ export function resetChat() {
     + '<div class="chip" onclick="chipSend(\'A pomodoro timer with customizable intervals and session history\')">\u23F1 Pomodoro</div>'
     + '<div class="chip" onclick="chipSend(\'A personal budget tracker with expense categories and charts\')">\uD83D\uDCB0 Budget tracker</div>'
     + '<div class="chip" onclick="chipSend(\'A daily mood journal with emoji ratings and a calendar view\')">\uD83C\uDF19 Mood journal</div>'
+    + '</div>'
+    + _renderTemplateGallery()
+    + '</div>'
+}
+
+function _renderTemplateGallery() {
+  var cats = '<div class="tpl-cat active" data-cat="all" onclick="_tplFilter(\'all\')">All</div>'
+  for (var c = 0; c < TEMPLATE_CATEGORIES.length; c++) {
+    var cat = TEMPLATE_CATEGORIES[c]
+    cats += '<div class="tpl-cat" data-cat="' + cat.id + '" onclick="_tplFilter(\'' + cat.id + '\')">' + cat.icon + ' ' + esc(cat.name) + '</div>'
+  }
+  var cards = ''
+  for (var i = 0; i < TEMPLATES.length; i++) {
+    var t = TEMPLATES[i]
+    cards += '<div class="tpl-card" data-cat="' + t.category + '" onclick="templateSend(\'' + t.id + '\')">'
+      + '<div class="tpl-card-icon">' + t.icon + '</div>'
+      + '<div class="tpl-card-name">' + esc(t.name) + '</div>'
+      + '<div class="tpl-card-desc">' + esc(t.desc) + '</div>'
+      + '</div>'
+  }
+  return '<div class="tpl-section">'
+    + '<div class="tpl-hdr" onclick="_tplToggle()"><span>\uD83D\uDCC2 Start from a template</span><span class="tpl-arrow" id="tpl-arrow">\u25B6</span></div>'
+    + '<div class="tpl-gallery" id="tpl-gallery" style="display:none">'
+    + '<div class="tpl-cats" id="tpl-cats">' + cats + '</div>'
+    + '<div class="tpl-grid" id="tpl-grid">' + cards + '</div>'
     + '</div></div>'
+}
+
+// Toggle gallery open/closed
+window._tplToggle = function () {
+  var g = $('tpl-gallery'), a = $('tpl-arrow')
+  if (!g) return
+  var open = g.style.display === 'none'
+  g.style.display = open ? '' : 'none'
+  if (a) a.textContent = open ? '\u25BC' : '\u25B6'
+}
+
+// Filter templates by category
+window._tplFilter = function (cat) {
+  var tabs = document.querySelectorAll('#tpl-cats .tpl-cat')
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.toggle('active', tabs[i].dataset.cat === cat)
+  }
+  var cards = document.querySelectorAll('#tpl-grid .tpl-card')
+  for (var j = 0; j < cards.length; j++) {
+    cards[j].style.display = (cat === 'all' || cards[j].dataset.cat === cat) ? '' : 'none'
+  }
 }
 
 export function addMsg(cfg) {

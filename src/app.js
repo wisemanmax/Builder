@@ -11,7 +11,7 @@ import { renderThoughtSelector, detachThought, showThoughtPicker, pickThought } 
 
 import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
-import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle, checkInterruptedBuild, recoverInterruptedBuild, dismissRecovery, stopPipeline } from './screens/build.js'
+import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, templateSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle, checkInterruptedBuild, recoverInterruptedBuild, dismissRecovery, stopPipeline } from './screens/build.js'
 import { openBuildHistory, closeBuildHistory, initBuildHistory } from './screens/build-history.js'
 import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, initThinkSheet } from './screens/think.js'
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
@@ -141,6 +141,7 @@ export function init() {
   window.openProjectSheet = openProjectSheet
   window.openCustomizeBuilder = openCustomizeBuilder
   window.chipSend = chipSend
+  window.templateSend = templateSend
   window.sendMsg = sendMsg
   window.closeBuilder = closeBuilder
   window.closeThink = closeThink
