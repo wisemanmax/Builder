@@ -1,27 +1,10 @@
 [
   {
-    "id": "gradbridgeapp3",
-    "name": "Gradbridgeapp3",
-    "icon": "🎯",
-    "ci": 1,
-    "url": "https://wisemanmax.github.io/builder/apps/gradbridgeapp3.html",
-    "path": "apps/gradbridgeapp3.html",
-    "prompts": [
-      {
-        "ts": "2026-03-18T16:31:58.785Z",
-        "type": "initial",
-        "text": "make this home page of gradbridge.com"
-      }
-    ],
-    "createdAt": "2026-03-18T16:31:58.785Z",
-    "updatedAt": "2026-03-18T16:31:58.785Z"
-  },
-  {
     "id": "2048bw",
     "name": "2048BW",
-    "icon": "ÃÂ°ÃÂÃÂÃÂ¯",
+    "icon": "Ã°ÂÂÂ¯",
     "ci": 1,
-    "url": "https://wisemanmax.github.io/builder/apps/2048bw.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
     "path": "apps/2048bw.html",
     "prompts": [
       {
@@ -46,9 +29,9 @@
   {
     "id": "amms6xfi60w2",
     "name": "amms6xfi60w2",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 2,
-    "url": "https://wisemanmax.github.io/builder/apps/amms6xfi60w2.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/amms6xfi60w2.html",
     "path": "apps/amms6xfi60w2.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.671Z",
@@ -57,9 +40,9 @@
   {
     "id": "amms8jy7rj07",
     "name": "amms8jy7rj07",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 6,
-    "url": "https://wisemanmax.github.io/builder/apps/amms8jy7rj07.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/amms8jy7rj07.html",
     "path": "apps/amms8jy7rj07.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.633Z",
@@ -68,9 +51,9 @@
   {
     "id": "ammshyw3prp9",
     "name": "ammshyw3prp9",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 7,
-    "url": "https://wisemanmax.github.io/builder/apps/ammshyw3prp9.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammshyw3prp9.html",
     "path": "apps/ammshyw3prp9.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.535Z",
@@ -79,9 +62,9 @@
   {
     "id": "ammsi8x61fxu",
     "name": "ammsi8x61fxu",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 6,
-    "url": "https://wisemanmax.github.io/builder/apps/ammsi8x61fxu.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammsi8x61fxu.html",
     "path": "apps/ammsi8x61fxu.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.707Z",
@@ -90,9 +73,9 @@
   {
     "id": "ammsjb9o0dux",
     "name": "ammsjb9o0dux",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 2,
-    "url": "https://wisemanmax.github.io/builder/apps/ammsjb9o0dux.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammsjb9o0dux.html",
     "path": "apps/ammsjb9o0dux.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.479Z",
@@ -101,9 +84,9 @@
   {
     "id": "ammt9qh612ux",
     "name": "ammt9qh612ux",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 3,
-    "url": "https://wisemanmax.github.io/builder/apps/ammt9qh612ux.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammt9qh612ux.html",
     "path": "apps/ammt9qh612ux.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.481Z",
@@ -112,9 +95,9 @@
   {
     "id": "ammteubbmev4",
     "name": "ammteubbmev4",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 6,
-    "url": "https://wisemanmax.github.io/builder/apps/ammteubbmev4.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammteubbmev4.html",
     "path": "apps/ammteubbmev4.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.787Z",
@@ -123,9 +106,9 @@
   {
     "id": "ammtgse7utaw",
     "name": "ammtgse7utaw",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 6,
-    "url": "https://wisemanmax.github.io/builder/apps/ammtgse7utaw.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ammtgse7utaw.html",
     "path": "apps/ammtgse7utaw.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.480Z",
@@ -134,9 +117,9 @@
   {
     "id": "gradbridgesite",
     "name": "Gradbridgesite",
-    "icon": "Ã°ÂÂÂ¯",
+    "icon": "ð¯",
     "ci": 2,
-    "url": "https://wisemanmax.github.io/builder/apps/gradbridgesite.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
     "path": "apps/gradbridgesite.html",
     "prompts": [
       {
@@ -151,9 +134,9 @@
   {
     "id": "lasttest",
     "name": "Lasttest",
-    "icon": "Ã°ÂÂÂ¯",
+    "icon": "ð¯",
     "ci": 4,
-    "url": "https://wisemanmax.github.io/builder/apps/lasttest.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
     "path": "apps/lasttest.html",
     "prompts": [
       {
@@ -168,9 +151,9 @@
   {
     "id": "recipe-app",
     "name": "recipe-app",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 2,
-    "url": "https://wisemanmax.github.io/builder/apps/recipe-app.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/recipe-app.html",
     "path": "apps/recipe-app.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.837Z",
@@ -179,9 +162,9 @@
   {
     "id": "retry",
     "name": "retry",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 4,
-    "url": "https://wisemanmax.github.io/builder/apps/retry.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/retry.html",
     "path": "apps/retry.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.579Z",
@@ -190,9 +173,9 @@
   {
     "id": "ti84bill",
     "name": "ti84bill",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 2,
-    "url": "https://wisemanmax.github.io/builder/apps/ti84bill.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/ti84bill.html",
     "path": "apps/ti84bill.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.616Z",
@@ -201,12 +184,29 @@
   {
     "id": "waterapp",
     "name": "waterapp",
-    "icon": "Ã°ÂÂÂ¦",
+    "icon": "ð¦",
     "ci": 0,
-    "url": "https://wisemanmax.github.io/builder/apps/waterapp.html",
+    "url": "https://Wisemanmax.github.io/Builder/apps/waterapp.html",
     "path": "apps/waterapp.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.728Z",
     "updatedAt": "2026-03-17T20:36:01.728Z"
+  },
+  {
+    "id": "gradbridgeapp3",
+    "name": "Gradbridgeapp3",
+    "icon": "ð¯",
+    "ci": 1,
+    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgeapp3.html",
+    "path": "apps/gradbridgeapp3.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T16:31:58.785Z",
+        "type": "initial",
+        "text": "make this home page of gradbridge.com"
+      }
+    ],
+    "createdAt": "2026-03-18T16:31:58.785Z",
+    "updatedAt": "2026-03-18T16:31:58.785Z"
   }
 ]
