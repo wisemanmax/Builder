@@ -6,7 +6,8 @@ import { SYS_BUILD, SYS_FIX, SYS_PLAN } from '../config/prompts.js'
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callClaudeAudit } from '../lib/ai.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
-import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType } from '../components/message.js'
+import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
+import { persistBuildSession, clearBuildSession } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
@@ -104,6 +105,18 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
   }
 
+  // Persist build session for crash recovery
+  function _persistProgress(lastStep) {
+    persistBuildSession({
+      pid: pid, appId: appId, appName: appName, appIcon: appIcon,
+      appCi: appCi, prompt: prompt, pipelineMode: 'builder2',
+      branchName: branchName, lastStep: lastStep,
+      steps: getPipelineSteps(), ts: new Date().toISOString(),
+      existingAppId: existingApp ? existingApp.id : null,
+      hasCode: !!(v2 || v1)
+    })
+  }
+
   // Silent branch creation (not a visible step)
   var p = Promise.resolve()
   if (hasGitHub) {
@@ -123,7 +136,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     if (images && images.length) planMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached \u2014 use them to understand the desired design/layout]'
     return retryStep(function () { return callClaudeRaw(SYS_PLAN, planMsg, 2000, images) }, 2, 'Plan').then(function (raw) {
       planJSON = raw
-      updatePS(pid, 0, 'done', 'Architecture planned \u2713')
+      updatePS(pid, 0, 'done', 'Architecture planned \u2713'); _persistProgress(0)
       addMsg({ role: 'asst', type: 'text', text: 'Architecture plan ready.' })
     }).catch(function (e) {
       updatePS(pid, 0, 'warn', 'Planning skipped: ' + scrubKeys(e.message || String(e)))
@@ -181,7 +194,9 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     }, images)
   }).then(function (code) {
     v1 = code
-    updatePS(pid, 1, 'done', 'Build complete \u2713')
+    updatePS(pid, 1, 'done', 'Build complete \u2713'); _persistProgress(1)
+    // Save app locally early so code survives a crash
+    _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
     if (thinkingText.trim()) {
       addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
     }
@@ -278,7 +293,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
           return ghPushFile(appPath, v2, (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [branch]', branchName, existingSha)
         })
       }, 3, 'Push').then(function () {
-        updatePS(pid, 5, 'done', 'Pushed to branch \u2713')
+        updatePS(pid, 5, 'done', 'Pushed to branch \u2713'); _persistProgress(5)
       }).catch(function (e) {
         updatePS(pid, 5, 'error', e.message)
         throw new Error('Branch push failed: ' + e.message)
@@ -375,6 +390,8 @@ export function runPipeline2(prompt, existingApp, customName, images) {
   }).finally(function () {
     _saveChatSession(appId, prompt)
     persist()
+    clearBuildSession()
+    clearPipelineSteps()
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
     clearInterval(_keepAlive)

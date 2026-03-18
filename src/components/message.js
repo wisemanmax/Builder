@@ -10,7 +10,25 @@ export function registerPipeType(pid, type) { _pipeTypes[pid] = type }
 var _currentSession = []
 
 export function getCurrentSession() { return _currentSession.slice() }
-export function clearCurrentSession() { _currentSession = [] }
+export function clearCurrentSession() {
+  _currentSession = []
+  try { localStorage.removeItem('bldr_live_chat') } catch (e) {}
+}
+
+// Persist live chat session to localStorage so it survives crashes
+function _persistLiveChat() {
+  try {
+    localStorage.setItem('bldr_live_chat', JSON.stringify(_currentSession))
+  } catch (e) { /* quota exceeded — non-critical */ }
+}
+
+// Hydrate live chat from localStorage (for crash recovery)
+export function hydrateLiveChat() {
+  try {
+    var raw = localStorage.getItem('bldr_live_chat')
+    return raw ? JSON.parse(raw) : null
+  } catch (e) { return null }
+}
 
 function _trackMessage(cfg) {
   // Skip heavy/transient message types
@@ -30,6 +48,7 @@ function _trackMessage(cfg) {
   else if (cfg.type === 'schema') { entry.text = 'Supabase schema generated' }
   else { entry.text = cfg.text || '' }
   _currentSession.push(entry)
+  _persistLiveChat()
 }
 
 export function scrollBot() {
@@ -213,6 +232,11 @@ export function addMsg(cfg) {
   return row
 }
 
+// Pipeline step state tracking for crash recovery
+var _pipelineSteps = {}
+export function getPipelineSteps() { return JSON.parse(JSON.stringify(_pipelineSteps)) }
+export function clearPipelineSteps() { _pipelineSteps = {} }
+
 export function updatePS(pid, step, state, det) {
   var el = $(pid + '-s' + step); if (!el) return
   var isB2 = _pipeTypes[pid] === 'builder2'
@@ -221,5 +245,8 @@ export function updatePS(pid, step, state, det) {
   var ico = state === 'done' ? '\u2713' : state === 'error' ? '\u2717' : state === 'wait' ? '\u23F8' : icons[step] || '\u00B7'
   el.className = 'ps s-' + state
   el.innerHTML = '<div class="psico">' + ico + '</div><div class="pstxt"><div class="psname">' + esc(names[step] || 'Step ' + step) + '</div><div class="psdet">' + esc(det) + '</div></div>' + (state === 'active' ? '<div class="spin"></div>' : '')
+  // Track step state for persistence
+  if (!_pipelineSteps[pid]) _pipelineSteps[pid] = {}
+  _pipelineSteps[pid][step] = { state: state, detail: det }
   scrollBot()
 }
