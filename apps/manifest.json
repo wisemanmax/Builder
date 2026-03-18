@@ -1,81 +1,8 @@
 [
   {
-    "id": "lasttest",
-    "name": "Lasttest",
-    "icon": "🎯",
-    "ci": 4,
-    "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
-    "path": "apps/lasttest.html",
-    "prompts": [
-      {
-        "ts": "2026-03-18T11:37:34.977Z",
-        "type": "initial",
-        "text": "Build a copy of gradbridge.com"
-      }
-    ],
-    "createdAt": "2026-03-18T11:37:34.977Z",
-    "updatedAt": "2026-03-18T11:37:34.977Z"
-  },
-  {
-    "id": "gbd",
-    "name": "GBD",
-    "icon": "🎯",
-    "ci": 2,
-    "url": "https://Wisemanmax.github.io/Builder/apps/gbd.html",
-    "path": "apps/gbd.html",
-    "prompts": [
-      {
-        "ts": "2026-03-18T07:19:23.807Z",
-        "type": "initial",
-        "text": "Copy gradbridge.com home page, extract all information and copy image paths to sites complete"
-      },
-      {
-        "ts": "2026-03-18T07:27:25.293Z",
-        "type": "update",
-        "text": "Make the site look closer to gradbridge.com"
-      }
-    ],
-    "createdAt": "2026-03-18T07:19:23.807Z",
-    "updatedAt": "2026-03-18T07:27:25.293Z"
-  },
-  {
-    "id": "gradbridge",
-    "name": "Gradbridge",
-    "icon": "🎯",
-    "ci": 1,
-    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridge.html",
-    "path": "apps/gradbridge.html",
-    "prompts": [
-      {
-        "ts": "2026-03-18T00:13:30.850Z",
-        "type": "initial",
-        "text": "I want you to just recreate gradbridge.com to the closet accuracy"
-      }
-    ],
-    "createdAt": "2026-03-18T00:13:30.850Z",
-    "updatedAt": "2026-03-18T00:13:30.850Z"
-  },
-  {
-    "id": "gradbridgesite",
-    "name": "Gradbridgesite",
-    "icon": "🎯",
-    "ci": 2,
-    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
-    "path": "apps/gradbridgesite.html",
-    "prompts": [
-      {
-        "ts": "2026-03-17T22:31:34.695Z",
-        "type": "initial",
-        "text": "Copy gradebridge.com home page"
-      }
-    ],
-    "createdAt": "2026-03-17T22:31:34.695Z",
-    "updatedAt": "2026-03-17T22:31:34.695Z"
-  },
-  {
     "id": "2048bw",
     "name": "2048BW",
-    "icon": "ð¯",
+    "icon": "Ã°ÂÂÂ¯",
     "ci": 1,
     "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
     "path": "apps/2048bw.html",
@@ -102,7 +29,7 @@
   {
     "id": "amms6xfi60w2",
     "name": "amms6xfi60w2",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 2,
     "url": "https://Wisemanmax.github.io/Builder/apps/amms6xfi60w2.html",
     "path": "apps/amms6xfi60w2.html",
@@ -113,7 +40,7 @@
   {
     "id": "amms8jy7rj07",
     "name": "amms8jy7rj07",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 6,
     "url": "https://Wisemanmax.github.io/Builder/apps/amms8jy7rj07.html",
     "path": "apps/amms8jy7rj07.html",
@@ -124,7 +51,7 @@
   {
     "id": "ammshyw3prp9",
     "name": "ammshyw3prp9",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 7,
     "url": "https://Wisemanmax.github.io/Builder/apps/ammshyw3prp9.html",
     "path": "apps/ammshyw3prp9.html",
@@ -135,7 +62,7 @@
   {
     "id": "ammsi8x61fxu",
     "name": "ammsi8x61fxu",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 6,
     "url": "https://Wisemanmax.github.io/Builder/apps/ammsi8x61fxu.html",
     "path": "apps/ammsi8x61fxu.html",
@@ -146,7 +73,7 @@
   {
     "id": "ammsjb9o0dux",
     "name": "ammsjb9o0dux",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 2,
     "url": "https://Wisemanmax.github.io/Builder/apps/ammsjb9o0dux.html",
     "path": "apps/ammsjb9o0dux.html",
@@ -157,7 +84,7 @@
   {
     "id": "ammt9qh612ux",
     "name": "ammt9qh612ux",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 3,
     "url": "https://Wisemanmax.github.io/Builder/apps/ammt9qh612ux.html",
     "path": "apps/ammt9qh612ux.html",
@@ -168,7 +95,7 @@
   {
     "id": "ammteubbmev4",
     "name": "ammteubbmev4",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 6,
     "url": "https://Wisemanmax.github.io/Builder/apps/ammteubbmev4.html",
     "path": "apps/ammteubbmev4.html",
@@ -179,7 +106,7 @@
   {
     "id": "ammtgse7utaw",
     "name": "ammtgse7utaw",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 6,
     "url": "https://Wisemanmax.github.io/Builder/apps/ammtgse7utaw.html",
     "path": "apps/ammtgse7utaw.html",
@@ -188,9 +115,43 @@
     "updatedAt": "2026-03-17T20:36:01.480Z"
   },
   {
+    "id": "gradbridgesite",
+    "name": "Gradbridgesite",
+    "icon": "ð¯",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
+    "path": "apps/gradbridgesite.html",
+    "prompts": [
+      {
+        "ts": "2026-03-17T22:31:34.695Z",
+        "type": "initial",
+        "text": "Copy gradebridge.com home page"
+      }
+    ],
+    "createdAt": "2026-03-17T22:31:34.695Z",
+    "updatedAt": "2026-03-17T22:31:34.695Z"
+  },
+  {
+    "id": "lasttest",
+    "name": "Lasttest",
+    "icon": "ð¯",
+    "ci": 4,
+    "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
+    "path": "apps/lasttest.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T11:37:34.977Z",
+        "type": "initial",
+        "text": "Build a copy of gradbridge.com"
+      }
+    ],
+    "createdAt": "2026-03-18T11:37:34.977Z",
+    "updatedAt": "2026-03-18T11:37:34.977Z"
+  },
+  {
     "id": "recipe-app",
     "name": "recipe-app",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 2,
     "url": "https://Wisemanmax.github.io/Builder/apps/recipe-app.html",
     "path": "apps/recipe-app.html",
@@ -201,7 +162,7 @@
   {
     "id": "retry",
     "name": "retry",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 4,
     "url": "https://Wisemanmax.github.io/Builder/apps/retry.html",
     "path": "apps/retry.html",
@@ -212,7 +173,7 @@
   {
     "id": "ti84bill",
     "name": "ti84bill",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 2,
     "url": "https://Wisemanmax.github.io/Builder/apps/ti84bill.html",
     "path": "apps/ti84bill.html",
@@ -223,7 +184,7 @@
   {
     "id": "waterapp",
     "name": "waterapp",
-    "icon": "📦",
+    "icon": "ð¦",
     "ci": 0,
     "url": "https://Wisemanmax.github.io/Builder/apps/waterapp.html",
     "path": "apps/waterapp.html",
