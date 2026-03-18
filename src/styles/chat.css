@@ -83,3 +83,15 @@
 .thinking-pre{font-family:var(--fm);font-size:11px;color:rgba(255,255,255,.5);line-height:1.65;white-space:pre-wrap;word-wrap:break-word;max-height:300px;overflow-y:auto;margin:10px 0 0;padding:0}
 .thinking-pre::-webkit-scrollbar{width:3px}
 .thinking-pre::-webkit-scrollbar-thumb{background:rgba(180,79,255,.2);border-radius:2px}
+
+/* FILE TREE CARD */
+.file-tree-card{background:rgba(16,163,127,.06);border:1.5px solid rgba(16,163,127,.18);border-radius:14px;overflow:hidden}
+.ft-hdr{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid rgba(16,163,127,.12)}
+.ft-ico{font-size:14px}
+.ft-title{font-family:var(--fh);font-size:12px;font-weight:700;color:rgba(255,255,255,.6)}
+.ft-list{padding:6px 13px 10px;max-height:260px;overflow-y:auto}
+.ft-list::-webkit-scrollbar{width:3px}
+.ft-list::-webkit-scrollbar-thumb{background:rgba(16,163,127,.2);border-radius:2px}
+.ft-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-family:var(--fm);font-size:11px;color:rgba(255,255,255,.55)}
+.ft-icon{font-size:12px;width:16px;text-align:center;flex-shrink:0}
+.ft-path{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

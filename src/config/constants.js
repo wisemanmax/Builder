@@ -78,5 +78,30 @@ export const PIPE2_ICONS = [
   '\u2705', '\uD83D\uDD00',
 ]
 
+export const PIPE3_NAMES = [
+  'Claude \u00B7 Decompose',
+  'Claude \u00B7 Scaffold',
+  'Claude \u00B7 Design Tokens',
+  'Claude \u00B7 Data Layer',
+  'Claude \u00B7 Shared Components',
+  'Claude \u00B7 Feature Components',
+  'Claude \u00B7 Layout Components',
+  'Claude \u00B7 Pages',
+  'Claude \u00B7 Routing',
+  'Claude \u00B7 Documentation',
+  'Push to Branch',
+  'Preview',
+  'Final Validation',
+  'Merge to Main',
+]
+
+export const PIPE3_ICONS = [
+  '\uD83E\uDDE9', '\uD83C\uDFD7', '\uD83C\uDFA8', '\uD83D\uDDC3',
+  '\uD83E\uDDF1', '\u2699\uFE0F', '\uD83D\uDDBC', '\uD83D\uDCC4',
+  '\uD83D\uDEA6', '\uD83D\uDCDD',
+  '\u2B06\uFE0F', '\uD83D\uDC41',
+  '\u2705', '\uD83D\uDD00',
+]
+
 export const SELFUPDATE_STEPS = ['Fetch Source', 'Claude \u00B7 Improve', 'Push to GitHub', 'Reload']
 export const SELFUPDATE_ICONS = ['\uD83D\uDCE5', '\uD83D\uDD28', '\u2B06\uFE0F', '\uD83D\uDD04']
