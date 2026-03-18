@@ -11,7 +11,8 @@ import { renderThoughtSelector, detachThought, showThoughtPicker, pickThought } 
 
 import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
-import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle, checkInterruptedBuild, recoverInterruptedBuild, dismissRecovery } from './screens/build.js'
+import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle, checkInterruptedBuild, recoverInterruptedBuild, dismissRecovery, stopPipeline } from './screens/build.js'
+import { openBuildHistory, closeBuildHistory, initBuildHistory } from './screens/build-history.js'
 import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, initThinkSheet } from './screens/think.js'
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
@@ -86,9 +87,11 @@ export function init() {
   initProfilesSettings()
   initContextMenu(openApp, openProjectSheet, openBuilder, delApp)
   initPipelineToggle()
+  initBuildHistory()
 
   // Builder sheet
   $('bs-close').addEventListener('click', closeBuilder)
+  $('bs-stop-btn').addEventListener('click', stopPipeline)
   $('builder-sheet').addEventListener('click', function (e) { if (e.target.id === 'builder-sheet') closeBuilder() })
   $('bs-proj-btn').addEventListener('click', function () { if (ST.activeAppId) openProjectSheet(ST.activeAppId) })
   var shY = 0
@@ -181,4 +184,7 @@ export function init() {
   window.copyToClipboard = copyToClipboard
   window.toast = toast
   window.dismissRecovery = dismissRecovery
+  window.stopPipeline = stopPipeline
+  window.openBuildHistory = openBuildHistory
+  window.closeBuildHistory = closeBuildHistory
 }

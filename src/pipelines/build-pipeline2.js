@@ -9,7 +9,7 @@ import { calculateBuildCost } from '../lib/cost.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
-import { persistBuildSession, clearBuildSession } from '../lib/state.js'
+import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
@@ -68,6 +68,7 @@ function notifyUser(title, body) {
 export function runPipeline2(prompt, existingApp, customName, images) {
   clearCurrentSession()
   resetCostAccum()
+  clearPipelineCancel()
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
@@ -135,6 +136,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
 
   p.then(function () {
     // Step 0 — Plan
+    checkPipelineCancel()
     updatePS(pid, 0, 'active', 'Claude is planning the architecture\u2026')
     var planMsg = 'App description: ' + prompt
     if (images && images.length) planMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached \u2014 use them to understand the desired design/layout]'
@@ -147,6 +149,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     })
   }).then(function () {
     // Step 1 — Build
+    checkPipelineCancel()
     updatePS(pid, 1, 'active', 'Claude is writing your app\u2026')
     var userMsg
     if (existingApp) {
@@ -293,6 +296,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     return runValidationPass()
   }).then(function () {
     // Step 5 — Push to branch
+    checkPipelineCancel()
     if (hasGitHub) {
       updatePS(pid, 5, 'active', 'Pushing to ' + branchName + '\u2026')
       var appPath = 'apps/' + appId + '.html'
@@ -387,6 +391,16 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     })
     return showFeedbackCard(appId, appName, prompt)
   }).catch(function (err) {
+    if (err.message === 'PIPELINE_CANCELLED') {
+      clearPreview(appId)
+      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      ST.activeAppId = appId
+      addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
+      toast('Pipeline stopped', 3000)
+      $('bs-proj-btn').style.display = 'flex'
+      renderGrid()
+      return
+    }
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
       _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)

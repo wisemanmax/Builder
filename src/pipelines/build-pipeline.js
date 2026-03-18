@@ -9,7 +9,7 @@ import { calculateBuildCost } from '../lib/cost.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
-import { persistBuildSession, clearBuildSession } from '../lib/state.js'
+import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
@@ -65,6 +65,7 @@ function notifyUser(title, body) {
 export function runPipeline(prompt, existingApp, customName, images) {
   clearCurrentSession()
   resetCostAccum()
+  clearPipelineCancel()
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
@@ -137,6 +138,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
 
   p.then(function () {
     // Step 1 — Plan
+    checkPipelineCancel()
     updatePS(pid, 1, 'active', 'Claude is planning the architecture\u2026')
     var planMsg = 'App description: ' + prompt
     if (images && images.length) planMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — use them to understand the desired design/layout]'
@@ -149,6 +151,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
     })
   }).then(function () {
     // Step 2 — Build
+    checkPipelineCancel()
     updatePS(pid, 2, 'active', 'Claude is writing your app\u2026')
     var userMsg
     if (existingApp) {
@@ -304,6 +307,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
     return runValidationPass()
   }).then(function () {
     // Step 6 — GPT-4o Enhancement Review
+    checkPipelineCancel()
     var canReview = !!(ST.gptKey && ST.auditEnabled)
     if (!canReview) {
       updatePS(pid, 6, 'skip', ST.gptKey ? 'Review disabled' : 'No OpenAI key — skipped')
@@ -403,6 +407,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
     })
   }).then(function () {
     // Step 9 — Backend
+    checkPipelineCancel()
     if (ST.backendEnabled && ST.sbUrl) {
       updatePS(pid, 9, 'active', 'Generating Supabase backend\u2026')
       return callClaudeRaw(SYS_BACKEND, 'App code:\n\n' + v2.slice(0, 60000), 4000).then(function (raw) {
@@ -421,6 +426,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
     }
   }).then(function () {
     // Step 10 — Push to branch
+    checkPipelineCancel()
     if (hasGitHub) {
       updatePS(pid, 10, 'active', 'Pushing to ' + branchName + '\u2026')
       var appPath = 'apps/' + appId + '.html'
@@ -517,6 +523,16 @@ export function runPipeline(prompt, existingApp, customName, images) {
     // Show feedback card if a profile is active
     return showFeedbackCard(appId, appName, prompt)
   }).catch(function (err) {
+    if (err.message === 'PIPELINE_CANCELLED') {
+      clearPreview(appId)
+      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      ST.activeAppId = appId
+      addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
+      toast('Pipeline stopped', 3000)
+      $('bs-proj-btn').style.display = 'flex'
+      renderGrid()
+      return
+    }
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
       _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)

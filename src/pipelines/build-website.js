@@ -6,7 +6,7 @@ import { calculateBuildCost } from '../lib/cost.js'
 import { injectProfileContext } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushTree, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
-import { persistBuildSession, clearBuildSession } from '../lib/state.js'
+import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
@@ -102,6 +102,7 @@ function fileContent(files, path) {
 export function runWebsitePipeline(prompt, existingApp, customName, images) {
   clearCurrentSession()
   resetCostAccum()
+  clearPipelineCancel()
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
@@ -185,6 +186,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
 
   p.then(function () {
     // Step 0 — Decompose
+    checkPipelineCancel()
     updatePS(pid, 0, 'active', 'Analyzing requirements\u2026')
     var decomposeMsg = 'Build a website for: ' + prompt
     if (images && images.length) decomposeMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached]'
@@ -197,6 +199,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     })
   }).then(function () {
     // Step 1 — Scaffold
+    checkPipelineCancel()
     updatePS(pid, 1, 'active', 'Generating project skeleton\u2026')
     var sys = SYS_WEB_SCAFFOLD.replace('{DECOMPOSE}', decomposition)
     return generateStep(sys, 'Generate the project scaffold based on the decomposition above.', 8000, 'Scaffold').then(function () {
@@ -412,6 +415,16 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     })
     return showFeedbackCard(appId, appName, prompt)
   }).catch(function (err) {
+    if (err.message === 'PIPELINE_CANCELLED') {
+      clearPreview(appId)
+      if (Object.keys(files).length) _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
+      ST.activeAppId = appId
+      addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
+      toast('Pipeline stopped', 3000)
+      $('bs-proj-btn').style.display = 'flex'
+      renderGrid()
+      return
+    }
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
       if (Object.keys(files).length) _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
