@@ -1,6 +1,53 @@
 import { ST } from '../lib/state.js'
-import { $, esc, grad } from '../lib/utils.js'
+import { $, esc, grad, fmtDate } from '../lib/utils.js'
 import { showCtxAt, closeCtx } from './context-menu.js'
+
+var _hoverTimer = null
+var _activeTooltip = null
+
+function _clearTooltip() {
+  clearTimeout(_hoverTimer)
+  if (_activeTooltip) {
+    _activeTooltip.remove()
+    _activeTooltip = null
+  }
+}
+
+function _showTooltip(el, appId) {
+  _clearTooltip()
+  var app = null
+  for (var i = 0; i < ST.apps.length; i++) {
+    if (ST.apps[i].id === appId) { app = ST.apps[i]; break }
+  }
+  if (!app) return
+
+  var buildCount = (app.prompts && app.prompts.length) || 1
+  var lastBuild = app.updatedAt ? fmtDate(app.updatedAt) : 'Unknown'
+  var totalCost = ''
+  if (app.costs && app.costs.length) {
+    var sum = 0
+    for (var c = 0; c < app.costs.length; c++) sum += (app.costs[c].userPrice || app.costs[c].rawCost || 0)
+    totalCost = '$' + sum.toFixed(4)
+  }
+
+  var tip = document.createElement('div')
+  tip.className = 'aicon-tooltip'
+  tip.innerHTML = '<div class="att-name">' + esc(app.name) + '</div>'
+    + '<div class="att-row"><span>Builds</span><span>' + buildCount + '</span></div>'
+    + '<div class="att-row"><span>Last updated</span><span>' + esc(lastBuild) + '</span></div>'
+    + (totalCost ? '<div class="att-row"><span>Total cost</span><span>' + totalCost + '</span></div>' : '')
+    + '<div class="att-view">View full build history</div>'
+
+  tip.addEventListener('click', function (e) {
+    e.stopPropagation()
+    _clearTooltip()
+    if (window.openBuildHistory) window.openBuildHistory(appId)
+  })
+
+  el.style.position = 'relative'
+  el.appendChild(tip)
+  _activeTooltip = tip
+}
 
 export function renderGrid() {
   var grid = $('app-grid')
@@ -24,7 +71,7 @@ export function renderGrid() {
   }
   grid.innerHTML = html
 
-  // Long press
+  // Long press + hover
   var icons = grid.querySelectorAll('.aicon[data-id]')
   for (var j = 0; j < icons.length; j++) {
     (function (el) {
@@ -36,6 +83,11 @@ export function renderGrid() {
       }, { passive: true })
       el.addEventListener('touchend', function () { clearTimeout(t) }, { passive: true })
       el.addEventListener('touchmove', function () { clearTimeout(t) }, { passive: true })
+      // Desktop hover tooltip
+      el.addEventListener('mouseenter', function () {
+        _hoverTimer = setTimeout(function () { _showTooltip(el, el.dataset.id) }, 600)
+      })
+      el.addEventListener('mouseleave', function () { _clearTooltip() })
     })(icons[j])
   }
 }

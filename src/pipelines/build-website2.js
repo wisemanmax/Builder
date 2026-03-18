@@ -8,7 +8,7 @@ import { injectProfileContext } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
-import { persistBuildSession, clearBuildSession } from '../lib/state.js'
+import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
@@ -97,6 +97,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     return
   }
   clearCurrentSession()
+  clearPipelineCancel()
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
@@ -418,6 +419,16 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     })
     return showFeedbackCard(appId, appName, prompt)
   }).catch(function (err) {
+    if (err.message === 'PIPELINE_CANCELLED') {
+      clearPreview(appId)
+      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      ST.activeAppId = appId
+      addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
+      toast('Pipeline stopped', 3000)
+      $('bs-proj-btn').style.display = 'flex'
+      renderGrid()
+      return
+    }
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
       _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)

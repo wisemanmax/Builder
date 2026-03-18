@@ -160,6 +160,7 @@
         </div>
       </div>
       <div class="bs-actions">
+        <button class="bs-btn bs-stop" id="bs-stop-btn" title="Stop pipeline" style="display:none">&#x23F9; Stop</button>
         <button class="bs-btn" id="bs-proj-btn" title="View project" style="display:none">&#x1F4CB;</button>
         <button class="bs-btn bs-close" id="bs-close">&#x2715;</button>
       </div>
@@ -416,10 +417,29 @@
   </div>
 </div>
 
+<!-- BUILD HISTORY OVERLAY -->
+<div id="build-history-overlay">
+  <div class="bh-sheet">
+    <div class="bh-handle"></div>
+    <div class="bh-top">
+      <div class="bh-app-info">
+        <div class="bh-icon" id="bh-icon">&#x1F3AF;</div>
+        <div>
+          <div class="bh-name" id="bh-name">App Name</div>
+          <div class="bh-sub" id="bh-sub">Build History</div>
+        </div>
+      </div>
+      <button class="bh-close" id="bh-close">&#x2715;</button>
+    </div>
+    <div class="bh-body" id="bh-body"></div>
+  </div>
+</div>
+
 <!-- CONTEXT MENU -->
 <div id="ctx-menu">
   <div class="cmi" id="ctx-open">&#x1F680; Open App</div>
   <div class="cmi" id="ctx-proj">&#x1F4CB; Project Details</div>
+  <div class="cmi" id="ctx-history">&#x1F4DA; Build History</div>
   <div class="cmi" id="ctx-edit">&#x270F;&#xFE0F; Edit / Update</div>
   <div class="cmsep"></div>
   <div class="cmi danger" id="ctx-del">&#x1F5D1;&#xFE0F; Delete</div>

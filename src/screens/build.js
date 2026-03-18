@@ -1,5 +1,5 @@
 import { ST, persist, saveKeys } from '../lib/state.js'
-import { hydrateBuildSession, clearBuildSession } from '../lib/state.js'
+import { hydrateBuildSession, clearBuildSession, requestPipelineCancel } from '../lib/state.js'
 import { $, esc, toast, autoResize } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS } from '../config/constants.js'
@@ -59,6 +59,29 @@ export function handleImageFiles(files) {
       }
       reader.readAsDataURL(f)
     })(file)
+  }
+}
+
+export function stopPipeline() {
+  if (!ST._building) return
+  requestPipelineCancel()
+  var btn = $('bs-stop-btn')
+  if (btn) { btn.textContent = 'Stopping\u2026'; btn.disabled = true }
+  addMsg({ role: 'system', text: 'Stop requested \u2014 pipeline will halt at next step.' })
+}
+
+// Show/hide stop button based on build state
+export function syncStopButton() {
+  var btn = $('bs-stop-btn')
+  if (!btn) return
+  if (ST._building) {
+    btn.style.display = 'flex'
+    btn.disabled = false
+    btn.textContent = '\u23F9 Stop'
+    btn.classList.add('active')
+  } else {
+    btn.style.display = 'none'
+    btn.classList.remove('active')
   }
 }
 
@@ -176,6 +199,8 @@ function _runBuild(text, existing, customName, images) {
   } else {
     runPipeline(text, existing, customName, images)
   }
+  syncStopButton()
+  _startStopBtnSync()
 }
 
 function _handleChat(text, images) {
@@ -332,6 +357,19 @@ export function recoverInterruptedBuild(session) {
 
 export function dismissRecovery() {
   closeBuilder()
+}
+
+// Poll to sync stop button visibility when build state changes
+var _stopBtnInterval = null
+function _startStopBtnSync() {
+  if (_stopBtnInterval) return
+  _stopBtnInterval = setInterval(function () {
+    syncStopButton()
+    if (!ST._building && _stopBtnInterval) {
+      clearInterval(_stopBtnInterval)
+      _stopBtnInterval = null
+    }
+  }, 500)
 }
 
 export function initPipelineToggle() {

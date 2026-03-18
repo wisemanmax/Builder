@@ -14,6 +14,7 @@ export const ST = {
   profiles: [], activeProfileId: null,
   _selfUpdateMode: false,
   pipelineMode: 'builder1',
+  _pipelineCancelRequested: false,
 }
 
 export function persist() {
@@ -103,6 +104,19 @@ export function getActiveProfile() {
     if (ST.profiles[i].id === ST.activeProfileId) return ST.profiles[i]
   }
   return null
+}
+
+// --- Pipeline cancellation ---
+export function requestPipelineCancel() {
+  ST._pipelineCancelRequested = true
+}
+export function clearPipelineCancel() {
+  ST._pipelineCancelRequested = false
+}
+export function checkPipelineCancel() {
+  if (ST._pipelineCancelRequested) {
+    throw new Error('PIPELINE_CANCELLED')
+  }
 }
 
 // --- Active build session persistence ---

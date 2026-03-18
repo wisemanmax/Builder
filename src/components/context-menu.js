@@ -20,6 +20,7 @@ export function closeCtx() { $('ctx-menu').classList.remove('on'); _ctxId = null
 export function initContextMenu(openApp, openProjectSheet, openBuilder, delApp) {
   $('ctx-open').addEventListener('click', function () { if (_ctxId) openApp(_ctxId); closeCtx() })
   $('ctx-proj').addEventListener('click', function () { if (_ctxId) openProjectSheet(_ctxId); closeCtx() })
+  $('ctx-history').addEventListener('click', function () { if (_ctxId && window.openBuildHistory) window.openBuildHistory(_ctxId); closeCtx() })
   $('ctx-edit').addEventListener('click', function () { if (_ctxId) openBuilder(_ctxId); closeCtx() })
   $('ctx-del').addEventListener('click', function () { if (_ctxId) delApp(_ctxId); closeCtx() })
   document.addEventListener('click', function (e) { if (!e.target.closest('#ctx-menu')) closeCtx() })
