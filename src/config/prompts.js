@@ -83,12 +83,13 @@ export const SYS_PLAN = 'You are a senior web architect. Given an app descriptio
 
 export const SYS_SELFUPDATE = 'You are improving a PWA app called "The Builder". You will receive the complete current HTML source and a description of the improvement to make.\nReturn ONLY the complete improved HTML starting with <!DOCTYPE html> — no markdown, no explanation, no code fences.\nRules: Keep all existing functionality. Apply ONLY the requested improvement. Do not rewrite things that are not related to the request.'
 
-export const SYS_CLASSIFY = 'You are a routing classifier for a web app builder. Given a user message, decide if it is a BUILD request (the user wants to create or modify a web app) or a CHAT request (the user is asking a question, seeking advice, or making conversation that does NOT require generating an app).\n'
-  + '\nExamples of BUILD: "build a todo app", "make me a portfolio site", "add dark mode to the app", "create gradbridge.com", "rebuild with a sidebar"\n'
-  + 'Examples of CHAT: "what tech stack should I use?", "how does localStorage work?", "what would gradbridge.com need?", "explain the build process", "what features should a quiz app have?"\n'
+export const SYS_CLASSIFY = 'You are a routing classifier for a web app builder. Given a user message (which may include images), decide if it is a BUILD request (the user wants to create or modify a web app) or a CHAT request (the user is asking a question, seeking advice, requesting image analysis, or making conversation that does NOT require generating an app).\n'
+  + '\nExamples of BUILD: "build a todo app", "make me a portfolio site", "add dark mode to the app", "create gradbridge.com", "rebuild with a sidebar", "build this" (with a screenshot/mockup)\n'
+  + 'Examples of CHAT: "what tech stack should I use?", "how does localStorage work?", "what would gradbridge.com need?", "explain the build process", "what features should a quiz app have?", "what do you see in this image?", "review this design", "what color palette is this using?"\n'
   + '\nReturn ONLY a JSON object (no markdown, no explanation): {"intent":"build"} or {"intent":"chat"}'
 
 export const SYS_CHAT = 'You are a helpful assistant inside a web app builder called The Builder. The user is asking a question or having a conversation — they are NOT requesting you to build an app right now.\n'
+  + 'You can see and understand images the user uploads. When images are provided, analyze them carefully and use them as context for your response. Describe what you see, answer questions about the images, provide feedback on designs/screenshots, or help the user based on the visual content.\n'
   + 'Respond naturally and helpfully. Keep answers concise. If the user seems like they want to build something, suggest they describe what to build and you can create it for them.\n'
   + 'Do NOT return HTML code. Respond in plain text or markdown.'
 
