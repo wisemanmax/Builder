@@ -148,17 +148,17 @@ export function sendMsg() {
   var customName = $('app-name-input').value.trim()
   var existing = ST.activeAppId ? ST.apps.find(function (a) { return a.id === ST.activeAppId }) : null
   // If editing an existing app, skip classification — always run pipeline
-  if (existing || images.length) {
+  if (existing) {
     $('app-name-input').value = ''
     _runBuild(text, existing, customName, images)
     return
   }
   // Classify intent before routing
   ST._building = true; $('send-btn').disabled = true
-  classifyIntent(text).then(function (intent) {
+  classifyIntent(text, images).then(function (intent) {
     ST._building = false; $('send-btn').disabled = false
     if (intent === 'chat') {
-      _handleChat(text)
+      _handleChat(text, images)
     } else {
       $('app-name-input').value = ''
       _runBuild(text, existing, customName, images)
@@ -178,9 +178,9 @@ function _runBuild(text, existing, customName, images) {
   }
 }
 
-function _handleChat(text) {
+function _handleChat(text, images) {
   addMsg({ role: 'asst', type: 'typing' })
-  callClaudeChat(text).then(function (reply) {
+  callClaudeChat(text, images).then(function (reply) {
     var typingEl = document.querySelector('.msg-typing')
     if (typingEl) typingEl.remove()
     addMsg({ role: 'asst', type: 'text', text: reply })

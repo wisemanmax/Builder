@@ -393,8 +393,8 @@ export function callGPT(code) {
   })
 }
 
-export function classifyIntent(msg) {
-  return callClaudeRaw(SYS_CLASSIFY, msg, 100).then(function (raw) {
+export function classifyIntent(msg, images) {
+  return callClaudeRaw(SYS_CLASSIFY, msg, 100, images).then(function (raw) {
     try {
       var parsed = JSON.parse(raw)
       return (parsed.intent === 'chat') ? 'chat' : 'build'
@@ -406,6 +406,6 @@ export function classifyIntent(msg) {
   })
 }
 
-export function callClaudeChat(msg) {
-  return callClaudeRaw(SYS_CHAT, msg, 2000)
+export function callClaudeChat(msg, images) {
+  return callClaudeRaw(SYS_CHAT, msg, 2000, images)
 }
