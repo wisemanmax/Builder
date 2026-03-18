@@ -2,13 +2,14 @@ import { ST, persist } from '../lib/state.js'
 import { hydrateBuildSession, clearBuildSession } from '../lib/state.js'
 import { $, esc, toast, autoResize } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
-import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS } from '../config/constants.js'
+import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS } from '../config/constants.js'
 import { addMsg, resetChat, hydrateLiveChat } from '../components/message.js'
 import { renderThoughtSelector } from '../components/thought-card.js'
 import { getPreviewPid, getApprovalGates } from '../components/approval-card.js'
 import { runPipeline } from '../pipelines/build-pipeline.js'
 import { runPipeline2 } from '../pipelines/build-pipeline2.js'
 import { runWebsitePipeline } from '../pipelines/build-website.js'
+import { runWebsite2Pipeline } from '../pipelines/build-website2.js'
 import { runSelfUpdatePipeline } from '../pipelines/builder-plus.js'
 import { classifyIntent, callClaudeChat } from '../lib/ai.js'
 
@@ -166,7 +167,9 @@ export function sendMsg() {
 }
 
 function _runBuild(text, existing, customName, images) {
-  if (ST.pipelineMode === 'website') {
+  if (ST.pipelineMode === 'website2') {
+    runWebsite2Pipeline(text, existing, customName, images)
+  } else if (ST.pipelineMode === 'website') {
     runWebsitePipeline(text, existing, customName, images)
   } else if (ST.pipelineMode === 'builder2') {
     runPipeline2(text, existing, customName, images)
@@ -192,6 +195,8 @@ function _handleChat(text) {
 function _updatePipelineSub(app) {
   if (app) {
     $('bs-sub').textContent = 'Describe changes'
+  } else if (ST.pipelineMode === 'website2') {
+    $('bs-sub').textContent = 'Recon \u2192 Structure \u2192 Design \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Push \u2192 Preview \u2192 Approve \u2192 Merge'
   } else if (ST.pipelineMode === 'website') {
     $('bs-sub').textContent = 'Decompose \u2192 Scaffold \u2192 Tokens \u2192 Data \u2192 Components \u2192 Pages \u2192 Route \u2192 Docs \u2192 Push \u2192 Merge'
   } else if (ST.pipelineMode === 'builder2') {
@@ -252,11 +257,12 @@ export function recoverInterruptedBuild(session) {
 
   // Show pipeline progress summary
   if (session.steps) {
+    var isWeb2 = session.pipelineMode === 'website2'
     var isWeb = session.pipelineMode === 'website'
     var isB2 = session.pipelineMode === 'builder2'
-    var names = isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
-    var icons = isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
-    var modeLabel = isWeb ? 'Website' : isB2 ? 'Claude-Only' : 'Standard'
+    var names = isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
+    var icons = isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
+    var modeLabel = isWeb2 ? 'Website 2' : isWeb ? 'Website' : isB2 ? 'Claude-Only' : 'Standard'
     var summaryHtml = '<div style="margin-top:4px"><strong>Pipeline Progress</strong> <span style="font-size:10px;color:rgba(255,255,255,.35)">(' + modeLabel + ')</span></div>'
     summaryHtml += '<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">'
     var pid = session.pid || 'recovered'

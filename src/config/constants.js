@@ -103,5 +103,25 @@ export const PIPE3_ICONS = [
   '\u2705', '\uD83D\uDD00',
 ]
 
+export const PIPE4_NAMES = [
+  'Claude \u00B7 Recon',
+  'Claude \u00B7 Structure Map',
+  'Claude \u00B7 Design Decisions',
+  'Claude \u00B7 Build',
+  'Automated Checks',
+  'Claude \u00B7 Audit',
+  'Claude \u00B7 Fix',
+  'Push to Branch',
+  'Preview',
+  'Final Validation',
+  'Merge to Main',
+]
+
+export const PIPE4_ICONS = [
+  '\uD83D\uDD0D', '\uD83D\uDDFA', '\uD83C\uDFA8', '\uD83D\uDD28', '\uD83D\uDCCB',
+  '\uD83D\uDD0E', '\uD83D\uDEE0', '\u2B06\uFE0F', '\uD83D\uDC41',
+  '\u2705', '\uD83D\uDD00',
+]
+
 export const SELFUPDATE_STEPS = ['Fetch Source', 'Claude \u00B7 Improve', 'Push to GitHub', 'Reload']
 export const SELFUPDATE_ICONS = ['\uD83D\uDCE5', '\uD83D\uDD28', '\u2B06\uFE0F', '\uD83D\uDD04']
