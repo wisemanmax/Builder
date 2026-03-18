@@ -6,6 +6,7 @@ export const ST = {
   ghToken: '', ghUser: '', ghRepo: '',
   sbUrl: '', sbAnon: '', sbEnabled: false, auditEnabled: true,
   backendEnabled: false,
+  website2Provider: 'claude',
   activeAppId: null, pendingIcon: '🎯', pendingColor: 0,
   viewingApp: null, projectAppId: null, _building: false,
   _studioFullscreen: false,
@@ -52,6 +53,7 @@ export function hydrate() {
   ST.auditEnabled = localStorage.getItem(KEY_STORE.AUDIT) !== 'false'
   ST.backendEnabled = localStorage.getItem(KEY_STORE.BACKEND) === 'true'
   ST.pipelineMode = localStorage.getItem(KEY_STORE.PIPELINE) || 'builder1'
+  ST.website2Provider = localStorage.getItem(KEY_STORE.W2_PROVIDER) || 'claude'
 }
 
 export function saveKeys() {
@@ -66,6 +68,7 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.AUDIT, String(ST.auditEnabled))
   localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled))
   localStorage.setItem(KEY_STORE.PIPELINE, ST.pipelineMode)
+  localStorage.setItem(KEY_STORE.W2_PROVIDER, ST.website2Provider)
 }
 
 export function setActiveProfile(id) {

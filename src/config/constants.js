@@ -58,6 +58,7 @@ export const KEY_STORE = {
   AUDIT: 'bldr_audit',
   BACKEND: 'bldr_backend',
   PIPELINE: 'bldr_pipeline',
+  W2_PROVIDER: 'bldr_w2provider',
 }
 
 export const PIPE2_NAMES = [
@@ -104,14 +105,14 @@ export const PIPE3_ICONS = [
 ]
 
 export const PIPE4_NAMES = [
-  'Claude \u00B7 Recon',
-  'Claude \u00B7 Brand Extraction',
-  'Claude \u00B7 Structure Map',
-  'Claude \u00B7 Design Decisions',
-  'Claude \u00B7 Build',
+  'AI \u00B7 Recon',
+  'AI \u00B7 Brand Extraction',
+  'AI \u00B7 Structure Map',
+  'AI \u00B7 Design Decisions',
+  'AI \u00B7 Build',
   'Automated Checks',
-  'Claude \u00B7 Audit',
-  'Claude \u00B7 Fix',
+  'AI \u00B7 Audit',
+  'AI \u00B7 Fix',
   'Push to Branch',
   'Preview',
   'Final Validation',

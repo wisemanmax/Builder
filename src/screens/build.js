@@ -1,4 +1,4 @@
-import { ST, persist } from '../lib/state.js'
+import { ST, persist, saveKeys } from '../lib/state.js'
 import { hydrateBuildSession, clearBuildSession } from '../lib/state.js'
 import { $, esc, toast, autoResize } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
@@ -212,6 +212,16 @@ function _syncToggle() {
     if (btns[i].dataset.mode === ST.pipelineMode) btns[i].classList.add('active')
     else btns[i].classList.remove('active')
   }
+  // Show model toggle only for website2
+  var mt = $('model-toggle')
+  if (mt) {
+    mt.style.display = ST.pipelineMode === 'website2' ? 'flex' : 'none'
+    var mbtns = mt.querySelectorAll('.mt-btn')
+    for (var j = 0; j < mbtns.length; j++) {
+      if (mbtns[j].dataset.provider === ST.website2Provider) mbtns[j].classList.add('active')
+      else mbtns[j].classList.remove('active')
+    }
+  }
 }
 
 // --- Interrupted build recovery ---
@@ -336,5 +346,21 @@ export function initPipelineToggle() {
     var app = ST.activeAppId ? ST.apps.find(function (a) { return a.id === ST.activeAppId }) : null
     _updatePipelineSub(app)
   })
+  // Model provider toggle (Claude vs ChatGPT for Website 2)
+  var mt = $('model-toggle')
+  if (mt) {
+    mt.addEventListener('click', function (e) {
+      var btn = e.target.closest('.mt-btn')
+      if (!btn || !btn.dataset.provider) return
+      ST.website2Provider = btn.dataset.provider
+      saveKeys()
+      _syncToggle()
+      var providerLabel = ST.website2Provider === 'chatgpt' ? 'ChatGPT (GPT-4o)' : 'Claude Sonnet'
+      toast('Website 2 model: ' + providerLabel)
+      if (ST.website2Provider === 'chatgpt' && !ST.gptKey) {
+        toast('Add your OpenAI key in Settings to use ChatGPT', 4000)
+      }
+    })
+  }
   _syncToggle()
 }
