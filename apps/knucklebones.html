@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knucklebones - Strategic Dice Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --bg-card: #1e1e1e;
+            --bg-hover: #333;
+            --border: #404040;
+            --border-active: #555;
+            --text-primary: #ffffff;
+            --text-secondary: #c9c9c9;
+            --text-muted: #a0a0a0;
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --transition: all 150ms ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .game-container {
+            max-width: min(100vw - 2rem, 1200px);
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .game-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+
+        .settings-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 0.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .difficulty-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .difficulty-btn:focus {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        .difficulty-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .sound-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.875rem;
+            min-height: 44px;
+        }
+
+        .sound-toggle:hover {
+            background: var(--bg-hover);
+        }
+
+        .sound-toggle:focus {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 2rem;
+            align-items: start;
+            flex: 1;
+            margin-bottom: 2rem;
+        }
+
+        .player-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .player-header {
+            text-align: center;
+        }
+
+        .player-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .player-score {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .grid-container {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            min-height: 48px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-cell:hover {
+            border-color: var(--border-active);
+        }
+
+        .grid-cell:focus {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        .grid-cell.valid {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .grid-cell.filled {
+            cursor: default;
+            background: var(--bg-tertiary);
+        }
+
+        .grid-cell.destroying {
+            animation: destruction 0.5s ease-in-out;
+        }
+
+        .grid-cell.placing {
+            animation: placement 0.3s ease-out;
+        }
+
+        .dice-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            min-width: 120px;
+        }
+
+        .turn-indicator {
+            text-align: center;
+            font-weight: 600;
+            color: var(--accent-primary);
+            font-size: 1.1rem;
+        }
+
+        .dice-container {
+            position: relative;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #fff, #e0e0e0);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid #ddd;
+        }
+
+        .dice.rolling {
+            animation: diceRoll 1s ease-in-out;
+        }
+
+        .roll-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-width: 100px;
+            min-height: 44px;
+        }
+
+        .roll-btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        .roll-btn:focus {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        .roll-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: min(400px, 90vw);
+            width: 100%;
+            text-align: center;
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .modal-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .score-breakdown {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+        }
+
+        .final-score {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .restart-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-height: 44px;
+        }
+
+        .restart-btn:hover {
+            background: #059669;
+        }
+
+        .restart-btn:focus {
+            outline: 2px solid var(--success);
+            outline-offset: 2px;
+        }
+
+        .score-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.875rem;
+            pointer-events: none;
+            opacity: 0;
+            animation: scorePopup 1s ease-out;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @keyframes diceRoll {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            75% { transform: rotate(270deg) scale(1.1); }
+        }
+
+        @keyframes destruction {
+            0% { transform: scale(1); background: var(--bg-tertiary); }
+            50% { transform: scale(1.2); background: var(--danger); }
+            100% { transform: scale(1); background: var(--bg-secondary); }
+        }
+
+        @keyframes placement {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes scorePopup {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .player-section:first-child {
+                order: 2;
+            }
+
+            .dice-section {
+                order: 1;
+            }
+
+            .player-section:last-child {
+                order: 3;
+            }
+
+            .settings-bar {
+                justify-content: center;
+            }
+
+            .dice {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .grid-cell {
+                font-size: 1.25rem;
+                min-height: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 0.5rem;
+            }
+
+            .grid-container {
+                padding: 0.75rem;
+            }
+
+            .game-grid {
+                gap: 0.5rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+            }
+
+            .grid-cell {
+                min-height: 48px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1 class="game-title">Knucklebones</h1>
+            <p class="game-subtitle">Strategic dice placement game</p>
+        </header>
+
+        <div class="settings-bar">
+            <div class="difficulty-selector">
+                <button class="difficulty-btn active" data-difficulty="easy" aria-label="Easy difficulty">Easy</button>
+                <button class="difficulty-btn" data-difficulty="medium" aria-label="Medium difficulty">Medium</button>
+                <button class="difficulty-btn" data-difficulty="hard" aria-label="Hard difficulty">Hard</button>
+            </div>
+            <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound effects">🔊 Sound On</button>
+        </div>
+
+        <main class="game-board">
+            <div class="player-section">
+                <div class="player-header">
+                    <h2 class="player-name">You</h2>
+                    <div class="player-score" id="playerScore" aria-label="Your score">0</div>
+                </div>
+                <div class="grid-container">
+                    <div class="game-grid" id="playerGrid" role="grid" aria-label="Your game board">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="dice-section">
+                <div class="turn-indicator" id="turnIndicator" aria-live="polite">Your Turn</div>
+                <div class="dice-container">
+                    <div class="dice" id="dice" aria-label="Dice value" aria-live="polite">?</div>
+                </div>
+                <button class="roll-btn" id="rollBtn" aria-label="Roll dice">Roll Dice</button>
+            </div>
+
+            <div class="player-section">
+                <div class="player-header">
+                    <h2 class="player-name">AI Opponent</h2>
+                    <div class="player-score" id="aiScore" aria-label="AI score">0</div>
+                </div>
+                <div class="grid-container">
+                    <div class="game-grid" id="aiGrid" role="grid" aria-label="AI game board">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div aria-live="polite" aria-atomic="true" class="sr-only" id="gameAnnouncements"></div>
+    </div>
+
+    <div class="modal hidden" id="gameEndModal" role="dialog" aria-labelledby="gameResult" aria-describedby="modalSubtitle" aria-modal="true">
+        <div class="modal-content">
+            <h2 class="modal-title" id="gameResult">Game Over</h2>
+            <p class="modal-subtitle" id="modalSubtitle">Final Scores</p>
+            <div class="score-breakdown">
+                <div>
+                    <div>You</div>
+                    <div class="final-score" id="finalPlayerScore">0</div>
+                </div>
+                <div>
+                    <div>AI</div>
+                    <div class="final-score" id="finalAiScore">0</div>
+                </div>
+            </div>
+            <button class="restart-btn" id="restartBtn" aria-label="Start a new game">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            playerBoard: Array(3).fill().map(() => Array(3).fill(null)),
+            aiBoard: Array(3).fill().map(() => Array(3).fill(null)),
+            currentPlayer: 'player',
+            diceValue: null,
+            playerScore: 0,
+            aiScore: 0,
+            gamePhase: 'rolling',
+            aiDifficulty: 'easy',
+            soundEnabled: true,
+            animating: false,
+            focusedCell: { row: 0, column: 0 },
+            previousFocus: null,
+            lastAnnouncement: '',
+            announcementTimeout: null
+        };
+
+        // DOM Elements
+        const elements = {
+            playerGrid: document.getElementById('playerGrid'),
+            aiGrid: document.getElementById('aiGrid'),
+            dice: document.getElementById('dice'),
+            rollBtn: document.getElementById('rollBtn'),
+            turnIndicator: document.getElementById('turnIndicator'),
+            playerScore: document.getElementById('playerScore'),
+            aiScore: document.getElementById('aiScore'),
+            gameEndModal: document.getElementById('gameEndModal'),
+            gameResult: document.getElementById('gameResult'),
+            finalPlayerScore: document.getElementById('finalPlayerScore'),
+            finalAiScore: document.getElementById('finalAiScore'),
+            restartBtn: document.getElementById('restartBtn'),
+            soundToggle: document.getElementById('soundToggle'),
+            gameAnnouncements: document.getElementById('gameAnnouncements')
+        };
+
+        // Focus trap for modal
+        let focusableElements = [];
+        let firstFocusableElement = null;
+        let lastFocusableElement = null;
+
+        function setupFocusTrap() {
+            focusableElements = elements.gameEndModal.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            firstFocusableElement = focusableElements[0];
+            lastFocusableElement = focusableElements[focusableElements.length - 1];
+        }
+
+        function trapFocus(e) {
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusableElement) {
+                        lastFocusableElement.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusableElement) {
+                        firstFocusableElement.focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+        }
+
+        // Audio Context for Sound Effects
+        let audioContext;
+        const sounds = {};
+
+        function initAudio() {
+            try {
+                if (!window.AudioContext && !window.webkitAudioContext) {
+                    console.log('Web Audio API not supported');
+                    return;
+                }
+                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Test audio context creation
+                if (!audioContext) {
+                    throw new Error('Failed to create audio context');
+                }
+                
+                // Generate sound effects with error handling
+                try {
+                    sounds.diceRoll = createTone(440, 0.1, 'sawtooth');
+                    sounds.placement = createTone(660, 0.15, 'sine');
+                    sounds.destruction = createTone(220, 0.2, 'square');
+                    sounds.victory = createTone(880, 0.3, 'sine');
+                } catch (soundError) {
+                    console.log('Failed to create sound effects:', soundError);
+                }
+            } catch (e) {
+                console.log('Audio initialization failed:', e);
+                audioContext = null;
+            }
+        }
+
+        function createTone(frequency, duration, type = 'sine') {
+            return () => {
+                if (!gameState.soundEnabled || !audioContext) return;
+                
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                    oscillator.type = type;
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration);
+                } catch (e) {
+                    console.log('Sound playback failed:', e);
+                }
+            };
+        }
+
+        function playSound(soundName) {
+            if (sounds[soundName]) {
+                try {
+                    sounds[soundName]();
+                } catch (e) {
+                    console.log('Sound playback error:', e);
+                }
+            }
+        }
+
+        function announceToScreenReader(message) {
+            // Debounce announcements to avoid spam
+            if (gameState.lastAnnouncement === message) return;
+            
+            if (gameState.announcementTimeout) {
+                clearTimeout(gameState.announcementTimeout);
+            }
+            
+            gameState.announcementTimeout = setTimeout(() => {
+                elements.gameAnnouncements.textContent = message;
+                gameState.lastAnnouncement = message;
+            }, 100);
+        }
+
+        // Core Game Logic
+        function rollDice() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function isValidPlacement(player, column, row) {
+            const board = player === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            return board[row][column] === null;
+        }
+
+        function placeTile(player, column, row, value) {
+            const board = player === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            board[row][column] = value;
+            
+            // Animate placement
+            const cellId = `${player}-${row}-${column}`;
+            const cell = document.getElementById(cellId);
+            if (cell) {
+                cell.classList.add('placing');
+                setTimeout(() => cell.classList.remove('placing'), 300);
+            }
+            
+            playSound('placement');
+            
+            // Destroy matching tiles in opponent's column
+            const opponent = player === 'player' ? 'ai' : 'player';
+            destroyMatchingTiles(opponent, column, value);
+        }
+
+        function destroyMatchingTiles(player, column, value) {
+            const board = player === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            let destroyed = false;
+            let destroyedCount = 0;
+            
+            for (let row = 0; row < 3; row++) {
+                if (board[row][column] === value) {
+                    board[row][column] = null;
+                    destroyed = true;
+                    destroyedCount++;
+                    
+                    // Animate destruction
+                    const cellId = `${player}-${row}-${column}`;
+                    const cell = document.getElementById(cellId);
+                    if (cell) {
+                        cell.classList.add('destroying');
+                        setTimeout(() => cell.classList.remove('destroying'), 500);
+                    }
+                }
+            }
+            
+            if (destroyed) {
+                playSound('destruction');
+                if (destroyedCount > 0) {
+                    announceToScreenReader(`${destroyedCount} tiles destroyed`);
+                }
+            }
+        }
+
+        function calculateColumnScore(board, column) {
+            const values = [];
+            for (let row = 0; row < 3; row++) {
+                if (board[row][column] !== null) {
+                    values.push(board[row][column]);
+                }
+            }
+            
+            if (values.length === 0) return 0;
+            
+            // Group by value and calculate score
+            const groups = {};
+            values.forEach(value => {
+                groups[value] = (groups[value] || 0) + 1;
+            });
+            
+            let score = 0;
+            Object.entries(groups).forEach(([value, count]) => {
+                score += parseInt(value) * count * count;
+            });
+            
+            return score;
+        }
+
+        function calculateTotalScore(player) {
+            const board = player === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            let total = 0;
+            for (let column = 0; column < 3; column++) {
+                total += calculateColumnScore(board, column);
+            }
+            return total;
+        }
+
+        function updateScores() {
+            const oldPlayerScore = gameState.playerScore;
+            const oldAiScore = gameState.aiScore;
+            
+            gameState.playerScore = calculateTotalScore('player');
+            gameState.aiScore = calculateTotalScore('ai');
+            elements.playerScore.textContent = gameState.playerScore;
+            elements.aiScore.textContent = gameState.aiScore;
+            
+            // Only announce significant score changes
+            const playerChange = gameState.playerScore - oldPlayerScore;
+            const aiChange = gameState.aiScore - oldAiScore;
+            
+            if (Math.abs(playerChange) > 5 || Math.abs(aiChange) > 5) {
+                announceToScreenReader(`Scores: You ${gameState.playerScore}, AI ${gameState.aiScore}`);
+            }
+        }
+
+        function isGameEnd() {
+            const playerFull = gameState.playerBoard.every(row => row.every(cell => cell !== null));
+            const aiFull = gameState.aiBoard.every(row => row.every(cell => cell !== null));
+            return playerFull && aiFull;
+        }
+
+        // AI Logic
+        function evaluateBoard() {
+            return gameState.aiScore - gameState.playerScore;
+        }
+
+        function getValidMoves(player) {
+            const board = player === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            const moves = [];
+            
+            for (let column = 0; column < 3; column++) {
+                for (let row = 0; row < 3; row++) {
+                    if (board[row][column] === null) {
+                        moves.push({ column, row });
+                    }
+                }
+            }
+            
+            return moves;
+        }
+
+        function simulateMove(player, column, row, value) {
+            // Create deep copy of current state
+            const originalPlayerBoard = gameState.playerBoard.map(row => [...row]);
+            const originalAiBoard = gameState.aiBoard.map(row => [...row]);
+            
+            // Simulate the move
+            const board = player === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            board[row][column] = value;
+            
+            // Simulate destruction
+            const opponent = player === 'player' ? 'ai' : 'player';
+            const opponentBoard = opponent === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            
+            for (let r = 0; r < 3; r++) {
+                if (opponentBoard[r][column] === value) {
+                    opponentBoard[r][column] = null;
+                }
+            }
+            
+            // Calculate scores
+            const aiScore = calculateTotalScore('ai');
+            const playerScore = calculateTotalScore('player');
+            const evaluation = aiScore - playerScore;
+            
+            // Restore original state
+            gameState.playerBoard = originalPlayerBoard;
+            gameState.aiBoard = originalAiBoard;
+            
+            return evaluation;
+        }
+
+        function makeAIMove() {
+            if (gameState.animating) return;
+            
+            const moves = getValidMoves('ai');
+            if (moves.length === 0) return;
+            
+            let bestMove = moves[0];
+            let bestScore = -Infinity;
+            
+            if (gameState.aiDifficulty === 'easy') {
+                // Random with slight bias toward better moves
+                const evaluatedMoves = moves.map(move => ({
+                    ...move,
+                    score: simulateMove('ai', move.column, move.row, gameState.diceValue)
+                }));
+                
+                const goodMoves = evaluatedMoves.filter(move => move.score > 0);
+                if (goodMoves.length > 0 && Math.random() < 0.6) {
+                    bestMove = goodMoves[Math.floor(Math.random() * goodMoves.length)];
+                } else {
+                    bestMove = moves[Math.floor(Math.random() * moves.length)];
+                }
+            } else if (gameState.aiDifficulty === 'medium') {
+                // Basic strategy - try each move and pick best
+                for (const move of moves) {
+                    const score = simulateMove('ai', move.column, move.row, gameState.diceValue);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = move;
+                    }
+                }
+            } else { // hard
+                // Advanced strategy - look ahead and consider opponent's response
+                for (const move of moves) {
+                    let moveScore = simulateMove('ai', move.column, move.row, gameState.diceValue);
+                    
+                    // Add bonus for creating stacks
+                    const currentColumn = [];
+                    for (let r = 0; r < 3; r++) {
+                        if (gameState.aiBoard[r][move.column] !== null) {
+                            currentColumn.push(gameState.aiBoard[r][move.column]);
+                        }
+                    }
+                    
+                    const sameValueCount = currentColumn.filter(v => v === gameState.diceValue).length;
+                    moveScore += sameValueCount * gameState.diceValue * 2; // Bonus for stacking
+                    
+                    // Add bonus for destroying opponent stacks
+                    const opponentColumn = [];
+                    for (let r = 0; r < 3; r++) {
+                        if (gameState.playerBoard[r][move.column] === gameState.diceValue) {
+                            opponentColumn.push(gameState.diceValue);
+                        }
+                    }
+                    moveScore += opponentColumn.length * gameState.diceValue * 3; // Bonus for destruction
+                    
+                    if (moveScore > bestScore) {
+                        bestScore = moveScore;
+                        bestMove = move;
+                    }
+                }
+            }
+            
+            // Execute the move
+            setTimeout(() => {
+                placeTile('ai', bestMove.column, bestMove.row, gameState.diceValue);
+                gameState.gamePhase = 'rolling';
+                gameState.currentPlayer = 'player';
+                gameState.diceValue = null;
+                updateDisplay();
+                
+                if (isGameEnd()) {
+                    endGame();
+                }
+            }, 1000); // Delay for AI thinking
+        }
+
+        // UI Functions
+        function createGrid(containerId, playerType) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            for (let row = 0; row < 3; row++) {
+                for (let column = 0; column < 3; column++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.id = `${playerType}-${row}-${column}`;
+                    cell.dataset.player = playerType;
+                    cell.dataset.row = row;
+                    cell.dataset.column = column;
+                    cell.setAttribute('role', 'gridcell');
+                    cell.setAttribute('tabindex', playerType === 'player' ? '0' : '-1');
+                    cell.setAttribute('aria-label', `${playerType === 'player' ? 'Your' : 'AI'} grid cell, column ${column + 1}, row ${row + 1}`);
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function updateGrid(playerType) {
+            const board = playerType === 'player' ? gameState.playerBoard : gameState.aiBoard;
+            
+            for (let row = 0; row < 3; row++) {
+                for (let column = 0; column < 3; column++) {
+                    const cell = document.getElementById(`${playerType}-${row}-${column}`);
+                    const value = board[row][column];
+                    
+                    cell.textContent = value || '';
+                    cell.classList.toggle('filled', value !== null);
+                    
+                    // Update aria-label
+                    const isEmpty = value === null;
+                    const statusText = isEmpty ? 'empty' : `contains ${value}`;
+                    cell.setAttribute('aria-label', `${playerType === 'player' ? 'Your' : 'AI'} grid cell, column ${column + 1}, row ${row + 1}, ${statusText}`);
+                    
+                    // Show valid placement indicators for player
+                    const isValid = gameState.currentPlayer === 'player' && 
+                                   gameState.gamePhase === 'placing' && 
+                                   playerType === 'player' && 
+                                   value === null;
+                    cell.classList.toggle('valid', isValid);
+                    
+                    // Update tabindex for keyboard navigation
+                    if (playerType === 'player') {
+                        cell.setAttribute('tabindex', isValid ? '0' : '-1');
+                    }
+                }
+            }
+        }
+
+        function updateDisplay() {
+            updateGrid('player');
+            updateGrid('ai');
+            updateScores();
+            
+            // Update turn indicator
+            const turnText = gameState.currentPlayer === 'player' ? 'Your Turn' : 'AI Turn';
+            elements.turnIndicator.textContent = turnText;
+            
+            // Update roll button
+            const canRoll = gameState.currentPlayer === 'player' && gameState.gamePhase === 'rolling' && !gameState.animating;
+            elements.rollBtn.disabled = !canRoll;
+            elements.rollBtn.textContent = gameState.gamePhase === 'placing' ? 'Place Dice' : 'Roll Dice';
+            
+            // Update dice display
+            const diceText = gameState.diceValue || '?';
+            elements.dice.textContent = diceText;
+            elements.dice.setAttribute('aria-label', `Dice value: ${gameState.diceValue ? gameState.diceValue : 'not rolled'}`);
+        }
+
+        function endGame() {
+            gameState.gamePhase = 'ended';
+            updateScores();
+            
+            const winner = gameState.playerScore > gameState.aiScore ? 'You Win!' : 
+                          gameState.playerScore < gameState.aiScore ? 'AI Wins!' : 'It\'s a Tie!';
+            
+            elements.gameResult.textContent = winner;
+            elements.finalPlayerScore.textContent = gameState.playerScore;
+            elements.finalAiScore.textContent = gameState.aiScore;
+            
+            // Store previous focus
+            gameState.previousFocus = document.activeElement;
+            
+            elements.gameEndModal.classList.remove('hidden');
+            setupFocusTrap();
+            
+            // Focus the modal
+            setTimeout(() => {
+                elements.restartBtn.focus();
+            }, 100);
+            
+            // Add event listener for focus trap
+            elements.gameEndModal.addEventListener('keydown', trapFocus);
+            
+            announceToScreenReader(`Game over! ${winner} Final scores: You ${gameState.playerScore}, AI ${gameState.aiScore}`);
+            
+            if (gameState.playerScore > gameState.aiScore) {
+                playSound('victory');
+            }
+            
+            // Save stats
+            saveGameStats();
+        }
+
+        function resetGame() {
+            gameState.playerBoard = Array(3).fill().map(() => Array(3).fill(null));
+            gameState.aiBoard = Array(3).fill().map(() => Array(3).fill(null));
+            gameState.currentPlayer = 'player';
+            gameState.diceValue = null;
+            gameState.playerScore = 0;
+            gameState.aiScore = 0;
+            gameState.gamePhase = 'rolling';
+            gameState.animating = false;
+            gameState.focusedCell = { row: 0, column: 0 };
+            gameState.lastAnnouncement = '';
+            
+            elements.gameEndModal.classList.add('hidden');
+            elements.gameEndModal.removeEventListener('keydown', trapFocus);
+            
+            // Restore focus
+            if (gameState.previousFocus && gameState.previousFocus.focus) {
+                gameState.previousFocus.focus();
+            } else {
+                elements.rollBtn.focus();
+            }
+            
+            updateDisplay();
+            announceToScreenReader('New game started');
+        }
+
+        function moveFocus(direction) {
+            if (gameState.gamePhase !== 'placing' || gameState.currentPlayer !== 'player') return;
+            
+            let { row, column } = gameState.focusedCell;
+            
+            switch (direction) {
+                case 'ArrowUp':
+                    row = Math.max(0, row - 1);
+                    break;
+                case 'ArrowDown':
+                    row = Math.min(2, row + 1);
+                    break;
+                case 'ArrowLeft':
+                    column = Math.max(0, column - 1);
+                    break;
+                case 'ArrowRight':
+                    column = Math.min(2, column + 1);
+                    break;
+            }
+            
+            gameState.focusedCell = { row, column };
+            const cell = document.getElementById(`player-${row}-${column}`);
+            
+            // Only focus if the cell is actually focusable (valid placement)
+            if (cell && cell.getAttribute('tabindex') === '0') {
+                cell.focus();
+            } else {
+                // Find next valid cell in the direction
+                let attempts = 0;
+                while (attempts < 9) {
+                    const nextCell = document.getElementById(`player-${row}-${column}`);
+                    if (nextCell && nextCell.getAttribute('tabindex') === '0') {
+                        nextCell.focus();
+                        gameState.focusedCell = { row, column };
+                        break;
+                    }
+                    
+                    // Continue in the same direction
+                    switch (direction) {
+                        case 'ArrowUp':
+                            row = row > 0 ? row - 1 : 2;
+                            break;
+                        case 'ArrowDown':
+                            row = row < 2 ? row + 1 : 0;
+                            break;
+                        case 'ArrowLeft':
+                            column = column > 0 ? column - 1 : 2;
+                            break;
+                        case 'ArrowRight':
+                            column = column < 2 ? column + 1 : 0;
+                            break;
+                    }
+                    attempts++;
+                }
+            }
+        }
+
+        // Event Handlers
+        function handleRollDice() {
+            if (gameState.animating || gameState.gamePhase !== 'rolling' || gameState.currentPlayer !== 'player') return;
+            
+            gameState.animating = true;
+            elements.dice.classList.add('rolling');
+            playSound('diceRoll');
+            
+            // Simulate rolling animation
+            let rollCount = 0;
+            const rollInterval = setInterval(() => {
+                const tempValue = rollDice();
+                elements.dice.textContent = tempValue;
+                elements.dice.setAttribute('aria-label', `Rolling dice, current value: ${tempValue}`);
+                rollCount++;
+                
+                if (rollCount >= 10) {
+                    clearInterval(rollInterval);
+                    gameState.diceValue = rollDice();
+                    elements.dice.textContent = gameState.diceValue;
+                    elements.dice.setAttribute('aria-label', `Dice rolled: ${gameState.diceValue}`);
+                    elements.dice.classList.remove('rolling');
+                    gameState.gamePhase = 'placing';
+                    gameState.animating = false;
+                    updateDisplay();
+                    announceToScreenReader(`You rolled a ${gameState.diceValue}`);
+                }
+            }, 100);
+        }
+
+        function handleCellClick(e) {
+            if (!e.target.classList.contains('grid-cell')) return;
+            
+            const { player, row, column } = e.target.dataset;
+            
+            if (player !== 'player' || 
+                gameState.currentPlayer !== 'player' || 
+                gameState.gamePhase !== 'placing' || 
+                gameState.animating ||
+                !isValidPlacement('player', parseInt(column), parseInt(row))) {
+                return;
+            }
+            
+            placeTile('player', parseInt(column), parseInt(row), gameState.diceValue);
+            gameState.gamePhase = 'rolling';
+            gameState.currentPlayer = 'ai';
+            gameState.diceValue = null;
+            
+            updateDisplay();
+            
+            if (isGameEnd()) {
+                endGame();
+                return;
+            }
+            
+            // AI turn
+            setTimeout(() => {
+                if (gameState.currentPlayer === 'ai') {
+                    gameState.diceValue = rollDice();
+                    elements.dice.textContent = gameState.diceValue;
+                    elements.dice.setAttribute('aria-label', `AI rolled: ${gameState.diceValue}`);
+                    makeAIMove();
+                }
+            }, 500);
+        }
+
+        function handleDifficultyChange(e) {
+            if (!e.target.classList.contains('difficulty-btn')) return;
+            
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            gameState.aiDifficulty = e.target.dataset.difficulty;
+            
+            announceToScreenReader(`Difficulty changed to ${gameState.aiDifficulty}`);
+            saveSettings();
+        }
+
+        function toggleSound() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            const soundText = gameState.soundEnabled ? '🔊 Sound On' : '🔇 Sound Off';
+            elements.soundToggle.textContent = soundText;
+            elements.soundToggle.setAttribute('aria-label', `Sound effects ${gameState.soundEnabled ? 'enabled' : 'disabled'}`);
+            announceToScreenReader(`Sound ${gameState.soundEnabled ? 'enabled' : 'disabled'}`);
+            saveSettings();
+        }
+
+        // Local Storage with error handling
+        function saveSettings() {
+            try {
+                const settings = {
+                    aiDifficulty: gameState.aiDifficulty,
+                    soundEnabled: gameState.soundEnabled
+                };
+                localStorage.setItem('knucklebones-settings', JSON.stringify(settings));
+            } catch (e) {
+                console.log('Failed to save settings:', e);
+            }
+        }
+
+        function loadSettings() {
+            try {
+                const settingsData = localStorage.getItem('knucklebones-settings');
+                if (!settingsData) return;
+                
+                const settings = JSON.parse(settingsData);
+                
+                if (settings.aiDifficulty && ['easy', 'medium', 'hard'].includes(settings.aiDifficulty)) {
+                    gameState.aiDifficulty = settings.aiDifficulty;
+                    const diffBtn = document.querySelector(`[data-difficulty="${settings.aiDifficulty}"]`);
+                    if (diffBtn) {
+                        document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+                        diffBtn.classList.add('active');
+                    }
+                }
+                
+                if (typeof settings.soundEnabled === 'boolean') {
+                    gameState.soundEnabled = settings.soundEnabled;
+                    const soundText = gameState.soundEnabled ? '🔊 Sound On' : '🔇 Sound Off';
+                    elements.soundToggle.textContent = soundText;
+                    elements.soundToggle.setAttribute('aria-label', `Sound effects ${gameState.soundEnabled ? 'enabled' : 'disabled'}`);
+                }
+            } catch (e) {
+                console.log('Failed to load settings:', e);
+            }
+        }
+
+        function saveGameStats() {
+            try {
+                const statsData = localStorage.getItem('knucklebones-stats');
+                const stats = statsData ? JSON.parse(statsData) : {};
+                
+                stats.gamesPlayed = (stats.gamesPlayed || 0) + 1;
+                if (gameState.playerScore > gameState.aiScore) {
+                    stats.wins = (stats.wins || 0) + 1;
+                } else if (gameState.playerScore < gameState.aiScore) {
+                    stats.losses = (stats.losses || 0) + 1;
+                } else {
+                    stats.ties = (stats.ties || 0) + 1;
+                }
+                
+                stats.highScore = Math.max(stats.highScore || 0, gameState.playerScore);
+                
+                localStorage.setItem('knucklebones-stats', JSON.stringify(stats));
+            } catch (e) {
+                console.log('Failed to save game stats:', e);
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initAudio();
+            createGrid('playerGrid', 'player');
+            createGrid('aiGrid', 'ai');
+            loadSettings();
+            updateDisplay();
+            
+            // Event delegation
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'rollBtn') {
+                    handleRollDice();
+                } else if (e.target.classList.contains('grid-cell')) {
+                    handleCellClick(e);
+                } else if (e.target.classList.contains('difficulty-btn')) {
+                    handleDifficultyChange(e);
+                } else if (e.target.id === 'soundToggle') {
+                    toggleSound();
+                } else if (e.target.id === 'restartBtn') {
+                    resetGame();
+                }
+            });
+            
+            // Keyboard shortcuts and navigation
+            document.addEventListener('keydown', function(e) {
+                // Modal handling
+                if (!elements.gameEndModal.classList.contains('hidden')) {
+                    if (e.key === 'Escape') {
+                        resetGame();
+                    }
+                    return;
+                }
+                
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    handleRollDice();
+                } else if (e.key === 'Escape') {
+                    if (!elements.gameEndModal.classList.contains('hidden')) {
+                        resetGame();
+                    }
+                } else if (e.key >= '1' && e.key <= '3' && gameState.gamePhase === 'placing') {
+                    const column = parseInt(e.key) - 1;
+                    // Find first empty row in column
+                    for (let row = 2; row >= 0; row--) {
+                        if (isValidPlacement('player', column, row)) {
+                            const cell = document.getElementById(`player-${row}-${column}`);
+                            if (cell) {
+                                cell.click();
+                            }
+                            break;
+                        }
+                    }
+                } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    e.preventDefault();
+                    moveFocus(e.key);
+                } else if (e.key === 'Enter' && gameState.gamePhase === 'placing') {
+                    const { row, column } = gameState.focusedCell;
+                    const cell = document.getElementById(`player-${row}-${column}`);
+                    if (cell && cell.classList.contains('valid')) {
+                        cell.click();
+                    }
+                }
+            });
+            
+            // Resume audio context on first user interaction
+            document.addEventListener('click', function() {
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume().catch(e => console.log('Audio resume failed:', e));
+                }
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>
