@@ -36,6 +36,25 @@
 .chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px}
 .chip{padding:6px 11px;border-radius:100px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:11px;cursor:pointer;transition:all .18s;white-space:nowrap}
 .chip:hover{border-color:var(--pk);color:var(--pk);background:rgba(255,60,172,.1)}
+
+/* TEMPLATE GALLERY */
+.tpl-section{margin-top:12px;width:100%;max-width:360px}
+.tpl-hdr{display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:7px 0;font-size:11px;color:rgba(255,255,255,.4);transition:color .15s}
+.tpl-hdr:hover{color:rgba(255,255,255,.65)}
+.tpl-arrow{font-size:8px;transition:transform .2s}
+.tpl-gallery{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.tpl-cats{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.tpl-cats::-webkit-scrollbar{height:0}
+.tpl-cat{padding:5px 10px;border-radius:100px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);font-size:10px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.tpl-cat.active{border-color:rgba(61,90,254,.4);background:rgba(61,90,254,.12);color:rgba(61,90,254,.9)}
+.tpl-cat:hover:not(.active){background:rgba(255,255,255,.08);color:rgba(255,255,255,.65)}
+.tpl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tpl-card{padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:4px}
+.tpl-card:hover{border-color:rgba(255,60,172,.35);background:rgba(255,60,172,.06);transform:translateY(-1px)}
+.tpl-card-icon{font-size:22px}
+.tpl-card-name{font-family:var(--fh);font-size:11px;font-weight:700;color:rgba(255,255,255,.8)}
+.tpl-card-desc{font-size:10px;color:rgba(255,255,255,.35);line-height:1.4}
+@media(max-width:360px){.tpl-grid{grid-template-columns:1fr}}
 .mrow{display:flex;padding:3px 13px;animation:mIn .24s cubic-bezier(.34,1.56,.64,1) both}
 @keyframes mIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 .mrow.user{justify-content:flex-end}

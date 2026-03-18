@@ -161,6 +161,12 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     } else {
       userMsg = 'BUILD REQUEST: ' + prompt
         + '\n\nCONTEXT: Single-file HTML app in sandboxed iframe. Offline-only, localStorage for persistence.'
+      if (ST._pendingTemplate) {
+        userMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture \u2014 expand, customize, and fill in all features):\n'
+          + ST._pendingTemplate.skeleton
+          + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
+        ST._pendingTemplate = null
+      }
     }
 
     var effectiveSys = existingApp ? SYS_UPDATE : SYS_BUILD

@@ -13,6 +13,7 @@ export const ST = {
   thoughts: [], rules: [], activeThoughtId: null, _thinking: false,
   profiles: [], activeProfileId: null,
   _selfUpdateMode: false,
+  _pendingTemplate: null,
   pipelineMode: 'builder1',
   _pipelineCancelRequested: false,
 }
