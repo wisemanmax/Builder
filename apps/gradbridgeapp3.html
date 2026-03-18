@@ -3,1310 +3,1220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GradBridge - Second Chances, Brighter Futures</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>GradBridge - Bridge to Your Graduate Future</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #64748b;
+            --accent: #0ea5e9;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --success: #10b981;
+            --error: #ef4444;
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: clamp(14px, 2.5vw, 16px);
+        }
+
+        .container {
+            max-width: min(75rem, 100% - 2rem);
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Aria live region for announcements */
+        #aria-live-region {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-desktop {
+            display: none;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-desktop a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 200ms ease;
+        }
+
+        .nav-desktop a:hover {
+            color: var(--text-primary);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 200ms ease;
+            border: none;
+            cursor: pointer;
+            font-size: max(14px, 0.875rem);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+            transition: all 200ms ease;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: var(--bg-tertiary);
+            border-color: var(--text-secondary);
+        }
+
+        .mobile-menu-btn.active {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg-primary);
+            z-index: 200;
+            padding: 2rem;
+            opacity: 0;
+            transform: translateX(-100%);
+            transition: all 300ms ease;
+        }
+
+        .mobile-nav.active {
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mobile-nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.125rem;
+            font-weight: 500;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-nav-links button {
+            margin-top: 1rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 0 6rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .hero-content {
+            max-width: min(50rem, 100%);
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background-color: var(--bg-secondary);
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .features-header h2 {
+            font-size: clamp(1.875rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .features-header p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: min(37.5rem, 100%);
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(18.75rem, 100%), 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: var(--bg-primary);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            transition: transform 200ms ease, box-shadow 200ms ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 300ms ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            max-width: min(25rem, 100%);
+            width: 100%;
+            border: 1px solid var(--border);
+            transform: scale(0.9);
+            transition: transform 300ms ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: var(--radius-md);
+        }
+
+        .modal-close:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 16px;
+            min-height: 44px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: -2px;
+        }
+
+        .form-error {
+            color: var(--error);
+            font-size: max(14px, 0.875rem);
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            transition: transform 300ms ease;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: calc(100vw - 4rem);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: auto;
+            min-width: 24px;
+            min-height: 24px;
+            border-radius: var(--radius-sm);
+        }
+
+        .toast-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-primary);
+            border-top: 1px solid var(--border);
+            padding: 3rem 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(15.625rem, 100%), 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 200ms ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        /* Focus trap styles */
+        .focus-trap-start,
+        .focus-trap-end {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 320px) {
+            .container {
+                padding: 0 0.5rem;
+            }
+            
+            .mobile-nav {
+                padding: 1rem;
+            }
+            
+            .hero {
+                padding: 2rem 0 3rem;
+            }
+            
+            .features {
+                padding: 3rem 0;
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+            }
+            
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .nav-desktop {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+
+            .hero-buttons {
+                flex-wrap: nowrap;
+            }
+
+            .modal-content {
+                width: 100%;
+            }
+
+            .toast {
+                max-width: 24rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hero {
+                padding: 6rem 0 8rem;
+            }
+
+            .features {
+                padding: 8rem 0;
+            }
+        }
+
+        @media (min-width: 1440px) {
+            .container {
+                max-width: 90rem;
+            }
+        }
+    </style>
 </head>
-
-<style>
-:root {
-  --color-primary: #4169E1;
-  --color-secondary: #FFD700;
-  --color-accent: #1E90FF;
-  --color-dark: #1B365D;
-  --color-light: #F8F9FA;
-  --color-text: #1B365D;
-  --color-text-muted: #6C7B95;
-  --color-border: #E8EBF0;
-  --gradient-primary: linear-gradient(135deg, #4169E1 0%, #1E90FF 100%);
-  --gradient-secondary: linear-gradient(90deg, #4169E1 0%, #6495ED 50%, #1E90FF 100%);
-  --gradient-cta: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  --font-heading: 'Playfair Display', serif;
-  --font-body: 'Source Sans Pro', sans-serif;
-  --font-size-h1: clamp(2.5rem, 5vw, 4rem);
-  --font-size-h2: clamp(2rem, 4vw, 3rem);
-  --font-size-h3: clamp(1.5rem, 3vw, 2rem);
-  --font-size-body: clamp(1rem, 1.5vw, 1.125rem);
-  --font-size-small: 0.875rem;
-  --line-height: 1.6;
-  --letter-spacing-heading: -0.02em;
-  --max-width: 1200px;
-  --container-padding: clamp(1rem, 5vw, 3rem);
-  --section-spacing: clamp(4rem, 8vw, 8rem);
-  --border-radius-sm: 6px;
-  --border-radius-md: 12px;
-  --border-radius-lg: 20px;
-  --border-radius-xl: 30px;
-  --shadow-sm: 0 2px 8px rgba(65, 105, 225, 0.1);
-  --shadow-md: 0 4px 20px rgba(65, 105, 225, 0.15);
-  --shadow-lg: 0 8px 40px rgba(65, 105, 225, 0.2);
-  --transition: all 0.3s ease;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: var(--font-body);
-  color: var(--color-text);
-  line-height: var(--line-height);
-  overflow-x: hidden;
-}
-
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--container-padding);
-}
-
-.page {
-  display: none;
-}
-
-.page.active {
-  display: block;
-}
-
-/* Navigation */
-.nav {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.nav .container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.nav-logo {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-}
-
-.nav-menu {
-  display: flex;
-  list-style: none;
-  gap: 2rem;
-  margin: 0;
-}
-
-.nav-menu a {
-  color: var(--color-text);
-  text-decoration: none;
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.nav-menu a:hover {
-  color: var(--color-primary);
-}
-
-.nav-actions {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius-md);
-  font-weight: 600;
-  text-decoration: none;
-  display: inline-block;
-  transition: var(--transition);
-  border: none;
-  cursor: pointer;
-  font-size: var(--font-size-small);
-}
-
-.btn-primary {
-  background: var(--gradient-cta);
-  color: var(--color-dark);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
-}
-
-.btn-ghost:hover {
-  background: var(--color-primary);
-  color: white;
-}
-
-.mobile-menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--color-text);
-}
-
-@media (max-width: 768px) {
-  .nav-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    flex-direction: column;
-    padding: 1rem;
-    box-shadow: var(--shadow-md);
-  }
-  
-  .nav-menu.show {
-    display: flex;
-  }
-  
-  .mobile-menu-toggle {
-    display: block;
-  }
-  
-  .nav-actions {
-    gap: 0.5rem;
-  }
-  
-  .btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* Hero Section */
-.hero {
-  background: var(--gradient-primary);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  padding-top: 100px;
-}
-
-.hero::before,
-.hero::after {
-  content: '';
-  position: absolute;
-  width: clamp(200px, 25vw, 300px);
-  height: clamp(200px, 25vw, 300px);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  z-index: 1;
-}
-
-.hero::before {
-  top: -100px;
-  left: -100px;
-}
-
-.hero::after {
-  bottom: -150px;
-  right: -150px;
-  width: clamp(300px, 40vw, 500px);
-  height: clamp(300px, 40vw, 500px);
-  background: rgba(30, 144, 255, 0.3);
-}
-
-.hero-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-  position: relative;
-  z-index: 2;
-}
-
-.hero-text h1 {
-  font-family: var(--font-heading);
-  font-size: var(--font-size-h1);
-  color: white;
-  margin-bottom: 1.5rem;
-  letter-spacing: var(--letter-spacing-heading);
-}
-
-.hero-text .highlight {
-  font-family: var(--font-heading);
-  font-style: italic;
-  color: var(--color-secondary);
-  display: block;
-}
-
-.hero-text p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: var(--font-size-body);
-  margin-bottom: 2rem;
-  max-width: 100%;
-}
-
-.hero-image {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hero-image img {
-  width: 100%;
-  max-width: min(400px, 90vw);
-  height: auto;
-  border-radius: var(--border-radius-lg);
-}
-
-@media (max-width: 768px) {
-  .hero-content {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 2rem;
-  }
-  
-  .hero-text p {
-    max-width: 100%;
-  }
-}
-
-/* Stats Section */
-.stats-section {
-  background: var(--gradient-primary);
-  padding: var(--section-spacing) 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.stats-section::before {
-  content: '';
-  position: absolute;
-  top: -100px;
-  right: -200px;
-  width: clamp(300px, 35vw, 400px);
-  height: clamp(300px, 35vw, 400px);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-}
-
-.stats-content {
-  position: relative;
-  z-index: 2;
-}
-
-.stats-headline {
-  color: white;
-  font-size: var(--font-size-h2);
-  margin-bottom: 1rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.stats-tagline {
-  font-family: var(--font-heading);
-  font-style: italic;
-  color: var(--color-secondary);
-  font-size: 1.5rem;
-  position: relative;
-  display: inline-block;
-  margin-bottom: 2rem;
-}
-
-.stats-tagline::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--color-secondary);
-  border-radius: 2px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-}
-
-.stat-card {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--border-radius-md);
-  padding: 2rem;
-  text-align: center;
-}
-
-.stat-number {
-  font-size: 3rem;
-  font-weight: 700;
-  color: var(--color-secondary);
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.125rem;
-}
-
-/* How It Works */
-.how-it-works {
-  padding: var(--section-spacing) 0;
-  background: white;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.section-title {
-  font-family: var(--font-heading);
-  font-size: var(--font-size-h2);
-  margin-bottom: 1rem;
-}
-
-.section-title .highlight {
-  color: var(--color-primary);
-  font-style: italic;
-}
-
-.section-subtitle {
-  color: var(--color-text-muted);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-}
-
-.step-card {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  padding: 2rem;
-  text-align: center;
-  transition: var(--transition);
-  position: relative;
-}
-
-.step-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.step-number {
-  width: 40px;
-  height: 40px;
-  background: var(--gradient-cta);
-  color: var(--color-dark);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.25rem;
-  margin: 0 auto 1.5rem;
-}
-
-.step-card h3 {
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-  font-size: 1.25rem;
-}
-
-.step-card p {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-small);
-  line-height: 1.5;
-}
-
-/* Resources Section */
-.resources-section {
-  background: var(--gradient-primary);
-  padding: var(--section-spacing) 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.resources-section::before {
-  content: '';
-  position: absolute;
-  top: -150px;
-  left: -200px;
-  width: clamp(400px, 45vw, 500px);
-  height: clamp(400px, 45vw, 500px);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-}
-
-.resources-section .section-title {
-  color: white;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.resources-section .highlight {
-  font-family: var(--font-heading);
-  font-style: italic;
-  color: var(--color-secondary);
-  position: relative;
-  display: block;
-}
-
-.resources-section .highlight::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 3px;
-  background: var(--color-secondary);
-  border-radius: 2px;
-}
-
-.resources-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin: 3rem 0;
-}
-
-.resource-card {
-  background: white;
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
-  transition: var(--transition);
-}
-
-.resource-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.resource-card-image {
-  width: 100%;
-  height: 200px;
-  background: var(--color-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.resource-card-content {
-  padding: 1.5rem;
-}
-
-.resource-card h3 {
-  font-size: 1.25rem;
-  margin-bottom: 0.75rem;
-  color: var(--color-text);
-}
-
-.resource-card p {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-small);
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
-}
-
-.btn-outline:hover {
-  background: var(--color-primary);
-  color: white;
-}
-
-.resources-cta {
-  text-align: center;
-  margin-top: 3rem;
-}
-
-/* Features Section */
-.features-section {
-  padding: var(--section-spacing) 0;
-  background: white;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-}
-
-.feature-card {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  padding: 2rem;
-  text-align: center;
-  transition: var(--transition);
-}
-
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.feature-icon {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  color: white;
-  font-size: 1.5rem;
-}
-
-.feature-card h3 {
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-  font-size: 1.125rem;
-}
-
-.feature-card p {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-small);
-  line-height: 1.5;
-}
-
-/* CTA Section */
-.cta-section {
-  background: var(--gradient-primary);
-  padding: var(--section-spacing) 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.cta-section::before {
-  content: '';
-  position: absolute;
-  top: -100px;
-  left: -100px;
-  width: clamp(200px, 25vw, 300px);
-  height: clamp(200px, 25vw, 300px);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-}
-
-.cta-section::after {
-  content: '';
-  position: absolute;
-  bottom: -150px;
-  right: -150px;
-  width: clamp(300px, 35vw, 400px);
-  height: clamp(300px, 35vw, 400px);
-  background: rgba(30, 144, 255, 0.3);
-  border-radius: 50%;
-}
-
-.cta-content {
-  position: relative;
-  z-index: 2;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.cta-content h2 {
-  font-family: var(--font-heading);
-  font-size: var(--font-size-h2);
-  color: white;
-  margin-bottom: 1rem;
-}
-
-.cta-content .highlight {
-  color: var(--color-secondary);
-  font-style: italic;
-}
-
-.cta-content p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: var(--font-size-body);
-  margin-bottom: 2rem;
-}
-
-/* Footer */
-.footer {
-  background: var(--gradient-primary);
-  color: white;
-  padding: 3rem 0 2rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.footer::before {
-  content: '';
-  position: absolute;
-  top: -100px;
-  right: -100px;
-  width: clamp(200px, 25vw, 300px);
-  height: clamp(200px, 25vw, 300px);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-}
-
-.footer-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
-  position: relative;
-  z-index: 2;
-}
-
-.footer-brand h2 {
-  font-family: var(--font-heading);
-  color: white;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.footer-column h3 {
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.footer-column ul {
-  list-style: none;
-}
-
-.footer-column a {
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  font-size: var(--font-size-small);
-  transition: var(--transition);
-}
-
-.footer-column a:hover {
-  color: white;
-}
-
-.footer-social {
-  margin-top: 1rem;
-}
-
-.footer-social p {
-  margin-bottom: 1rem;
-  font-size: var(--font-size-small);
-}
-
-.social-links {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-links a {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-  text-decoration: none;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.social-links a:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.footer-disclaimer {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 2rem;
-  position: relative;
-  z-index: 2;
-}
-
-.footer-disclaimer p {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.4;
-  margin-bottom: 1rem;
-}
-
-@media (max-width: 768px) {
-  .footer-content {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-  
-  .footer-brand {
-    grid-column: 1 / -1;
-  }
-}
-
-/* Placeholder image styles */
-.placeholder-img {
-  background: linear-gradient(45deg, #f0f2f5, #e4e7eb);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-muted);
-  font-size: 1rem;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  padding: 1rem;
-}
-
-.hero-placeholder {
-  width: 100%;
-  max-width: min(400px, 90vw);
-  height: clamp(200px, 25vw, 300px);
-  border-radius: var(--border-radius-lg);
-  background: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1rem;
-  text-align: center;
-  padding: 1rem;
-}
-
-.resource-placeholder {
-  background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
-  color: white;
-  font-size: 1rem;
-}
-
-@media (max-width: 480px) {
-  .hero-placeholder {
-    width: 100%;
-    max-width: 100%;
-    height: 200px;
-  }
-}
-</style>
-
 <body>
-<!-- Navigation -->
-<nav class="nav">
-  <div class="container">
-    <a href="#" class="nav-logo" onclick="showPage('home')">GradBridge</a>
-    
-    <ul class="nav-menu" id="navMenu">
-      <li><a href="#" onclick="showPage('student-loans')">Student Loans</a></li>
-      <li><a href="#" onclick="showPage('resources')">Resources</a></li>
-      <li><a href="#" onclick="showPage('partners')">Partners</a></li>
-      <li><a href="#" onclick="showPage('about')">About Us</a></li>
-    </ul>
-    
-    <div class="nav-actions">
-      <a href="#" class="btn btn-primary" onclick="showSignInModal()">Apply Now</a>
-      <a href="#" class="btn btn-ghost" onclick="showSignInModal()">Sign In</a>
-      <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-expanded="false" aria-label="Toggle navigation menu">☰</button>
+    <div id="app">
+        <!-- Aria live region for screen reader announcements -->
+        <div id="aria-live-region" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- Header -->
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <a href="#" class="logo" aria-label="GradBridge - Home">GradBridge</a>
+                    
+                    <nav class="nav-desktop" aria-label="Main navigation">
+                        <a href="#programs" aria-label="View graduate programs">Programs</a>
+                        <a href="#resources" aria-label="Access student resources">Resources</a>
+                        <a href="#about" aria-label="Learn about GradBridge">About</a>
+                        <a href="#contact" aria-label="Contact GradBridge">Contact</a>
+                    </nav>
+
+                    <div class="auth-buttons">
+                        <button class="btn btn-secondary" id="signin-btn" aria-label="Sign in to your account">Sign In</button>
+                        <button class="btn btn-primary" id="apply-btn" aria-label="Apply to graduate programs">Apply Now</button>
+                        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open mobile menu" aria-expanded="false">
+                            <span class="sr-only">Menu</span>
+                            ☰
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile Navigation -->
+        <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+            <div class="mobile-nav-header">
+                <a href="#" class="logo" aria-label="GradBridge - Home">GradBridge</a>
+                <button class="mobile-menu-btn" id="mobile-menu-close" aria-label="Close mobile menu">✕</button>
+            </div>
+            <div class="mobile-nav-links">
+                <a href="#programs" aria-label="View graduate programs">Programs</a>
+                <a href="#resources" aria-label="Access student resources">Resources</a>
+                <a href="#about" aria-label="Learn about GradBridge">About</a>
+                <a href="#contact" aria-label="Contact GradBridge">Contact</a>
+                <button class="btn btn-secondary" id="mobile-signin-btn" aria-label="Sign in to your account">Sign In</button>
+                <button class="btn btn-primary" id="mobile-apply-btn" aria-label="Apply to graduate programs">Apply Now</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Bridge to Your Graduate Future</h1>
+                    <p>Connect with top-tier graduate programs, access expert guidance, and take the next step in your academic journey. We bridge the gap between your aspirations and your achievements.</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" id="hero-apply-btn" aria-label="Apply to graduate programs">Apply Now</button>
+                        <button class="btn btn-secondary" id="hero-signin-btn" aria-label="Sign in to your account">Sign In</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <div class="features-header">
+                    <h2>Why Choose GradBridge?</h2>
+                    <p>We provide comprehensive support throughout your graduate school journey, from application to graduation.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">🎯</div>
+                        <h3>Personalized Matching</h3>
+                        <p>Our AI-powered platform matches you with graduate programs that align with your academic goals, career aspirations, and personal preferences.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">👥</div>
+                        <h3>Expert Guidance</h3>
+                        <p>Connect with admissions counselors, current graduate students, and alumni who provide insights and mentorship throughout your journey.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">📚</div>
+                        <h3>Comprehensive Resources</h3>
+                        <p>Access our extensive library of application guides, test prep materials, and academic writing resources to strengthen your applications.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">💰</div>
+                        <h3>Funding Opportunities</h3>
+                        <p>Discover scholarships, grants, and funding opportunities specifically curated for graduate students in your field of study.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">⚡</div>
+                        <h3>Streamlined Applications</h3>
+                        <p>Apply to multiple programs through our unified platform, saving time and ensuring your applications are complete and compelling.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">🎓</div>
+                        <h3>Success Tracking</h3>
+                        <p>Monitor your application progress, receive updates from programs, and celebrate your acceptances with our integrated dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h4>Programs</h4>
+                        <a href="#masters" aria-label="View Master's degree programs">Master's Programs</a>
+                        <a href="#phd" aria-label="View PhD programs">PhD Programs</a>
+                        <a href="#professional" aria-label="View professional degree programs">Professional Programs</a>
+                        <a href="#online" aria-label="View online degree programs">Online Programs</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Resources</h4>
+                        <a href="#guides" aria-label="Access application guides">Application Guides</a>
+                        <a href="#test-prep" aria-label="Access test preparation materials">Test Preparation</a>
+                        <a href="#essays" aria-label="Get essay writing help">Essay Writing</a>
+                        <a href="#interviews" aria-label="Prepare for interviews">Interview Prep</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Support</h4>
+                        <a href="#help" aria-label="Visit help center">Help Center</a>
+                        <a href="#contact" aria-label="Contact support">Contact Us</a>
+                        <a href="#community" aria-label="Join our community">Community</a>
+                        <a href="#blog" aria-label="Read our blog">Blog</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Company</h4>
+                        <a href="#about" aria-label="Learn about our company">About Us</a>
+                        <a href="#careers" aria-label="View career opportunities">Careers</a>
+                        <a href="#privacy" aria-label="Read privacy policy">Privacy Policy</a>
+                        <a href="#terms" aria-label="Read terms of service">Terms of Service</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 GradBridge. All rights reserved. Bridging the path to graduate success.</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Apply Now Modal -->
+        <div class="modal" id="apply-modal" role="dialog" aria-labelledby="apply-modal-title" aria-modal="true">
+            <div class="focus-trap-start" tabindex="0"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="apply-modal-title">Apply Now</h3>
+                    <button class="modal-close" id="apply-modal-close" aria-label="Close apply now dialog">✕</button>
+                </div>
+                <form id="apply-form" action="https://gradbridge.com/apply" method="POST">
+                    <div class="form-group">
+                        <label for="apply-name">Full Name</label>
+                        <input type="text" id="apply-name" name="name" required aria-describedby="apply-name-error">
+                        <div class="form-error" id="apply-name-error" role="alert" aria-live="polite"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="apply-email">Email Address</label>
+                        <input type="email" id="apply-email" name="email" required aria-describedby="apply-email-error">
+                        <div class="form-error" id="apply-email-error" role="alert" aria-live="polite"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="apply-program">Program of Interest</label>
+                        <select id="apply-program" name="program" required aria-describedby="apply-program-error">
+                            <option value="">Select a program</option>
+                            <option value="masters">Master's Degree</option>
+                            <option value="phd">PhD Program</option>
+                            <option value="professional">Professional Program</option>
+                        </select>
+                        <div class="form-error" id="apply-program-error" role="alert" aria-live="polite"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="apply-field">Field of Study</label>
+                        <input type="text" id="apply-field" name="field" required aria-describedby="apply-field-error">
+                        <div class="form-error" id="apply-field-error" role="alert" aria-live="polite"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" aria-label="Submit your application">Submit Application</button>
+                </form>
+            </div>
+            <div class="focus-trap-end" tabindex="0"></div>
+        </div>
+
+        <!-- Sign In Modal -->
+        <div class="modal" id="signin-modal" role="dialog" aria-labelledby="signin-modal-title" aria-modal="true">
+            <div class="focus-trap-start" tabindex="0"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="signin-modal-title">Sign In</h3>
+                    <button class="modal-close" id="signin-modal-close" aria-label="Close sign in dialog">✕</button>
+                </div>
+                <form id="signin-form" action="https://gradbridge.com/signin" method="POST">
+                    <div class="form-group">
+                        <label for="signin-email">Email Address</label>
+                        <input type="email" id="signin-email" name="email" required aria-describedby="signin-email-error">
+                        <div class="form-error" id="signin-email-error" role="alert" aria-live="polite"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signin-password">Password</label>
+                        <input type="password" id="signin-password" name="password" required aria-describedby="signin-password-error">
+                        <div class="form-error" id="signin-password-error" role="alert" aria-live="polite"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" aria-label="Sign in to your account">Sign In</button>
+                    <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+                        Don't have an account? <a href="#" style="color: var(--primary);" id="show-apply" aria-label="Apply for a new account">Apply now</a>
+                    </p>
+                </form>
+            </div>
+            <div class="focus-trap-end" tabindex="0"></div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast" id="toast" role="alert" aria-live="assertive">
+            <span id="toast-message"></span>
+            <button class="toast-close" id="toast-close" aria-label="Close notification">✕</button>
+        </div>
     </div>
-  </div>
-</nav>
 
-<!-- Sign In Modal -->
-<div id="signInModal" class="modal" style="display: none;">
-  <div class="modal-overlay" onclick="hideSignInModal()"></div>
-  <div class="modal-content">
-    <h3>Get Started with GradBridge</h3>
-    <p>Choose how you'd like to proceed:</p>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="hideSignInModal()">Apply for Student Loan</button>
-      <button class="btn btn-ghost" onclick="hideSignInModal()">Sign In to Account</button>
-    </div>
-    <button class="modal-close" onclick="hideSignInModal()">&times;</button>
-  </div>
-</div>
+    <script>
+        // State management
+        const state = {
+            currentModal: null,
+            mobileMenuOpen: false,
+            formData: {
+                apply: {},
+                signin: {}
+            },
+            formErrors: {},
+            focusableElements: [],
+            lastFocusedElement: null,
+            toastTimeout: null
+        };
 
-<!-- Home Page -->
-<div id="home" class="page active">
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1>Second Chances, <span class="highlight">Brighter Futures.</span></h1>
-          <p>We bridge the gap when traditional lenders have denied your student loan, providing the financial support you need to continue your education and build a brighter future.</p>
-          <a href="#" class="btn btn-primary" onclick="showSignInModal()">Apply Now</a>
-        </div>
-        <div class="hero-image">
-          <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&h=300&fit=crop&crop=faces" alt="Diverse students studying together" onerror="this.outerHTML='<div class=\'hero-placeholder\'>Image of diverse students studying together</div>'">
-        </div>
-      </div>
-    </div>
-  </section>
+        // DOM elements cache
+        const elements = {};
 
-  <!-- Stats Section -->
-  <section class="stats-section">
-    <div class="container">
-      <div class="stats-content">
-        <h2 class="stats-headline">Approximately 42% of college dropouts cite financial struggles as the primary reason for leaving school.</h2>
-        <p class="stats-tagline">GradBridge removes the financial barriers to graduation</p>
-        
-        <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-number">42%</span>
-            <span class="stat-label">College dropouts cite financial struggles</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-number">2,000+</span>
-            <span class="stat-label">Schools nationwide</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            cacheElements();
+            bindEvents();
+            loadFromStorage();
+        });
 
-  <!-- How It Works -->
-  <section class="how-it-works">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">How it <span class="highlight">Works.</span></h2>
-        <p class="section-subtitle">With a simple application process and expanded eligibility, we provide access to the funding you need to continue your education and build a brighter future.</p>
-      </div>
-      
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-number">1</div>
-          <h3>Get Started with GradBridge</h3>
-          <p>If you applied for a private student loan and didn't get approved, you can apply with GradBridge. Don't worry – we specialize in reviewing applications from students who have been denied elsewhere.</p>
-        </div>
-        
-        <div class="step-card">
-          <div class="step-number">2</div>
-          <h3>Complete a Short Application</h3>
-          <p>The process is fast, secure, and only takes a few minutes. If referred, you'll receive a link to apply directly with GradBridge.</p>
-        </div>
-        
-        <div class="step-card">
-          <div class="step-number">3</div>
-          <h3>We Work with Your School</h3>
-          <p>If approved, we'll coordinate directly with your school to certify the loan amount and send the funds on your behalf. We take care of ensuring your loan proceeds pay your cost of attendance.</p>
-        </div>
-        
-        <div class="step-card">
-          <div class="step-number">4</div>
-          <h3>Stay on Track</h3>
-          <p>During the process, you'll receive regular updates and easy-to-understand repayment options. If you selected an in-school payment plan, signing up for autopay can help you stay on top of things and lower your rate.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+        function cacheElements() {
+            // Buttons
+            elements.applyBtns = document.querySelectorAll('#apply-btn, #mobile-apply-btn, #hero-apply-btn');
+            elements.signinBtns = document.querySelectorAll('#signin-btn, #mobile-signin-btn, #hero-signin-btn');
+            elements.mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            elements.mobileMenuClose = document.getElementById('mobile-menu-close');
+            elements.showApplyBtn = document.getElementById('show-apply');
 
-  <!-- Resources Section -->
-  <section class="resources-section">
-    <div class="container">
-      <h2 class="section-title">Plan for college with confidence using our <span class="highlight">Free Resources.</span></h2>
-      
-      <div class="resources-grid">
-        <div class="resource-card">
-          <div class="resource-card-image">
-            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=300&h=200&fit=crop" alt="College costs article preview" onerror="this.outerHTML='<div class=\'placeholder-img resource-placeholder\'>College costs article preview image</div>'">
-          </div>
-          <div class="resource-card-content">
-            <h3>The Hidden Costs of College You Should Plan For</h3>
-            <p>Beyond tuition from your studies. Learn about the hidden expenses that can catch students off guard.</p>
-            <a href="#" class="btn btn-outline">Read Full Article</a>
-          </div>
-        </div>
-        
-        <div class="resource-card">
-          <div class="resource-card-image">
-            <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=200&fit=crop" alt="Student loan denied guide preview" onerror="this.outerHTML='<div class=\'placeholder-img resource-placeholder\'>Student loan denied guide preview image</div>'">
-          </div>
-          <div class="resource-card-content">
-            <h3>Student Loan Denied? Here's What to Do Next</h3>
-            <p>If your student loan application was denied, don't panic. Learn why it happened and how you can get the funding you need.</p>
-            <a href="#" class="btn btn-outline">Read Full Article</a>
-          </div>
-        </div>
-        
-        <div class="resource-card">
-          <div class="resource-card-image">
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&h=200&fit=crop" alt="Credit score impact article preview" onerror="this.outerHTML='<div class=\'placeholder-img resource-placeholder\'>Credit score impact article preview image</div>'">
-          </div>
-          <div class="resource-card-content">
-            <h3>How Your Credit Score Affects Private Student Loan Approval</h3>
-            <p>Learn how credit scores impact private student loan approval and why most students need a cosigner to qualify.</p>
-            <a href="#" class="btn btn-outline">Read Full Article</a>
-          </div>
-        </div>
-      </div>
-      
-      <div class="resources-cta">
-        <a href="#" class="btn btn-primary" onclick="showPage('resources')">View All Resources</a>
-      </div>
-    </div>
-  </section>
+            // Modals
+            elements.applyModal = document.getElementById('apply-modal');
+            elements.signinModal = document.getElementById('signin-modal');
+            elements.mobileNav = document.getElementById('mobile-nav');
 
-  <!-- Features Section -->
-  <section class="features-section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Achieve Your <span class="highlight">Education Dreams.</span></h2>
-        <p class="section-subtitle">If you've been denied for a traditional private student loan, GradBridge is here to help. Our second-look private student loan program is designed for students who fall just outside traditional funding criteria.</p>
-      </div>
-      
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">📄</div>
-          <h3>Simple Application</h3>
-          <p>Our simple digital application process will give you a decision in less than five minutes.</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🏫</div>
-          <h3>Over 2,000 Schools</h3>
-          <p>We support undergraduate and graduate programs from over 2,000 schools nationwide.</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🔄</div>
-          <h3>Second Chances</h3>
-          <p>Students who have been denied by traditional lenders may get a second chance at approval with our specialized program.</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">💳</div>
-          <h3>Flexible Repayment Options</h3>
-          <p>While in school you can choose from a variety of repayment methods such as 3% per month to help cover account charges, or 1% for Payment Relief fee payments.*</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🤝</div>
-          <h3>Cosigner Support</h3>
-          <p>We make it easy for you to apply with a cosigner to maximize your chances of approval!</p>
-        </div>
-      </div>
-    </div>
-  </section>
+            // Forms
+            elements.applyForm = document.getElementById('apply-form');
+            elements.signinForm = document.getElementById('signin-form');
 
-  <!-- CTA Section -->
-  <section class="cta-section">
-    <div class="container">
-      <div class="cta-content">
-        <h2>Ready to Get <span class="highlight">Started?</span></h2>
-        <p>Don't let financial barriers stop you from achieving your education dreams. Apply with GradBridge today and take the next step toward your brighter future.</p>
-        <a href="#" class="btn btn-primary" onclick="showSignInModal()">Apply Now</a>
-      </div>
-    </div>
-  </section>
-</div>
+            // Toast
+            elements.toast = document.getElementById('toast');
+            elements.toastMessage = document.getElementById('toast-message');
+            elements.toastClose = document.getElementById('toast-close');
 
-<!-- Student Loans Page -->
-<div id="student-loans" class="page">
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1>Student Loans for <span class="highlight">Everyone.</span></h1>
-          <p>Get the funding you need to continue your education, even if you've been denied elsewhere.</p>
-          <a href="#" class="btn btn-primary" onclick="showSignInModal()">Apply Now</a>
-        </div>
-        <div class="hero-image">
-          <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop" alt="Student with books" onerror="this.outerHTML='<div class=\'hero-placeholder\'>Student with books image</div>'">
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
+            // Modal closes
+            elements.applyModalClose = document.getElementById('apply-modal-close');
+            elements.signinModalClose = document.getElementById('signin-modal-close');
 
-<!-- Resources Page -->
-<div id="resources" class="page">
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1>Free <span class="highlight">Resources.</span></h1>
-          <p>Everything you need to know about student loans, college funding, and financial planning.</p>
-        </div>
-        <div class="hero-image">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop" alt="Educational resources" onerror="this.outerHTML='<div class=\'hero-placeholder\'>Educational resources image</div>'">
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
+            // Aria live region
+            elements.ariaLiveRegion = document.getElementById('aria-live-region');
 
-<!-- Partners Page -->
-<div id="partners" class="page">
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1>Our <span class="highlight">Partners.</span></h1>
-          <p>Working with over 2,000 schools nationwide to provide educational funding solutions.</p>
-        </div>
-        <div class="hero-image">
-          <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=300&fit=crop" alt="University campus" onerror="this.outerHTML='<div class=\'hero-placeholder\'>University campus image</div>'">
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
+            // Focus trap elements
+            elements.focusTrapStarts = document.querySelectorAll('.focus-trap-start');
+            elements.focusTrapEnds = document.querySelectorAll('.focus-trap-end');
+        }
 
-<!-- About Page -->
-<div id="about" class="page">
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1>About <span class="highlight">GradBridge.</span></h1>
-          <p>We're dedicated to removing financial barriers to education and helping students achieve their dreams.</p>
-        </div>
-        <div class="hero-image">
-          <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop" alt="Graduation ceremony" onerror="this.outerHTML='<div class=\'hero-placeholder\'>Graduation ceremony image</div>'">
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
+        function bindEvents() {
+            // Apply buttons
+            elements.applyBtns.forEach(btn => {
+                btn.addEventListener('click', () => openModal('apply'));
+            });
 
-<!-- Footer -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-content">
-      <div class="footer-brand">
-        <h2>GradBridge</h2>
-        <div class="footer-social">
-          <p>Follow us</p>
-          <div class="social-links">
-            <a href="#" aria-label="LinkedIn">LI</a>
-            <a href="#" aria-label="Instagram">IG</a>
-            <a href="#" aria-label="Facebook">FB</a>
-            <a href="#" aria-label="Twitter">TW</a>
-            <a href="#" aria-label="TikTok">TT</a>
-          </div>
-        </div>
-      </div>
-      
-      <div class="footer-column">
-        <h3>Student Loans</h3>
-        <ul>
-          <li><a href="#" onclick="showPage('student-loans')">Student Loans</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-column">
-        <h3>Resources</h3>
-        <ul>
-          <li><a href="#" onclick="showPage('resources')">Resources</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-column">
-        <h3>Partners</h3>
-        <ul>
-          <li><a href="#" onclick="showPage('partners')">Partners</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-column">
-        <h3>About Us</h3>
-        <ul>
-          <li><a href="#" onclick="showPage('about')">About Us</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-column">
-        <h3>In the News</h3>
-        <ul>
-          <li><a href="#">In the News</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-column">
-        <h3>For Schools</h3>
-        <ul>
-          <li><a href="#">For Schools</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-column">
-        <h3>Support</h3>
-        <ul>
-          <li><a href="#">FAQs</a></li>
-          <li><a href="#">Careers</a></li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="footer-disclaimer">
-      <p>Federal loans, GradBridge loans are for students currently enrolled at a participating school. All loans will be certified by the school. Source: based on data from Education USA, report on College Dropout rates. The 3% per month to help cover account charges, or 1% for Payment Relief fee payments while in school. Interest accrues but is added to the loan balance, each choice impacts the total loan cost. For the 1% repayment example, assume a $10,000 loan with an APR of 16.3%, a 4% origination fee, and a 20% don't discount applied and 10-year term. The loan will have 60 months of in school payments of 1%.</p>
-    </div>
-  </div>
-</footer>
+            // Sign in buttons
+            elements.signinBtns.forEach(btn => {
+                btn.addEventListener('click', () => openModal('signin'));
+            });
 
-<script>
-// Page routing
-function showPage(pageId) {
-  // Hide all pages
-  const pages = document.querySelectorAll('.page');
-  pages.forEach(page => {
-    page.classList.remove('active');
-  });
-  
-  // Show selected page
-  const selectedPage = document.getElementById(pageId);
-  if (selectedPage) {
-    selectedPage.classList.add('active');
-    window.scrollTo(0, 0);
-  }
-  
-  // Store current page
-  localStorage.setItem('currentPage', pageId);
-}
+            // Mobile menu
+            elements.mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+            elements.mobileMenuClose.addEventListener('click', closeMobileMenu);
 
-// Modal functionality
-function showSignInModal() {
-  const modal = document.getElementById('signInModal');
-  modal.style.display = 'flex';
-  modal.style.alignItems = 'center';
-  modal.style.justifyContent = 'center';
-  modal.style.position = 'fixed';
-  modal.style.top = '0';
-  modal.style.left = '0';
-  modal.style.width = '100%';
-  modal.style.height = '100%';
-  modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-  modal.style.zIndex = '10000';
-}
+            // Modal closes
+            elements.applyModalClose.addEventListener('click', closeModal);
+            elements.signinModalClose.addEventListener('click', closeModal);
 
-function hideSignInModal() {
-  const modal = document.getElementById('signInModal');
-  modal.style.display = 'none';
-}
+            // Modal backdrop clicks
+            elements.applyModal.addEventListener('click', (e) => {
+                if (e.target === elements.applyModal) closeModal();
+            });
+            elements.signinModal.addEventListener('click', (e) => {
+                if (e.target === elements.signinModal) closeModal();
+            });
 
-// Mobile menu
-function toggleMobileMenu() {
-  const menu = document.getElementById('navMenu');
-  const toggle = document.querySelector('.mobile-menu-toggle');
-  const isExpanded = menu.classList.contains('show');
-  
-  menu.classList.toggle('show');
-  toggle.setAttribute('aria-expanded', !isExpanded);
-}
+            // Show apply from signin
+            elements.showApplyBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeModal();
+                setTimeout(() => openModal('apply'), 150);
+            });
 
-// Load saved page on page load
-window.addEventListener('DOMContentLoaded', function() {
-  const savedPage = localStorage.getItem('currentPage');
-  if (savedPage && document.getElementById(savedPage)) {
-    showPage(savedPage);
-  }
-});
+            // Forms
+            elements.applyForm.addEventListener('submit', handleApplySubmit);
+            elements.signinForm.addEventListener('submit', handleSigninSubmit);
 
-// Close modal when clicking outside
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('modal-overlay')) {
-    hideSignInModal();
-  }
-});
+            // Form inputs - save to state and localStorage
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', debounce(handleInputChange, 300));
+            });
 
-// Smooth scrolling for anchor links
-document.addEventListener('click', function(e) {
-  if (e.target.tagName === 'A' && e.target.getAttribute('href').startsWith('#')) {
-    e.preventDefault();
-    const targetId = e.target.getAttribute('href').slice(1);
-    const targetElement = document.getElementById(targetId);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
-});
-</script>
+            // Keyboard navigation
+            document.addEventListener('keydown', handleKeydown);
 
-<style>
-.modal {
-  display: none;
-}
+            // Mobile nav links - close menu when clicked
+            document.querySelectorAll('.mobile-nav-links a, .mobile-nav-links button').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
 
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: var(--border-radius-md);
-  max-width: min(400px, 90vw);
-  width: 100%;
-  position: relative;
-  box-shadow: var(--shadow-lg);
-}
+            // Toast close button
+            elements.toastClose.addEventListener('click', hideToast);
 
-.modal-content h3 {
-  margin-bottom: 1rem;
-  color: var(--color-text);
-}
+            // Focus trap events
+            elements.focusTrapStarts.forEach(trap => {
+                trap.addEventListener('focus', handleFocusTrapStart);
+            });
+            elements.focusTrapEnds.forEach(trap => {
+                trap.addEventListener('focus', handleFocusTrapEnd);
+            });
+        }
 
-.modal-content p {
-  margin-bottom: 2rem;
-  color: var(--color-text-muted);
-}
+        function handleKeydown(e) {
+            if (e.key === 'Escape') {
+                if (state.currentModal) {
+                    closeModal();
+                } else if (state.mobileMenuOpen) {
+                    closeMobileMenu();
+                } else if (elements.toast.classList.contains('show')) {
+                    hideToast();
+                }
+            }
+        }
 
-.modal-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+        function toggleMobileMenu() {
+            if (state.mobileMenuOpen) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
 
-.modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
+        function openMobileMenu() {
+            state.mobileMenuOpen = true;
+            elements.mobileNav.classList.add('active');
+            elements.mobileMenuBtn.classList.add('active');
+            elements.mobileMenuBtn.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+            
+            // Announce to screen readers
+            announceToScreenReader('Mobile menu opened');
 
-.modal-close:hover {
-  background: var(--color-light);
-  color: var(--color-text);
-}
-</style>
+            // Focus management
+            setTimeout(() => {
+                elements.mobileMenuClose.focus();
+            }, 100);
+        }
 
+        function closeMobileMenu() {
+            state.mobileMenuOpen = false;
+            elements.mobileNav.classList.remove('active');
+            elements.mobileMenuBtn.classList.remove('active');
+            elements.mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+            
+            // Announce to screen readers
+            announceToScreenReader('Mobile menu closed');
+
+            // Return focus to menu button
+            elements.mobileMenuBtn.focus();
+        }
+
+        function openModal(type) {
+            state.lastFocusedElement = document.activeElement;
+            state.currentModal = type;
+            const modal = type === 'apply' ? elements.applyModal : elements.signinModal;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Set up focus trap
+            setupFocusTrap(modal);
+            
+            // Focus first input
+            const firstInput = modal.querySelector('input');
+            if (firstInput) {
+                setTimeout(() => firstInput.focus(), 150);
+            }
+        }
+
+        function closeModal() {
+            if (elements.applyModal) elements.applyModal.classList.remove('active');
+            if (elements.signinModal) elements.signinModal.classList.remove('active');
+            state.currentModal = null;
+            document.body.style.overflow = '';
+            
+            // Return focus to the element that opened the modal
+            if (state.lastFocusedElement) {
+                setTimeout(() => {
+                    state.lastFocusedElement.focus();
+                    state.lastFocusedElement = null;
+                }, 150);
+            }
+        }
+
+        function setupFocusTrap(modal) {
+            const focusableSelectors = [
+                'button:not([disabled])',
+                'input:not([disabled])',
+                'select:not([disabled])',
+                'textarea:not([disabled])',
+                'a[href]',
+                '[tabindex]:not([tabindex="-1"])'
+            ];
+            
+            state.focusableElements = Array.from(modal.querySelectorAll(focusableSelectors.join(', ')));
+        }
+
+        function handleFocusTrapStart(e) {
+            if (state.focusableElements.length > 0) {
+                e.preventDefault();
+                state.focusableElements[state.focusableElements.length - 1].focus();
+            }
+        }
+
+        function handleFocusTrapEnd(e) {
+            if (state.focusableElements.length > 0) {
+                e.preventDefault();
+                state.focusableElements[0].focus();
+            }
+        }
+
+        function handleInputChange(e) {
+            const { name, value, form } = e.target;
+            const formType = form.id.includes('apply') ? 'apply' : 'signin';
+            
+            state.formData[formType][name] = value;
+            saveToStorage();
+            
+            // Clear error
+            const errorEl = document.getElementById(`${formType}-${name}-error`);
+            if (errorEl) {
+                errorEl.textContent = '';
+            }
+        }
+
+        function handleApplySubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Basic validation
+            const errors = {};
+            if (!data.name?.trim()) errors.name = 'Name is required';
+            if (!data.email?.trim()) errors.email = 'Email is required';
+            if (!data.program) errors.program = 'Program selection is required';
+            if (!data.field?.trim()) errors.field = 'Field of study is required';
+            
+            if (data.email?.trim() && !isValidEmail(data.email)) {
+                errors.email = 'Please enter a valid email address';
+            }
+
+            if (Object.keys(errors).length > 0) {
+                displayFormErrors('apply', errors);
+                return;
+            }
+
+            // In a real app, this would submit to gradbridge.com/apply
+            showToast('Application submitted successfully! We\'ll be in touch soon.');
+            closeModal();
+            clearForm('apply');
+        }
+
+        function handleSigninSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Basic validation
+            const errors = {};
+            if (!data.email?.trim()) errors.email = 'Email is required';
+            if (!data.password?.trim()) errors.password = 'Password is required';
+            
+            if (data.email?.trim() && !isValidEmail(data.email)) {
+                errors.email = 'Please enter a valid email address';
+            }
+
+            if (Object.keys(errors).length > 0) {
+                displayFormErrors('signin', errors);
+                return;
+            }
+
+            // In a real app, this would submit to gradbridge.com/signin
+            showToast('Sign in successful! Welcome back.');
+            closeModal();
+            clearForm('signin');
+        }
+
+        function displayFormErrors(formType, errors) {
+            Object.entries(errors).forEach(([field, message]) => {
+                const errorEl = document.getElementById(`${formType}-${field}-error`);
+                if (errorEl) {
+                    errorEl.textContent = message;
+                    // Announce error to screen readers via aria-live region
+                    announceToScreenReader(`Error in ${field}: ${message}`);
+                }
+            });
+        }
+
+        function clearForm(formType) {
+            const form = formType === 'apply' ? elements.applyForm : elements.signinForm;
+            form.reset();
+            state.formData[formType] = {};
+            
+            // Clear errors
+            form.querySelectorAll('.form-error').forEach(error => {
+                error.textContent = '';
+            });
+            
+            saveToStorage();
+        }
+
+        function showToast(message) {
+            // Clear any existing timeout
+            if (state.toastTimeout) {
+                clearTimeout(state.toastTimeout);
+            }
+            
+            elements.toastMessage.textContent = message;
+            elements.toast.classList.add('show');
+            
+            // Announce to screen readers via aria-live region
+            announceToScreenReader(message);
+            
+            // Auto-hide after 5 seconds
+            state.toastTimeout = setTimeout(() => {
+                hideToast();
+            }, 5000);
+        }
+
+        function hideToast() {
+            elements.toast.classList.remove('show');
+            if (state.toastTimeout) {
+                clearTimeout(state.toastTimeout);
+                state.toastTimeout = null;
+            }
+        }
+
+        function announceToScreenReader(message) {
+            if (elements.ariaLiveRegion) {
+                elements.ariaLiveRegion.textContent = message;
+                
+                // Clear after announcement
+                setTimeout(() => {
+                    elements.ariaLiveRegion.textContent = '';
+                }, 1000);
+            }
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('gradbridge-state', JSON.stringify(state.formData));
+            } catch (e) {
+                console.warn('Could not save to localStorage:', e);
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const stored = localStorage.getItem('gradbridge-state');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    state.formData = { ...state.formData, ...data };
+                    
+                    // Populate forms
+                    Object.entries(data.apply || {}).forEach(([key, value]) => {
+                        const input = document.getElementById(`apply-${key}`);
+                        if (input) input.value = value;
+                    });
+                    
+                    Object.entries(data.signin || {}).forEach(([key, value]) => {
+                        const input = document.getElementById(`signin-${key}`);
+                        if (input) input.value = value;
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not load from localStorage:', e);
+            }
+        }
+    </script>
 </body>
 </html>
