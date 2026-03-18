@@ -8,7 +8,7 @@ import { renderProfilesSettings } from './profiles.js'
 
 export function openSettings() {
   $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey
-  $('s-gh-token').value = ST.ghToken; $('s-gh-user').value = ST.ghUser; $('s-gh-repo').value = ST.ghRepo
+  $('s-gh-token').value = ST.ghToken; $('s-gh-user').value = ST.ghUser; $('s-gh-repo').value = ST.ghRepo; $('s-gh-domain').value = ST.ghCustomDomain
   $('s-sb-url').value = ST.sbUrl; $('s-sb-anon').value = ST.sbAnon
   $('s-audit-pill').classList.toggle('on', ST.auditEnabled)
   $('s-sync-pill').classList.toggle('on', ST.sbEnabled)
@@ -28,9 +28,9 @@ export function initSettings() {
     toast(ST.gptKey ? 'AI keys saved \u2014 GPT audit active \u2713' : 'AI keys saved \u2713')
   })
   $('s-save-gh').addEventListener('click', function () {
-    var ghT = $('s-gh-token').value.trim(), ghU = $('s-gh-user').value.trim(), ghR = $('s-gh-repo').value.trim()
+    var ghT = $('s-gh-token').value.trim(), ghU = $('s-gh-user').value.trim(), ghR = $('s-gh-repo').value.trim(), ghD = $('s-gh-domain').value.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '')
     if (!ghT || !ghU || !ghR) { toast('Fill in all three GitHub fields'); return }
-    ST.ghToken = ghT; ST.ghUser = ghU; ST.ghRepo = ghR; saveKeys()
+    ST.ghToken = ghT; ST.ghUser = ghU; ST.ghRepo = ghR; ST.ghCustomDomain = ghD; saveKeys()
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
     toast('Testing GitHub connection\u2026')
     testGitHub().then(function (ok) { toast(ok ? '\u2713 GitHub connected: ' + ST.ghUser + '/' + ST.ghRepo : '\u2717 GitHub test failed', 4000) })

@@ -4,7 +4,7 @@
     "name": "2048BW",
     "icon": "🎯",
     "ci": 1,
-    "url": "https://wisemanmax.github.io/builder/apps/2048bw.html",
+    "url": "https://www.wiseforge.dev/apps/2048bw.html",
     "path": "apps/2048bw.html",
     "prompts": [
       {
@@ -31,7 +31,7 @@
     "name": "Gradbridgeapp3",
     "icon": "🎯",
     "ci": 1,
-    "url": "https://wisemanmax.github.io/builder/apps/gradbridgeapp3.html",
+    "url": "https://www.wiseforge.dev/apps/gradbridgeapp3.html",
     "path": "apps/gradbridgeapp3.html",
     "prompts": [
       {
@@ -53,7 +53,7 @@
     "name": "Gradbridgesite",
     "icon": "🎯",
     "ci": 2,
-    "url": "https://wisemanmax.github.io/builder/apps/gradbridgesite.html",
+    "url": "https://www.wiseforge.dev/apps/gradbridgesite.html",
     "path": "apps/gradbridgesite.html",
     "prompts": [
       {
@@ -70,7 +70,7 @@
     "name": "Lasttest",
     "icon": "🎯",
     "ci": 4,
-    "url": "https://wisemanmax.github.io/builder/apps/lasttest.html",
+    "url": "https://www.wiseforge.dev/apps/lasttest.html",
     "path": "apps/lasttest.html",
     "prompts": [
       {
@@ -87,7 +87,7 @@
     "name": "ti84bill",
     "icon": "📦",
     "ci": 2,
-    "url": "https://wisemanmax.github.io/builder/apps/ti84bill.html",
+    "url": "https://www.wiseforge.dev/apps/ti84bill.html",
     "path": "apps/ti84bill.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.616Z",
@@ -98,7 +98,7 @@
     "name": "waterapp",
     "icon": "📦",
     "ci": 0,
-    "url": "https://wisemanmax.github.io/builder/apps/waterapp.html",
+    "url": "https://www.wiseforge.dev/apps/waterapp.html",
     "path": "apps/waterapp.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.728Z",
