@@ -241,9 +241,18 @@ export function pullFromGitHub() {
 
     if (!htmlFiles.length) { toast('No apps found in GitHub repo', 3000); return }
 
-    // Build local ID set
+    // Build local ID set and refresh existing app metadata from manifest
     var localById = {}
-    ST.apps.forEach(function (a) { localById[a.id] = true })
+    var metaUpdated = false
+    ST.apps.forEach(function (a) {
+      localById[a.id] = true
+      var m = manifestById[a.id]
+      if (m) {
+        if (m.icon && m.icon !== a.icon) { a.icon = m.icon; metaUpdated = true }
+        if (m.name && m.name !== a.name) { a.name = m.name; metaUpdated = true }
+      }
+    })
+    if (metaUpdated) persist()
 
     // Fetch code for every app not yet in local state
     var newFiles = htmlFiles.filter(function (f) { return !localById[f.id] })
