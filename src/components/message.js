@@ -1,6 +1,7 @@
 import { $, esc, escAttr } from '../lib/utils.js'
 import { PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS } from '../config/constants.js'
 import { approveAndMerge, requestChanges, resolveRetry } from './approval-card.js'
+import { costCardHTML } from '../lib/cost.js'
 
 // Pipeline type registry — maps pid to 'builder1' | 'builder2'
 var _pipeTypes = {}
@@ -235,6 +236,8 @@ export function addMsg(cfg) {
           else { body.style.display = 'none'; tog.textContent = '\u25B6' }
         })
       }, 0)
+    } else if (cfg.type === 'cost') {
+      row.innerHTML = '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#00E5FF,#00C853)">\uD83D\uDCB0</div><div style="flex:1;min-width:0">' + costCardHTML(cfg.cost) + '</div></div>'
     }
   }
   if (cfg.id) row.id = cfg.id

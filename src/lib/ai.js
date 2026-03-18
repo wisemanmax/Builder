@@ -19,6 +19,24 @@ function logCacheUsage(d, label) {
   }
 }
 
+// --- Cost accumulator ---
+var _costAccum = { calls: [] }
+
+export function resetCostAccum() { _costAccum = { calls: [] } }
+export function getCostAccum() { return _costAccum }
+
+function trackUsage(label, model, usage) {
+  if (!usage) return
+  _costAccum.calls.push({
+    label: label,
+    model: model,
+    input: usage.input_tokens || usage.prompt_tokens || 0,
+    output: usage.output_tokens || usage.completion_tokens || 0,
+    cacheRead: usage.cache_read_input_tokens || 0,
+    cacheWrite: usage.cache_creation_input_tokens || 0,
+  })
+}
+
 // Background-aware timeout: pauses the countdown while the page is hidden
 // so that browser timer throttling doesn't cause premature timeouts.
 export function fetchWithTimeout(url, opts, ms) {
@@ -112,6 +130,7 @@ export function callClaude(sys, msg, temperature) {
     return r.json()
   }).then(function (d) {
     logCacheUsage(d, 'callClaude')
+    trackUsage('Build', 'claude-sonnet-4-20250514', d.usage)
     var code = (d.content && d.content[0] && d.content[0].text) || ''
     code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     var docIdx = code.indexOf('<!DOCTYPE')
@@ -138,6 +157,7 @@ export function callClaudeWithThinking(sys, msg, thinkingBudget) {
     return r.json()
   }).then(function (d) {
     logCacheUsage(d, 'callClaudeWithThinking')
+    trackUsage('Build (thinking)', 'claude-sonnet-4-20250514', d.usage)
     var code = ''
     if (d.content && Array.isArray(d.content)) {
       for (var i = 0; i < d.content.length; i++) {
@@ -165,6 +185,7 @@ export function callClaudeRaw(sys, msg, maxTokens, images) {
     return r.json()
   }).then(function (d) {
     logCacheUsage(d, 'callClaudeRaw')
+    trackUsage('Claude Raw', 'claude-sonnet-4-20250514', d.usage)
     var raw = (d.content && d.content[0] && d.content[0].text) || ''
     return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
   }).catch(function (e) {
@@ -184,6 +205,7 @@ export function callClaudeMultiTurn(sys, messages, temperature) {
     return r.json()
   }).then(function (d) {
     logCacheUsage(d, 'callClaudeMultiTurn')
+    trackUsage('Fix', 'claude-sonnet-4-20250514', d.usage)
     var code = (d.content && d.content[0] && d.content[0].text) || ''
     code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     var docIdx = code.indexOf('<!DOCTYPE')
@@ -209,6 +231,7 @@ export function callClaudeRawMultiTurn(sys, messages, maxTokens) {
     return r.json()
   }).then(function (d) {
     logCacheUsage(d, 'callClaudeRawMultiTurn')
+    trackUsage('Claude Multi', 'claude-sonnet-4-20250514', d.usage)
     var raw = (d.content && d.content[0] && d.content[0].text) || ''
     return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
   }).catch(function (e) {
@@ -263,8 +286,16 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
               }
             } else if (evt.type === 'message_delta' && evt.usage) {
               logCacheUsage({ usage: evt.usage }, 'callClaudeStream')
+              // Merge output token count from message_delta
+              _streamUsage.output_tokens = (_streamUsage.output_tokens || 0) + (evt.usage.output_tokens || 0)
             } else if (evt.type === 'message_start' && evt.message) {
               logCacheUsage(evt.message, 'callClaudeStream')
+              // Capture input token counts from message_start
+              if (evt.message.usage) {
+                _streamUsage.input_tokens = evt.message.usage.input_tokens || 0
+                _streamUsage.cache_read_input_tokens = evt.message.usage.cache_read_input_tokens || 0
+                _streamUsage.cache_creation_input_tokens = evt.message.usage.cache_creation_input_tokens || 0
+              }
             } else if (evt.type === 'error') {
               throw new Error('Claude stream error: ' + (evt.error && evt.error.message || 'unknown'))
             }
@@ -290,11 +321,15 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
 
   _validateKeyedRequest(url, opts)
 
+  // Accumulate streaming usage across message_start + message_delta events
+  var _streamUsage = {}
+
   function attemptStream(n) {
     return _nativeFetch.call(window, url, opts).then(function (r) {
       if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
       return parseSSE(r.body)
     }).then(function (code) {
+      trackUsage('Build (stream)', 'claude-sonnet-4-20250514', _streamUsage)
       code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
       if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
       return code
@@ -349,6 +384,7 @@ export function callGPTRawMultiTurn(sys, messages, maxTokens) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    trackUsage('GPT Multi', 'gpt-4o-mini', d.usage)
     var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
     return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
   }).catch(function (e) {
@@ -366,6 +402,7 @@ export function callGPTReview(code) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    trackUsage('GPT Review', 'gpt-4o', d.usage)
     var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '{}'
     raw = raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     try { var p = JSON.parse(raw); return { enhancements: Array.isArray(p.enhancements) ? p.enhancements : [], bugs: Array.isArray(p.bugs) ? p.bugs : [] } } catch (e) { return { enhancements: [], bugs: [] } }
@@ -384,6 +421,7 @@ export function callGPT(code) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    trackUsage('GPT Audit', 'gpt-4o', d.usage)
     var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '[]'
     raw = raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     try { var p = JSON.parse(raw); return Array.isArray(p) ? p : [] } catch (e) { return [] }
@@ -416,6 +454,7 @@ export function callGPTRaw2(sys, msg, maxTokens, images) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    trackUsage('GPT Raw', 'gpt-4o', d.usage)
     var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
     return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
   }).catch(function (e) {
@@ -434,6 +473,7 @@ export function callGPTMultiTurn2(sys, messages, temperature) {
     if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
     return r.json()
   }).then(function (d) {
+    trackUsage('GPT Build', 'gpt-4o', d.usage)
     var code = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
     code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
     var docIdx = code.indexOf('<!DOCTYPE')
@@ -496,6 +536,8 @@ export function callGPTWithStream(sys, msg, onChunk, images) {
       if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
       return parseSSE(r.body)
     }).then(function (code) {
+      // Estimate tokens for GPT stream (usage not available in default stream mode)
+      trackUsage('GPT Build (stream)', 'gpt-4o', { prompt_tokens: Math.ceil(msg.length / 4) + Math.ceil(sys.length / 4), completion_tokens: Math.ceil(code.length / 4) })
       code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
       if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('GPT returned an unexpected response format')
       return code

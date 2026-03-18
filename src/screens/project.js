@@ -3,6 +3,7 @@ import { $, esc, grad, toast, fmtDate, showScreen, copyToClipboard } from '../li
 import { ghPageUrl } from '../lib/utils.js'
 import { renderGrid } from '../components/app-icon.js'
 import { openBuilder } from './build.js'
+import { costSummaryHTML } from '../lib/cost.js'
 
 export function openProjectSheet(id) {
   ST.projectAppId = id
@@ -66,6 +67,20 @@ export function openProjectSheet(id) {
         if (body.style.display === 'none') { body.style.display = 'block'; tog.innerHTML = '&#x25BC;' }
         else { body.style.display = 'none'; tog.innerHTML = '&#x25B6;' }
       })
+    }
+  }
+
+  // Build costs section
+  var costSection = $('proj-cost-section')
+  var costDetails = $('proj-cost-details')
+  if (costSection && costDetails) {
+    var costs = app.costs || []
+    if (costs.length > 0) {
+      costSection.style.display = ''
+      costDetails.innerHTML = costSummaryHTML(costs)
+    } else {
+      costSection.style.display = 'none'
+      costDetails.innerHTML = ''
     }
   }
 
