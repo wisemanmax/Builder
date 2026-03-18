@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Source+Sans+Pro:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>GradBridge</title>
+    <style>
+        :root {
+            --color-primary: #004080;
+            --color-secondary: #0080ff;
+            --color-accent: #0080ff;
+            --color-dark: #002040;
+            --color-light: #f0f8ff;
+            --color-text: #002040;
+            --color-text-muted: #004080;
+            --color-border: #004080;
+            --font-heading: 'Merriweather', serif;
+            --font-body: 'Source Sans Pro', sans-serif;
+            --transition-default: all 0.3s ease;
+            --gradient-primary-accent: linear-gradient(135deg, #004080, #0080ff);
+        }
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: var(--color-text);
+            background-color: var(--color-light);
+        }
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            letter-spacing: -0.02em;
+        }
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+        }
+        h3 {
+            font-size: clamp(1.2rem, 2vw, 1.75rem);
+        }
+        p {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: clamp(1rem, 5vw, 3rem);
+        }
+        .nav {
+            background-color: var(--color-primary);
+            color: white;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+        }
+        .nav .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+        .nav ul li {
+            margin: 0;
+        }
+        .nav ul li a {
+            color: white;
+            text-decoration: none;
+            transition: var(--transition-default);
+        }
+        .nav ul li a:hover {
+            color: var(--color-accent);
+        }
+        .hero {
+            background: var(--gradient-primary-accent);
+            color: white;
+            padding: var(--sectionSpacing) 0;
+            text-align: center;
+        }
+        .hero h1 {
+            margin-bottom: 1rem;
+        }
+        .hero .cta-button {
+            background-color: var(--color-accent);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-default);
+        }
+        .hero .cta-button:hover {
+            background-color: var(--color-secondary);
+        }
+        .section {
+            padding: var(--sectionSpacing) 0;
+        }
+        .section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .about-us, .programs, .testimonials, .contact {
+            background-color: var(--color-light);
+        }
+        .programs .program-card {
+            background-color: white;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1rem;
+            transition: var(--transition-default);
+        }
+        .programs .program-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .testimonials .testimonial {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        .contact form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .contact form input, .contact form textarea {
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .contact form button {
+            background-color: var(--color-accent);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-default);
+        }
+        .contact form button:hover {
+            background-color: var(--color-secondary);
+        }
+        .footer {
+            background-color: var(--color-dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        .footer .social-links a {
+            color: white;
+            margin: 0 0.5rem;
+            transition: var(--transition-default);
+        }
+        .footer .social-links a:hover {
+            color: var(--color-accent);
+        }
+        @media (max-width: 768px) {
+            .nav ul {
+                display: none;
+            }
+            .nav .mobile-menu {
+                display: block;
+                cursor: pointer;
+            }
+        }
+        @media (min-width: 769px) {
+            .nav .mobile-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="nav">
+        <div class="logo">GradBridge</div>
+        <div class="mobile-menu" aria-label="Toggle navigation menu" aria-expanded="false">☰</div>
+        <ul>
+            <li><a href="/" onclick="showPage('home')">Home</a></li>
+            <li><a href="/about" onclick="showPage('about')">About</a></li>
+            <li><a href="/programs" onclick="showPage('programs')">Programs</a></li>
+            <li><a href="/testimonials" onclick="showPage('testimonials')">Testimonials</a></li>
+            <li><a href="/contact" onclick="showPage('contact')">Contact</a></li>
+        </ul>
+    </header>
+    <main>
+        <div id="home" class="page">
+            <section class="hero">
+                <div class="container">
+                    <h1>Empowering Your Future</h1>
+                    <button class="cta-button" onclick="showPage('programs')">Learn More</button>
+                </div>
+            </section>
+            <section class="about-us section">
+                <div class="container">
+                    <h2>About GradBridge</h2>
+                    <p>At GradBridge, we are committed to helping students achieve their academic and career goals.</p>
+                </div>
+            </section>
+            <section class="programs section">
+                <div class="container">
+                    <h2>Our Programs</h2>
+                    <div class="program-card">
+                        <p>Our programs are designed to provide the skills and knowledge needed to succeed in today's competitive job market.</p>
+                    </div>
+                </div>
+            </section>
+            <section class="testimonials section">
+                <div class="container">
+                    <h2>What Our Students Say</h2>
+                    <div class="testimonial">
+                        <p>Join thousands of satisfied students who have transformed their futures with us.</p>
+                    </div>
+                </div>
+            </section>
+            <section class="contact section">
+                <div class="container">
+                    <h2>Get in Touch</h2>
+                    <form>
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your Name" required>
+                        <label for="email">Your Email</label>
+                        <input type="email" id="email" name="email" placeholder="Your Email" required>
+                        <label for="message">Your Message</label>
+                        <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
+                        <button type="submit">Contact Us</button>
+                    </form>
+                </div>
+            </section>
+            <section class="disclaimer section">
+                <div class="container">
+                    <p>All programs are subject to availability and eligibility.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <div class="social-links">
+                <a href="https://twitter.com/gradbridge">Twitter</a>
+                <a href="https://linkedin.com/company/gradbridge">LinkedIn</a>
+            </div>
+            <p>© 2023 GradBridge. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        function showPage(id) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+
+            const navLinks = document.querySelector('.nav ul');
+            if (window.innerWidth >= 769) {
+                navLinks.style.display = 'flex';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('home');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const navLinks = document.querySelector('.nav ul');
+            mobileMenu.addEventListener('click', () => {
+                const isExpanded = mobileMenu.getAttribute('aria-expanded') === 'true';
+                navLinks.style.display = isExpanded ? 'none' : 'flex';
+                mobileMenu.setAttribute('aria-expanded', !isExpanded);
+            });
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 769) {
+                    navLinks.style.display = 'flex';
+                    mobileMenu.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
