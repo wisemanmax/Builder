@@ -106,9 +106,13 @@
     <div class="sb-icons">&#x26A1;&#x1F50B;</div>
   </div>
   <div class="home-hdr">
-    <div class="home-title">The Builder</div>
+    <div class="home-title-row">
+      <div class="home-title">The Builder</div>
+      <div id="profile-chip" class="profile-chip" onclick="showProfilePicker()">No Profile</div>
+    </div>
     <div class="home-sub" id="home-sub">Tap to open &middot; Hold for options &middot; &#x2726; to build</div>
   </div>
+  <div id="profile-picker" class="profile-picker"></div>
   <div class="app-grid" id="app-grid"></div>
   <div class="dock">
     <div class="dock-inner">
@@ -200,6 +204,60 @@
         </div>
       </div>
       <div class="ihint" id="think-hint">&#x1F4AD; Tap an option or type your own response</div>
+    </div>
+  </div>
+</div>
+
+<!-- ORG THINK SHEET -->
+<div id="org-think-sheet">
+  <div class="bs" id="org-ts-inner">
+    <div class="bs-handle" id="org-ts-handle"></div>
+    <div class="bs-top">
+      <div class="bs-info">
+        <div class="bs-title" id="org-ts-title">Organization Profile</div>
+        <div class="bs-sub" id="org-ts-sub">Round 1 of 4 &middot; Vision &amp; Mission</div>
+      </div>
+      <div class="bs-actions">
+        <button class="bs-btn bs-close" id="org-ts-close">&#x2715;</button>
+      </div>
+    </div>
+    <div class="ts-progress" id="org-ts-progress"></div>
+    <div id="org-think-scroll"></div>
+    <div class="bs-input">
+      <div class="ibox">
+        <textarea id="org-think-input" rows="2" placeholder="Tell me about your organization..."></textarea>
+        <div class="iacts">
+          <button id="org-think-send-btn">&uarr;</button>
+        </div>
+      </div>
+      <div class="ihint">&#x1F3E2; Your org profile will guide every future build</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEEDBACK OVERLAY -->
+<div id="feedback-overlay">
+  <div class="fb-card">
+    <div class="fb-title">&#x2B50; Rate this build</div>
+    <div class="fb-app-name" id="fb-app-name">App</div>
+    <div class="fb-stars">
+      <span class="fb-star" data-val="1">&#x2605;</span>
+      <span class="fb-star" data-val="2">&#x2605;</span>
+      <span class="fb-star" data-val="3">&#x2605;</span>
+      <span class="fb-star" data-val="4">&#x2605;</span>
+      <span class="fb-star" data-val="5">&#x2605;</span>
+    </div>
+    <div class="fl"><label>What did you like?</label><textarea class="fi" id="fb-liked" rows="2" placeholder="Optional..."></textarea></div>
+    <div class="fl"><label>What would you change?</label><textarea class="fi" id="fb-disliked" rows="2" placeholder="Optional..."></textarea></div>
+    <div class="fb-tags">
+      <span class="fb-tag">Design</span>
+      <span class="fb-tag">Functionality</span>
+      <span class="fb-tag">Responsive</span>
+      <span class="fb-tag">Performance</span>
+    </div>
+    <div class="fb-actions">
+      <button class="btn-p" id="fb-submit">Save Feedback</button>
+      <button class="fb-skip" id="fb-skip">Skip</button>
     </div>
   </div>
 </div>
@@ -316,6 +374,8 @@
         <button class="btn-p" id="s-save-gh" style="background:var(--gh);box-shadow:none">Save &amp; Test GitHub</button>
         <button class="btn-p" id="s-gh-sync" style="background:rgba(255,255,255,.08);box-shadow:none;font-size:12px;padding:11px;border:1.5px solid rgba(255,255,255,.12);margin-top:6px">&#x1F504; Sync Apps from GitHub</button>
       </div>
+      <span class="ssec">Profiles</span>
+      <div class="sscard" id="profiles-section"></div>
       <span class="ssec">Pipeline</span>
       <div class="sscard">
         <div class="ssrow"><div class="ssrl"><div class="sl">GPT-4o Audit Step</div><div class="ss">Scan for bugs between builds</div></div><div class="pill" id="s-audit-pill"></div></div>

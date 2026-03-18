@@ -4,6 +4,7 @@ import { persist } from '../lib/state.js'
 import { testGitHub, pullFromGitHub } from '../lib/github.js'
 import { pullFromSupabase } from '../lib/storage.js'
 import { renderGrid } from '../components/app-icon.js'
+import { renderProfilesSettings } from './profiles.js'
 
 export function openSettings() {
   $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey
@@ -14,6 +15,7 @@ export function openSettings() {
   var bp = $('s-backend-pill'); if (bp) bp.classList.toggle('on', ST.backendEnabled)
   $('s-sb-exp').style.display = ST.sbEnabled ? 'flex' : 'none'
   var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
+  renderProfilesSettings()
   $('settings-overlay').classList.add('on')
 }
 

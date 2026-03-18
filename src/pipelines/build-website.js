@@ -2,10 +2,12 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { callClaudeRaw } from '../lib/ai.js'
+import { injectProfileContext } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushTree, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
 import { persistBuildSession, clearBuildSession } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
+import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
@@ -184,7 +186,8 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     updatePS(pid, 0, 'active', 'Analyzing requirements\u2026')
     var decomposeMsg = 'Build a website for: ' + prompt
     if (images && images.length) decomposeMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached]'
-    return retryStep(function () { return callClaudeRaw(SYS_WEB_DECOMPOSE, decomposeMsg, 4000, images) }, 2, 'Decompose').then(function (raw) {
+    var effectiveDecomposeSys = injectProfileContext(SYS_WEB_DECOMPOSE)
+    return retryStep(function () { return callClaudeRaw(effectiveDecomposeSys, decomposeMsg, 4000, images) }, 2, 'Decompose').then(function (raw) {
       decomposition = raw
       updatePS(pid, 0, 'done', 'Decomposition complete \u2713')
       _persistProgress(0)
@@ -392,6 +395,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
         + '<button onclick="openProjectSheet(\'' + appId + '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>'
         + '</div>'
     })
+    return showFeedbackCard(appId, appName, prompt)
   }).catch(function (err) {
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)

@@ -3,11 +3,13 @@ import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/uti
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
 import { callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit } from '../lib/ai.js'
+import { injectProfileContext } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
 import { persistBuildSession, clearBuildSession } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
+import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
@@ -184,7 +186,8 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
     var charCount = 0
     thinkingText = ''
-    return callClaudeWithThinkingStream(SYS_WEB2_BUILD, buildMsg, 4000, function (type, text) {
+    var effectiveBuildSys = injectProfileContext(SYS_WEB2_BUILD)
+    return callClaudeWithThinkingStream(effectiveBuildSys, buildMsg, 4000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 3, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
@@ -358,6 +361,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         + '<button onclick="openProjectSheet(\'' + appId + '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>'
         + '</div>'
     })
+    return showFeedbackCard(appId, appName, prompt)
   }).catch(function (err) {
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)

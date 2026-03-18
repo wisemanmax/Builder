@@ -10,6 +10,7 @@ export const ST = {
   viewingApp: null, projectAppId: null, _building: false,
   _studioFullscreen: false,
   thoughts: [], rules: [], activeThoughtId: null, _thinking: false,
+  profiles: [], activeProfileId: null,
   _selfUpdateMode: false,
   pipelineMode: 'builder1',
 }
@@ -19,6 +20,7 @@ export function persist() {
     localStorage.setItem('bldr_apps', JSON.stringify(ST.apps))
     localStorage.setItem('bldr_thoughts', JSON.stringify(ST.thoughts))
     localStorage.setItem('bldr_rules', JSON.stringify(ST.rules))
+    localStorage.setItem('bldr_profiles', JSON.stringify(ST.profiles))
   } catch (e) {
     if (e.name === 'QuotaExceededError' || String(e.name).indexOf('QuotaExceeded') >= 0 || e.code === 22) {
       try {
@@ -37,6 +39,8 @@ export function hydrate() {
   try { ST.apps = JSON.parse(localStorage.getItem('bldr_apps') || '[]') } catch (e) { ST.apps = [] }
   try { ST.thoughts = JSON.parse(localStorage.getItem('bldr_thoughts') || '[]') } catch (e) { ST.thoughts = [] }
   try { ST.rules = JSON.parse(localStorage.getItem('bldr_rules') || '[]') } catch (e) { ST.rules = [] }
+  try { ST.profiles = JSON.parse(localStorage.getItem('bldr_profiles') || '[]') } catch (e) { ST.profiles = [] }
+  ST.activeProfileId = localStorage.getItem('bldr_activeProfile') || null
   ST.key = localStorage.getItem(KEY_STORE.ANTH) || ''
   ST.gptKey = localStorage.getItem(KEY_STORE.GPT) || ''
   ST.ghToken = localStorage.getItem(KEY_STORE.GH_TOKEN) || ''
@@ -62,6 +66,20 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.AUDIT, String(ST.auditEnabled))
   localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled))
   localStorage.setItem(KEY_STORE.PIPELINE, ST.pipelineMode)
+}
+
+export function setActiveProfile(id) {
+  ST.activeProfileId = id
+  if (id) localStorage.setItem('bldr_activeProfile', id)
+  else localStorage.removeItem('bldr_activeProfile')
+}
+
+export function getActiveProfile() {
+  if (!ST.activeProfileId) return null
+  for (var i = 0; i < ST.profiles.length; i++) {
+    if (ST.profiles[i].id === ST.activeProfileId) return ST.profiles[i]
+  }
+  return null
 }
 
 // --- Active build session persistence ---
