@@ -223,6 +223,17 @@ export const SYS_WEB2_BUILD = 'You are a senior principal engineer. You build pi
   + '- Labels on form inputs, aria-live for dynamic content\n'
   + '\nTHE BAR: The result must look like the real website — a polished, professional multi-page site. Not a prototype.'
 
+export const SYS_WEB2_UPDATE = 'You are a senior principal engineer. You are modifying an existing single-file HTML website based on a user\'s change request.\n'
+  + '\nRULES:\n'
+  + '1. You will receive the COMPLETE current HTML source code and a change request\n'
+  + '2. Apply ONLY the requested changes — preserve all existing functionality, design, and structure that is not related to the change\n'
+  + '3. If the change request requires architectural modifications, make them cleanly while keeping unrelated code intact\n'
+  + '4. Return ONLY the complete modified raw HTML starting with <!DOCTYPE html> — no markdown, no code fences, no explanation\n'
+  + '5. All CSS inside <style>, all JS inside <script>\n'
+  + '6. ZERO external dependencies — no CDN scripts/links. You may use @import for Google Fonts only\n'
+  + '7. Must work as a standalone HTML file\n'
+  + '\nQUALITY BAR: The modified site must look like a polished, pixel-perfect website. Maintain responsive design, accessibility, and visual quality.'
+
 export const SYS_WEB2_FIX = 'You are a senior engineer performing targeted bug fixes on a single-file HTML website recreation.\n'
   + '\nRULES:\n'
   + '1. Fix ONLY the listed issues — no refactoring, no redesign\n'

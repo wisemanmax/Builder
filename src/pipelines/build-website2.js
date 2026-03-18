@@ -14,7 +14,7 @@ import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 import {
-  SYS_WEB2_RECON, SYS_WEB2_BRAND, SYS_WEB2_STRUCTURE, SYS_WEB2_DESIGN, SYS_WEB2_BUILD, SYS_WEB2_FIX, SYS_WEB2_AUDIT
+  SYS_WEB2_RECON, SYS_WEB2_BRAND, SYS_WEB2_STRUCTURE, SYS_WEB2_DESIGN, SYS_WEB2_BUILD, SYS_WEB2_UPDATE, SYS_WEB2_FIX, SYS_WEB2_AUDIT
 } from '../config/prompts-website2.js'
 import { SYS_AUDIT } from '../config/prompts.js'
 
@@ -182,9 +182,11 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     updatePS(pid, 4, 'active', 'Claude is building the website\u2026')
     var buildMsg
     if (existingApp) {
+      var currentCode = existingApp.code || ''
       var prevPrompts = (existingApp.prompts || []).map(function (p2) { return p2.text }).join('\n\u2192 ')
-      var appDesc = prevPrompts || existingApp.desc || existingApp.name || 'an existing website'
-      buildMsg = 'Rebuild this website from scratch with the following change:\n\nOriginal site: ' + appDesc + '\n\nChange request: ' + prompt + '\n\nRebuild the complete site with this change applied.'
+      var codeSection = currentCode ? '\n\nCURRENT SITE CODE:\n' + currentCode.slice(0, 120000) : ''
+      var historySection = prevPrompts ? '\n\nBUILD HISTORY (for context):\n' + prevPrompts : ''
+      buildMsg = 'CHANGE REQUEST: ' + prompt + historySection + codeSection + '\n\nApply the requested change to the existing code above. Return the complete modified HTML.'
     } else {
       buildMsg = 'BUILD THIS WEBSITE: ' + prompt
         + '\n\nCONTEXT: Single-file HTML website with multi-page routing via showPage(). All pages in one file.'
@@ -199,7 +201,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
     var charCount = 0
     thinkingText = ''
-    return callClaudeWithThinkingStream(SYS_WEB2_BUILD, buildMsg, 4000, function (type, text) {
+    return callClaudeWithThinkingStream(existingApp ? SYS_WEB2_UPDATE : SYS_WEB2_BUILD, buildMsg, 4000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 4, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
       else if (type === 'thinking') { thinkingText += text }
     }, images)

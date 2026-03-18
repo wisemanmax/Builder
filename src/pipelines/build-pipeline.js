@@ -2,7 +2,7 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
-import { SYS_BUILD, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../config/prompts.js'
+import { SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../config/prompts.js'
 import { injectProfileContext, mergeRulesWithProfile } from '../lib/profile-context.js'
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callGPT, callGPTReview } from '../lib/ai.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
@@ -150,15 +150,17 @@ export function runPipeline(prompt, existingApp, customName, images) {
     updatePS(pid, 2, 'active', 'Claude is writing your app\u2026')
     var userMsg
     if (existingApp) {
+      var currentCode = existingApp.code || ''
       var prevPrompts = (existingApp.prompts || []).map(function (p2) { return p2.text }).join('\n\u2192 ')
-      var appDesc = prevPrompts || existingApp.desc || existingApp.name || 'an existing app'
-      userMsg = 'Rebuild this app from scratch with the following change:\n\nOriginal app: ' + appDesc + '\n\nChange request: ' + prompt + '\n\nRebuild the complete app with this change applied.'
+      var codeSection = currentCode ? '\n\nCURRENT APP CODE:\n' + currentCode.slice(0, 120000) : ''
+      var historySection = prevPrompts ? '\n\nBUILD HISTORY (for context):\n' + prevPrompts : ''
+      userMsg = 'CHANGE REQUEST: ' + prompt + historySection + codeSection + '\n\nApply the requested change to the existing code above. Return the complete modified HTML.'
     } else {
       userMsg = 'BUILD REQUEST: ' + prompt
         + '\n\nCONTEXT: Single-file HTML app in sandboxed iframe. Offline-only, localStorage for persistence.'
     }
 
-    var effectiveSys = SYS_BUILD
+    var effectiveSys = existingApp ? SYS_UPDATE : SYS_BUILD
     specText = 'No specification provided'
     rulesText = 'No specific rules'
     var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
