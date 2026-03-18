@@ -6,41 +6,39 @@
     <title>GradBridge - Second Chances, Brighter Futures</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <style>
 :root {
-  --color-primary: #4169E1;
-  --color-secondary: #FFD700;
-  --color-accent: #1E90FF;
-  --color-dark: #1B365D;
-  --color-light: #F8F9FA;
-  --color-text: #1B365D;
-  --color-text-muted: #6C7B95;
-  --color-border: #E8EBF0;
-  --gradient-primary: linear-gradient(135deg, #4169E1 0%, #1E90FF 100%);
-  --gradient-secondary: linear-gradient(90deg, #4169E1 0%, #6495ED 50%, #1E90FF 100%);
-  --gradient-cta: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  --font-heading: 'Playfair Display', serif;
+  --color-primary: #003366;
+  --color-secondary: #008080;
+  --color-accent: #FFD700;
+  --color-dark: #002244;
+  --color-light: #F0F8FF;
+  --color-text: #003366;
+  --color-text-muted: #008080;
+  --color-border: #002244;
+  --gradient-primary: linear-gradient(90deg, #003366 0%, #FFD700 100%);
+  --font-heading: 'Merriweather', serif;
   --font-body: 'Source Sans Pro', sans-serif;
-  --font-size-h1: clamp(2.5rem, 5vw, 4rem);
-  --font-size-h2: clamp(2rem, 4vw, 3rem);
-  --font-size-h3: clamp(1.5rem, 3vw, 2rem);
-  --font-size-body: clamp(1rem, 1.5vw, 1.125rem);
-  --font-size-small: 0.875rem;
+  --font-size-h1: clamp(2rem, 5vw, 3.5rem);
+  --font-size-h2: clamp(1.5rem, 3vw, 2.5rem);
+  --font-size-h3: clamp(1.2rem, 2vw, 1.75rem);
+  --font-size-body: clamp(0.9rem, 1.5vw, 1.1rem);
+  --font-size-small: 0.85rem;
   --line-height: 1.6;
   --letter-spacing-heading: -0.02em;
   --max-width: 1200px;
   --container-padding: clamp(1rem, 5vw, 3rem);
-  --section-spacing: clamp(4rem, 8vw, 8rem);
-  --border-radius-sm: 6px;
-  --border-radius-md: 12px;
-  --border-radius-lg: 20px;
-  --border-radius-xl: 30px;
-  --shadow-sm: 0 2px 8px rgba(65, 105, 225, 0.1);
-  --shadow-md: 0 4px 20px rgba(65, 105, 225, 0.15);
-  --shadow-lg: 0 8px 40px rgba(65, 105, 225, 0.2);
+  --section-spacing: clamp(3rem, 8vw, 6rem);
+  --border-radius-sm: 8px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 8px;
+  --border-radius-xl: 8px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
   --transition: all 0.3s ease;
 }
 
@@ -137,7 +135,7 @@ body {
 }
 
 .btn-primary {
-  background: var(--gradient-cta);
+  background: var(--gradient-primary);
   color: var(--color-dark);
 }
 
@@ -423,7 +421,7 @@ body {
 .step-number {
   width: 40px;
   height: 40px;
-  background: var(--gradient-cta);
+  background: var(--gradient-primary);
   color: var(--color-dark);
   border-radius: 50%;
   display: flex;
@@ -853,7 +851,7 @@ body {
       <button class="btn btn-primary" onclick="hideSignInModal()">Apply for Student Loan</button>
       <button class="btn btn-ghost" onclick="hideSignInModal()">Sign In to Account</button>
     </div>
-    <button class="modal-close" onclick="hideSignInModal()">&times;</button>
+    <button class="modal-close" onclick="hideSignInModal()" aria-label="Close modal">&times;</button>
   </div>
 </div>
 
@@ -879,7 +877,7 @@ body {
   <section class="stats-section">
     <div class="container">
       <div class="stats-content">
-        <h2 class="stats-headline">Approximately 42% of college dropouts cite financial struggles as the primary reason for leaving school.</h2>
+        <h2 class="stats-headline">Approximately 42% of college dropouts cite financial struggles as the primary reason for leaving school. <span style="font-size: 0.75rem;">(Source: Education USA, report on College Dropout rates)</span></h2>
         <p class="stats-tagline">GradBridge removes the financial barriers to graduation</p>
         
         <div class="stats-grid">
@@ -1110,11 +1108,11 @@ body {
         <div class="footer-social">
           <p>Follow us</p>
           <div class="social-links">
-            <a href="#" aria-label="LinkedIn">LI</a>
-            <a href="#" aria-label="Instagram">IG</a>
-            <a href="#" aria-label="Facebook">FB</a>
-            <a href="#" aria-label="Twitter">TW</a>
-            <a href="#" aria-label="TikTok">TT</a>
+            <a href="https://www.linkedin.com" aria-label="LinkedIn">LI</a>
+            <a href="https://www.instagram.com" aria-label="Instagram">IG</a>
+            <a href="https://www.facebook.com" aria-label="Facebook">FB</a>
+            <a href="https://www.twitter.com" aria-label="Twitter">TW</a>
+            <a href="https://www.tiktok.com" aria-label="TikTok">TT</a>
           </div>
         </div>
       </div>
