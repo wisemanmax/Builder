@@ -2,7 +2,8 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
 import { THINK_ROUND_LABELS } from '../config/constants.js'
 import { SYS_THINK } from '../config/prompts.js'
-import { callGPTRawMultiTurn } from '../lib/ai.js'
+import { callGPTRawMultiTurn, resetCostAccum } from '../lib/ai.js'
+import { calculateBuildCost } from '../lib/cost.js'
 import { ghSyncThoughtAndRules } from '../lib/github.js'
 import { openBuilder } from './build.js'
 
@@ -26,6 +27,7 @@ export function openThink(resumeId) {
     }
   }
   _thinkState = { round: 1, maxRounds: 5, thoughtId: uid(), conversation: [], originalPrompt: '', brief: null, rules: null }
+  resetCostAccum()
   renderThinkProgress(1)
   var ts2 = $('think-scroll')
   ts2.innerHTML = '<div class="think-welcome">'
@@ -278,11 +280,18 @@ export function finishThink() {
   if (_thinkState.rules) {
     rules = saveRulesFromThought(thought, _thinkState.rules)
   }
+  // Persist Think session cost on thought object
+  var costData = calculateBuildCost()
+  if (costData.breakdown.length > 0) {
+    thought.cost = { rawCost: costData.rawCost, userPrice: costData.userPrice, markup: costData.markup, totalInput: costData.totalInput, totalOutput: costData.totalOutput, ts: costData.ts }
+    persist()
+  }
   ST.activeThoughtId = thought.id
   $('think-sheet').classList.remove('open')
   ST._thinking = false
   openBuilder()
-  toast('Thought saved \u2014 rules attached to build', 3000)
+  var costMsg = costData.rawCost > 0 ? ' (cost: $' + costData.rawCost.toFixed(4) + ')' : ''
+  toast('Thought saved \u2014 rules attached to build' + costMsg, 3000)
   ghSyncThoughtAndRules(thought, rules).then(function () {
     if (ST.ghToken) toast('\u2601\uFE0F Thought & rules synced to GitHub', 2500)
   })

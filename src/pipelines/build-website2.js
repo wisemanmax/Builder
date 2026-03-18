@@ -2,7 +2,8 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
-import { callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit, callGPTRaw2, callGPTMultiTurn2, callGPTWithStream, callGPTAudit2 } from '../lib/ai.js'
+import { callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit, callGPTRaw2, callGPTMultiTurn2, callGPTWithStream, callGPTAudit2, resetCostAccum } from '../lib/ai.js'
+import { calculateBuildCost } from '../lib/cost.js'
 import { injectProfileContext } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
@@ -85,6 +86,7 @@ function notifyUser(title, body) {
  * 8: Push  9: Preview  10: Approval  11: Merge
  */
 export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
+  resetCostAccum()
   // Validate API key for selected provider
   if (ST.website2Provider === 'chatgpt' && !ST.gptKey) {
     addMsg({ role: 'asst', type: 'text', text: 'OpenAI API key is required to use ChatGPT. Add it in Settings, or switch to Claude.' })
@@ -392,6 +394,19 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     $('ihint').textContent = '\uD83D\uDCAC Describe changes for a new build'
     $('bs-proj-btn').style.display = 'flex'
     renderGrid()
+    // Show cost analysis card
+    var costData = calculateBuildCost()
+    if (costData.breakdown.length > 0) {
+      addMsg({ role: 'asst', type: 'cost', cost: costData })
+      for (var ci = 0; ci < ST.apps.length; ci++) {
+        if (ST.apps[ci].id === appId) {
+          if (!ST.apps[ci].costs) ST.apps[ci].costs = []
+          ST.apps[ci].costs.push({ rawCost: costData.rawCost, userPrice: costData.userPrice, markup: costData.markup, totalInput: costData.totalInput, totalOutput: costData.totalOutput, ts: costData.ts })
+          if (ST.apps[ci].costs.length > 50) ST.apps[ci].costs = ST.apps[ci].costs.slice(-50)
+          break
+        }
+      }
+    }
     var g = grad(appCi)
     addMsg({
       role: 'asst', type: 'text',

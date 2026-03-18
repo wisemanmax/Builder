@@ -4,7 +4,8 @@ import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
 import { SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_PLAN } from '../config/prompts.js'
 import { injectProfileContext, mergeRulesWithProfile } from '../lib/profile-context.js'
-import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callClaudeAudit } from '../lib/ai.js'
+import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callClaudeAudit, resetCostAccum } from '../lib/ai.js'
+import { calculateBuildCost } from '../lib/cost.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
@@ -66,6 +67,7 @@ function notifyUser(title, body) {
  */
 export function runPipeline2(prompt, existingApp, customName, images) {
   clearCurrentSession()
+  resetCostAccum()
   ST._building = true; $('send-btn').disabled = true
   var pid = 'p' + Date.now()
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
@@ -361,6 +363,19 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     $('ihint').textContent = '\uD83D\uDCAC Describe changes for a new build'
     $('bs-proj-btn').style.display = 'flex'
     renderGrid()
+    // Show cost analysis card
+    var costData = calculateBuildCost()
+    if (costData.breakdown.length > 0) {
+      addMsg({ role: 'asst', type: 'cost', cost: costData })
+      for (var ci = 0; ci < ST.apps.length; ci++) {
+        if (ST.apps[ci].id === appId) {
+          if (!ST.apps[ci].costs) ST.apps[ci].costs = []
+          ST.apps[ci].costs.push({ rawCost: costData.rawCost, userPrice: costData.userPrice, markup: costData.markup, totalInput: costData.totalInput, totalOutput: costData.totalOutput, ts: costData.ts })
+          if (ST.apps[ci].costs.length > 50) ST.apps[ci].costs = ST.apps[ci].costs.slice(-50)
+          break
+        }
+      }
+    }
     var g = grad(appCi)
     addMsg({
       role: 'asst', type: 'text',
