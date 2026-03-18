@@ -1,5 +1,44 @@
 [
   {
+    "id": "lasttest",
+    "name": "Lasttest",
+    "icon": "🎯",
+    "ci": 4,
+    "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
+    "path": "apps/lasttest.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T11:37:34.977Z",
+        "type": "initial",
+        "text": "Build a copy of gradbridge.com"
+      }
+    ],
+    "createdAt": "2026-03-18T11:37:34.977Z",
+    "updatedAt": "2026-03-18T11:37:34.977Z"
+  },
+  {
+    "id": "gbd",
+    "name": "GBD",
+    "icon": "🎯",
+    "ci": 2,
+    "url": "https://Wisemanmax.github.io/Builder/apps/gbd.html",
+    "path": "apps/gbd.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T07:19:23.807Z",
+        "type": "initial",
+        "text": "Copy gradbridge.com home page, extract all information and copy image paths to sites complete"
+      },
+      {
+        "ts": "2026-03-18T07:27:25.293Z",
+        "type": "update",
+        "text": "Make the site look closer to gradbridge.com"
+      }
+    ],
+    "createdAt": "2026-03-18T07:19:23.807Z",
+    "updatedAt": "2026-03-18T07:27:25.293Z"
+  },
+  {
     "id": "gradbridge",
     "name": "Gradbridge",
     "icon": "🎯",
@@ -50,10 +89,15 @@
         "ts": "2026-03-17T05:12:37.534Z",
         "type": "update",
         "text": "Fix ui and make it less buggy"
+      },
+      {
+        "ts": "2026-03-18T01:24:30.629Z",
+        "type": "update",
+        "text": "Make game take up full screen"
       }
     ],
     "createdAt": "2026-03-17T00:39:04.950Z",
-    "updatedAt": "2026-03-17T05:12:37.534Z"
+    "updatedAt": "2026-03-18T01:24:30.629Z"
   },
   {
     "id": "amms6xfi60w2",
