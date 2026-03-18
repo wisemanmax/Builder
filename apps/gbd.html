@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradBridge - Bridge Your Academic Future</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-600: #4f46e5;
+            --primary-700: #4338ca;
+            --primary-500: #6366f1;
+            --primary-900: #312e81;
+            --primary-300: #a5b4fc;
+            --secondary-600: #7c3aed;
+            --secondary-700: #6d28d9;
+            --accent-500: #06b6d4;
+            --accent-600: #0891b2;
+            --gray-900: #111827;
+            --gray-800: #1f2937;
+            --gray-700: #374151;
+            --gray-600: #4b5563;
+            --gray-500: #6b7280;
+            --gray-400: #9ca3af;
+            --gray-300: #d1d5db;
+            --gray-200: #e5e7eb;
+            --gray-100: #f3f4f6;
+            --gray-50: #f9fafb;
+            --white: #ffffff;
+            --success-500: #10b981;
+            --error-500: #ef4444;
+            --warning-500: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--white);
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: min(75rem, 100% - 2rem);
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-800);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-500);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--gray-300);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a:focus {
+            color: var(--primary-500);
+            outline: none;
+        }
+
+        .nav-menu a.active {
+            color: var(--primary-500);
+            position: relative;
+        }
+
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-500);
+            border-radius: 1px;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, var(--primary-600), var(--secondary-600));
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-btn:hover,
+        .cta-btn:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+            outline: 2px solid var(--primary-500);
+            outline-offset: 2px;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 0 4rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 50%, var(--primary-900) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(99,102,241,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--white), var(--primary-300));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: clamp(1.125rem, 2vw, 1.25rem);
+            color: var(--gray-300);
+            margin-bottom: 2rem;
+            max-width: 37.5rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid var(--gray-600);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:focus {
+            border-color: var(--primary-500);
+            background: rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+            background: var(--gray-800);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            font-size: 1.125rem;
+            color: var(--gray-400);
+            max-width: 37.5rem;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(18.75rem, 100%), 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--gray-700);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--gray-600);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-500), var(--secondary-600));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-500);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-500), var(--secondary-600));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--gray-400);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--primary-600), var(--secondary-700));
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 4rem 0;
+            background: var(--gray-800);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(21.875rem, 100%), 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .testimonial-card {
+            background: var(--gray-700);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--gray-600);
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4rem;
+            color: var(--primary-500);
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: var(--gray-300);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-500), var(--secondary-600));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .author-info h4 {
+            font-weight: 600;
+        }
+
+        .author-info p {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 4rem 0;
+            background: var(--gray-900);
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .contact-form {
+            background: var(--gray-800);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--gray-700);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-600);
+            border-radius: 8px;
+            background: var(--gray-700);
+            color: var(--white);
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            min-height: 44px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--gray-900);
+            border-top: 1px solid var(--gray-800);
+            padding: 3rem 0 1rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(15.625rem, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-section ul li a:hover,
+        .footer-section ul li a:focus {
+            color: var(--primary-500);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-800);
+            color: var(--gray-500);
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--success-500);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transform: translateX(25rem);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: var(--error-500);
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .loading::after {
+            content: 'Sending...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(17, 24, 39, 0.9);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: calc(50% - 3rem);
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--gray-900);
+                flex-direction: column;
+                padding: 2rem;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                border-top: 1px solid var(--gray-800);
+            }
+
+            .nav-menu.open {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding: 6rem 0 3rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2.25rem;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        :focus {
+            outline: 2px solid var(--primary-500);
+            outline-offset: 2px;
+        }
+
+        button:focus,
+        a:focus {
+            outline: 2px solid var(--primary-500);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header id="main-header">
+            <div class="container">
+                <nav>
+                    <a href="#" class="logo" aria-label="GradBridge Home">GradBridge</a>
+                    <ul class="nav-menu" id="nav-menu">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#testimonials">Success Stories</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#" class="cta-btn">Get Started</a></li>
+                    </ul>
+                    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle mobile menu" aria-controls="nav-menu" aria-expanded="false">
+                        ☰
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero" id="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1>Bridge Your Academic Future</h1>
+                        <p>Connect with top graduate programs, access exclusive resources, and accelerate your journey from undergraduate studies to advanced degrees.</p>
+                        <div class="hero-buttons">
+                            <a href="#contact" class="cta-btn">Start Your Journey</a>
+                            <a href="#features" class="btn-secondary">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stats" id="stats">
+                <div class="container">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <h3>10,000+</h3>
+                            <p>Students Connected</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>500+</h3>
+                            <p>Partner Universities</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>95%</h3>
+                            <p>Acceptance Rate</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>$50M+</h3>
+                            <p>Scholarships Secured</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="features" id="features">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>Why Choose GradBridge?</h2>
+                        <p>Comprehensive tools and resources designed to streamline your graduate school application process and maximize your success.</p>
+                    </div>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon" role="img" aria-label="Target icon">🎯</div>
+                            <h3>Program Matching</h3>
+                            <p>AI-powered matching system that connects you with graduate programs that align with your academic background, research interests, and career goals.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" role="img" aria-label="Document icon">📝</div>
+                            <h3>Application Support</h3>
+                            <p>Expert guidance on personal statements, research proposals, and application essays from professionals who have successfully navigated the process.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" role="img" aria-label="Money icon">💰</div>
+                            <h3>Funding Opportunities</h3>
+                            <p>Access to exclusive scholarship databases, fellowship programs, and funding opportunities specifically curated for graduate students.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" role="img" aria-label="Handshake icon">🤝</div>
+                            <h3>Mentorship Network</h3>
+                            <p>Connect with current graduate students, alumni, and faculty members who provide insider insights and ongoing support throughout your journey.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" role="img" aria-label="Chart icon">📊</div>
+                            <h3>Progress Tracking</h3>
+                            <p>Comprehensive dashboard to track application deadlines, requirements, and progress across multiple programs and institutions.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" role="img" aria-label="Microscope icon">🔬</div>
+                            <h3>Research Connections</h3>
+                            <p>Direct access to research opportunities, lab placements, and faculty collaborations in your field of interest.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="testimonials" id="testimonials">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>Success Stories</h2>
+                        <p>Hear from students who successfully bridged their way to graduate school with our platform.</p>
+                    </div>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">GradBridge made my PhD application process so much smoother. The mentorship program connected me with a current student in my target lab, and their insights were invaluable.</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">SM</div>
+                                <div class="author-info">
+                                    <h4>Sarah Martinez</h4>
+                                    <p>PhD Student, MIT</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">The funding database helped me secure a full fellowship for my Master's program. I wouldn't have found these opportunities otherwise.</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">JC</div>
+                                <div class="author-info">
+                                    <h4>James Chen</h4>
+                                    <p>MS Student, Stanford</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">The program matching feature opened my eyes to schools I never considered. I'm now thriving in a program that's a perfect fit for my research interests.</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">EP</div>
+                                <div class="author-info">
+                                    <h4>Emily Park</h4>
+                                    <p>PhD Student, Harvard</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">The application support team helped me craft a compelling personal statement that got me into my dream program. Their feedback was spot-on.</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">MJ</div>
+                                <div class="author-info">
+                                    <h4>Michael Johnson</h4>
+                                    <p>PhD Student, Berkeley</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="contact" id="contact">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>Ready to Start Your Journey?</h2>
+                        <p>Get in touch with our team to learn how GradBridge can accelerate your path to graduate school.</p>
+                    </div>
+                    <div class="contact-content">
+                        <div>
+                            <h3>Get Started Today</h3>
+                            <p>Join thousands of students who have successfully bridged their way to graduate school. Our expert team is here to guide you every step of the way.</p>
+                            <ul style="margin-top: 2rem; list-style: none;">
+                                <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+                                    <span style="color: var(--primary-500);">✓</span>
+                                    Free initial consultation
+                                </li>
+                                <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+                                    <span style="color: var(--primary-500);">✓</span>
+                                    Personalized program recommendations
+                                </li>
+                                <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+                                    <span style="color: var(--primary-500);">✓</span>
+                                    Access to exclusive resources
+                                </li>
+                                <li style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+                                    <span style="color: var(--primary-500);">✓</span>
+                                    Ongoing mentorship support
+                                </li>
+                            </ul>
+                        </div>
+                        <form class="contact-form" id="contact-form">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="field">Field of Study</label>
+                                <input type="text" id="field" name="field" placeholder="e.g., Computer Science, Biology, Psychology">
+                            </div>
+                            <div class="form-group">
+                                <label for="level">Degree Level</label>
+                                <select id="level" name="level">
+                                    <option value="">Select degree level</option>
+                                    <option value="masters">Master's Degree</option>
+                                    <option value="phd">PhD/Doctoral</option>
+                                    <option value="professional">Professional Program</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">How can we help you?</label>
+                                <textarea id="message" name="message" placeholder="Tell us about your goals and any specific questions you have..."></textarea>
+                            </div>
+                            <button type="submit" class="cta-btn" style="width: 100%;">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>GradBridge</h3>
+                        <p>Bridging the gap between undergraduate studies and graduate school success.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Services</h3>
+                        <ul>
+                            <li><a href="#features">Program Matching</a></li>
+                            <li><a href="#features">Application Support</a></li>
+                            <li><a href="#features">Mentorship</a></li>
+                            <li><a href="#features">Funding Resources</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Resources</h3>
+                        <ul>
+                            <li><a href="#">Application Guide</a></li>
+                            <li><a href="#">Scholarship Database</a></li>
+                            <li><a href="#">Success Stories</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Company</h3>
+                        <ul>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 GradBridge. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+        <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+    </div>
+
+    <script>
+        // Application State
+        const state = {
+            mobileMenuOpen: false,
+            currentSection: 'hero',
+            formData: {
+                name: '',
+                email: '',
+                field: '',
+                level: '',
+                message: ''
+            },
+            scrollY: 0,
+            isLoading: false
+        };
+
+        // Utility Functions
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function saveToLocalStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (error) {
+                console.warn('Failed to save to localStorage:', error);
+            }
+        }
+
+        function loadFromLocalStorage(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            } catch (error) {
+                console.warn('Failed to load from localStorage:', error);
+                return null;
+            }
+        }
+
+        // Navigation Functions
+        function toggleMobileMenu() {
+            state.mobileMenuOpen = !state.mobileMenuOpen;
+            const navMenu = document.getElementById('nav-menu');
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            
+            navMenu.classList.toggle('open', state.mobileMenuOpen);
+            menuBtn.textContent = state.mobileMenuOpen ? '✕' : '☰';
+            menuBtn.setAttribute('aria-expanded', state.mobileMenuOpen);
+        }
+
+        function closeMobileMenu() {
+            if (state.mobileMenuOpen) {
+                state.mobileMenuOpen = false;
+                const navMenu = document.getElementById('nav-menu');
+                const menuBtn = document.getElementById('mobile-menu-btn');
+                
+                navMenu.classList.remove('open');
+                menuBtn.textContent = '☰';
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function smoothScroll(targetId) {
+            const target = document.getElementById(targetId.replace('#', ''));
+            if (target) {
+                const headerHeight = 80;
+                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+                
+                closeMobileMenu();
+            }
+        }
+
+        // Form Handling
+        function updateFormData(field, value) {
+            state.formData[field] = value;
+            saveToLocalStorage('gradbridge_form_data', state.formData);
+        }
+
+        function validateForm() {
+            const { name, email } = state.formData;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!name.trim()) {
+                showToast('Please enter your full name', 'error');
+                return false;
+            }
+            
+            if (!email.trim() || !emailRegex.test(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        async function submitForm(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) return;
+            
+            state.isLoading = true;
+            const form = document.getElementById('contact-form');
+            form.classList.add('loading');
+            
+            try {
+                // Simulate API call with potential for failure
+                const response = await new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // Simulate 90% success rate
+                        if (Math.random() > 0.1) {
+                            resolve({ success: true, message: 'Form submitted successfully' });
+                        } else {
+                            reject(new Error('Network error occurred'));
+                        }
+                    }, 1500);
+                });
+                
+                if (response.success) {
+                    showToast('Thank you! We\'ll be in touch soon.', 'success');
+                    
+                    // Reset form
+                    form.reset();
+                    state.formData = {
+                        name: '',
+                        email: '',
+                        field: '',
+                        level: '',
+                        message: ''
+                    };
+                    
+                    localStorage.removeItem('gradbridge_form_data');
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showToast('Sorry, there was an error sending your message. Please try again.', 'error');
+            } finally {
+                state.isLoading = false;
+                form.classList.remove('loading');
+            }
+        }
+
+        // Scroll Handling
+        const handleScroll = debounce(() => {
+            state.scrollY = window.scrollY;
+            
+            // Update header background
+            const header = document.getElementById('main-header');
+            if (header) {
+                if (state.scrollY > 100) {
+                    header.style.background = 'rgba(17, 24, 39, 0.98)';
+                } else {
+                    header.style.background = 'rgba(17, 24, 39, 0.95)';
+                }
+            }
+            
+            // Update active section
+            const sections = ['hero', 'features', 'testimonials', 'contact'];
+            const current = sections.find(section => {
+                const element = document.getElementById(section);
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    return rect.top <= 200 && rect.bottom >= 200;
+                }
+                return false;
+            });
+            
+            if (current && current !== state.currentSection) {
+                state.currentSection = current;
+                // Update active nav link
+                document.querySelectorAll('.nav-menu a').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        }, 100);
+
+        // Event Delegation
+        function handleClick(e) {
+            // Mobile menu toggle
+            if (e.target.id === 'mobile-menu-btn') {
+                e.preventDefault();
+                toggleMobileMenu();
+                return;
+            }
+            
+            // Smooth scroll for anchor links
+            if (e.target.matches('a[href^="#"]')) {
+                e.preventDefault();
+                smoothScroll(e.target.getAttribute('href'));
+                return;
+            }
+            
+            // Close mobile menu when clicking outside
+            if (state.mobileMenuOpen && !e.target.closest('nav')) {
+                closeMobileMenu();
+            }
+        }
+
+        function handleInput(e) {
+            if (e.target.matches('#contact-form input, #contact-form textarea, #contact-form select')) {
+                updateFormData(e.target.name, e.target.value);
+            }
+        }
+
+        function handleSubmit(e) {
+            if (e.target.id === 'contact-form') {
+                submitForm(e);
+            }
+        }
+
+        // Initialize Application
+        function init() {
+            // Load saved form data
+            const savedFormData = loadFromLocalStorage('gradbridge_form_data');
+            if (savedFormData) {
+                state.formData = { ...state.formData, ...savedFormData };
+                // Populate form fields
+                Object.entries(savedFormData).forEach(([key, value]) => {
+                    const field = document.getElementById(key);
+                    if (field) field.value = value;
+                });
+            }
+            
+            // Set up event listeners
+            document.addEventListener('click', handleClick);
+            document.addEventListener('input', handleInput);
+            document.addEventListener('submit', handleSubmit);
+            window.addEventListener('scroll', handleScroll);
+            
+            // Handle keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && state.mobileMenuOpen) {
+                    closeMobileMenu();
+                }
+            });
+            
+            // Initialize scroll position
+            handleScroll();
+            
+            console.log('GradBridge application initialized');
+        }
+
+        // Start the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
