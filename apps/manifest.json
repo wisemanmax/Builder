@@ -1,5 +1,22 @@
 [
   {
+    "id": "gradbridgeapp3",
+    "name": "Gradbridgeapp3",
+    "icon": "🎯",
+    "ci": 1,
+    "url": "https://wisemanmax.github.io/builder/apps/gradbridgeapp3.html",
+    "path": "apps/gradbridgeapp3.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T16:31:58.785Z",
+        "type": "initial",
+        "text": "make this home page of gradbridge.com"
+      }
+    ],
+    "createdAt": "2026-03-18T16:31:58.785Z",
+    "updatedAt": "2026-03-18T16:31:58.785Z"
+  },
+  {
     "id": "2048bw",
     "name": "2048BW",
     "icon": "ÃÂ°ÃÂÃÂÃÂ¯",
