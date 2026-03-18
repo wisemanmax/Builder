@@ -323,8 +323,8 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
   return attemptStream(0)
 }
 
-export function callClaudeAudit(code) {
-  return callClaudeRaw(SYS_AUDIT, 'Audit:\n\n' + code.slice(0, 40000), 2000)
+export function callClaudeAudit(code, customSysPrompt) {
+  return callClaudeRaw(customSysPrompt || SYS_AUDIT, 'Audit:\n\n' + code.slice(0, 40000), 2000)
     .then(function (raw) {
       try { var p = JSON.parse(raw); return Array.isArray(p) ? p : [] }
       catch (e) { return [] }
