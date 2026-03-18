@@ -152,6 +152,41 @@ export function ghSyncThoughtAndRules(thought, rules) {
   return Promise.all(promises).catch(function (e) { console.warn('GitHub thought/rules sync:', e) })
 }
 
+export function ghPushTree(files, message, branch) {
+  var repoBase = 'https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo
+  return ghFetch(repoBase + '/git/refs/heads/' + encodeURIComponent(branch)).then(function (ref) {
+    var commitSha = ref.object.sha
+    return ghFetch(repoBase + '/git/commits/' + commitSha).then(function (commit) {
+      var baseTreeSha = commit.tree.sha
+      var paths = Object.keys(files)
+      var blobPromises = paths.map(function (path) {
+        return ghFetch(repoBase + '/git/blobs', {
+          method: 'POST',
+          body: JSON.stringify({ content: safeBase64(files[path]), encoding: 'base64' })
+        }).then(function (blob) {
+          return { path: path, mode: '100644', type: 'blob', sha: blob.sha }
+        })
+      })
+      return Promise.all(blobPromises).then(function (treeItems) {
+        return ghFetch(repoBase + '/git/trees', {
+          method: 'POST',
+          body: JSON.stringify({ base_tree: baseTreeSha, tree: treeItems })
+        })
+      }).then(function (tree) {
+        return ghFetch(repoBase + '/git/commits', {
+          method: 'POST',
+          body: JSON.stringify({ message: message, tree: tree.sha, parents: [commitSha] })
+        })
+      }).then(function (newCommit) {
+        return ghFetch(repoBase + '/git/refs/heads/' + encodeURIComponent(branch), {
+          method: 'PATCH',
+          body: JSON.stringify({ sha: newCommit.sha })
+        })
+      })
+    })
+  })
+}
+
 export function testGitHub() {
   return fetchWithRetry('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo, { headers: ghHeaders() }, 30000).then(function (res) { return res.ok }).catch(function () { return false })
 }
