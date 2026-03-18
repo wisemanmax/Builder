@@ -83,6 +83,15 @@ export const SYS_PLAN = 'You are a senior web architect. Given an app descriptio
 
 export const SYS_SELFUPDATE = 'You are improving a PWA app called "The Builder". You will receive the complete current HTML source and a description of the improvement to make.\nReturn ONLY the complete improved HTML starting with <!DOCTYPE html> — no markdown, no explanation, no code fences.\nRules: Keep all existing functionality. Apply ONLY the requested improvement. Do not rewrite things that are not related to the request.'
 
+export const SYS_CLASSIFY = 'You are a routing classifier for a web app builder. Given a user message, decide if it is a BUILD request (the user wants to create or modify a web app) or a CHAT request (the user is asking a question, seeking advice, or making conversation that does NOT require generating an app).\n'
+  + '\nExamples of BUILD: "build a todo app", "make me a portfolio site", "add dark mode to the app", "create gradbridge.com", "rebuild with a sidebar"\n'
+  + 'Examples of CHAT: "what tech stack should I use?", "how does localStorage work?", "what would gradbridge.com need?", "explain the build process", "what features should a quiz app have?"\n'
+  + '\nReturn ONLY a JSON object (no markdown, no explanation): {"intent":"build"} or {"intent":"chat"}'
+
+export const SYS_CHAT = 'You are a helpful assistant inside a web app builder called The Builder. The user is asking a question or having a conversation — they are NOT requesting you to build an app right now.\n'
+  + 'Respond naturally and helpfully. Keep answers concise. If the user seems like they want to build something, suggest they describe what to build and you can create it for them.\n'
+  + 'Do NOT return HTML code. Respond in plain text or markdown.'
+
 export const SYS_THINK = 'You are an expert product strategist helping a user ideate and refine an app concept through a structured conversation.\n'
   + 'You operate in ROUNDS. The user will tell you which round you are on.\n'
   + '\nROUND STRUCTURE:\n'

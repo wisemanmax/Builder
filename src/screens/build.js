@@ -8,6 +8,7 @@ import { getPreviewPid, getApprovalGates } from '../components/approval-card.js'
 import { runPipeline } from '../pipelines/build-pipeline.js'
 import { runPipeline2 } from '../pipelines/build-pipeline2.js'
 import { runSelfUpdatePipeline } from '../pipelines/builder-plus.js'
+import { classifyIntent, callClaudeChat } from '../lib/ai.js'
 
 // Pending images for next message (array of {base64, mediaType, name})
 var _pendingImages = []
@@ -142,13 +143,45 @@ export function sendMsg() {
     return
   }
   var customName = $('app-name-input').value.trim()
-  $('app-name-input').value = ''
   var existing = ST.activeAppId ? ST.apps.find(function (a) { return a.id === ST.activeAppId }) : null
+  // If editing an existing app, skip classification — always run pipeline
+  if (existing || images.length) {
+    $('app-name-input').value = ''
+    _runBuild(text, existing, customName, images)
+    return
+  }
+  // Classify intent before routing
+  ST._building = true; $('send-btn').disabled = true
+  classifyIntent(text).then(function (intent) {
+    ST._building = false; $('send-btn').disabled = false
+    if (intent === 'chat') {
+      _handleChat(text)
+    } else {
+      $('app-name-input').value = ''
+      _runBuild(text, existing, customName, images)
+    }
+  })
+}
+
+function _runBuild(text, existing, customName, images) {
   if (ST.pipelineMode === 'builder2') {
     runPipeline2(text, existing, customName, images)
   } else {
     runPipeline(text, existing, customName, images)
   }
+}
+
+function _handleChat(text) {
+  addMsg({ role: 'asst', type: 'typing' })
+  callClaudeChat(text).then(function (reply) {
+    var typingEl = document.querySelector('.msg-typing')
+    if (typingEl) typingEl.remove()
+    addMsg({ role: 'asst', type: 'text', text: reply })
+  }).catch(function (e) {
+    var typingEl = document.querySelector('.msg-typing')
+    if (typingEl) typingEl.remove()
+    addMsg({ role: 'asst', type: 'text', text: 'Sorry, something went wrong: ' + (e.message || String(e)) })
+  })
 }
 
 // Pipeline mode toggle helpers
