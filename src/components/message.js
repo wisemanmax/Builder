@@ -1,7 +1,7 @@
 import { $, esc, escAttr } from '../lib/utils.js'
 import { PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS, PIPE5_NAMES, PIPE5_ICONS } from '../config/constants.js'
 import { TEMPLATES, TEMPLATE_CATEGORIES } from '../config/templates.js'
-import { approveAndMerge, requestChanges, resolveRetry } from './approval-card.js'
+import { approveAndMerge, requestChanges, resolveRetry, approveBlueprintContinue, rejectBlueprint } from './approval-card.js'
 import { costCardHTML } from '../lib/cost.js'
 
 // Pipeline type registry — maps pid to 'builder1' | 'builder2'
@@ -46,6 +46,7 @@ function _trackMessage(cfg) {
   else if (cfg.type === 'approval') { entry.text = 'Awaiting approval' }
   else if (cfg.type === 'merge-status') { entry.text = cfg.status === 'done' ? 'Merged' : 'Merging' }
   else if (cfg.type === 'preview-card') { entry.text = 'Preview: ' + (cfg.appName || 'App') }
+  else if (cfg.type === 'blueprint-preview') { entry.text = 'Blueprint preview: ' + (cfg.appName || 'App') }
   else if (cfg.type === 'retry-prompt') { entry.text = (cfg.bugCount || 0) + ' issues remain — retry?' }
   else if (cfg.type === 'schema') { entry.text = 'Supabase schema generated' }
   else { entry.text = cfg.text || '' }
@@ -197,6 +198,32 @@ export function addMsg(cfg) {
       row.innerHTML = '<div class="awrap"><div class="aav" style="' + auditAvStyle + '">' + auditBadge + '</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge" style="' + (isClaudeAudit ? 'background:var(--g1)' : '') + '">' + auditBadge + '</div><div class="audit-title">' + auditTitle + '</div><span class="ab ' + (bugs.length ? 'bugs' : 'clean') + '">' + (bugs.length ? bugs.length + ' Bug' + (bugs.length !== 1 ? 's' : '') : '\u2713 Clean') + '</span></div>' + bhtml + '</div></div></div>'
     } else if (cfg.type === 'preview-card') {
       row.innerHTML = '<div class="awrap"><div class="aav">\uD83D\uDC41</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview \u2014 ' + esc(cfg.appName || 'App') + '</div><span class="pcc-branch">' + esc(cfg.branch || 'local') + '</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="' + escAttr(cfg.code || '') + '"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\'' + esc(cfg.appId || '') + '\',\'' + esc(cfg.pid || '') + '\');">\uD83D\uDD0D Full Screen</button></div></div></div></div></div>'
+    } else if (cfg.type === 'blueprint-preview') {
+      var bpId = 'bp-' + Date.now()
+      var bpPid = esc(cfg.pid || '')
+      row.id = bpId
+      row.innerHTML = '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#7C4DFF,#B44FFF)">\uD83D\uDCDD</div>'
+        + '<div style="flex:1;min-width:0"><div class="bp-preview-card">'
+        + '<div class="bp-preview-hdr"><div class="bp-preview-title">\uD83D\uDCDD Blueprint Preview \u2014 ' + esc(cfg.appName || 'App') + '</div>'
+        + '<div class="bp-preview-meta">' + esc(cfg.meta || 'Stitch scaffold \u2014 review before Claude adds logic') + '</div></div>'
+        + '<div class="bp-preview-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="' + escAttr(cfg.code || '') + '"></iframe></div>'
+        + '<div class="bp-preview-actions">'
+        + '<button class="bp-btn approve" data-pid="' + bpPid + '" data-action="approve">\u2705 Approve &amp; Continue</button>'
+        + '<button class="bp-btn reject" data-pid="' + bpPid + '" data-action="reject">\u274C Reject Blueprint</button>'
+        + '</div></div></div></div>'
+      setTimeout(function () {
+        var btns = row.querySelectorAll('.bp-btn[data-pid]')
+        for (var bpi = 0; bpi < btns.length; bpi++) {
+          btns[bpi].addEventListener('click', function () {
+            var pid2 = this.dataset.pid
+            var action = this.dataset.action
+            var allBtns = row.querySelectorAll('.bp-btn')
+            for (var k = 0; k < allBtns.length; k++) allBtns[k].disabled = true
+            if (action === 'approve') { this.textContent = 'Continuing\u2026'; approveBlueprintContinue(pid2) }
+            else { this.textContent = 'Rejected'; rejectBlueprint(pid2) }
+          })
+        }
+      }, 0)
     } else if (cfg.type === 'approval') {
       row.id = cfg.id
       var apid = esc(cfg.pid || '')

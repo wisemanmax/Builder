@@ -52,6 +52,23 @@ export function requestChanges(pid) {
 
 export function getApprovalGates() { return _approvalGates }
 
+// Blueprint approval gates — pause after Stitch scaffold to let user preview before Claude hydration
+var _blueprintGates = {}
+
+export function waitForBlueprintApproval(pid) {
+  return new Promise(function (resolve, reject) { _blueprintGates[pid] = { resolve: resolve, reject: reject } })
+}
+
+export function approveBlueprintContinue(pid) {
+  if (_blueprintGates[pid]) _blueprintGates[pid].resolve('approved')
+  delete _blueprintGates[pid]
+}
+
+export function rejectBlueprint(pid) {
+  if (_blueprintGates[pid]) _blueprintGates[pid].reject(new Error('BLUEPRINT_REJECTED'))
+  delete _blueprintGates[pid]
+}
+
 export function waitForRetryDecision(pid) {
   return new Promise(function (resolve) { _retryGates[pid] = { resolve: resolve } })
 }

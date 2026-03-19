@@ -10,7 +10,7 @@ import { runLocalChecks } from '../lib/checks.js'
 import { updateStitchStage, updateStitchEstimate, updateStitchTime } from '../components/stitch-tracker.js'
 import { addMsg, updatePS } from '../components/message.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
-import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
+import { setPreview, clearPreview, waitForApproval, waitForBlueprintApproval } from '../components/approval-card.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
@@ -954,20 +954,38 @@ export function runStitchPipeline(context, callbacks) {
     if (containerId) updateStitchStage(containerId, 1, PIPE5_STATUS.PASSED, 'Scaffold locked')
     updatePS(pid, 1, 'done', 'Blueprint locked ✓')
 
+    // ── Stage 2: Blueprint Review (User Approval Gate) ──
+    checkPipelineCancel()
+    updateStage(2, 'running', 'Awaiting your review…')
+    if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.RUNNING, 'Awaiting review…')
+    updatePS(pid, 2, 'wait', 'Review the scaffold…')
+
+    // Show blueprint preview in chat with approve/reject buttons
+    addMsg({ role: 'asst', type: 'blueprint-preview', code: stitchHTML, appName: appName, pid: pid, meta: Math.round(stitchHTML.length / 1024) + 'KB · ' + blueprintCleanCopy.tagCount + ' tags — review before Claude adds logic' })
+    notifyUser('Blueprint Ready', appName + ' scaffold is waiting for your review.')
+
+    return waitForBlueprintApproval(pid)
+  }).then(function () {
+    // Blueprint approved — continue
+    updateStage(2, 'passed', 'Approved')
+    if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.PASSED, 'Approved')
+    updatePS(pid, 2, 'done', 'Approved ✓')
+    addMsg({ role: 'asst', type: 'text', text: 'Blueprint approved — proceeding to hydration.' })
+
     // ── Stage 3: Assemble (Hydration) ──
     checkPipelineCancel()
-    updateStage(2, 'running', 'Claude adding logic layer…')
-    if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.RUNNING, 'Claude adding logic layer…')
-    updatePS(pid, 2, 'active', 'Assembling full app…')
+    updateStage(3, 'running', 'Claude adding logic layer…')
+    if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, 'Claude adding logic layer…')
+    updatePS(pid, 3, 'active', 'Assembling full app…')
     updateEstimate('~1-2 min remaining')
     if (containerId) updateStitchEstimate(containerId, '~1-2 min remaining')
 
     return retryStage(function () {
       return runAssemble(stitchHTML, intakePayload)
     }, 'Assemble', 2, function (statusMsg) {
-      updateStage(2, 'running', statusMsg)
-      if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.RUNNING, statusMsg)
-      updatePS(pid, 2, 'active', statusMsg)
+      updateStage(3, 'running', statusMsg)
+      if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, statusMsg)
+      updatePS(pid, 3, 'active', statusMsg)
     })
   }).then(function (html) {
     assembledHTML = html
@@ -976,15 +994,15 @@ export function runStitchPipeline(context, callbacks) {
       preview: assembledHTML.slice(0, 500)
     })
 
-    updateStage(2, 'passed', 'App assembled (' + Math.round(assembledHTML.length / 1024) + 'KB)')
-    if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.PASSED, 'App assembled')
-    updatePS(pid, 2, 'done', 'Assembly complete ✓')
+    updateStage(3, 'passed', 'App assembled (' + Math.round(assembledHTML.length / 1024) + 'KB)')
+    if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.PASSED, 'App assembled')
+    updatePS(pid, 3, 'done', 'Assembly complete ✓')
 
     // ── Stage 4: Verify (Automated Guardrails) ──
     checkPipelineCancel()
-    updateStage(3, 'running', 'Running verification checks…')
-    if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, 'Running checks…')
-    updatePS(pid, 3, 'active', 'Verifying quality…')
+    updateStage(4, 'running', 'Running verification checks…')
+    if (containerId) updateStitchStage(containerId, 4, PIPE5_STATUS.RUNNING, 'Running checks…')
+    updatePS(pid, 4, 'active', 'Verifying quality…')
     updateEstimate('< 1 min remaining')
     if (containerId) updateStitchEstimate(containerId, '< 1 min remaining')
 
@@ -993,8 +1011,8 @@ export function runStitchPipeline(context, callbacks) {
         return runVerify(assembledHTML, blueprintCleanCopy)
       })
     }, 'Verify', 2, function (statusMsg) {
-      updateStage(3, 'running', statusMsg)
-      if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, statusMsg)
+      updateStage(4, 'running', statusMsg)
+      if (containerId) updateStitchStage(containerId, 4, PIPE5_STATUS.RUNNING, statusMsg)
     })
   }).then(function (report) {
     checksReport = report
@@ -1013,13 +1031,13 @@ export function runStitchPipeline(context, callbacks) {
       var addedTags = checksReport.structureDiff.addedTags.slice(0, 10)
       addMsg({ role: 'asst', type: 'text', text: 'Structure violation: Claude added ' + violationCount + ' HTML tag(s). Re-running hydration with violation report…' })
 
-      updateStage(3, 'failed', violationCount + ' structure violation(s)')
-      if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.FAILED, violationCount + ' violation(s)')
+      updateStage(4, 'failed', violationCount + ' structure violation(s)')
+      if (containerId) updateStitchStage(containerId, 4, PIPE5_STATUS.FAILED, violationCount + ' violation(s)')
       context._structureRetried = true
 
       // Re-run Stage 3 with violation report injected
-      updateStage(2, 'running', 'Re-hydrating (structure fix)…')
-      if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.RUNNING, 'Re-hydrating…')
+      updateStage(3, 'running', 'Re-hydrating (structure fix)…')
+      if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, 'Re-hydrating…')
 
       var violationSys = SYS_STITCH_ENHANCE
         + '\n\n⛔⛔⛔ STRUCTURE VIOLATION REPORT — YOUR PREVIOUS OUTPUT FAILED THE AUTOMATED DIFF ⛔⛔⛔\n'
@@ -1051,11 +1069,11 @@ export function runStitchPipeline(context, callbacks) {
         }
         var verifyStatus = checksReport.score >= 60 ? 'passed' : 'failed'
 
-        updateStage(2, 'passed', 'Re-hydrated')
-        if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.PASSED, 'Re-hydrated')
-        updateStage(3, verifyStatus, statusDetail)
-        if (containerId) updateStitchStage(containerId, 3, verifyStatus === 'passed' ? PIPE5_STATUS.PASSED : PIPE5_STATUS.FAILED, statusDetail)
-        updatePS(pid, 3, verifyStatus === 'passed' ? 'done' : 'warn', statusDetail)
+        updateStage(3, 'passed', 'Re-hydrated')
+        if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.PASSED, 'Re-hydrated')
+        updateStage(4, verifyStatus, statusDetail)
+        if (containerId) updateStitchStage(containerId, 4, verifyStatus === 'passed' ? PIPE5_STATUS.PASSED : PIPE5_STATUS.FAILED, statusDetail)
+        updatePS(pid, 4, verifyStatus === 'passed' ? 'done' : 'warn', statusDetail)
 
         if (checksReport.localChecks) {
           addMsg({ role: 'asst', type: 'checks', checks: checksReport.localChecks })
@@ -1071,13 +1089,13 @@ export function runStitchPipeline(context, callbacks) {
     }
     var verifyStatus = checksReport.score >= 60 ? 'passed' : 'failed'
 
-    updateStage(3, verifyStatus, statusDetail)
+    updateStage(4, verifyStatus, statusDetail)
     if (containerId) {
-      updateStitchStage(containerId, 3,
+      updateStitchStage(containerId, 4,
         verifyStatus === 'passed' ? PIPE5_STATUS.PASSED : PIPE5_STATUS.FAILED,
         statusDetail)
     }
-    updatePS(pid, 3, verifyStatus === 'passed' ? 'done' : 'warn', statusDetail)
+    updatePS(pid, 4, verifyStatus === 'passed' ? 'done' : 'warn', statusDetail)
 
     // Show checks in chat
     if (checksReport.localChecks) {
@@ -1090,16 +1108,16 @@ export function runStitchPipeline(context, callbacks) {
 
     // ── Stage 5: Review ──
     checkPipelineCancel()
-    updateStage(4, 'running', 'GPT-4o reviewing…')
-    if (containerId) updateStitchStage(containerId, 4, PIPE5_STATUS.RUNNING, 'GPT-4o reviewing…')
-    updatePS(pid, 4, 'active', 'GPT-4o review…')
+    updateStage(5, 'running', 'GPT-4o reviewing…')
+    if (containerId) updateStitchStage(containerId, 5, PIPE5_STATUS.RUNNING, 'GPT-4o reviewing…')
+    updatePS(pid, 5, 'active', 'GPT-4o review…')
 
     return retryStage(function () {
       return runReview(assembledHTML, checksReport)
     }, 'Review', 2, function (statusMsg) {
-      updateStage(4, 'running', statusMsg)
-      if (containerId) updateStitchStage(containerId, 4, PIPE5_STATUS.RUNNING, statusMsg)
-      updatePS(pid, 4, 'active', statusMsg)
+      updateStage(5, 'running', statusMsg)
+      if (containerId) updateStitchStage(containerId, 5, PIPE5_STATUS.RUNNING, statusMsg)
+      updatePS(pid, 5, 'active', statusMsg)
     })
   }).then(function (findings) {
     reviewFindings = findings || []
@@ -1114,28 +1132,28 @@ export function runStitchPipeline(context, callbacks) {
     var criticals = reviewFindings.filter(function (f) { return (f.severity || '').toLowerCase() === 'critical' }).length
     if (criticals) findingSummary += ' (' + criticals + ' critical)'
 
-    updateStage(4, 'passed', findingSummary)
+    updateStage(5, 'passed', findingSummary)
     if (containerId) {
-      updateStitchStage(containerId, 4, PIPE5_STATUS.PASSED, findingSummary)
+      updateStitchStage(containerId, 5, PIPE5_STATUS.PASSED, findingSummary)
       populateReviewFindings(containerId, reviewFindings)
     }
-    updatePS(pid, 4, 'done', findingSummary + ' ✓')
+    updatePS(pid, 5, 'done', findingSummary + ' ✓')
     addMsg({ role: 'asst', type: 'text', text: 'GPT-4o review complete — ' + findingSummary })
 
     // ── Stage 6: Polish ──
     checkPipelineCancel()
-    updateStage(5, 'running', 'Claude polishing…')
-    if (containerId) updateStitchStage(containerId, 5, PIPE5_STATUS.RUNNING, 'Claude polishing…')
-    updatePS(pid, 5, 'active', 'Polishing…')
+    updateStage(6, 'running', 'Claude polishing…')
+    if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, 'Claude polishing…')
+    updatePS(pid, 6, 'active', 'Polishing…')
     updateEstimate('< 1 min remaining')
     if (containerId) updateStitchEstimate(containerId, '< 1 min remaining')
 
     return retryStage(function () {
       return runPolish(assembledHTML, reviewFindings, blueprintCleanCopy)
     }, 'Polish', 2, function (statusMsg) {
-      updateStage(5, 'running', statusMsg)
-      if (containerId) updateStitchStage(containerId, 5, PIPE5_STATUS.RUNNING, statusMsg)
-      updatePS(pid, 5, 'active', statusMsg)
+      updateStage(6, 'running', statusMsg)
+      if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, statusMsg)
+      updatePS(pid, 6, 'active', statusMsg)
     })
   }).then(function (polishResult) {
     finalHTML = polishResult.html
@@ -1146,9 +1164,9 @@ export function runStitchPipeline(context, callbacks) {
     })
 
     var polishDetail = polishResult.secondPass ? '2 passes applied' : (reviewFindings.length ? 'Fixes applied' : 'Clean — no fixes needed')
-    updateStage(5, 'passed', polishDetail)
-    if (containerId) updateStitchStage(containerId, 5, PIPE5_STATUS.PASSED, polishDetail)
-    updatePS(pid, 5, 'done', polishDetail + ' ✓')
+    updateStage(6, 'passed', polishDetail)
+    if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.PASSED, polishDetail)
+    updatePS(pid, 6, 'done', polishDetail + ' ✓')
     addMsg({ role: 'asst', type: 'text', text: 'Polish complete — ' + polishDetail })
 
     // Save locally before deliver stage
@@ -1156,9 +1174,9 @@ export function runStitchPipeline(context, callbacks) {
 
     // ── Stage 7: Deliver ──
     checkPipelineCancel()
-    updateStage(6, 'running', 'Generating build manifest…')
-    if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, 'Generating manifest…')
-    updatePS(pid, 6, 'active', 'Delivering…')
+    updateStage(7, 'running', 'Generating build manifest…')
+    if (containerId) updateStitchStage(containerId, 7, PIPE5_STATUS.RUNNING, 'Generating manifest…')
+    updatePS(pid, 7, 'active', 'Delivering…')
 
     // Generate Build Manifest — tells the user exactly what was met and what gaps exist
     buildManifest = _generateBuildManifest(intakePayload, checksReport, reviewFindings, blueprintCleanCopy)
@@ -1166,8 +1184,8 @@ export function runStitchPipeline(context, callbacks) {
 
     // Push to GitHub branch if configured
     if (hasGitHub) {
-      updateStage(6, 'running', 'Pushing to ' + branchName + '…')
-      if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, 'Pushing to branch…')
+      updateStage(7, 'running', 'Pushing to ' + branchName + '…')
+      if (containerId) updateStitchStage(containerId, 7, PIPE5_STATUS.RUNNING, 'Pushing to branch…')
       var appPath = 'apps/' + appId + '.html'
       return retryStage(function () {
         return ghCreateBranch(branchName).catch(function () { /* branch may exist */ }).then(function () {
@@ -1176,8 +1194,8 @@ export function runStitchPipeline(context, callbacks) {
           })
         })
       }, 'Deliver-Push', 2, function (statusMsg) {
-        updateStage(6, 'running', statusMsg)
-        if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, statusMsg)
+        updateStage(7, 'running', statusMsg)
+        if (containerId) updateStitchStage(containerId, 7, PIPE5_STATUS.RUNNING, statusMsg)
       }).then(function () {
         return 'github'
       }).catch(function (e) {
@@ -1193,9 +1211,9 @@ export function runStitchPipeline(context, callbacks) {
     addMsg({ role: 'asst', type: 'preview-card', code: finalHTML, appName: appName, branch: branchName || 'local', appId: appId, pid: pid })
 
     // Approval gate
-    updateStage(6, 'running', 'Awaiting approval…')
-    if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, 'Awaiting approval…')
-    updatePS(pid, 6, 'wait', 'Waiting for your approval…')
+    updateStage(7, 'running', 'Awaiting approval…')
+    if (containerId) updateStitchStage(containerId, 7, PIPE5_STATUS.RUNNING, 'Awaiting approval…')
+    updatePS(pid, 7, 'wait', 'Waiting for your approval…')
     addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
     notifyUser('Stitch Build Ready', appName + ' is waiting for your approval.')
 
@@ -1203,8 +1221,8 @@ export function runStitchPipeline(context, callbacks) {
   }).then(function () {
     // Approved — merge if GitHub, otherwise finalize local
     if (hasGitHub) {
-      updateStage(6, 'running', 'Merging to main…')
-      if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, 'Merging…')
+      updateStage(7, 'running', 'Merging to main…')
+      if (containerId) updateStitchStage(containerId, 7, PIPE5_STATUS.RUNNING, 'Merging…')
       var mergeStatusId = 'merge-' + Date.now()
       addMsg({ role: 'asst', type: 'merge-status', mergeId: mergeStatusId, status: 'merging' })
 
@@ -1240,9 +1258,9 @@ export function runStitchPipeline(context, callbacks) {
     }
   }).then(function (mode) {
     // Deliver = passed
-    updateStage(6, 'passed', mode === 'github' ? 'Merged & deploying' : 'Saved locally')
-    if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.PASSED, mode === 'github' ? 'Merged & deploying' : 'Saved locally')
-    updatePS(pid, 6, 'done', 'Delivered ✓')
+    updateStage(7, 'passed', mode === 'github' ? 'Merged & deploying' : 'Saved locally')
+    if (containerId) updateStitchStage(containerId, 7, PIPE5_STATUS.PASSED, mode === 'github' ? 'Merged & deploying' : 'Saved locally')
+    updatePS(pid, 7, 'done', 'Delivered ✓')
 
     storeInProgressiveLearner(runId, 'deliver', {
       mode: mode,
@@ -1361,14 +1379,24 @@ export function runStitchPipeline(context, callbacks) {
       return
     }
 
+    if (err.message === 'BLUEPRINT_REJECTED') {
+      updateStage(2, 'failed', 'Rejected')
+      if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.FAILED, 'Rejected')
+      updatePS(pid, 2, 'error', 'Blueprint rejected')
+      addMsg({ role: 'asst', type: 'text', text: 'Blueprint rejected. Describe what you\'d like different and try again.' })
+      $('bs-proj-btn').style.display = 'flex'
+      renderGrid()
+      return
+    }
+
     // Determine which stage failed based on what we have
     var failedStage = 0
     if (intakePayload && !stitchHTML) failedStage = 1
-    else if (stitchHTML && !assembledHTML) failedStage = 2
-    else if (assembledHTML && !checksReport) failedStage = 3
-    else if (checksReport && !reviewFindings) failedStage = 4
-    else if (reviewFindings && !finalHTML) failedStage = 5
-    else if (finalHTML) failedStage = 6
+    else if (stitchHTML && !assembledHTML) failedStage = 3
+    else if (assembledHTML && !checksReport) failedStage = 4
+    else if (checksReport && !reviewFindings) failedStage = 5
+    else if (reviewFindings && !finalHTML) failedStage = 6
+    else if (finalHTML) failedStage = 7
 
     // Blueprint failure gets special treatment: offer fallback to standard pipeline
     if (failedStage === 1) {
@@ -1377,7 +1405,7 @@ export function runStitchPipeline(context, callbacks) {
     }
 
     haltWithOptions(
-      ['Intake', 'Blueprint', 'Assemble', 'Verify', 'Review', 'Polish', 'Deliver'][failedStage],
+      ['Intake', 'Blueprint', 'Blueprint Review', 'Assemble', 'Verify', 'Review', 'Polish', 'Deliver'][failedStage],
       failedStage,
       err
     )
