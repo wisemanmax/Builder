@@ -1,6 +1,6 @@
 import { ST } from './state.js'
 
-var APPROVED_KEY_DOMAINS = ['api.anthropic.com', 'api.openai.com', 'api.github.com', 'api.stitch.ai']
+var APPROVED_KEY_DOMAINS = ['api.anthropic.com', 'api.openai.com', 'api.github.com', 'stitch.googleapis.com']
 
 export var _nativeFetch = window.fetch
 

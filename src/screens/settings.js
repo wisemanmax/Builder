@@ -78,12 +78,17 @@ export function initSettings() {
 }
 
 function _testStitchKey(key) {
-  fetch('https://api.stitch.ai/v1/ping', {
-    method: 'GET',
-    headers: { 'Authorization': 'Bearer ' + key }
+  fetch('https://stitch.googleapis.com/mcp', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': key
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 1 })
   }).then(function (res) {
     if (res.ok) toast('\u2713 Stitch API key verified', 3000)
-    else toast('\u2717 Stitch API key invalid (HTTP ' + res.status + ')', 4000)
+    else if (res.status === 401 || res.status === 403) toast('\u2717 Stitch API key invalid (HTTP ' + res.status + ')', 4000)
+    else toast('\u2717 Stitch API error (HTTP ' + res.status + ')', 4000)
   }).catch(function () {
     toast('\u2717 Could not reach Stitch API', 4000)
   })
