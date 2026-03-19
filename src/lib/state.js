@@ -2,7 +2,7 @@ import { KEY_STORE } from '../config/constants.js'
 
 export const ST = {
   apps: [],
-  key: '', gptKey: '',
+  key: '', gptKey: '', stitchKey: '',
   ghToken: '', ghUser: '', ghRepo: '', ghCustomDomain: '',
   sbUrl: '', sbAnon: '', sbEnabled: false, auditEnabled: true,
   backendEnabled: false,
@@ -66,6 +66,7 @@ export function hydrate() {
   ST.activeProfileId = localStorage.getItem('bldr_activeProfile') || null
   ST.key = localStorage.getItem(KEY_STORE.ANTH) || ''
   ST.gptKey = localStorage.getItem(KEY_STORE.GPT) || ''
+  ST.stitchKey = localStorage.getItem(KEY_STORE.STITCH) || ''
   ST.ghToken = localStorage.getItem(KEY_STORE.GH_TOKEN) || ''
   ST.ghUser = localStorage.getItem(KEY_STORE.GH_USER) || ''
   ST.ghRepo = localStorage.getItem(KEY_STORE.GH_REPO) || ''
@@ -82,6 +83,7 @@ export function hydrate() {
 export function saveKeys() {
   localStorage.setItem(KEY_STORE.ANTH, ST.key)
   localStorage.setItem(KEY_STORE.GPT, ST.gptKey)
+  localStorage.setItem(KEY_STORE.STITCH, ST.stitchKey)
   localStorage.setItem(KEY_STORE.GH_TOKEN, ST.ghToken)
   localStorage.setItem(KEY_STORE.GH_USER, ST.ghUser)
   localStorage.setItem(KEY_STORE.GH_REPO, ST.ghRepo)
@@ -143,7 +145,7 @@ export function clearBuildSession() {
 
 export function keyStatusHTML() {
   var items = [
-    ['Anthropic', ST.key], ['OpenAI', ST.gptKey],
+    ['Anthropic', ST.key], ['OpenAI', ST.gptKey], ['Stitch', ST.stitchKey],
     ['GitHub Token', ST.ghToken], ['Supabase Anon', ST.sbAnon],
   ]
   var rows = ''

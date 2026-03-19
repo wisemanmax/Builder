@@ -2,7 +2,8 @@ import { ST, persist, saveKeys } from '../lib/state.js'
 import { hydrateBuildSession, clearBuildSession, requestPipelineCancel } from '../lib/state.js'
 import { $, esc, toast, autoResize } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
-import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS } from '../config/constants.js'
+import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS, PIPE5_NAMES, PIPE5_ICONS } from '../config/constants.js'
+import { _syncStitchGate } from './settings.js'
 import { TEMPLATES } from '../config/templates.js'
 import { addMsg, resetChat, hydrateLiveChat } from '../components/message.js'
 import { renderThoughtSelector } from '../components/thought-card.js'
@@ -232,6 +233,8 @@ function _handleChat(text, images) {
 function _updatePipelineSub(app) {
   if (app) {
     $('bs-sub').textContent = 'Describe changes'
+  } else if (ST.pipelineMode === 'stitch') {
+    $('bs-sub').textContent = 'Intake \u2192 Blueprint \u2192 Assemble \u2192 Verify \u2192 Review \u2192 Polish \u2192 Deliver'
   } else if (ST.pipelineMode === 'website2') {
     $('bs-sub').textContent = 'Recon \u2192 Structure \u2192 Design \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Push \u2192 Preview \u2192 Approve \u2192 Merge'
   } else if (ST.pipelineMode === 'website') {
@@ -249,6 +252,7 @@ function _syncToggle() {
     if (btns[i].dataset.mode === ST.pipelineMode) btns[i].classList.add('active')
     else btns[i].classList.remove('active')
   }
+  _syncStitchGate()
   // Show model toggle only for website2
   var mt = $('model-toggle')
   if (mt) {
@@ -304,12 +308,13 @@ export function recoverInterruptedBuild(session) {
 
   // Show pipeline progress summary
   if (session.steps) {
+    var isStitch = session.pipelineMode === 'stitch'
     var isWeb2 = session.pipelineMode === 'website2'
     var isWeb = session.pipelineMode === 'website'
     var isB2 = session.pipelineMode === 'builder2'
-    var names = isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
-    var icons = isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
-    var modeLabel = isWeb2 ? 'Website 2' : isWeb ? 'Website' : isB2 ? 'Claude-Only' : 'Standard'
+    var names = isStitch ? PIPE5_NAMES : isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
+    var icons = isStitch ? PIPE5_ICONS : isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
+    var modeLabel = isStitch ? 'Flawless Pipeline' : isWeb2 ? 'Website 2' : isWeb ? 'Website' : isB2 ? 'Claude-Only' : 'Standard'
     var summaryHtml = '<div style="margin-top:4px"><strong>Pipeline Progress</strong> <span style="font-size:10px;color:rgba(255,255,255,.35)">(' + modeLabel + ')</span></div>'
     summaryHtml += '<div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">'
     var pid = session.pid || 'recovered'
@@ -387,9 +392,15 @@ function _startStopBtnSync() {
 export function initPipelineToggle() {
   var toggle = $('pipe-toggle')
   if (!toggle) return
+  _syncStitchGate()
   toggle.addEventListener('click', function (e) {
     var btn = e.target.closest('.pt-btn')
     if (!btn || !btn.dataset.mode) return
+    // Gate stitch mode behind key
+    if (btn.dataset.mode === 'stitch' && !ST.stitchKey) {
+      _showStitchModal()
+      return
+    }
     ST.pipelineMode = btn.dataset.mode
     try { localStorage.setItem('bldr_pipeline', ST.pipelineMode) } catch (x) {}
     _syncToggle()
@@ -413,4 +424,25 @@ export function initPipelineToggle() {
     })
   }
   _syncToggle()
+  // Stitch key modal
+  var stitchModalSettings = $('stitch-modal-settings')
+  var stitchModalClose = $('stitch-modal-close')
+  if (stitchModalSettings) {
+    stitchModalSettings.addEventListener('click', function () {
+      $('stitch-key-modal').classList.remove('on')
+      if (typeof window.openSettings === 'function') window.openSettings()
+    })
+  }
+  if (stitchModalClose) {
+    stitchModalClose.addEventListener('click', function () { $('stitch-key-modal').classList.remove('on') })
+  }
+  var stitchOverlay = $('stitch-key-modal')
+  if (stitchOverlay) {
+    stitchOverlay.addEventListener('click', function (e) { if (e.target === stitchOverlay) stitchOverlay.classList.remove('on') })
+  }
+}
+
+function _showStitchModal() {
+  var modal = $('stitch-key-modal')
+  if (modal) modal.classList.add('on')
 }

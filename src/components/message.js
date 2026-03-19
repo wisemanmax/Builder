@@ -1,5 +1,5 @@
 import { $, esc, escAttr } from '../lib/utils.js'
-import { PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS } from '../config/constants.js'
+import { PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS, PIPE5_NAMES, PIPE5_ICONS } from '../config/constants.js'
 import { TEMPLATES, TEMPLATE_CATEGORIES } from '../config/templates.js'
 import { approveAndMerge, requestChanges, resolveRetry } from './approval-card.js'
 import { costCardHTML } from '../lib/cost.js'
@@ -42,7 +42,7 @@ function _trackMessage(cfg) {
   else if (cfg.type === 'thinking') { entry.text = (cfg.text || '').slice(0, 2000) }
   else if (cfg.type === 'checks') { var f = (cfg.checks || []).filter(function (c) { return !c.passed }).length; entry.text = f ? f + ' issue(s) found' : 'All checks passed' }
   else if (cfg.type === 'audit') { var b = (cfg.bugs || []).length; entry.text = b ? b + ' bug(s) found' : 'No bugs found' }
-  else if (cfg.type === 'pipeline') { entry.text = 'Pipeline started' }
+  else if (cfg.type === 'pipeline') { entry.text = (cfg.pipelineType === 'stitch' ? 'Flawless Pipeline' : 'Pipeline') + ' started' }
   else if (cfg.type === 'approval') { entry.text = 'Awaiting approval' }
   else if (cfg.type === 'merge-status') { entry.text = cfg.status === 'done' ? 'Merged' : 'Merging' }
   else if (cfg.type === 'preview-card') { entry.text = 'Preview: ' + (cfg.appName || 'App') }
@@ -153,8 +153,8 @@ export function addMsg(cfg) {
       row.innerHTML = '<div class="awrap"><div class="aav">\u26A1</div><div class="abub">' + (cfg.html || esc(cfg.text || '')) + '</div></div>'
     } else if (cfg.type === 'pipeline') {
       row.id = cfg.id
-      var pNames = cfg.pipelineType === 'website2' ? PIPE4_NAMES : cfg.pipelineType === 'website' ? PIPE3_NAMES : cfg.pipelineType === 'builder2' ? PIPE2_NAMES : PIPE_NAMES
-      var pIcons = cfg.pipelineType === 'website2' ? PIPE4_ICONS : cfg.pipelineType === 'website' ? PIPE3_ICONS : cfg.pipelineType === 'builder2' ? PIPE2_ICONS : PIPE_ICONS
+      var pNames = cfg.pipelineType === 'stitch' ? PIPE5_NAMES : cfg.pipelineType === 'website2' ? PIPE4_NAMES : cfg.pipelineType === 'website' ? PIPE3_NAMES : cfg.pipelineType === 'builder2' ? PIPE2_NAMES : PIPE_NAMES
+      var pIcons = cfg.pipelineType === 'stitch' ? PIPE5_ICONS : cfg.pipelineType === 'website2' ? PIPE4_ICONS : cfg.pipelineType === 'website' ? PIPE3_ICONS : cfg.pipelineType === 'builder2' ? PIPE2_ICONS : PIPE_ICONS
       if (cfg.pipelineType) _pipeTypes[cfg.id] = cfg.pipelineType
       var phtml = '<div class="awrap"><div class="aav">\u26A1</div><div style="flex:1;min-width:0"><div class="pipe-card" id="' + cfg.id + '-inner">'
       for (var i = 0; i < pNames.length; i++) {
@@ -299,11 +299,12 @@ export function clearPipelineSteps() { _pipelineSteps = {} }
 
 export function updatePS(pid, step, state, det) {
   var el = $(pid + '-s' + step); if (!el) return
+  var isStitch = _pipeTypes[pid] === 'stitch'
   var isWeb2 = _pipeTypes[pid] === 'website2'
   var isWeb = _pipeTypes[pid] === 'website'
   var isB2 = _pipeTypes[pid] === 'builder2'
-  var names = isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
-  var icons = isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
+  var names = isStitch ? PIPE5_NAMES : isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
+  var icons = isStitch ? PIPE5_ICONS : isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
   var ico = state === 'done' ? '\u2713' : state === 'error' ? '\u2717' : state === 'wait' ? '\u23F8' : icons[step] || '\u00B7'
   el.className = 'ps s-' + state
   el.innerHTML = '<div class="psico">' + ico + '</div><div class="pstxt"><div class="psname">' + esc(names[step] || 'Step ' + step) + '</div><div class="psdet">' + esc(det) + '</div></div>' + (state === 'active' ? '<div class="spin"></div>' : '')

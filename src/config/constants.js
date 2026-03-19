@@ -49,6 +49,7 @@ export const MAX_FIX_PASSES = 2
 export const KEY_STORE = {
   ANTH: 'bldr_key',
   GPT: 'bldr_gptKey',
+  STITCH: 'bldr_stitchKey',
   GH_TOKEN: 'bldr_ghToken',
   GH_USER: 'bldr_ghUser',
   GH_REPO: 'bldr_ghRepo',
@@ -125,6 +126,28 @@ export const PIPE4_ICONS = [
   '\uD83D\uDD0E', '\uD83D\uDEE0', '\u2B06\uFE0F', '\uD83D\uDC41',
   '\u2705', '\uD83D\uDD00',
 ]
+
+export const PIPE5_NAMES = [
+  'Stitch \u00B7 Intake',
+  'Stitch \u00B7 Blueprint',
+  'Stitch \u00B7 Assemble',
+  'Stitch \u00B7 Verify',
+  'GPT-4o \u00B7 Review',
+  'Stitch \u00B7 Polish',
+  'Stitch \u00B7 Deliver',
+]
+
+export const PIPE5_ICONS = [
+  '\uD83D\uDCE5', '\uD83D\uDCDD', '\uD83E\uDDF5', '\u2705',
+  '\uD83D\uDD0D', '\u2728', '\uD83D\uDE80',
+]
+
+export const PIPE5_STATUS = {
+  RUNNING: 'running',
+  PASSED: 'passed',
+  FAILED: 'failed',
+  SKIPPED: 'skipped',
+}
 
 export const SELFUPDATE_STEPS = ['Fetch Source', 'Claude \u00B7 Improve', 'Push to GitHub', 'Reload']
 export const SELFUPDATE_ICONS = ['\uD83D\uDCE5', '\uD83D\uDD28', '\u2B06\uFE0F', '\uD83D\uDD04']
