@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradBridge - Bridge Your Academic Journey</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border-color: #374151;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-size: clamp(14px, 2vw, 16px);
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+        
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: clamp(1.25rem, 3vw, 1.5rem);
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            role: button;
+            aria-label: "Navigate to page";
+        }
+        
+        .nav-links a:hover,
+        .nav-links a:focus {
+            color: var(--text-primary);
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-height: 44px;
+            font-size: 16px;
+            line-height: 1;
+            role: button;
+            aria-label: "Button";
+        }
+        
+        .btn:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+        
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+        
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            min-height: 44px;
+            min-width: 44px;
+            aria-label: "Open mobile menu";
+        }
+        
+        .mobile-nav {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--secondary-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+        }
+        
+        .mobile-nav.active {
+            display: block;
+        }
+        
+        .mobile-nav ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .mobile-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 0;
+            display: block;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            aria-label: "Navigate to page";
+        }
+        
+        /* Main Content */
+        main {
+            margin-top: 80px;
+        }
+        
+        .container {
+            max-width: min(1200px, 90vw);
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 1rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+        }
+        
+        .hero-content {
+            max-width: min(800px, 90vw);
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--secondary-bg);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            color: var(--text-secondary);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+        
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--accent-color);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+        }
+        
+        /* How it Works */
+        .how-it-works {
+            padding: 6rem 2rem;
+        }
+        
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .step {
+            text-align: center;
+        }
+        
+        .step-number {
+            width: 3rem;
+            height: 3rem;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-weight: 600;
+        }
+        
+        .step h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .step p {
+            color: var(--text-secondary);
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 6rem 2rem;
+            background: var(--secondary-bg);
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .testimonial {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .testimonial-content {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .author-avatar {
+            width: 3rem;
+            height: 3rem;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .author-info h4 {
+            font-weight: 600;
+        }
+        
+        .author-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* CTA Section */
+        .cta {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+        }
+        
+        .cta h2 {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard {
+            padding: 2rem;
+            min-height: calc(100vh - 160px);
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: var(--success-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            z-index: 3000;
+            transform: translateX(400px);
+            transition: transform 0.3s;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: var(--error-color);
+        }
+        
+        /* Loading States */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--secondary-bg);
+            padding: 3rem 2rem 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+            gap: 2rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            aria-label: "Navigate to page";
+        }
+        
+        .footer-section ul li a:hover,
+        .footer-section ul li a:focus {
+            color: var(--text-primary);
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: min(90%, 400px);
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.5rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            min-height: 44px;
+            min-width: 44px;
+            aria-label: "Close modal";
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-size: 16px;
+            min-height: 44px;
+            aria-label: "Form input";
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+            border-color: var(--accent-color);
+        }
+        
+        /* Search and Filter */
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: min(200px, 100%);
+        }
+        
+        .filter-select {
+            min-width: min(150px, 100%);
+        }
+        
+        /* View switching */
+        .view {
+            display: none;
+        }
+        
+        .view.active {
+            display: block;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-large {
+                width: 100%;
+                max-width: min(300px, 90vw);
+            }
+            
+            nav {
+                padding: 1rem;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-filter {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero {
+                padding: 4rem 1rem;
+            }
+            
+            .features,
+            .how-it-works,
+            .testimonials {
+                padding: 4rem 1rem;
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <nav>
+                <div class="logo">GradBridge</div>
+                <ul class="nav-links" role="navigation" aria-label="Main navigation">
+                    <li><a href="#" data-view="home" role="button" aria-label="Navigate to Home">Home</a></li>
+                    <li><a href="#" data-view="features" role="button" aria-label="Navigate to Features">Features</a></li>
+                    <li><a href="#" data-view="pricing" role="button" aria-label="Navigate to Pricing">Pricing</a></li>
+                    <li><a href="#" data-view="about" role="button" aria-label="Navigate to About">About</a></li>
+                    <li><a href="#" data-view="contact" role="button" aria-label="Navigate to Contact">Contact</a></li>
+                </ul>
+                <div class="auth-buttons" id="authButtons">
+                    <button class="btn btn-secondary" data-action="login" aria-label="Login to account">Login</button>
+                    <button class="btn btn-primary" data-action="signup" aria-label="Sign up for account">Sign Up</button>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open mobile menu">☰</button>
+                <div class="mobile-nav" id="mobileNav">
+                    <ul role="navigation" aria-label="Mobile navigation">
+                        <li><a href="#" data-view="home" role="button" aria-label="Navigate to Home">Home</a></li>
+                        <li><a href="#" data-view="features" role="button" aria-label="Navigate to Features">Features</a></li>
+                        <li><a href="#" data-view="pricing" role="button" aria-label="Navigate to Pricing">Pricing</a></li>
+                        <li><a href="#" data-view="about" role="button" aria-label="Navigate to About">About</a></li>
+                        <li><a href="#" data-view="contact" role="button" aria-label="Navigate to Contact">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Home View -->
+            <div class="view active" id="home">
+                <section class="hero">
+                    <div class="hero-content">
+                        <h1>Bridge Your Academic Journey</h1>
+                        <p>Connect with mentors, access resources, and accelerate your path to graduate school success. Join thousands of students who've transformed their academic futures.</p>
+                        <div class="hero-buttons">
+                            <button class="btn btn-primary btn-large" data-action="signup" aria-label="Get started for free">Get Started Free</button>
+                            <button class="btn btn-secondary btn-large" data-action="demo" aria-label="Watch demo video">Watch Demo</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="features">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2>Everything You Need to Succeed</h2>
+                            <p>Comprehensive tools and resources designed for graduate school preparation</p>
+                        </div>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">🎓</div>
+                                <h3>Expert Mentorship</h3>
+                                <p>Connect with graduate students and professionals in your field for personalized guidance and support.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📚</div>
+                                <h3>Resource Library</h3>
+                                <p>Access curated study materials, application templates, and preparation guides tailored to your program.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">💬</div>
+                                <h3>Community Forums</h3>
+                                <p>Join discussions with peers, share experiences, and get answers to your questions from the community.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <h3>Progress Tracking</h3>
+                                <p>Monitor your application progress, set goals, and stay on track with personalized dashboards.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔍</div>
+                                <h3>Program Discovery</h3>
+                                <p>Explore graduate programs that match your interests, qualifications, and career goals.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">✍️</div>
+                                <h3>Application Support</h3>
+                                <p>Get feedback on essays, statements of purpose, and other application materials from experts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="how-it-works">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2>How It Works</h2>
+                            <p>Your journey to graduate school success in three simple steps</p>
+                        </div>
+                        <div class="steps-grid">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <h3>Create Your Profile</h3>
+                                <p>Tell us about your academic background, interests, and goals to get personalized recommendations.</p>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <h3>Connect & Learn</h3>
+                                <p>Match with mentors, join relevant communities, and access resources tailored to your needs.</p>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <h3>Apply & Succeed</h3>
+                                <p>Use our tools and support to submit strong applications and achieve your graduate school goals.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="testimonials">
+                    <div class="container">
+                        <div class="section-header">
+                            <h2>Success Stories</h2>
+                            <p>Hear from students who've achieved their graduate school dreams</p>
+                        </div>
+                        <div class="testimonials-grid" id="testimonialsGrid">
+                            <!-- Testimonials will be rendered here -->
+                        </div>
+                    </div>
+                </section>
+
+                <section class="cta">
+                    <div class="container">
+                        <h2>Ready to Bridge Your Future?</h2>
+                        <p>Join thousands of students who are already on their path to graduate school success</p>
+                        <button class="btn btn-large" style="background: white; color: var(--accent-color);" data-action="signup" aria-label="Start your journey today">Start Your Journey Today</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Dashboard View -->
+            <div class="view" id="dashboard">
+                <section class="dashboard">
+                    <div class="container">
+                        <div class="dashboard-header">
+                            <h1>Welcome back, <span id="userName">Student</span>!</h1>
+                            <button class="btn btn-primary" data-action="add-goal" aria-label="Add new goal">Add New Goal</button>
+                        </div>
+                        
+                        <div class="dashboard-stats" id="dashboardStats">
+                            <!-- Stats will be rendered here -->
+                        </div>
+                        
+                        <div class="search-filter">
+                            <input type="text" class="search-input" placeholder="Search goals..." id="goalSearch" aria-label="Search goals">
+                            <select class="filter-select" id="goalFilter" aria-label="Filter goals by category">
+                                <option value="">All Goals</option>
+                                <option value="application">Applications</option>
+                                <option value="research">Research</option>
+                                <option value="networking">Networking</option>
+                                <option value="preparation">Preparation</option>
+                            </select>
+                        </div>
+                        
+                        <div id="goalsContainer">
+                            <!-- Goals will be rendered here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Features View -->
+            <div class="view" id="features">
+                <section style="padding: 6rem 2rem; min-height: 80vh;">
+                    <div class="container">
+                        <div class="section-header">
+                            <h1>Platform Features</h1>
+                            <p>Discover all the tools and resources available to help you succeed</p>
+                        </div>
+                        
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">🎯</div>
+                                <h3>Goal Setting & Tracking</h3>
+                                <p>Set SMART goals for your graduate school journey and track your progress with detailed analytics and milestone celebrations.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">👥</div>
+                                <h3>Mentor Matching</h3>
+                                <p>Get matched with experienced mentors based on your field of study, career goals, and personality compatibility.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📝</div>
+                                <h3>Application Builder</h3>
+                                <p>Use our step-by-step application builder with templates, examples, and expert feedback to create compelling applications.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔬</div>
+                                <h3>Research Opportunities</h3>
+                                <p>Discover research opportunities, connect with faculty, and find projects that align with your interests and goals.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">💰</div>
+                                <h3>Funding Database</h3>
+                                <p>Access our comprehensive database of scholarships, grants, and funding opportunities for graduate students.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📈</div>
+                                <h3>Career Planning</h3>
+                                <p>Plan your post-graduation career with industry insights, job market analysis, and networking opportunities.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Pricing View -->
+            <div class="view" id="pricing">
+                <section style="padding: 6rem 2rem; min-height: 80vh;">
+                    <div class="container">
+                        <div class="section-header">
+                            <h1>Choose Your Plan</h1>
+                            <p>Flexible pricing options to support your graduate school journey</p>
+                        </div>
+                        
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <h3>Free</h3>
+                                <div class="stat-value">$0</div>
+                                <div class="stat-label">per month</div>
+                                <ul style="list-style: none; margin: 2rem 0;">
+                                    <li style="margin-bottom: 0.5rem;">✓ Basic goal tracking</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ Community access</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ Limited resources</li>
+                                </ul>
+                                <button class="btn btn-secondary" style="width: 100%;" data-action="signup" aria-label="Get started with free plan">Get Started</button>
+                            </div>
+                            <div class="feature-card" style="border-color: var(--accent-color);">
+                                <h3>Pro</h3>
+                                <div class="stat-value">$29</div>
+                                <div class="stat-label">per month</div>
+                                <ul style="list-style: none; margin: 2rem 0;">
+                                    <li style="margin-bottom: 0.5rem;">✓ Everything in Free</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ Mentor matching</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ Application builder</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ Priority support</li>
+                                </ul>
+                                <button class="btn btn-primary" style="width: 100%;" data-action="signup" aria-label="Start free trial of pro plan">Start Free Trial</button>
+                            </div>
+                            <div class="feature-card">
+                                <h3>Premium</h3>
+                                <div class="stat-value">$99</div>
+                                <div class="stat-label">per month</div>
+                                <ul style="list-style: none; margin: 2rem 0;">
+                                    <li style="margin-bottom: 0.5rem;">✓ Everything in Pro</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ 1-on-1 coaching</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ Custom resources</li>
+                                    <li style="margin-bottom: 0.5rem;">✓ White-glove support</li>
+                                </ul>
+                                <button class="btn btn-primary" style="width: 100%;" data-action="signup" aria-label="Contact sales for premium plan">Contact Sales</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- About View -->
+            <div class="view" id="about">
+                <section style="padding: 6rem 2rem; min-height: 80vh;">
+                    <div class="container">
+                        <div class="section-header">
+                            <h1>About GradBridge</h1>
+                            <p>Empowering the next generation of graduate students</p>
+                        </div>
+                        
+                        <div style="max-width: 800px; margin: 0 auto; text-align: left;">
+                            <h2 style="margin-bottom: 1rem;">Our Mission</h2>
+                            <p style="margin-bottom: 2rem; color: var(--text-secondary);">
+                                GradBridge was founded with a simple mission: to democratize access to graduate education by providing students with the tools, resources, and connections they need to succeed. We believe that every student deserves the opportunity to pursue their academic dreams, regardless of their background or circumstances.
+                            </p>
+                            
+                            <h2 style="margin-bottom: 1rem;">Our Story</h2>
+                            <p style="margin-bottom: 2rem; color: var(--text-secondary);">
+                                Founded in 2023 by a team of graduate students and education professionals, GradBridge emerged from the recognition that the graduate school application process is often overwhelming and inequitable. Our founders experienced firsthand the challenges of navigating applications, finding mentors, and accessing resources.
+                            </p>
+                            
+                            <h2 style="margin-bottom: 1rem;">Our Impact</h2>
+                            <div class="dashboard-stats" style="margin: 2rem 0;">
+                                <div class="stat-card">
+                                    <div class="stat-value">10,000+</div>
+                                    <div class="stat-label">Students Helped</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">500+</div>
+                                    <div class="stat-label">Mentors</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">85%</div>
+                                    <div class="stat-label">Success Rate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Contact View -->
+            <div class="view" id="contact">
+                <section style="padding: 6rem 2rem; min-height: 80vh;">
+                    <div class="container">
+                        <div class="section-header">
+                            <h1>Get in Touch</h1>
+                            <p>We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+                        </div>
+                        
+                        <div style="max-width: 600px; margin: 0 auto;">
+                            <form id="contactForm">
+                                <div class="form-group">
+                                    <label for="contactName">Name</label>
+                                    <input type="text" id="contactName" required aria-label="Your name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactEmail">Email</label>
+                                    <input type="email" id="contactEmail" required aria-label="Your email address">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactSubject">Subject</label>
+                                    <select id="contactSubject" required aria-label="Select subject">
+                                        <option value="">Select a subject</option>
+                                        <option value="general">General Inquiry</option>
+                                        <option value="support">Technical Support</option>
+                                        <option value="partnership">Partnership</option>
+                                        <option value="feedback">Feedback</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactMessage">Message</label>
+                                    <textarea id="contactMessage" rows="5" required aria-label="Your message"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%;" aria-label="Send message">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GradBridge</h3>
+                    <p>Bridging the gap between undergraduate studies and graduate school success.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Platform</h3>
+                    <ul>
+                        <li><a href="#" data-view="features" aria-label="Learn about mentorship">Mentorship</a></li>
+                        <li><a href="#" data-view="features" aria-label="Browse resources">Resources</a></li>
+                        <li><a href="#" data-view="features" aria-label="Join community">Community</a></li>
+                        <li><a href="#" data-view="features" aria-label="Track progress">Progress Tracking</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#" data-view="contact" aria-label="Visit help center">Help Center</a></li>
+                        <li><a href="#" data-view="contact" aria-label="Contact us">Contact Us</a></li>
+                        <li><a href="#" data-view="about" aria-label="View FAQ">FAQ</a></li>
+                        <li><a href="#" data-view="about" aria-label="Check status">Status</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#" data-view="about" aria-label="About us">About</a></li>
+                        <li><a href="#" data-view="about" aria-label="View careers">Careers</a></li>
+                        <li><a href="#" data-view="about" aria-label="Privacy policy">Privacy</a></li>
+                        <li><a href="#" data-view="about" aria-label="Terms of service">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GradBridge. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <!-- Modals -->
+        <div class="modal" id="loginModal" role="dialog" aria-labelledby="loginModalTitle" aria-modal="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="loginModalTitle">Login</h3>
+                    <button class="close-btn" data-action="close-modal" aria-label="Close login modal">&times;</button>
+                </div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required aria-label="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required aria-label="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" aria-label="Login to account">
+                        <span class="btn-text">Login</span>
+                        <span class="loading" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal" id="signupModal" role="dialog" aria-labelledby="signupModalTitle" aria-modal="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="signupModalTitle">Sign Up</h3>
+                    <button class="close-btn" data-action="close-modal" aria-label="Close signup modal">&times;</button>
+                </div>
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" required aria-label="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" required aria-label="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" required aria-label="Create a password">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupField">Field of Study</label>
+                        <select id="signupField" required aria-label="Select your field of study">
+                            <option value="">Select your field</option>
+                            <option value="computer-science">Computer Science</option>
+                            <option value="biology">Biology</option>
+                            <option value="psychology">Psychology</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="business">Business</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" aria-label="Create account">
+                        <span class="btn-text">Sign Up</span>
+                        <span class="loading" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal" id="goalModal" role="dialog" aria-labelledby="goalModalTitle" aria-modal="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="goalModalTitle">Add New Goal</h3>
+                    <button class="close-btn" data-action="close-modal" aria-label="Close goal modal">&times;</button>
+                </div>
+                <form id="goalForm">
+                    <div class="form-group">
+                        <label for="goalTitle">Goal Title</label>
+                        <input type="text" id="goalTitle" required aria-label="Enter goal title">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalCategory">Category</label>
+                        <select id="goalCategory" required aria-label="Select goal category">
+                            <option value="">Select category</option>
+                            <option value="application">Application</option>
+                            <option value="research">Research</option>
+                            <option value="networking">Networking</option>
+                            <option value="preparation">Preparation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDescription">Description</label>
+                        <textarea id="goalDescription" rows="3" aria-label="Enter goal description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDeadline">Deadline</label>
+                        <input type="date" id="goalDeadline" required aria-label="Select goal deadline">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" aria-label="Save goal">
+                        <span class="btn-text">Save Goal</span>
+                        <span class="loading" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" aria-live="polite"></div>
+    </div>
+
+    <script>
+        // Application State
+        const state = {
+            currentView: 'home',
+            user: null,
+            goals: [],
+            testimonials: [],
+            isLoggedIn: false,
+            currentModal: null,
+            editingGoal: null
+        };
+
+        // Demo Data
+        const demoTestimonials = [
+            {
+                id: 1,
+                content: "GradBridge connected me with an amazing mentor who helped me navigate the PhD application process. I'm now pursuing my dream degree at Stanford!",
+                author: "Sarah Martinez",
+                role: "PhD Student, Stanford University",
+                avatar: "SM"
+            },
+            {
+                id: 2,
+                content: "The resource library was invaluable for my MBA applications. The templates and guides saved me countless hours and helped me craft compelling essays.",
+                author: "James Chen",
+                role: "MBA Student, Wharton",
+                avatar: "JC"
+            },
+            {
+                id: 3,
+                content: "The community support was incredible. Having peers who understood the journey made all the difference in staying motivated throughout the process.",
+                author: "Alex Liu",
+                role: "MS Student, MIT",
+                avatar: "AL"
+            },
+            {
+                id: 4,
+                content: "The goal tracking feature kept me organized and motivated. I was able to break down my applications into manageable tasks and stay on track.",
+                author: "Maria Rodriguez",
+                role: "PhD Student, Harvard",
+                avatar: "MR"
+            },
+            {
+                id: 5,
+                content: "Finding funding opportunities was so much easier with GradBridge. I secured three scholarships that covered my entire graduate program.",
+                author: "David Kim",
+                role: "MS Student, Berkeley",
+                avatar: "DK"
+            }
+        ];
+
+        const demoGoals = [
+            {
+                id: 1,
+                title: "Complete GRE Preparation",
+                category: "preparation",
+                description: "Study for and take the GRE exam",
+                deadline: "2024-06-15",
+                completed: false,
+                createdAt: new Date('2024-01-15')
+            },
+            {
+                id: 2,
+                title: "Research PhD Programs",
+                category: "research",
+                description: "Identify and research 10 potential PhD programs in Computer Science",
+                deadline: "2024-05-01",
+                completed: true,
+                createdAt: new Date('2024-01-10')
+            },
+            {
+                id: 3,
+                title: "Draft Personal Statement",
+                category: "application",
+                description: "Write first draft of personal statement for graduate applications",
+                deadline: "2024-07-01",
+                completed: false,
+                createdAt: new Date('2024-02-01')
+            },
+            {
+                id: 4,
+                title: "Connect with Professors",
+                category: "networking",
+                description: "Reach out to 5 professors in my field of interest",
+                deadline: "2024-06-01",
+                completed: false,
+                createdAt: new Date('2024-02-15')
+            },
+            {
+                id: 5,
+                title: "Gather Recommendation Letters",
+                category: "application",
+                description: "Request and collect 3 letters of recommendation",
+                deadline: "2024-08-15",
+                completed: false,
+                createdAt: new Date('2024-03-01')
+            }
+        ];
+
+        // Utility Functions
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => container.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('gradbridge_state', JSON.stringify({
+                    user: state.user,
+                    goals: state.goals,
+                    isLoggedIn: state.isLoggedIn
+                }));
+            } catch (error) {
+                console.error('Failed to save to localStorage:', error);
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('gradbridge_state');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.user = data.user;
+                    state.goals = data.goals || [];
+                    state.isLoggedIn = data.isLoggedIn || false;
+                }
+            } catch (error) {
+                console.error('Failed to load from localStorage:', error);
+            }
+        }
+
+        // View Management
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Show selected view
+            const targetView = document.getElementById(viewName);
+            if (targetView) {
+                targetView.classList.add('active');
+                state.currentView = viewName;
+                
+                // Update URL
+                history.pushState({view: viewName}, '', `#${viewName}`);
+                
+                // Render view-specific content
+                if (viewName === 'dashboard') {
+                    renderDashboard();
+                } else if (viewName === 'home') {
+                    renderTestimonials();
+                }
+            }
+        }
+
+        // Modal Management
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId + 'Modal');
+            if (modal) {
+                modal.style.display = 'block';
+                state.currentModal = modalId;
+                
+                // Focus first input
+                const firstInput = modal.querySelector('input, select, textarea');
+                if (firstInput) {
+                    setTimeout(() => firstInput.focus(), 100);
+                }
+            }
+        }
+
+        function closeModal() {
+            if (state.currentModal) {
+                const modal = document.getElementById(state.currentModal + 'Modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                state.currentModal = null;
+                state.editingGoal = null;
+            }
+        }
+
+        // Authentication
+        function handleLogin(formData) {
+            const email = formData.get('email');
+            const password = formData.get('password');
+            
+            // Simulate login
+            setTimeout(() => {
+                state.user = {
+                    name: email.split('@')[0],
+                    email: email,
+                    field: 'Computer Science'
+                };
+                state.isLoggedIn = true;
+                
+                // Load demo goals if no goals exist
+                if (state.goals.length === 0) {
+                    state.goals = [...demoGoals];
+                }
+                
+                saveToStorage();
+                updateAuthUI();
+                closeModal();
+                switchView('dashboard');
+                showToast('Welcome back! Successfully logged in.');
+            }, 1000);
+        }
+
+        function handleSignup(formData) {
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const field = formData.get('field');
+            
+            // Simulate signup
+            setTimeout(() => {
+                state.user = {
+                    name: name,
+                    email: email,
+                    field: field
+                };
+                state.isLoggedIn = true;
+                state.goals = [...demoGoals];
+                
+                saveToStorage();
+                updateAuthUI();
+                closeModal();
+                switchView('dashboard');
+                showToast('Welcome to GradBridge! Your account has been created.');
+            }, 1000);
+        }
+
+        function handleLogout() {
+            state.user = null;
+            state.isLoggedIn = false;
+            state.goals = [];
+            saveToStorage();
+            updateAuthUI();
+            switchView('home');
+            showToast('Successfully logged out.');
+        }
+
+        function updateAuthUI() {
+            const authButtons = document.getElementById('authButtons');
+            
+            if (state.isLoggedIn && state.user) {
+                authButtons.innerHTML = `
+                    <button class="btn btn-secondary" data-action="dashboard" aria-label="Go to dashboard">Dashboard</button>
+                    <button class="btn btn-primary" data-action="logout" aria-label="Logout of account">Logout</button>
+                `;
+                
+                const userName = document.getElementById('userName');
+                if (userName) {
+                    userName.textContent = state.user.name;
+                }
+            } else {
+                authButtons.innerHTML = `
+                    <button class="btn btn-secondary" data-action="login" aria-label="Login to account">Login</button>
+                    <button class="btn btn-primary" data-action="signup" aria-label="Sign up for account">Sign Up</button>
+                `;
+            }
+        }
+
+        // Goal Management
+        function addGoal(goalData) {
+            const newGoal = {
+                id: Date.now(),
+                title: goalData.title,
+                category: goalData.category,
+                description: goalData.description,
+                deadline: goalData.deadline,
+                completed: false,
+                createdAt: new Date()
+            };
+            
+            state.goals.unshift(newGoal);
+            saveToStorage();
+            renderGoals();
+            showToast('Goal added successfully!');
+        }
+
+        function updateGoal(goalId, goalData) {
+            const goalIndex = state.goals.findIndex(g => g.id === goalId);
+            if (goalIndex !== -1) {
+                state.goals[goalIndex] = {
+                    ...state.goals[goalIndex],
+                    title: goalData.title,
+                    category: goalData.category,
+                    description: goalData.description,
+                    deadline: goalData.deadline
+                };
+                saveToStorage();
+                renderGoals();
+                showToast('Goal updated successfully!');
+            }
+        }
+
+        function toggleGoalComplete(goalId) {
+            const goal = state.goals.find(g => g.id === goalId);
+            if (goal) {
+                goal.completed = !goal.completed;
+                saveToStorage();
+                renderGoals();
+                showToast(goal.completed ? 'Goal completed! 🎉' : 'Goal marked as incomplete.');
+            }
+        }
+
+        function deleteGoal(goalId) {
+            if (confirm('Are you sure you want to delete this goal?')) {
+                state.goals = state.goals.filter(g => g.id !== goalId);
+                saveToStorage();
+                renderGoals();
+                showToast('Goal deleted successfully.');
+            }
+        }
+
+        function editGoal(goalId) {
+            const goal = state.goals.find(g => g.id === goalId);
+            if (goal) {
+                state.editingGoal = goal;
+                
+                // Populate form
+                document.getElementById('goalTitle').value = goal.title;
+                document.getElementById('goalCategory').value = goal.category;
+                document.getElementById('goalDescription').value = goal.description;
+                document.getElementById('goalDeadline').value = goal.deadline;
+                
+                document.getElementById('goalModalTitle').textContent = 'Edit Goal';
+                openModal('goal');
+            }
+        }
+
+        // Rendering Functions
+        function renderTestimonials() {
+            const container = document.getElementById('testimonialsGrid');
+            if (!container) return;
+            
+            if (state.testimonials.length === 0) {
+                state.testimonials = [...demoTestimonials];
+            }
+            
+            container.innerHTML = state.testimonials.map(testimonial => `
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        "${testimonial.content}"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">${testimonial.avatar}</div>
+                        <div class="author-info">
+                            <h4>${testimonial.author}</h4>
+                            <p>${testimonial.role}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderDashboard() {
+            if (!state.isLoggedIn) {
+                switchView('home');
+                return;
+            }
+            
+            renderDashboardStats();
+            renderGoals();
+        }
+
+        function renderDashboardStats() {
+            const container = document.getElementById('dashboardStats');
+            if (!container) return;
+            
+            const totalGoals = state.goals.length;
+            const completedGoals = state.goals.filter(g => g.completed).length;
+            const pendingGoals = totalGoals - completedGoals;
+            const completionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
+            
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalGoals}</div>
+                    <div class="stat-label">Total Goals</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${completedGoals}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${pendingGoals}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${completionRate}%</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+            `;
+        }
+
+        function renderGoals() {
+            const container = document.getElementById('goalsContainer');
+            if (!container) return;
+            
+            const searchTerm = document.getElementById('goalSearch')?.value.toLowerCase() || '';
+            const filterCategory = document.getElementById('goalFilter')?.value || '';
+            
+            let filteredGoals = state.goals.filter(goal => {
+                const matchesSearch = goal.title.toLowerCase().includes(searchTerm) ||
+                                    goal.description.toLowerCase().includes(searchTerm);
+                const matchesFilter = !filterCategory || goal.category === filterCategory;
+                return matchesSearch && matchesFilter;
+            });
+            
+            if (filteredGoals.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No goals found</h3>
+                        <p>Start by adding your first goal to track your progress.</p>
+                        <button class="btn btn-primary" data-action="add-goal" style="margin-top: 1rem;" aria-label="Add your first goal">Add Your First Goal</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="features-grid">
+                    ${filteredGoals.map(goal => `
+                        <div class="feature-card ${goal.completed ? 'completed' : ''}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                <div class="feature-icon">${getCategoryIcon(goal.category)}</div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn btn-secondary
