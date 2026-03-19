@@ -5,7 +5,10 @@ var currentDim = 0
 var _competitors = null
 var _mapDimensions = null
 
-export function renderMarketMap(container) {
+var _signal = null
+
+export function renderMarketMap(container, signal) {
+  _signal = signal
   _competitors = getCompetitors()
   _mapDimensions = getMapDimensions()
   var dim = _mapDimensions[currentDim]
@@ -50,15 +53,18 @@ export function renderMarketMap(container) {
   // Dropdown change
   document.getElementById('mie-map-dim').addEventListener('change', function () {
     currentDim = parseInt(this.value, 10)
-    renderMarketMap(container)
-  })
+    renderMarketMap(container, _signal)
+  }, { signal: signal })
 
   // Tooltip interactions
   setupTooltips()
 }
 
 function buildSVG(dim) {
-  var pad = { top: 30, right: 30, bottom: 50, left: 60 }
+  var isMobile = window.matchMedia('(max-width: 768px)').matches
+  var pad = isMobile
+    ? { top: 20, right: 20, bottom: 40, left: 45 }
+    : { top: 30, right: 30, bottom: 50, left: 60 }
   var vw = 700, vh = 440
   var plotW = vw - pad.left - pad.right
   var plotH = vh - pad.top - pad.bottom
@@ -125,28 +131,43 @@ function setupTooltips() {
   var wrap = document.getElementById('mie-scatter-wrap')
   var tooltip = document.getElementById('mie-scatter-tooltip')
   if (!wrap || !tooltip) return
+  var signal = _signal
+
+  function showTooltip(id, x, y) {
+    var c = _competitors.find(function (comp) { return comp.id === id })
+    if (!c) return
+    var dim = _mapDimensions[currentDim]
+    tooltip.innerHTML = '<div style="font-weight:700;margin-bottom:4px;color:' + c.color + '">' + c.name + '</div>'
+      + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + dim.xLabel + ': <strong style="color:#fff">' + c.scores[dim.xKey] + '</strong></div>'
+      + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + dim.yLabel + ': <strong style="color:#fff">' + c.scores[dim.yKey] + '</strong></div>'
+      + '<div style="color:rgba(255,255,255,0.5);font-size:11px">Composite: <strong style="color:#fff">' + c.scores.composite + '</strong></div>'
+    tooltip.classList.add('show')
+
+    var rect = wrap.getBoundingClientRect()
+    tooltip.style.left = (x - rect.left + 14) + 'px'
+    tooltip.style.top = (y - rect.top - 60) + 'px'
+  }
 
   var bubbles = wrap.querySelectorAll('.mie-bubble')
   for (var i = 0; i < bubbles.length; i++) {
+    // Mouse events
     bubbles[i].addEventListener('mouseenter', function (e) {
-      var id = this.dataset.id
-      var c = _competitors.find(function (comp) { return comp.id === id })
-      if (!c) return
-      var dim = _mapDimensions[currentDim]
-      tooltip.innerHTML = '<div style="font-weight:700;margin-bottom:4px;color:' + c.color + '">' + c.name + '</div>'
-        + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + dim.xLabel + ': <strong style="color:#fff">' + c.scores[dim.xKey] + '</strong></div>'
-        + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + dim.yLabel + ': <strong style="color:#fff">' + c.scores[dim.yKey] + '</strong></div>'
-        + '<div style="color:rgba(255,255,255,0.5);font-size:11px">Composite: <strong style="color:#fff">' + c.scores.composite + '</strong></div>'
-      tooltip.classList.add('show')
-
-      var rect = wrap.getBoundingClientRect()
-      var cx = e.clientX - rect.left
-      var cy = e.clientY - rect.top
-      tooltip.style.left = (cx + 14) + 'px'
-      tooltip.style.top = (cy - 10) + 'px'
-    })
+      showTooltip(this.dataset.id, e.clientX, e.clientY)
+    }, { signal: signal })
     bubbles[i].addEventListener('mouseleave', function () {
       tooltip.classList.remove('show')
-    })
+    }, { signal: signal })
+
+    // Touch events
+    bubbles[i].addEventListener('touchstart', function (e) {
+      e.preventDefault()
+      var touch = e.touches[0]
+      showTooltip(this.dataset.id, touch.clientX, touch.clientY)
+    }, { signal: signal, passive: false })
   }
+
+  // Dismiss tooltip on touch outside bubbles
+  wrap.addEventListener('touchend', function () {
+    tooltip.classList.remove('show')
+  }, { signal: signal })
 }

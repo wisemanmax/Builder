@@ -20,6 +20,15 @@ var state = {
   sidebarOpen: false,
 }
 
+// AbortController for cleaning up event listeners between renders
+var _screenController = null
+
+function resetListeners() {
+  if (_screenController) _screenController.abort()
+  _screenController = new AbortController()
+  return _screenController.signal
+}
+
 var SCREEN_TITLES = {
   'overview': 'Overview',
   'competitors': 'Competitors',
@@ -65,19 +74,19 @@ function setMode(mode) {
   render()
 }
 
-function render() {
+function renderShell() {
   var nav = document.getElementById('mie-nav')
-  var content = document.getElementById('mie-content')
   var title = document.getElementById('mie-header-title')
   var alertBadge = document.getElementById('mie-alert-badge')
   var refreshBarEl = document.getElementById('mie-refresh-bar')
 
   // Update nav
   var customPages = getCustomPages()
+  var signal = _screenController ? _screenController.signal : null
   renderNav(nav, state.screen, state.mode, function (screenId, data) {
     navigate(screenId, data)
     closeSidebar()
-  }, customPages, state.selectedPageId)
+  }, customPages, state.selectedPageId, signal)
 
   // Update title
   if (state.screen === 'custom-page' && state.selectedPageId) {
@@ -97,46 +106,58 @@ function render() {
   }
 
   // Render refresh bar
-  renderRefreshBar(refreshBarEl, function () { render() })
+  renderRefreshBar(refreshBarEl, function () { render() }, signal)
 
   // Render bottom tab bar
   renderBottomBar()
+}
 
-  // Render screen
+function renderScreen() {
+  var signal = resetListeners()
+  var content = document.getElementById('mie-content')
+
   switch (state.screen) {
     case 'overview':
-      renderDashboard(content, navigate)
+      renderDashboard(content, navigate, signal)
       break
     case 'competitors':
-      renderDashboard(content, navigate) // leaderboard is part of overview
+      renderDashboard(content, navigate, signal)
       break
     case 'market-map':
-      renderMarketMap(content)
+      renderMarketMap(content, signal)
       break
     case 'competitor-detail':
-      renderCompetitorDetail(content, state.selectedCompetitor, navigate)
+      renderCompetitorDetail(content, state.selectedCompetitor, navigate, signal)
       break
     case 'gaps':
-      renderGaps(content)
+      renderGaps(content, signal)
       break
     case 'sentiment':
-      renderSentiment(content)
+      renderSentiment(content, signal)
       break
     case 'messaging':
-      renderMessaging(content)
+      renderMessaging(content, signal)
       break
     case 'match-tool':
-      renderMatchTool(content)
+      renderMatchTool(content, signal)
       break
     case 'page-creator':
-      renderPageCreator(content, navigate)
+      renderPageCreator(content, navigate, signal)
       break
     case 'custom-page':
-      renderCustomPage(content, state.selectedPageId, navigate)
+      renderCustomPage(content, state.selectedPageId, navigate, signal)
       break
     default:
-      renderDashboard(content, navigate)
+      renderDashboard(content, navigate, signal)
   }
+
+  // Scroll to top on navigation
+  if (content) content.scrollTop = 0
+}
+
+function render() {
+  renderShell()
+  renderScreen()
 }
 
 function renderBottomBar() {

@@ -3,7 +3,7 @@ import { getCompetitors, getScoreDimensions, getAlerts } from '../lib/mie-data.j
 import { scoreBar, scoreBadge } from '../components/score-bar.js'
 import { scoreColor } from '../lib/scoring.js'
 
-export function renderDashboard(container, navigate) {
+export function renderDashboard(container, navigate, signal) {
   var COMPETITORS = getCompetitors()
   var SCORE_DIMENSIONS = getScoreDimensions()
   var COMPETITIVE_ALERTS = getAlerts()
@@ -29,9 +29,9 @@ export function renderDashboard(container, navigate) {
   html += '<table class="mie-table"><thead><tr>'
   html += '<th>#</th><th>Lender</th><th>Composite</th>'
   for (var d = 0; d < SCORE_DIMENSIONS.length; d++) {
-    html += '<th>' + SCORE_DIMENSIONS[d].label + '</th>'
+    html += '<th class="mie-hide-mobile">' + SCORE_DIMENSIONS[d].label + '</th>'
   }
-  html += '<th>Segment</th></tr></thead><tbody>'
+  html += '<th class="mie-hide-mobile">Segment</th></tr></thead><tbody>'
 
   for (var i = 0; i < sorted.length; i++) {
     var c = sorted[i]
@@ -41,9 +41,9 @@ export function renderDashboard(container, navigate) {
     html += '<td>' + scoreBadge(c.scores.composite) + '</td>'
     for (var dd = 0; dd < SCORE_DIMENSIONS.length; dd++) {
       var key = SCORE_DIMENSIONS[dd].key
-      html += '<td>' + scoreBar(c.scores[key], { showValue: true, size: 'small', color: SCORE_DIMENSIONS[dd].color }) + '</td>'
+      html += '<td class="mie-hide-mobile">' + scoreBar(c.scores[key], { showValue: true, size: 'small', color: SCORE_DIMENSIONS[dd].color }) + '</td>'
     }
-    html += '<td><span class="mie-segment-tag">' + c.segment + '</span></td>'
+    html += '<td class="mie-hide-mobile"><span class="mie-segment-tag">' + c.segment + '</span></td>'
     html += '</tr>'
   }
 
@@ -76,7 +76,7 @@ export function renderDashboard(container, navigate) {
       var id = this.dataset.id
       var comp = COMPETITORS.find(function (c) { return c.id === id })
       if (comp) navigate('competitor-detail', { competitor: comp })
-    })
+    }, { signal: signal })
   }
 }
 

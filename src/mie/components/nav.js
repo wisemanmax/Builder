@@ -12,7 +12,7 @@ var NAV_ITEMS = [
   { id: 'page-creator', icon: '&#x2795;', label: 'Page Creator', mode: 'internal' },
 ]
 
-export function renderNav(container, activeId, mode, onNavigate, customPages, activePageId) {
+export function renderNav(container, activeId, mode, onNavigate, customPages, activePageId, signal) {
   var html = ''
   for (var i = 0; i < NAV_ITEMS.length; i++) {
     var item = NAV_ITEMS[i]
@@ -44,6 +44,7 @@ export function renderNav(container, activeId, mode, onNavigate, customPages, ac
   container.innerHTML = html
 
   // Standard nav item clicks
+  var opts = signal ? { signal: signal } : undefined
   var btns = container.querySelectorAll('.mie-nav-item')
   for (var k = 0; k < btns.length; k++) {
     btns[k].addEventListener('click', function (e) {
@@ -52,7 +53,7 @@ export function renderNav(container, activeId, mode, onNavigate, customPages, ac
       var screen = this.dataset.screen
       var pageId = this.dataset.pageId
       onNavigate(screen, pageId ? { pageId: pageId } : undefined)
-    })
+    }, opts)
   }
 
   // Delete buttons for custom pages
@@ -68,7 +69,7 @@ export function renderNav(container, activeId, mode, onNavigate, customPages, ac
       } else {
         onNavigate(activeId) // Re-render to update nav
       }
-    })
+    }, opts)
   }
 }
 

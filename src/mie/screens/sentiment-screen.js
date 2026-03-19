@@ -1,7 +1,7 @@
 // Sentiment Feed Screen
 import { getCompetitors, getSentimentScores, getSentimentLabels, getSentimentCategories, getSampleReviews } from '../lib/mie-data.js'
 
-export function renderSentiment(container) {
+export function renderSentiment(container, signal) {
   var COMPETITORS = getCompetitors()
   var SENTIMENT_SCORES = getSentimentScores()
   var SENTIMENT_LABELS = getSentimentLabels()
@@ -88,7 +88,7 @@ export function renderSentiment(container) {
       this.classList.add('active')
       var compId = this.dataset.comp
       document.getElementById('mie-reviews-list').innerHTML = renderReviews(compId)
-    })
+    }, { signal: signal })
   }
 }
 

@@ -2,7 +2,10 @@
 import { hasApiKey, getApiKey, getCustomPages, saveCustomPage, getCustomPage, deleteCustomPage } from '../lib/mie-data.js'
 import { generatePage } from '../lib/mie-ai.js'
 
-export function renderPageCreator(container, navigate) {
+var _signal = null
+
+export function renderPageCreator(container, navigate, signal) {
+  if (signal) _signal = signal
   var html = '<div class="mie-page-creator">'
 
   if (!hasApiKey()) {
@@ -54,13 +57,13 @@ export function renderPageCreator(container, navigate) {
       var prompt = promptInput.value.trim()
       if (!prompt) return
       buildPage(container, prompt, navigate)
-    })
+    }, { signal: _signal })
     promptInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         var prompt = promptInput.value.trim()
         if (prompt) buildPage(container, prompt, navigate)
       }
-    })
+    }, { signal: _signal })
   }
 
   // View buttons
@@ -69,7 +72,7 @@ export function renderPageCreator(container, navigate) {
     viewBtns[v].addEventListener('click', function (e) {
       e.stopPropagation()
       navigate('custom-page', { pageId: this.dataset.id })
-    })
+    }, { signal: _signal })
   }
 
   // Delete buttons
@@ -80,7 +83,7 @@ export function renderPageCreator(container, navigate) {
       deleteCustomPage(this.dataset.id)
       renderPageCreator(container, navigate)
       if (navigate) navigate('page-creator')
-    })
+    }, { signal: _signal })
   }
 }
 
@@ -122,7 +125,8 @@ function buildPage(container, prompt, navigate) {
   })
 }
 
-export function renderCustomPage(container, pageId, navigate) {
+export function renderCustomPage(container, pageId, navigate, signal) {
+  if (signal) _signal = signal
   var page = getCustomPage(pageId)
   if (!page) {
     container.innerHTML = '<div class="mie-card"><p>Page not found.</p></div>'
@@ -150,7 +154,7 @@ export function renderCustomPage(container, pageId, navigate) {
   // Back
   document.getElementById('mie-custom-back').addEventListener('click', function () {
     navigate('page-creator')
-  })
+  }, { signal: _signal })
 
   // Regenerate
   document.getElementById('mie-custom-regen').addEventListener('click', function () {
@@ -168,13 +172,13 @@ export function renderCustomPage(container, pageId, navigate) {
     }).catch(function (e) {
       contentEl.innerHTML = '<div style="color:#FF5252;padding:20px">Error: ' + escapeHtml(e.message) + '</div>'
     })
-  })
+  }, { signal: _signal })
 
   // Delete
   document.getElementById('mie-custom-delete').addEventListener('click', function () {
     deleteCustomPage(pageId)
     navigate('page-creator')
-  })
+  }, { signal: _signal })
 }
 
 function escapeHtml(str) {

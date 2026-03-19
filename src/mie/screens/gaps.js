@@ -2,7 +2,7 @@
 import { getSegments } from '../lib/mie-data.js'
 import { scoreBar } from '../components/score-bar.js'
 
-export function renderGaps(container) {
+export function renderGaps(container, signal) {
   var SEGMENTS = getSegments()
   var sorted = SEGMENTS.slice().sort(function (a, b) { return b.opportunityScore - a.opportunityScore })
 
@@ -61,7 +61,7 @@ export function renderGaps(container) {
   for (var c = 0; c < cards.length; c++) {
     cards[c].addEventListener('click', function () {
       this.classList.toggle('expanded')
-    })
+    }, { signal: signal })
   }
 }
 

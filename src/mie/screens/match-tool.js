@@ -17,8 +17,10 @@ var formState = {
 }
 
 var matchResults = null
+var _signal = null
 
-export function renderMatchTool(container) {
+export function renderMatchTool(container, signal) {
+  if (signal) _signal = signal
   if (matchResults) {
     renderResults(container)
     return
@@ -61,7 +63,7 @@ export function renderMatchTool(container) {
   html += '</div>'
   container.innerHTML = html
 
-  attachFormHandlers(container)
+  attachFormHandlers(container, _signal)
 }
 
 function renderStep1() {
@@ -173,42 +175,46 @@ function renderStep3() {
   return html
 }
 
-function attachFormHandlers(container) {
-  // Radio buttons
+function attachFormHandlers(container, signal) {
+  // Radio buttons — use delegated click, update UI in place instead of full re-render
   container.addEventListener('click', function (e) {
     var btn = e.target.closest('.mie-radio-btn')
     if (btn && btn.dataset.field) {
       formState[btn.dataset.field] = btn.dataset.value
-      renderMatchTool(container)
+      // Update selection state in DOM instead of full re-render
+      var siblings = btn.parentNode.querySelectorAll('.mie-radio-btn')
+      for (var s = 0; s < siblings.length; s++) siblings[s].classList.remove('selected')
+      btn.classList.add('selected')
       return
     }
-  })
+  }, { signal: signal })
 
   // Cosigner toggle
   var tog = document.getElementById('mie-cosigner-toggle')
   if (tog) tog.addEventListener('click', function () {
     formState.cosignerAvailable = !formState.cosignerAvailable
-    renderMatchTool(container)
-  })
+    tog.classList.toggle('active', formState.cosignerAvailable)
+    tog.querySelector('span').textContent = formState.cosignerAvailable ? 'Yes, I have a cosigner' : 'No cosigner available'
+  }, { signal: signal })
 
   // Dropdowns
   var cit = document.getElementById('mie-citizenship')
-  if (cit) cit.addEventListener('change', function () { formState.citizenshipStatus = this.value })
+  if (cit) cit.addEventListener('change', function () { formState.citizenshipStatus = this.value }, { signal: signal })
   var st = document.getElementById('mie-state')
-  if (st) st.addEventListener('change', function () { formState.state = this.value })
+  if (st) st.addEventListener('change', function () { formState.state = this.value }, { signal: signal })
 
   // Navigation
   var prev = document.getElementById('mie-match-prev')
   if (prev) prev.addEventListener('click', function () {
     formState.step = Math.max(1, formState.step - 1)
     renderMatchTool(container)
-  })
+  }, { signal: signal })
 
   var next = document.getElementById('mie-match-next')
   if (next) next.addEventListener('click', function () {
     formState.step = Math.min(3, formState.step + 1)
     renderMatchTool(container)
-  })
+  }, { signal: signal })
 
   var submit = document.getElementById('mie-match-submit')
   if (submit) submit.addEventListener('click', function () {
@@ -239,7 +245,7 @@ function attachFormHandlers(container) {
       matchResults = runMatch(profile)
       renderResults(container)
     }, 1500)
-  })
+  }, { signal: signal })
 }
 
 function renderResults(container) {
@@ -321,7 +327,8 @@ function renderResults(container) {
   container.innerHTML = html
 
   // Reset handler
-  document.getElementById('mie-match-reset').addEventListener('click', function () {
+  var resetBtn = document.getElementById('mie-match-reset')
+  if (resetBtn) resetBtn.addEventListener('click', function () {
     matchResults = null
     formState.step = 1
     formState.creditRange = ''
@@ -333,5 +340,5 @@ function renderResults(container) {
     formState.citizenshipStatus = ''
     formState.state = ''
     renderMatchTool(container)
-  })
+  }, { signal: _signal })
 }
