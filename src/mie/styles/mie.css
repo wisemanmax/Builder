@@ -1229,8 +1229,62 @@ body {
   font-size: 13px;
 }
 
+/* Sidebar overlay */
+.mie-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.mie-sidebar-overlay.visible { display: block; }
+
+/* Bottom tab bar (mobile only) */
+.mie-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: rgba(8,8,18,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--mie-border);
+  padding: 4px 0 env(safe-area-inset-bottom, 4px);
+}
+.mie-bottom-bar-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+}
+.mie-tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  border: none;
+  background: none;
+  color: var(--mie-text-muted);
+  font-family: var(--fb);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mie-tab-btn .mie-tab-icon { font-size: 20px; line-height: 1; }
+.mie-tab-btn.active {
+  color: var(--mie-accent);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+  body.mie-sidebar-open { overflow: hidden; }
   .mie-sidebar {
     transform: translateX(-100%);
   }
@@ -1238,9 +1292,83 @@ body {
     transform: translateX(0);
     box-shadow: 0 0 40px rgba(0,0,0,0.5);
   }
-  .mie-main { margin-left: 0; }
-  .mie-menu-btn { display: block; }
+  .mie-main {
+    margin-left: 0;
+    padding-bottom: 64px; /* space for bottom bar */
+  }
+  .mie-menu-btn { display: none; }
+  .mie-bottom-bar { display: block; }
+  .mie-header {
+    padding: 12px 16px;
+  }
+  .mie-header-title {
+    font-size: 16px;
+  }
   .mie-grid-2, .mie-grid-3 { grid-template-columns: 1fr; }
   .mie-content { padding: 16px; }
   .mie-kpi-row { grid-template-columns: 1fr 1fr; }
+
+  /* Table horizontal scroll */
+  .mie-card:has(.mie-table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .mie-table { min-width: 600px; }
+
+  /* Bigger touch targets for radio buttons */
+  .mie-radio-btn { padding: 10px 16px; font-size: 13px; }
+
+  /* Refresh bar compact */
+  .mie-refresh-bar { padding: 6px 16px; }
+  .mie-refresh-controls { gap: 6px; }
+  .mie-refresh-ts { margin-left: 0; width: 100%; margin-top: 4px; }
+
+  /* Segment stats wrap */
+  .mie-seg-stats { flex-wrap: wrap; gap: 12px; }
+
+  /* Sentiment row stacking */
+  .mie-sent-cat { width: 80px; font-size: 10px; }
+
+  /* Scatter chart mobile */
+  .mie-scatter-wrap { min-height: 240px; }
+
+  /* Cards padding */
+  .mie-card { padding: 16px; }
+
+  /* Detail header */
+  .mie-detail-name { font-size: 17px; }
+  .mie-detail-logo { width: 40px; height: 40px; font-size: 20px; border-radius: 12px; }
+
+  /* Match tool mobile */
+  .mie-match-intro h2 { font-size: 19px; }
+  .mie-match-intro p { font-size: 13px; }
+  .mie-btn { padding: 12px 18px; font-size: 14px; }
+  .mie-btn-row { flex-wrap: wrap; }
+
+  /* Result cards */
+  .mie-result-header { flex-wrap: wrap; gap: 8px; }
+  .mie-result-cta { flex-wrap: wrap; }
+  .mie-result-cta-btn { flex: 1; text-align: center; min-width: 100px; }
+
+  /* Page creator */
+  .mie-page-input-row { flex-direction: column; }
+
+  /* Review cards */
+  .mie-review-header { flex-wrap: wrap; }
+
+  /* KPI cards */
+  .mie-kpi { padding: 12px; }
+  .mie-kpi-val { font-size: 20px; }
+
+  /* Mode toggle in sidebar */
+  .mie-mode-btn { padding: 8px 10px; font-size: 12px; }
+
+  /* Comp tabs scroll */
+  .mie-comp-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .mie-comp-tab { flex-shrink: 0; }
+
+  /* Alert cards */
+  .mie-alert { padding: 12px; }
+  .mie-alert-title { font-size: 12px; }
+
+  /* Messaging cards */
+  .mie-msg-card { padding: 14px; }
+  .mie-msg-status { flex-wrap: wrap; }
 }
