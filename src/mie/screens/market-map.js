@@ -1,16 +1,20 @@
 // Interactive Market Map — SVG Scatter Plot
-import { COMPETITORS, MAP_DIMENSIONS } from '../data/competitors.js'
+import { getCompetitors, getMapDimensions } from '../lib/mie-data.js'
 
 var currentDim = 0
+var _competitors = null
+var _mapDimensions = null
 
 export function renderMarketMap(container) {
-  var dim = MAP_DIMENSIONS[currentDim]
+  _competitors = getCompetitors()
+  _mapDimensions = getMapDimensions()
+  var dim = _mapDimensions[currentDim]
 
   var html = '<div class="mie-axis-controls">'
   html += '<label style="font-size:12px;color:var(--mie-text-secondary);margin-right:4px">Map View:</label>'
   html += '<select class="mie-axis-select" id="mie-map-dim">'
-  for (var i = 0; i < MAP_DIMENSIONS.length; i++) {
-    html += '<option value="' + i + '"' + (i === currentDim ? ' selected' : '') + '>' + MAP_DIMENSIONS[i].label + '</option>'
+  for (var i = 0; i < _mapDimensions.length; i++) {
+    html += '<option value="' + i + '"' + (i === currentDim ? ' selected' : '') + '>' + _mapDimensions[i].label + '</option>'
   }
   html += '</select></div>'
 
@@ -24,8 +28,8 @@ export function renderMarketMap(container) {
   html += '<div class="mie-card" style="margin-top:16px">'
   html += '<div class="mie-card-title">Market Position Legend</div>'
   html += '<div style="display:flex;flex-wrap:wrap;gap:14px">'
-  for (var j = 0; j < COMPETITORS.length; j++) {
-    var c = COMPETITORS[j]
+  for (var j = 0; j < _competitors.length; j++) {
+    var c = _competitors[j]
     html += '<div style="display:flex;align-items:center;gap:6px;font-size:12px">'
     html += '<span class="mie-comp-dot" style="background:' + c.color + '"></span>'
     html += '<span' + (c.isSelf ? ' style="color:var(--mie-accent);font-weight:600"' : '') + '>' + c.name + '</span>'
@@ -93,8 +97,8 @@ function buildSVG(dim) {
   svg += '<text x="14" y="' + (pad.top + plotH / 2) + '" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="11" font-family="var(--fh)" font-weight="600" transform="rotate(-90,14,' + (pad.top + plotH / 2) + ')">' + dim.yLabel + '</text>'
 
   // Lender bubbles
-  for (var i = 0; i < COMPETITORS.length; i++) {
-    var c = COMPETITORS[i]
+  for (var i = 0; i < _competitors.length; i++) {
+    var c = _competitors[i]
     var cx = pad.left + (c.scores[dim.xKey] / 100) * plotW
     var cy = pad.top + ((100 - c.scores[dim.yKey]) / 100) * plotH
     var r = 10 + (c.marketShareProxy / 100) * 16 // radius 10-26
@@ -126,9 +130,9 @@ function setupTooltips() {
   for (var i = 0; i < bubbles.length; i++) {
     bubbles[i].addEventListener('mouseenter', function (e) {
       var id = this.dataset.id
-      var c = COMPETITORS.find(function (comp) { return comp.id === id })
+      var c = _competitors.find(function (comp) { return comp.id === id })
       if (!c) return
-      var dim = MAP_DIMENSIONS[currentDim]
+      var dim = _mapDimensions[currentDim]
       tooltip.innerHTML = '<div style="font-weight:700;margin-bottom:4px;color:' + c.color + '">' + c.name + '</div>'
         + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + dim.xLabel + ': <strong style="color:#fff">' + c.scores[dim.xKey] + '</strong></div>'
         + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + dim.yLabel + ': <strong style="color:#fff">' + c.scores[dim.yKey] + '</strong></div>'

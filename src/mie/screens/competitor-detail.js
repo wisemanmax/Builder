@@ -1,9 +1,13 @@
 // Competitor Detail Page
-import { SCORE_DIMENSIONS } from '../data/competitors.js'
-import { SENTIMENT_SCORES, SENTIMENT_LABELS, SAMPLE_REVIEWS } from '../data/sentiment.js'
+import { getScoreDimensions, getSentimentScores, getSentimentLabels, getSampleReviews } from '../lib/mie-data.js'
 import { scoreBar, scoreBadge, tierBadge } from '../components/score-bar.js'
 
 export function renderCompetitorDetail(container, competitor, navigate) {
+  var SCORE_DIMENSIONS = getScoreDimensions()
+  var SENTIMENT_SCORES = getSentimentScores()
+  var SENTIMENT_LABELS = getSentimentLabels()
+  var SAMPLE_REVIEWS = getSampleReviews()
+
   if (!competitor) {
     container.innerHTML = '<p>No competitor selected.</p>'
     return

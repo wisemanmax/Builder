@@ -1,8 +1,12 @@
 // Sentiment Feed Screen
-import { COMPETITORS } from '../data/competitors.js'
-import { SENTIMENT_SCORES, SENTIMENT_LABELS, SENTIMENT_CATEGORIES, SAMPLE_REVIEWS } from '../data/sentiment.js'
+import { getCompetitors, getSentimentScores, getSentimentLabels, getSentimentCategories, getSampleReviews } from '../lib/mie-data.js'
 
 export function renderSentiment(container) {
+  var COMPETITORS = getCompetitors()
+  var SENTIMENT_SCORES = getSentimentScores()
+  var SENTIMENT_LABELS = getSentimentLabels()
+  var SENTIMENT_CATEGORIES = getSentimentCategories()
+  var SAMPLE_REVIEWS = getSampleReviews()
   var html = ''
 
   // Competitor tabs
