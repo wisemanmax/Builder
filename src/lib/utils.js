@@ -7,7 +7,7 @@ export function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '
 
 export function escAttr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
 
-export function uid() { return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) }
+export function uid() { return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8) }
 
 export function slugify(str) { return String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'app' }
 

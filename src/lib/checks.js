@@ -19,6 +19,14 @@ export function runLocalChecks(code) {
       !/<button[^>]*>\s*<\/button>/i.test(code), 'Empty button elements found')
     add('Accessibility', 'no-div-onclick', 'No <div onclick> patterns',
       !/<div[^>]+onclick\s*=/i.test(code), 'Use <button> instead of <div onclick>')
+    add('Accessibility', 'img-alt', 'Images have alt attributes',
+      !/<img(?![^>]*alt\s*=)[^>]*>/i.test(code), 'All <img> elements should have alt attributes for screen readers')
+    add('Accessibility', 'has-aria-or-roles', 'Uses ARIA labels or roles',
+      /(?:aria-label|aria-labelledby|aria-describedby|role\s*=)/i.test(code),
+      'Consider adding ARIA attributes for interactive elements')
+    add('Accessibility', 'has-focus-styles', 'Has focus indicator styles',
+      /:focus/.test(code) || /focus-visible/.test(code),
+      'Add :focus or :focus-visible styles for keyboard navigation')
 
     // --- Security ---
     add('Security', 'no-eval', 'No eval() usage', !/\beval\s*\(/.test(code))
@@ -26,6 +34,9 @@ export function runLocalChecks(code) {
     add('Security', 'no-innerhtml-xss', 'No innerHTML with concatenation',
       !(/\.innerHTML\s*=\s*[^'"<]/.test(code) && /\.innerHTML\s*=\s*.*\+/.test(code)),
       'innerHTML with concatenation may indicate XSS risk')
+    add('Security', 'no-inline-event-handlers', 'No inline JS event handlers in body',
+      !/<(?:div|span|p|a|img|td|tr)[^>]+on(?:click|load|error|mouseover)\s*=/i.test(code),
+      'Use addEventListener instead of inline event handlers for better CSP compatibility')
 
     // --- Structure ---
     add('Structure', 'has-title', 'Has <title> element',

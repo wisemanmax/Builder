@@ -26,11 +26,18 @@ import { pullFromGitHub } from './lib/github.js'
 import { pullFromSupabase } from './lib/storage.js'
 
 export function init() {
-  // Global error guard
-  window.onerror = function (m, s) { if (String(m).includes('Script error') || String(s || '').includes('blob:')) return true }
+  // Global error guard — suppress only cross-origin/blob errors, log all others
+  window.onerror = function (m, s, l, c, err) {
+    if (String(m).includes('Script error') || String(s || '').includes('blob:')) return true
+    console.error('[Builder] Uncaught error:', m, 'at', s, l + ':' + c, err)
+    return false
+  }
   window.addEventListener('unhandledrejection', function (e) {
-    console.warn('Unhandled rejection:', e.reason)
-    e.preventDefault()
+    var reason = e.reason
+    var msg = (reason && reason.message) || String(reason || '')
+    // Suppress pipeline cancellation (intentional) but log everything else
+    if (msg === 'PIPELINE_CANCELLED') { e.preventDefault(); return }
+    console.warn('[Builder] Unhandled rejection:', reason)
   })
 
   // PWA setup

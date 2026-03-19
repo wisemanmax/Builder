@@ -69,7 +69,7 @@ export function ghMergeBranch(branchName, appName) {
 }
 
 export function ghDeleteBranch(branchName) {
-  fetch('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/git/refs/heads/' + branchName, { method: 'DELETE', headers: ghHeaders() }).catch(function () { })
+  ghFetch('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/git/refs/heads/' + branchName, { method: 'DELETE' }).catch(function () { })
 }
 
 export function ghPushManifest(branch) {

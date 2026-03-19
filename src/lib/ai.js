@@ -2,9 +2,14 @@ import { ST } from './state.js'
 import { scrubKeys } from './utils.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
 import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CHAT } from '../config/prompts.js'
+import { CLAUDE_MODEL, GPT_MODEL, GPT_MINI_MODEL, ANTHROPIC_API_URL, OPENAI_API_URL } from '../config/constants.js'
 
 function claudeHeaders() {
   return { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'anthropic-dangerous-direct-browser-access': 'true' }
+}
+
+function gptHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey }
 }
 
 function logCacheUsage(d, label) {
@@ -17,6 +22,87 @@ function logCacheUsage(d, label) {
       console.log('[Cache ' + (label || 'Claude') + '] input=' + total + ' cached=' + cached + ' created=' + created + ' savings~' + (total > 0 ? Math.round(cached / total * 100) : 0) + '%')
     }
   }
+}
+
+// --- Shared response parsing helpers ---
+
+// Strip markdown code fences from AI responses
+function stripFences(text) {
+  return text.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+}
+
+// Extract HTML code from response, stripping any preamble before DOCTYPE/html
+function extractHTML(code, provider) {
+  code = stripFences(code)
+  var docIdx = code.indexOf('<!DOCTYPE')
+  if (docIdx < 0) docIdx = code.indexOf('<!doctype')
+  if (docIdx < 0) docIdx = code.indexOf('<html')
+  if (docIdx > 0) code = code.substring(docIdx)
+  if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0 && code.indexOf('<!doctype') < 0) {
+    throw new Error((provider || 'AI') + ' returned an unexpected response format')
+  }
+  return code
+}
+
+// Extract raw text from Claude response
+function extractClaudeText(d) {
+  return (d.content && d.content[0] && d.content[0].text) || ''
+}
+
+// Extract raw text from GPT response
+function extractGPTText(d) {
+  return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
+}
+
+// Handle Claude API error responses
+function handleClaudeError(r) {
+  if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+  return r.json()
+}
+
+// Handle GPT API error responses
+function handleGPTError(r) {
+  if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
+  return r.json()
+}
+
+// Wrap catch for Claude calls
+function claudeCatch(e) {
+  if (e.message && e.message.indexOf('Claude:') === 0) throw e
+  throw new Error(classifyFetchError(e, 'Claude'))
+}
+
+// Wrap catch for GPT calls
+function gptCatch(e) {
+  if (e.message && e.message.indexOf('GPT:') === 0) throw e
+  throw new Error(classifyFetchError(e, 'GPT'))
+}
+
+// Check if an error is retryable (network/timeout)
+function isRetryableError(msg) {
+  msg = msg.toLowerCase()
+  return msg.indexOf('failed to fetch') >= 0
+    || msg.indexOf('load failed') >= 0
+    || msg.indexOf('timed out') >= 0
+    || msg.indexOf('network') >= 0
+    || msg.indexOf('aborted') >= 0
+    || msg.indexOf('err_internet_disconnected') >= 0
+}
+
+// Wait for page to become visible before retrying
+function waitForVisibility() {
+  if (document.visibilityState !== 'visible') {
+    return new Promise(function (resolve) {
+      function onVisible() {
+        if (document.visibilityState === 'visible') {
+          document.removeEventListener('visibilitychange', onVisible)
+          resolve()
+        }
+      }
+      document.addEventListener('visibilitychange', onVisible)
+    })
+  }
+  return Promise.resolve()
 }
 
 // --- Cost accumulator ---
@@ -78,32 +164,15 @@ export function fetchWithTimeout(url, opts, ms) {
 }
 
 export function fetchWithRetry(url, opts, ms, retries) {
-  retries = retries || 4 // up from 2
+  retries = retries || 4
   function attempt(n) {
     return fetchWithTimeout(url, opts, ms).catch(function (e) {
-      var msg = String(e && e.message || e || '').toLowerCase()
-      var isRetryable = msg.indexOf('failed to fetch') >= 0
-        || msg.indexOf('load failed') >= 0
-        || msg.indexOf('timed out') >= 0
-        || msg.indexOf('network') >= 0
-        || msg.indexOf('aborted') >= 0
-        || msg.indexOf('err_internet_disconnected') >= 0
-      if (isRetryable && n < retries) {
-        var delay = Math.min(2000 * Math.pow(2, n), 30000) // 2s, 4s, 8s, 16s (exp backoff, cap 30s)
-        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
-          // If we were hidden when the error happened, wait until visible before retrying
-          if (document.visibilityState !== 'visible') {
-            return new Promise(function (resolve) {
-              function onVisible() {
-                if (document.visibilityState === 'visible') {
-                  document.removeEventListener('visibilitychange', onVisible)
-                  resolve()
-                }
-              }
-              document.addEventListener('visibilitychange', onVisible)
-            })
-          }
-        }).then(function () { return attempt(n + 1) })
+      var msg = String(e && e.message || e || '')
+      if (isRetryableError(msg) && n < retries) {
+        var delay = Math.min(2000 * Math.pow(2, n), 30000)
+        return new Promise(function (resolve) { setTimeout(resolve, delay) })
+          .then(function () { return waitForVisibility() })
+          .then(function () { return attempt(n + 1) })
       }
       throw e
     })
@@ -121,123 +190,75 @@ export function classifyFetchError(e, api) {
 
 export function callClaude(sys, msg, temperature) {
   temperature = temperature !== undefined ? temperature : 0.3
-  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+  return fetchWithRetry(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
-  }, 300000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
+  }, 300000).then(handleClaudeError).then(function (d) {
     logCacheUsage(d, 'callClaude')
-    trackUsage('Build', 'claude-sonnet-4-20250514', d.usage)
-    var code = (d.content && d.content[0] && d.content[0].text) || ''
-    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-    var docIdx = code.indexOf('<!DOCTYPE')
-    if (docIdx < 0) docIdx = code.indexOf('<!doctype')
-    if (docIdx < 0) docIdx = code.indexOf('<html')
-    if (docIdx > 0) code = code.substring(docIdx)
-    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0 && code.indexOf('<!doctype') < 0) throw new Error('Claude returned an unexpected response format')
-    return code
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('Claude:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'Claude'))
-  })
+    trackUsage('Build', CLAUDE_MODEL, d.usage)
+    return extractHTML(extractClaudeText(d), 'Claude')
+  }).catch(claudeCatch)
 }
 
 export function callClaudeWithThinking(sys, msg, thinkingBudget) {
   thinkingBudget = thinkingBudget || 2000
   var maxTokens = thinkingBudget + 16000
-  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+  return fetchWithRetry(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
-  }, 600000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: msg }] }),
+  }, 600000).then(handleClaudeError).then(function (d) {
     logCacheUsage(d, 'callClaudeWithThinking')
-    trackUsage('Build (thinking)', 'claude-sonnet-4-20250514', d.usage)
+    trackUsage('Build (thinking)', CLAUDE_MODEL, d.usage)
     var code = ''
     if (d.content && Array.isArray(d.content)) {
       for (var i = 0; i < d.content.length; i++) {
         if (d.content[i].type === 'text') { code = d.content[i].text; break }
       }
     }
-    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
-    return code
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('Claude:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'Claude'))
-  })
+    return extractHTML(code, 'Claude')
+  }).catch(claudeCatch)
 }
 
 export function callClaudeRaw(sys, msg, maxTokens, images) {
   maxTokens = maxTokens || 4000
   var userContent = _buildUserContent(msg, images)
-  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+  return fetchWithRetry(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: userContent }] }),
-  }, 120000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: userContent }] }),
+  }, 120000).then(handleClaudeError).then(function (d) {
     logCacheUsage(d, 'callClaudeRaw')
-    trackUsage('Claude Raw', 'claude-sonnet-4-20250514', d.usage)
-    var raw = (d.content && d.content[0] && d.content[0].text) || ''
-    return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('Claude:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'Claude'))
-  })
+    trackUsage('Claude Raw', CLAUDE_MODEL, d.usage)
+    return stripFences(extractClaudeText(d))
+  }).catch(claudeCatch)
 }
 
 export function callClaudeMultiTurn(sys, messages, temperature) {
   temperature = temperature !== undefined ? temperature : 0.3
-  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+  return fetchWithRetry(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: messages }),
-  }, 300000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: 16000, temperature: temperature, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: messages }),
+  }, 300000).then(handleClaudeError).then(function (d) {
     logCacheUsage(d, 'callClaudeMultiTurn')
-    trackUsage('Fix', 'claude-sonnet-4-20250514', d.usage)
-    var code = (d.content && d.content[0] && d.content[0].text) || ''
-    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-    var docIdx = code.indexOf('<!DOCTYPE')
-    if (docIdx < 0) docIdx = code.indexOf('<!doctype')
-    if (docIdx < 0) docIdx = code.indexOf('<html')
-    if (docIdx > 0) code = code.substring(docIdx)
-    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0 && code.indexOf('<!doctype') < 0) throw new Error('Claude returned an unexpected response format')
-    return code
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('Claude:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'Claude'))
-  })
+    trackUsage('Fix', CLAUDE_MODEL, d.usage)
+    return extractHTML(extractClaudeText(d), 'Claude')
+  }).catch(claudeCatch)
 }
 
 export function callClaudeRawMultiTurn(sys, messages, maxTokens) {
   maxTokens = maxTokens || 4000
-  return fetchWithRetry('https://api.anthropic.com/v1/messages', {
+  return fetchWithRetry(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: messages }),
-  }, 60000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: messages }),
+  }, 60000).then(handleClaudeError).then(function (d) {
     logCacheUsage(d, 'callClaudeRawMultiTurn')
-    trackUsage('Claude Multi', 'claude-sonnet-4-20250514', d.usage)
-    var raw = (d.content && d.content[0] && d.content[0].text) || ''
-    return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('Claude:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'Claude'))
-  })
+    trackUsage('Claude Multi', CLAUDE_MODEL, d.usage)
+    return stripFences(extractClaudeText(d))
+  }).catch(claudeCatch)
 }
 
 // Build user content array with optional images for Claude vision
@@ -286,11 +307,9 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
               }
             } else if (evt.type === 'message_delta' && evt.usage) {
               logCacheUsage({ usage: evt.usage }, 'callClaudeStream')
-              // Merge output token count from message_delta
               _streamUsage.output_tokens = (_streamUsage.output_tokens || 0) + (evt.usage.output_tokens || 0)
             } else if (evt.type === 'message_start' && evt.message) {
               logCacheUsage(evt.message, 'callClaudeStream')
-              // Capture input token counts from message_start
               if (evt.message.usage) {
                 _streamUsage.input_tokens = evt.message.usage.input_tokens || 0
                 _streamUsage.cache_read_input_tokens = evt.message.usage.cache_read_input_tokens || 0
@@ -312,42 +331,47 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
   }
 
   var userContent = _buildUserContent(msg, images)
-  var url = 'https://api.anthropic.com/v1/messages'
+  var url = ANTHROPIC_API_URL
   var opts = {
     method: 'POST',
     headers: claudeHeaders(),
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, stream: true, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: userContent }] }),
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, stream: true, thinking: { type: 'enabled', budget_tokens: thinkingBudget }, system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }], messages: [{ role: 'user', content: userContent }] }),
   }
 
   _validateKeyedRequest(url, opts)
 
-  // Accumulate streaming usage across message_start + message_delta events
   var _streamUsage = {}
 
   function attemptStream(n) {
+    return _nativeFetch.call(window, url, opts).then(handleClaudeError)
+    .then(function (r) {
+      // handleClaudeError returns parsed JSON for ok responses, but for streaming
+      // we need the raw response — re-fetch approach kept for consistency
+      return r
+    }).catch(function () {
+      // For streaming, we need the raw response body, not parsed JSON
+      // Re-do the fetch to get the stream
+      return null
+    })
+  }
+
+  // Streaming needs raw response, not JSON-parsed — use direct fetch
+  function attemptStreamDirect(n) {
     return _nativeFetch.call(window, url, opts).then(function (r) {
       if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
       return parseSSE(r.body)
     }).then(function (code) {
-      trackUsage('Build (stream)', 'claude-sonnet-4-20250514', _streamUsage)
-      code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-      if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('Claude returned an unexpected response format')
-      return code
+      trackUsage('Build (stream)', CLAUDE_MODEL, _streamUsage)
+      return extractHTML(code, 'Claude')
     }).catch(function (e) {
       if (e.message && e.message.indexOf('Claude:') === 0) throw e
-      var msg2 = String(e && e.message || e || '').toLowerCase()
-      var isRetryable = msg2.indexOf('failed to fetch') >= 0 || msg2.indexOf('load failed') >= 0 || msg2.indexOf('network') >= 0 || msg2.indexOf('aborted') >= 0 || msg2.indexOf('timed out') >= 0
-      if (isRetryable && n < 3) {
+      var msg2 = String(e && e.message || e || '')
+      if (isRetryableError(msg2) && n < 3) {
         var delay = Math.min(2000 * Math.pow(2, n), 16000)
         console.warn('Stream attempt ' + (n + 1) + ' failed, retrying in ' + delay + 'ms:', e.message)
-        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
-          if (document.visibilityState !== 'visible') {
-            return new Promise(function (resolve) {
-              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
-              document.addEventListener('visibilitychange', onVis)
-            })
-          }
-        }).then(function () { return attemptStream(n + 1) })
+        return new Promise(function (resolve) { setTimeout(resolve, delay) })
+          .then(function () { return waitForVisibility() })
+          .then(function () { return attemptStreamDirect(n + 1) })
       }
       // Fall back to non-streaming on persistent stream errors
       console.warn('Streaming failed, falling back to non-streaming:', e.message)
@@ -355,7 +379,7 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
     })
   }
 
-  return attemptStream(0)
+  return attemptStreamDirect(0)
 }
 
 export function callClaudeAudit(code, customSysPrompt) {
@@ -376,59 +400,38 @@ export function callClaudeEnhanceReview(code) {
 
 export function callGPTRawMultiTurn(sys, messages, maxTokens) {
   maxTokens = maxTokens || 4000
-  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+  return fetchWithRetry(OPENAI_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o-mini', max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }].concat(messages) }),
-  }, 120000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
-    trackUsage('GPT Multi', 'gpt-4o-mini', d.usage)
-    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
-    return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('GPT:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'GPT'))
-  })
+    headers: gptHeaders(),
+    body: JSON.stringify({ model: GPT_MINI_MODEL, max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }].concat(messages) }),
+  }, 120000).then(handleGPTError).then(function (d) {
+    trackUsage('GPT Multi', GPT_MINI_MODEL, d.usage)
+    return stripFences(extractGPTText(d))
+  }).catch(gptCatch)
 }
 
 export function callGPTReview(code) {
-  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+  return fetchWithRetry(OPENAI_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 3000, temperature: 0.2, messages: [{ role: 'system', content: SYS_ENHANCE_REVIEW }, { role: 'user', content: 'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 40000) }] }),
-  }, 120000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
-    trackUsage('GPT Review', 'gpt-4o', d.usage)
-    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '{}'
-    raw = raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+    headers: gptHeaders(),
+    body: JSON.stringify({ model: GPT_MODEL, max_tokens: 3000, temperature: 0.2, messages: [{ role: 'system', content: SYS_ENHANCE_REVIEW }, { role: 'user', content: 'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 40000) }] }),
+  }, 120000).then(handleGPTError).then(function (d) {
+    trackUsage('GPT Review', GPT_MODEL, d.usage)
+    var raw = stripFences(extractGPTText(d) || '{}')
     try { var p = JSON.parse(raw); return { enhancements: Array.isArray(p.enhancements) ? p.enhancements : [], bugs: Array.isArray(p.bugs) ? p.bugs : [] } } catch (e) { return { enhancements: [], bugs: [] } }
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('GPT:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'GPT'))
-  })
+  }).catch(gptCatch)
 }
 
 export function callGPT(code) {
-  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+  return fetchWithRetry(OPENAI_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 2000, temperature: 0.1, messages: [{ role: 'system', content: SYS_AUDIT }, { role: 'user', content: 'Audit:\n\n' + code.slice(0, 40000) }] }),
-  }, 120000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
-    trackUsage('GPT Audit', 'gpt-4o', d.usage)
-    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '[]'
-    raw = raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
+    headers: gptHeaders(),
+    body: JSON.stringify({ model: GPT_MODEL, max_tokens: 2000, temperature: 0.1, messages: [{ role: 'system', content: SYS_AUDIT }, { role: 'user', content: 'Audit:\n\n' + code.slice(0, 40000) }] }),
+  }, 120000).then(handleGPTError).then(function (d) {
+    trackUsage('GPT Audit', GPT_MODEL, d.usage)
+    var raw = stripFences(extractGPTText(d) || '[]')
     try { var p = JSON.parse(raw); return Array.isArray(p) ? p : [] } catch (e) { return [] }
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('GPT:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'GPT'))
-  })
+  }).catch(gptCatch)
 }
 
 // --- GPT equivalents for Website2 provider toggle ---
@@ -446,55 +449,35 @@ function _gptBuildUserContent(msg, images) {
 export function callGPTRaw2(sys, msg, maxTokens, images) {
   maxTokens = maxTokens || 4000
   var userContent = (images && images.length) ? _gptBuildUserContent(msg, images) : msg
-  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+  return fetchWithRetry(OPENAI_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o', max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }, { role: 'user', content: userContent }] }),
-  }, 120000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
-    trackUsage('GPT Raw', 'gpt-4o', d.usage)
-    var raw = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
-    return raw.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('GPT:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'GPT'))
-  })
+    headers: gptHeaders(),
+    body: JSON.stringify({ model: GPT_MODEL, max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }, { role: 'user', content: userContent }] }),
+  }, 120000).then(handleGPTError).then(function (d) {
+    trackUsage('GPT Raw', GPT_MODEL, d.usage)
+    return stripFences(extractGPTText(d))
+  }).catch(gptCatch)
 }
 
 export function callGPTMultiTurn2(sys, messages, temperature) {
   temperature = temperature !== undefined ? temperature : 0.3
-  return fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+  return fetchWithRetry(OPENAI_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 16000, temperature: temperature, messages: [{ role: 'system', content: sys }].concat(messages) }),
-  }, 300000).then(function (r) {
-    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('GPT: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })
-    return r.json()
-  }).then(function (d) {
-    trackUsage('GPT Build', 'gpt-4o', d.usage)
-    var code = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''
-    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-    var docIdx = code.indexOf('<!DOCTYPE')
-    if (docIdx < 0) docIdx = code.indexOf('<!doctype')
-    if (docIdx < 0) docIdx = code.indexOf('<html')
-    if (docIdx > 0) code = code.substring(docIdx)
-    if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0 && code.indexOf('<!doctype') < 0) throw new Error('GPT returned an unexpected response format')
-    return code
-  }).catch(function (e) {
-    if (e.message && e.message.indexOf('GPT:') === 0) throw e
-    throw new Error(classifyFetchError(e, 'GPT'))
-  })
+    headers: gptHeaders(),
+    body: JSON.stringify({ model: GPT_MODEL, max_tokens: 16000, temperature: temperature, messages: [{ role: 'system', content: sys }].concat(messages) }),
+  }, 300000).then(handleGPTError).then(function (d) {
+    trackUsage('GPT Build', GPT_MODEL, d.usage)
+    return extractHTML(extractGPTText(d), 'GPT')
+  }).catch(gptCatch)
 }
 
 export function callGPTWithStream(sys, msg, onChunk, images) {
   var userContent = (images && images.length) ? _gptBuildUserContent(msg, images) : msg
-  var url = 'https://api.openai.com/v1/chat/completions'
+  var url = OPENAI_API_URL
   var opts = {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ST.gptKey },
-    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 16000, stream: true, temperature: 0.3, messages: [{ role: 'system', content: sys }, { role: 'user', content: userContent }] }),
+    headers: gptHeaders(),
+    body: JSON.stringify({ model: GPT_MODEL, max_tokens: 16000, stream: true, temperature: 0.3, messages: [{ role: 'system', content: sys }, { role: 'user', content: userContent }] }),
   }
 
   _validateKeyedRequest(url, opts)
@@ -537,24 +520,16 @@ export function callGPTWithStream(sys, msg, onChunk, images) {
       return parseSSE(r.body)
     }).then(function (code) {
       // Estimate tokens for GPT stream (usage not available in default stream mode)
-      trackUsage('GPT Build (stream)', 'gpt-4o', { prompt_tokens: Math.ceil(msg.length / 4) + Math.ceil(sys.length / 4), completion_tokens: Math.ceil(code.length / 4) })
-      code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim()
-      if (code.indexOf('<html') < 0 && code.indexOf('<!DOCTYPE') < 0) throw new Error('GPT returned an unexpected response format')
-      return code
+      trackUsage('GPT Build (stream)', GPT_MODEL, { prompt_tokens: Math.ceil(msg.length / 4) + Math.ceil(sys.length / 4), completion_tokens: Math.ceil(code.length / 4) })
+      return extractHTML(code, 'GPT')
     }).catch(function (e) {
       if (e.message && e.message.indexOf('GPT:') === 0) throw e
-      var msg2 = String(e && e.message || e || '').toLowerCase()
-      var isRetryable = msg2.indexOf('failed to fetch') >= 0 || msg2.indexOf('load failed') >= 0 || msg2.indexOf('network') >= 0 || msg2.indexOf('aborted') >= 0 || msg2.indexOf('timed out') >= 0
-      if (isRetryable && n < 3) {
+      var msg2 = String(e && e.message || e || '')
+      if (isRetryableError(msg2) && n < 3) {
         var delay = Math.min(2000 * Math.pow(2, n), 16000)
-        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
-          if (document.visibilityState !== 'visible') {
-            return new Promise(function (resolve) {
-              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
-              document.addEventListener('visibilitychange', onVis)
-            })
-          }
-        }).then(function () { return attemptStream(n + 1) })
+        return new Promise(function (resolve) { setTimeout(resolve, delay) })
+          .then(function () { return waitForVisibility() })
+          .then(function () { return attemptStream(n + 1) })
       }
       throw new Error(classifyFetchError(e, 'GPT'))
     })

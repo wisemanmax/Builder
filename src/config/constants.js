@@ -136,3 +136,10 @@ export var COST_RATES = {
   'gpt-4o-mini': { input: 0.15, output: 0.60 },
 }
 export var COST_MARKUP = 7
+
+// --- Model & API constants ---
+export var CLAUDE_MODEL = 'claude-sonnet-4-20250514'
+export var GPT_MODEL = 'gpt-4o'
+export var GPT_MINI_MODEL = 'gpt-4o-mini'
+export var ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
+export var OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
