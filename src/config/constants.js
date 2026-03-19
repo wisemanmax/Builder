@@ -130,6 +130,7 @@ export const PIPE4_ICONS = [
 export const PIPE5_NAMES = [
   'Stitch \u00B7 Intake',
   'Stitch \u00B7 Blueprint',
+  'Blueprint Review',
   'Stitch \u00B7 Assemble',
   'Stitch \u00B7 Verify',
   'GPT-4o \u00B7 Review',
@@ -138,7 +139,7 @@ export const PIPE5_NAMES = [
 ]
 
 export const PIPE5_ICONS = [
-  '\uD83D\uDCE5', '\uD83D\uDCDD', '\uD83E\uDDF5', '\u2705',
+  '\uD83D\uDCE5', '\uD83D\uDCDD', '\uD83D\uDC41', '\uD83E\uDDF5', '\u2705',
   '\uD83D\uDD0D', '\u2728', '\uD83D\uDE80',
 ]
 

@@ -70,6 +70,20 @@
 .pcc-frame-overlay{position:absolute;inset:0;cursor:pointer;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,.4))}
 .pcc-expand-btn{padding:5px 11px;border-radius:8px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.2);color:#fff;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--fh)}
 
+/* BLUEPRINT PREVIEW (pre-hydration gate) */
+.bp-preview-card{background:rgba(139,92,246,.06);border:1.5px solid rgba(139,92,246,.25);border-radius:4px 14px 14px 14px;overflow:hidden}
+.bp-preview-hdr{padding:10px 13px;border-bottom:1px solid rgba(139,92,246,.12)}
+.bp-preview-title{font-family:var(--fh);font-size:12px;font-weight:800;color:rgba(255,255,255,.9);margin-bottom:3px}
+.bp-preview-meta{font-size:10px;color:rgba(255,255,255,.4)}
+.bp-preview-frame{height:260px;overflow:hidden;position:relative;border-bottom:1px solid rgba(139,92,246,.12)}
+.bp-preview-frame iframe{width:100%;height:100%;border:none;pointer-events:none}
+.bp-preview-actions{display:flex;gap:8px;padding:12px 13px}
+.bp-btn{flex:1;padding:11px;border-radius:10px;border:none;font-family:var(--fh);font-size:12px;font-weight:700;cursor:pointer;transition:transform .15s,opacity .15s}
+.bp-btn:active{transform:scale(.96)}
+.bp-btn.approve{background:linear-gradient(135deg,#8B5CF6,#06B6D4);color:#fff;box-shadow:0 4px 16px rgba(139,92,246,.35)}
+.bp-btn.reject{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7)}
+.bp-btn:disabled{opacity:.4;cursor:not-allowed}
+
 /* APPROVAL GATE */
 .approval-card{background:rgba(61,90,254,.08);border:1.5px solid rgba(61,90,254,.3);border-radius:4px 14px 14px 14px;overflow:hidden;padding:14px}
 .appr-title{font-family:var(--fh);font-size:13px;font-weight:800;margin-bottom:4px}
