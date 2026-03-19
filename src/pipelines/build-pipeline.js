@@ -13,7 +13,7 @@ import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipel
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
-import { pushToSupabase } from '../lib/storage.js'
+import { pushToSupabase, runSupabaseSql, getSetupSql } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 
 // Check IDs that are advisory-only and should not count as critical failures
@@ -419,10 +419,34 @@ export function runPipeline(prompt, existingApp, customName, images) {
       return callClaudeRaw(SYS_BACKEND, 'App code:\n\n' + v2.slice(0, 60000), 4000).then(function (raw) {
         var backend = JSON.parse(raw)
         var tables = backend.tables || []
-        var allSql = tables.map(function (t) { return t.sql || '' }).concat(backend.rls || []).filter(Boolean).join('\n\n')
-        updatePS(pid, 9, 'done', tables.length + ' table' + (tables.length !== 1 ? 's' : '') + ' designed \u2713')
+        var sqlStatements = tables.map(function (t) { return t.sql || '' }).concat(backend.rls || []).filter(Boolean)
+        var allSql = sqlStatements.join('\n\n')
         addMsg({ role: 'asst', type: 'schema', sql: allSql, tables: tables })
-        if (backend.injectedHTML && backend.injectedHTML.indexOf('<!DOCTYPE') >= 0 && backend.injectedHTML.length > 500) { v2 = backend.injectedHTML }
+
+        // Replace placeholders in injected HTML with real Supabase credentials
+        if (backend.injectedHTML && backend.injectedHTML.indexOf('<!DOCTYPE') >= 0 && backend.injectedHTML.length > 500) {
+          v2 = backend.injectedHTML
+            .replace(/YOUR_SUPABASE_URL/g, ST.sbUrl)
+            .replace(/YOUR_SUPABASE_ANON_KEY/g, ST.sbAnon)
+        }
+
+        // Auto-execute SQL to create tables in Supabase
+        if (sqlStatements.length > 0 && ST.sbAnon) {
+          updatePS(pid, 9, 'active', 'Creating ' + tables.length + ' table(s) in Supabase\u2026')
+          return runSupabaseSql(sqlStatements).then(function () {
+            updatePS(pid, 9, 'done', tables.length + ' table(s) created \u2713')
+          }).catch(function (execErr) {
+            if (execErr.message === 'SETUP_REQUIRED') {
+              updatePS(pid, 9, 'warn', tables.length + ' table(s) designed \u2014 run setup SQL first')
+              addMsg({ role: 'asst', type: 'text', text: 'To enable auto table creation, run this one-time setup SQL in your Supabase SQL Editor:' })
+              addMsg({ role: 'asst', type: 'schema', sql: getSetupSql(), tables: [{ name: 'builder_exec', description: 'One-time setup \u2014 enables auto table creation' }, { name: 'builder_apps', description: 'Sync table for your Builder apps' }] })
+            } else {
+              updatePS(pid, 9, 'warn', tables.length + ' table(s) designed \u2014 auto-create failed')
+            }
+          })
+        } else {
+          updatePS(pid, 9, 'done', 'No tables needed')
+        }
       }).catch(function (e) {
         updatePS(pid, 9, 'warn', 'Backend gen skipped: ' + scrubKeys(e.message || String(e)))
       })
