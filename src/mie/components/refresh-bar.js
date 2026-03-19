@@ -9,7 +9,7 @@ var SECTIONS = [
   { id: 'alerts', label: 'Alerts' },
 ]
 
-export function renderRefreshBar(container, onRefreshDone) {
+export function renderRefreshBar(container, onRefreshDone, signal) {
   if (!container) return
 
   var hasKey = hasApiKey()
@@ -53,12 +53,14 @@ export function renderRefreshBar(container, onRefreshDone) {
 
   if (!hasKey) return
 
+  var opts = signal ? { signal: signal } : undefined
+
   // Refresh all button
   var refreshAllBtn = document.getElementById('mie-refresh-all')
   if (refreshAllBtn) {
     refreshAllBtn.addEventListener('click', function () {
       doRefresh(container, null, onRefreshDone)
-    })
+    }, opts)
   }
 
   // Section dropdown toggle
@@ -68,10 +70,10 @@ export function renderRefreshBar(container, onRefreshDone) {
     toggleBtn.addEventListener('click', function (e) {
       e.stopPropagation()
       dropdown.classList.toggle('open')
-    })
+    }, opts)
     document.addEventListener('click', function () {
       dropdown.classList.remove('open')
-    })
+    }, opts)
   }
 
   // Section refresh buttons
@@ -81,7 +83,7 @@ export function renderRefreshBar(container, onRefreshDone) {
       var section = this.dataset.section
       dropdown.classList.remove('open')
       doRefresh(container, section, onRefreshDone)
-    })
+    }, opts)
   }
 }
 

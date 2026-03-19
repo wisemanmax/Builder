@@ -2,7 +2,7 @@
 import { getScoreDimensions, getSentimentScores, getSentimentLabels, getSampleReviews } from '../lib/mie-data.js'
 import { scoreBar, scoreBadge, tierBadge } from '../components/score-bar.js'
 
-export function renderCompetitorDetail(container, competitor, navigate) {
+export function renderCompetitorDetail(container, competitor, navigate, signal) {
   var SCORE_DIMENSIONS = getScoreDimensions()
   var SENTIMENT_SCORES = getSentimentScores()
   var SENTIMENT_LABELS = getSentimentLabels()
@@ -69,13 +69,13 @@ export function renderCompetitorDetail(container, competitor, navigate) {
   for (var p = 0; p < c.products.length; p++) {
     var prod = c.products[p]
     html += '<tr>'
-    html += '<td style="font-weight:600">' + prod.name + '</td>'
-    html += '<td class="mie-product-val">' + prod.fixedAprMin.toFixed(2) + '% &ndash; ' + prod.fixedAprMax.toFixed(2) + '%</td>'
-    html += '<td class="mie-product-val">' + prod.variableAprMin.toFixed(2) + '% &ndash; ' + prod.variableAprMax.toFixed(2) + '%</td>'
-    html += '<td class="mie-product-val">$' + prod.loanMin.toLocaleString() + ' &ndash; ' + (prod.loanMax ? '$' + prod.loanMax.toLocaleString() : 'COA') + '</td>'
-    html += '<td class="mie-product-val">' + prod.repaymentTermsMin + '&ndash;' + prod.repaymentTermsMax + ' yr</td>'
-    html += '<td class="mie-product-val">' + prod.cosignerReleaseMonths + ' mo</td>'
-    html += '<td class="mie-product-val">' + prod.hardshipForbearanceMonths + ' mo</td>'
+    html += '<td data-label="Product" style="font-weight:600">' + prod.name + '</td>'
+    html += '<td data-label="Fixed APR" class="mie-product-val">' + prod.fixedAprMin.toFixed(2) + '% &ndash; ' + prod.fixedAprMax.toFixed(2) + '%</td>'
+    html += '<td data-label="Variable APR" class="mie-product-val">' + prod.variableAprMin.toFixed(2) + '% &ndash; ' + prod.variableAprMax.toFixed(2) + '%</td>'
+    html += '<td data-label="Loan Range" class="mie-product-val">$' + prod.loanMin.toLocaleString() + ' &ndash; ' + (prod.loanMax ? '$' + prod.loanMax.toLocaleString() : 'COA') + '</td>'
+    html += '<td data-label="Terms" class="mie-product-val">' + prod.repaymentTermsMin + '&ndash;' + prod.repaymentTermsMax + ' yr</td>'
+    html += '<td data-label="Cosigner Release" class="mie-product-val">' + prod.cosignerReleaseMonths + ' mo</td>'
+    html += '<td data-label="Forbearance" class="mie-product-val">' + prod.hardshipForbearanceMonths + ' mo</td>'
     html += '</tr>'
   }
   html += '</tbody></table></div>'
@@ -125,5 +125,5 @@ export function renderCompetitorDetail(container, competitor, navigate) {
   // Back button handler
   document.getElementById('mie-detail-back').addEventListener('click', function () {
     navigate('overview')
-  })
+  }, { signal: signal })
 }

@@ -66,7 +66,7 @@ var MESSAGING_RECS = [
   },
 ]
 
-export function renderMessaging(container) {
+export function renderMessaging(container, signal) {
   var html = ''
   html += '<div style="margin-bottom:18px;font-size:13px;color:var(--mie-text-secondary);line-height:1.6">'
   html += 'AI-generated messaging recommendations based on current competitive conditions. Approve or reject to add to the experiment queue.'
@@ -105,6 +105,6 @@ export function renderMessaging(container) {
     var idx = parseInt(btn.dataset.idx, 10)
     var action = btn.dataset.action
     MESSAGING_RECS[idx].status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'pending'
-    renderMessaging(container)
-  })
+    renderMessaging(container, signal)
+  }, { signal: signal })
 }

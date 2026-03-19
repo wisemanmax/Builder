@@ -1282,6 +1282,17 @@ body {
   color: var(--mie-accent);
 }
 
+/* Prevent text selection on interactive elements */
+.mie-tab-btn, .mie-nav-item, .mie-radio-btn, .mie-btn, .mie-toggle-btn, .mie-comp-tab {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Hide on mobile utility */
+@media (max-width: 768px) {
+  .mie-hide-mobile { display: none !important; }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   body.mie-sidebar-open { overflow: hidden; }
@@ -1294,25 +1305,84 @@ body {
   }
   .mie-main {
     margin-left: 0;
-    padding-bottom: 64px; /* space for bottom bar */
   }
-  .mie-menu-btn { display: none; }
-  .mie-bottom-bar { display: block; }
+  .mie-menu-btn { display: flex; }
+  .mie-bottom-bar {
+    display: block;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
   .mie-header {
     padding: 12px 16px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(8, 8, 18, 0.95);
   }
   .mie-header-title {
     font-size: 16px;
   }
   .mie-grid-2, .mie-grid-3 { grid-template-columns: 1fr; }
-  .mie-content { padding: 16px; }
+  .mie-content { padding: 16px; padding-bottom: 80px; }
   .mie-kpi-row { grid-template-columns: 1fr 1fr; }
 
-  /* Table horizontal scroll */
-  .mie-card:has(.mie-table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .mie-table { min-width: 600px; }
+  /* Remove expensive backdrop-filter on mobile */
+  .mie-card {
+    padding: 16px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .mie-scatter-tooltip {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .mie-refresh-dropdown {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .mie-sidebar-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 
-  /* Bigger touch targets for radio buttons */
+  /* Remove drop-shadow on SVG bubbles for GPU perf */
+  .mie-bubble { filter: none !important; }
+
+  /* Table: hide extra columns, remove forced min-width */
+  .mie-table { min-width: 0; }
+  .mie-card:has(.mie-table) { overflow-x: visible; }
+
+  /* Product table stacked card layout */
+  .mie-product-table thead { display: none; }
+  .mie-product-table tbody tr {
+    display: block;
+    padding: 12px;
+    border: 1px solid var(--mie-border);
+    border-radius: var(--mie-rs);
+    margin-bottom: 8px;
+  }
+  .mie-product-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: none;
+  }
+  .mie-product-table td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    color: var(--mie-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  /* Touch-friendly tap targets */
+  .mie-nav-item { padding: 12px 16px; min-height: 44px; }
+  .mie-tab-btn { min-height: 48px; }
+  .mie-comp-tab { padding: 8px 14px; }
+  .mie-msg-status-btn { padding: 8px 12px; }
   .mie-radio-btn { padding: 10px 16px; font-size: 13px; }
 
   /* Refresh bar compact */
@@ -1328,9 +1398,6 @@ body {
 
   /* Scatter chart mobile */
   .mie-scatter-wrap { min-height: 240px; }
-
-  /* Cards padding */
-  .mie-card { padding: 16px; }
 
   /* Detail header */
   .mie-detail-name { font-size: 17px; }
