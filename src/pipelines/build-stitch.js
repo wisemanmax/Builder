@@ -74,6 +74,15 @@ function _ensureProject() {
   })
 }
 
+/**
+ * Strip markdown code fences from text, returning inner content.
+ */
+function _stripCodeFences(text) {
+  // Match ```html ... ``` or ``` ... ```
+  var match = text.match(/```(?:html|htm)?\s*\n?([\s\S]*?)```/)
+  return match ? match[1].trim() : text
+}
+
 function callStitchBlueprint(appDescription) {
   return _ensureProject().then(function (projectId) {
     var args = { prompt: appDescription }
@@ -86,30 +95,52 @@ function callStitchBlueprint(appDescription) {
     var content = (result && result.content) || []
     var html = ''
     for (var i = 0; i < content.length; i++) {
-      if (content[i].type === 'text') {
-        var text = content[i].text || ''
-        // Check if it contains HTML
-        if (text.indexOf('<') >= 0 && text.indexOf('>') >= 0) {
-          html = text
+      var item = content[i]
+      if (item.type === 'text') {
+        var text = item.text || ''
+        // Strip markdown code fences if present
+        var stripped = _stripCodeFences(text)
+        // Check if it contains HTML tags
+        if (stripped.indexOf('<') >= 0 && stripped.indexOf('>') >= 0) {
+          html = stripped
           break
         }
         // Try parsing as JSON with html/code field
         try {
           var parsed = JSON.parse(text)
-          html = parsed.html || parsed.scaffold || parsed.code || parsed.screen || ''
-          if (html) break
+          html = parsed.html || parsed.scaffold || parsed.code || parsed.screen
+            || parsed.content || parsed.output || parsed.result || ''
+          if (html) {
+            html = _stripCodeFences(html)
+            break
+          }
         } catch (e) { /* not JSON, continue */ }
       }
     }
     // If no HTML found in text blocks, check for resource content
     if (!html) {
       for (var j = 0; j < content.length; j++) {
-        if (content[j].type === 'resource' && content[j].resource) {
-          var res = content[j].resource
-          if (res.mimeType && res.mimeType.indexOf('html') >= 0 && res.text) {
-            html = res.text
-            break
+        var item2 = content[j]
+        if (item2.type === 'resource' && item2.resource) {
+          var res = item2.resource
+          if (res.text && res.text.length > 10) {
+            // Accept any resource with HTML content, not just html mime type
+            var resText = _stripCodeFences(res.text)
+            if (resText.indexOf('<') >= 0) {
+              html = resText
+              break
+            }
           }
+        }
+        // Handle blob/base64 content
+        if (item2.type === 'resource' && item2.resource && item2.resource.blob) {
+          try {
+            var decoded = atob(item2.resource.blob)
+            if (decoded.indexOf('<') >= 0 && decoded.indexOf('>') >= 0) {
+              html = decoded
+              break
+            }
+          } catch (e) { /* not valid base64 */ }
         }
       }
     }
@@ -249,12 +280,36 @@ function _buildAppDescription(context, specText, rulesText) {
   return desc
 }
 
+var SYS_CLAUDE_BLUEPRINT = 'You are a senior UI engineer. Generate a clean, well-structured HTML scaffold for the requested app.\n'
+  + '\nOUTPUT RULES:\n'
+  + '1. Return ONLY raw HTML — no markdown, no code fences, no explanation\n'
+  + '2. All CSS inside <style>, all JS inside <script>\n'
+  + '3. ZERO external dependencies — no CDN scripts/links. You may use @import for Google Fonts only\n'
+  + '4. Must work as a standalone HTML file. Begin with <!DOCTYPE html>\n'
+  + '5. Focus on LAYOUT and STRUCTURE — create the full visual scaffold with placeholder content\n'
+  + '6. Include all screens/views, navigation, modals, and interactive elements as HTML structure\n'
+  + '7. Style it beautifully with a modern dark theme by default, responsive design, and clean typography\n'
+  + '8. Add minimal JS: view switching, modal toggles, navigation — but NOT full business logic\n'
+  + '9. Use semantic HTML: <header>, <main>, <nav>, <section>, <button>\n'
+  + '10. Mobile-first responsive design with CSS Grid/Flexbox\n'
+  + '\nThis scaffold will be enhanced with full logic in the next stage. Focus on creating a complete, beautiful UI shell.'
+
 /**
  * Stage 2 — Blueprint
  * Call Stitch API with app description → return HTML scaffold.
+ * Falls back to Claude if Stitch API fails.
  */
 function runBlueprint(intakePayload) {
-  return callStitchBlueprint(intakePayload.appDescription)
+  return callStitchBlueprint(intakePayload.appDescription).catch(function (stitchErr) {
+    console.warn('[Stitch] Blueprint API failed, falling back to Claude:', stitchErr.message)
+    // Fall back to Claude for scaffold generation
+    return callClaude(SYS_CLAUDE_BLUEPRINT, intakePayload.appDescription, 0.4).then(function (html) {
+      if (!html || html.length < 50) {
+        throw new Error('Blueprint fallback also returned empty HTML (original: ' + stitchErr.message + ')')
+      }
+      return html
+    })
+  })
 }
 
 /**
