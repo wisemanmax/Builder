@@ -439,7 +439,9 @@ function runAssemble(stitchHTML, intakePayload) {
   // Inject profile context (org identity, global rules, learned preferences)
   sys = injectProfileContext(sys)
 
-  var userMsg = 'STITCH BLUEPRINT (LOCKED HTML scaffold — hydrate with logic, do NOT modify DOM structure):\n\n'
+  var userMsg = '⛔ STITCH BLUEPRINT — STRUCTURE-LOCKED SCAFFOLD ⛔\n'
+    + 'This HTML is IMMUTABLE. Your output will be machine-diffed tag-by-tag against this scaffold.\n'
+    + 'Add JavaScript logic inside <script> and CSS inside <style> ONLY. Do NOT add, remove, or modify ANY HTML tags in <body>.\n\n'
     + stitchHTML
     + '\n\nORIGINAL USER REQUEST:\n' + intakePayload.prompt
 
@@ -1020,14 +1022,22 @@ export function runStitchPipeline(context, callbacks) {
       if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.RUNNING, 'Re-hydrating…')
 
       var violationSys = SYS_STITCH_ENHANCE
-        + '\n\nSTRUCTURE VIOLATION REPORT — YOUR PREVIOUS OUTPUT FAILED:\n'
-        + 'You added ' + violationCount + ' HTML tags that were NOT in the blueprint. This is forbidden.\n'
-        + 'Tags you added (remove ALL of these):\n' + addedTags.map(function (t) { return '  - ' + t }).join('\n')
-        + '\n\nYou MUST return the scaffold HTML with ZERO new tags. Use only existing elements.'
+        + '\n\n⛔⛔⛔ STRUCTURE VIOLATION REPORT — YOUR PREVIOUS OUTPUT FAILED THE AUTOMATED DIFF ⛔⛔⛔\n'
+        + 'You added ' + violationCount + ' HTML tags that were NOT in the original blueprint. This FAILED the build.\n'
+        + 'Your output was MACHINE-DIFFED and these extra tags were detected:\n' + addedTags.map(function (t) { return '  ✗ REMOVE: ' + t }).join('\n')
+        + '\n\nCRITICAL INSTRUCTIONS FOR THIS RETRY:\n'
+        + '1. Start from the ORIGINAL scaffold below — do NOT start from your previous (rejected) output\n'
+        + '2. Add ONLY <script> and <style> blocks — absolutely NO new HTML elements anywhere in <body>\n'
+        + '3. Every tag in your <body> MUST exist in the original scaffold. The diff tool will catch any addition.\n'
+        + '4. If a feature needs new DOM elements, use: /* STRUCTURAL_GAP: [feature] not in blueprint */\n'
+        + '5. Use JavaScript to manipulate textContent/value of EXISTING elements — do NOT create new ones\n'
+        + '\nThis is your LAST attempt. If you add even ONE extra HTML tag, the build will permanently fail.'
       violationSys = injectProfileContext(violationSys)
 
-      var violationMsg = 'STITCH BLUEPRINT (LOCKED — do NOT add tags):\n\n' + stitchHTML
-        + '\n\nYOUR PREVIOUS (REJECTED) OUTPUT:\n' + assembledHTML.slice(0, 30000)
+      var violationMsg = '⛔ ORIGINAL SCAFFOLD (IMMUTABLE — start from THIS, not your previous output) ⛔\n'
+        + 'Your output will be machine-diffed against this scaffold. Any new HTML tag = build failure.\n\n'
+        + stitchHTML
+        + '\n\n--- YOUR PREVIOUS (REJECTED) OUTPUT (for reference ONLY — do NOT copy its structure) ---\n' + assembledHTML.slice(0, 30000)
         + '\n\nORIGINAL USER REQUEST:\n' + intakePayload.prompt
 
       return callClaude(violationSys, violationMsg, 0.2).then(function (retriedHTML) {
