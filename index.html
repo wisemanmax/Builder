@@ -17,6 +17,7 @@
   connect-src 'self'
     https://api.anthropic.com
     https://api.openai.com
+    https://api.stitch.ai
     https://api.github.com
     https://raw.githubusercontent.com
     https://*.supabase.co
@@ -153,6 +154,7 @@
           <button class="pt-btn" data-mode="builder2">Claude-Only</button>
           <button class="pt-btn" data-mode="website">Website</button>
           <button class="pt-btn" data-mode="website2">Website 2</button>
+          <button class="pt-btn pt-stitch" data-mode="stitch" id="pt-stitch-btn" title="Requires Stitch API key">&#x1F9F5; Flawless</button>
         </div>
         <div class="model-toggle" id="model-toggle" style="display:none">
           <button class="mt-btn active" data-provider="claude">Claude</button>
@@ -373,6 +375,7 @@
       <div class="sscard">
         <div class="fl"><label>Anthropic API Key</label><input class="fi fi-mono" type="password" id="s-anth" placeholder="sk-ant-..."></div>
         <div class="fl"><label>OpenAI API Key (GPT-4o Audit)</label><input class="fi fi-mono" type="password" id="s-gpt" placeholder="sk-..."></div>
+        <div class="fl"><label>Stitch API Key <span style="font-size:10px;color:rgba(255,255,255,.35)">(Flawless Pipeline)</span></label><div class="fi-pw-wrap"><input class="fi fi-mono" type="password" id="s-stitch" placeholder="stitch_..."><button type="button" class="fi-pw-toggle" id="s-stitch-toggle">&#x1F441;</button></div></div>
         <button class="btn-p" id="s-save-ai">Save AI Keys</button>
       </div>
       <span class="ssec">GitHub</span>
@@ -452,6 +455,19 @@
   <div class="ib-info"><div class="ib-title">Install The Builder</div><div class="ib-sub">Add to home screen for full PWA experience</div></div>
   <button class="ib-add" id="ib-add">Add</button>
   <button class="ib-x" id="ib-x">&#x2715;</button>
+</div>
+
+<!-- STITCH KEY MODAL -->
+<div id="stitch-key-modal" class="stitch-modal-overlay">
+  <div class="stitch-modal">
+    <div class="stitch-modal-icon">&#x1F512;</div>
+    <div class="stitch-modal-title">Stitch API Key Required</div>
+    <div class="stitch-modal-sub">The Flawless Pipeline requires a Stitch API key. Add your key in Settings to unlock this pipeline.</div>
+    <div class="stitch-modal-btns">
+      <button class="btn-p" id="stitch-modal-settings">&#x2699;&#xFE0F; Open Settings</button>
+      <button class="stitch-modal-dismiss" id="stitch-modal-close">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>

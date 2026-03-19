@@ -7,7 +7,7 @@ import { renderGrid } from '../components/app-icon.js'
 import { renderProfilesSettings } from './profiles.js'
 
 export function openSettings() {
-  $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey
+  $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey; $('s-stitch').value = ST.stitchKey
   $('s-gh-token').value = ST.ghToken; $('s-gh-user').value = ST.ghUser; $('s-gh-repo').value = ST.ghRepo; $('s-gh-domain').value = ST.ghCustomDomain
   $('s-sb-url').value = ST.sbUrl; $('s-sb-anon').value = ST.sbAnon
   $('s-audit-pill').classList.toggle('on', ST.auditEnabled)
@@ -22,10 +22,25 @@ export function openSettings() {
 export function initSettings() {
   $('ssclose').addEventListener('click', function () { $('settings-overlay').classList.remove('on') })
   $('settings-overlay').addEventListener('click', function (e) { if (e.target.id === 'settings-overlay') $('settings-overlay').classList.remove('on') })
+  // Stitch key show/hide toggle
+  var stitchToggle = $('s-stitch-toggle')
+  if (stitchToggle) {
+    stitchToggle.addEventListener('click', function () {
+      var inp = $('s-stitch')
+      if (inp.type === 'password') { inp.type = 'text'; stitchToggle.textContent = '\uD83D\uDE48' }
+      else { inp.type = 'password'; stitchToggle.textContent = '\uD83D\uDC41' }
+    })
+  }
   $('s-save-ai').addEventListener('click', function () {
-    ST.key = $('s-anth').value.trim(); ST.gptKey = $('s-gpt').value.trim(); saveKeys()
+    ST.key = $('s-anth').value.trim(); ST.gptKey = $('s-gpt').value.trim(); ST.stitchKey = $('s-stitch').value.trim(); saveKeys()
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
+    // Test Stitch key if provided
+    if (ST.stitchKey) {
+      _testStitchKey(ST.stitchKey)
+    }
     toast(ST.gptKey ? 'AI keys saved \u2014 GPT audit active \u2713' : 'AI keys saved \u2713')
+    // Update Flawless Pipeline button gate
+    _syncStitchGate()
   })
   $('s-save-gh').addEventListener('click', function () {
     var ghT = $('s-gh-token').value.trim(), ghU = $('s-gh-user').value.trim(), ghR = $('s-gh-repo').value.trim(), ghD = $('s-gh-domain').value.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '')
@@ -60,4 +75,24 @@ export function initSettings() {
   }
   $('s-clear').addEventListener('click', function () { if (!confirm('Delete all apps locally?')) return; ST.apps = []; persist(); renderGrid(); toast('All apps cleared locally') })
   $('s-signout').addEventListener('click', function () { if (!confirm('Sign out and clear all keys?')) return; localStorage.clear(); location.reload() })
+}
+
+function _testStitchKey(key) {
+  fetch('https://api.stitch.ai/v1/ping', {
+    method: 'GET',
+    headers: { 'Authorization': 'Bearer ' + key }
+  }).then(function (res) {
+    if (res.ok) toast('\u2713 Stitch API key verified', 3000)
+    else toast('\u2717 Stitch API key invalid (HTTP ' + res.status + ')', 4000)
+  }).catch(function () {
+    toast('\u2717 Could not reach Stitch API', 4000)
+  })
+}
+
+export function _syncStitchGate() {
+  var btn = $('pt-stitch-btn')
+  if (!btn) return
+  var hasKey = !!ST.stitchKey
+  btn.classList.toggle('pt-locked', !hasKey)
+  btn.title = hasKey ? 'Stitch-Claude Chat Builder \u00B7 Flawless Pipeline' : 'Requires Stitch API key'
 }
