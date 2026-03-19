@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradBridge - Connecting Talent with Opportunity</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-blue: #2563eb;
+            --dark-blue: #1e40af;
+            --light-blue: #3b82f6;
+            --accent-purple: #7c3aed;
+            --bg-dark: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --success-green: #10b981;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: clamp(1.25rem, 2vw, 1.5rem);
+            font-weight: 700;
+            color: var(--primary-blue);
+            cursor: pointer;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            padding: 0.5rem 0;
+            aria-label: "Navigate to page section";
+            role: "button";
+        }
+        
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-size: clamp(0.875rem, 1.5vw, 1rem);
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--primary-blue);
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-secondary) 100%);
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            min-height: 48px;
+        }
+        
+        /* Stats Section */
+        .stats {
+            padding: 4rem 2rem;
+            background: var(--bg-secondary);
+        }
+        
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        
+        .stat-item h3 {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-item p {
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 2vw, 1.1rem);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+        }
+        
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            will-change: opacity, transform;
+        }
+        
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-blue);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+        
+        .steps-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .step.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .step h3 {
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            margin-bottom: 1rem;
+        }
+        
+        .step p {
+            color: var(--text-secondary);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            line-height: 1.6;
+        }
+        
+        /* CTA Section */
+        .cta {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        }
+        
+        .cta h2 {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--bg-dark);
+            padding: 3rem 2rem 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .footer-section h4 {
+            font-size: clamp(1.1rem, 2vw, 1.2rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            padding: 0.25rem 0;
+            display: inline-block;
+        }
+        
+        .footer-section ul li a:hover {
+            color: var(--text-primary);
+        }
+        
+        .footer-section p {
+            color: var(--text-secondary);
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            line-height: 1.6;
+        }
+        
+        .footer-bottom {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: clamp(0.875rem, 1.5vw, 1rem);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Focus Styles for Accessibility */
+        .btn:focus,
+        .nav-links a:focus,
+        .mobile-menu-toggle:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-dark);
+                flex-direction: column;
+                padding: 1rem;
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .auth-buttons {
+                gap: 0.5rem;
+            }
+            
+            .btn {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
+            }
+            
+            .hero {
+                padding: 6rem 1rem 3rem;
+                min-height: 80vh;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .btn-large {
+                width: 100%;
+                max-width: 280px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .steps {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            nav {
+                padding: 1rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero {
+                padding: 5rem 1rem 2rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .features,
+            .how-it-works,
+            .cta {
+                padding: 4rem 1rem;
+            }
+            
+            .feature-card,
+            .step {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (min-width: 1280px) {
+            .hero-content,
+            .features-container,
+            .steps-container {
+                max-width: 1200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">GradBridge</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#features" aria-label="Navigate to Features section">Features</a></li>
+                <li><a href="#how-it-works" aria-label="Navigate to How It Works section">How It Works</a></li>
+                <li><a href="#pricing" aria-label="Navigate to Pricing section">Pricing</a></li>
+                <li><a href="#about" aria-label="Navigate to About section">About</a></li>
+                <li><a href="#contact" aria-label="Navigate to Contact section">Contact</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <a href="#" class="btn btn-secondary">Sign In</a>
+                <a href="#" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Bridge the Gap Between Talent and Opportunity</h1>
+                <p>Connect with top employers, showcase your skills, and land your dream job. GradBridge makes career transitions seamless for new graduates and career changers.</p>
+                <div class="hero-buttons">
+                    <a href="#" class="btn btn-primary btn-large">Find Your Dream Job</a>
+                    <a href="#" class="btn btn-secondary btn-large">Post a Job</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stats-container">
+                <div class="stat-item">
+                    <h3>50K+</h3>
+                    <p>Active Job Seekers</p>
+                </div>
+                <div class="stat-item">
+                    <h3>2,500+</h3>
+                    <p>Partner Companies</p>
+                </div>
+                <div class="stat-item">
+                    <h3>95%</h3>
+                    <p>Success Rate</p>
+                </div>
+                <div class="stat-item">
+                    <h3>30 Days</h3>
+                    <p>Average Time to Hire</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="features-container">
+                <div class="section-header">
+                    <h2>Why Choose GradBridge?</h2>
+                    <p>We provide comprehensive tools and resources to help you succeed in your career journey</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Smart Job Matching</h3>
+                        <p>Our AI-powered algorithm matches you with jobs that align with your skills, experience, and career goals for better success rates.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Skill Assessment</h3>
+                        <p>Take comprehensive skill assessments to showcase your abilities and get personalized recommendations for improvement.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤝</div>
+                        <h3>Mentorship Program</h3>
+                        <p>Connect with industry professionals and experienced mentors who can guide you through your career transition.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h3>Learning Resources</h3>
+                        <p>Access curated courses, workshops, and resources to upskill and stay competitive in your field.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💼</div>
+                        <h3>Portfolio Builder</h3>
+                        <p>Create stunning portfolios and resumes with our professional templates and showcase your best work.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Global Network</h3>
+                        <p>Join a community of professionals, alumni, and industry leaders from around the world.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works" id="how-it-works">
+            <div class="steps-container">
+                <div class="section-header">
+                    <h2>How It Works</h2>
+                    <p>Get started in three simple steps and land your dream job</p>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Create Your Profile</h3>
+                        <p>Build a comprehensive profile showcasing your skills, experience, and career aspirations with our easy-to-use tools.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Get Matched</h3>
+                        <p>Our smart algorithm analyzes your profile and matches you with relevant job opportunities from our partner companies.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Land Your Job</h3>
+                        <p>Apply to matched positions, connect with employers, and get support throughout the interview process until you land your dream job.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <h2>Ready to Bridge Your Career Gap?</h2>
+            <p>Join thousands of successful professionals who found their dream jobs through GradBridge</p>
+            <a href="#" class="btn btn-secondary btn-large">Start Your Journey Today</a>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>GradBridge</h4>
+                <p>Connecting talent with opportunity. Building bridges to successful careers.</p>
+            </div>
+            <div class="footer-section">
+                <h4>For Job Seekers</h4>
+                <ul>
+                    <li><a href="#">Browse Jobs</a></li>
+                    <li><a href="#">Career Resources</a></li>
+                    <li><a href="#">Skill Assessments</a></li>
+                    <li><a href="#">Resume Builder</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>For Employers</h4>
+                <ul>
+                    <li><a href="#">Post Jobs</a></li>
+                    <li><a href="#">Find Talent</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#">Success Stories</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 GradBridge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // State management with localStorage persistence
+        const state = {
+            mobileMenuOpen: false,
+            currentSection: 'hero',
+            animatedElements: new Set(),
+            isLoaded: false,
+            userPreferences: JSON.parse(localStorage.getItem('gradbridge-preferences')) || {
+                theme: 'dark',
+                reducedMotion: false,
+                visitCount: 0
+            }
+        };
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('gradbridge-preferences', JSON.stringify(state.userPreferences));
+            localStorage.setItem('gradbridge-session', JSON.stringify({
+                currentSection: state.currentSection,
+                timestamp: Date.now()
+            }));
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserPreferences();
+            initializeApp();
+            setupEventListeners();
+            setupScrollAnimations();
+            setupIntersectionObserver();
+            
+            // Mark as loaded
+            state.isLoaded = true;
+            document.body.classList.add('loaded');
+            
+            // Update visit count
+            state.userPreferences.visitCount++;
+            saveState();
+        });
+
+        function loadUserPreferences() {
+            // Restore session if recent
+            const session = JSON.parse(localStorage.getItem('gradbridge-session') || '{}');
+            if (session.timestamp && Date.now() - session.timestamp < 3600000) { // 1 hour
+                state.currentSection = session.currentSection || 'hero';
+            }
+            
+            // Apply user preferences
+            if (state.userPreferences.reducedMotion) {
+                document.documentElement.style.setProperty('--animation-duration', '0.01ms');
+            }
+        }
+
+        function initializeApp() {
+            // Add loading animation to hero content
+            const heroContent = document.querySelector('.hero-content');
+            if (heroContent) {
+                heroContent.classList.add('loading');
+            }
+
+            // Initialize header scroll effect
+            updateHeaderOnScroll();
+            
+            // Set initial active nav link
+            updateActiveNavLink();
+        }
+
+        function setupEventListeners() {
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navLinks = document.getElementById('navLinks');
+
+            if (mobileMenuToggle && navLinks) {
+                mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!mobileMenuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', handleSmoothScroll);
+            });
+
+            // Header scroll effect
+            window.addEventListener('scroll', throttle(updateHeaderOnScroll, 16));
+            
+            // Update active nav link on scroll
+            window.addEventListener('scroll', throttle(updateActiveNavLink, 100));
+
+            // Keyboard navigation
+            document.addEventListener('keydown', handleKeyboardNavigation);
+
+            // Button interactions
+            setupButtonInteractions();
+
+            // Save state on page unload
+            window.addEventListener('beforeunload', saveState);
+        }
+
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            
+            state.mobileMenuOpen = !state.mobileMenuOpen;
+            navLinks.classList.toggle('active', state.mobileMenuOpen);
+            
+            // Update toggle button text
+            mobileMenuToggle.textContent = state.mobileMenuOpen ? '✕' : '☰';
+            mobileMenuToggle.setAttribute('aria-expanded', state.mobileMenuOpen);
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = state.mobileMenuOpen ? 'hidden' : '';
+        }
+
+        function closeMobileMenu() {
+            if (state.mobileMenuOpen) {
+                const navLinks = document.getElementById('navLinks');
+                const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                
+                state.mobileMenuOpen = false;
+                navLinks.classList.remove('active');
+                mobileMenuToggle.textContent = '☰';
+                mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleSmoothScroll(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const target = document.querySelector(targetId);
+            
+            if (target) {
+                const headerHeight = document.querySelector('header').offsetHeight;
+                const targetPosition = target.offsetTop - headerHeight - 20;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // Update state
+                state.currentSection = targetId.substring(1);
+                saveState();
+                
+                // Close mobile menu
+                closeMobileMenu();
+            }
+        }
+
+        function updateHeaderOnScroll() {
+            const header = document.querySelector('header');
+            const scrollY = window.scrollY;
+            
+            if (scrollY > 100) {
+                header.style.background = 'rgba(15, 23, 42, 0.98)';
+                header.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
+            } else {
+                header.style.background = 'rgba(15, 23, 42, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        }
+
+        function updateActiveNavLink() {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+            const scrollY = window.scrollY;
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            let currentSection = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - headerHeight - 100;
+                const sectionBottom = sectionTop + section.offsetHeight;
+                
+                if (scrollY >= sectionTop && scrollY < sectionBottom) {
+                    currentSection = section.id;
+                }
+            });
+            
+            // Update active nav link
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href').substring(1);
+                if (href === currentSection) {
+                    link.style.color = 'var(--primary-blue)';
+                } else {
+                    link.style.color = 'var(--text-secondary)';
+                }
+            });
+            
+            state.currentSection = currentSection;
+        }
+
+        function setupScrollAnimations() {
+            // Animate stats on scroll
+            const observerOptions = {
+                threshold: 0.3,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !state.animatedElements.has(entry.target)) {
+                        animateElement(entry.target);
+                        state.animatedElements.add(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements for animation
+            document.querySelectorAll('.feature-card, .step, .stat-item').forEach(element => {
+                observer.observe(element);
+            });
+        }
+
+        function setupIntersectionObserver() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe feature cards and steps
+            document.querySelectorAll('.feature-card, .step').forEach(element => {
+                observer.observe(element);
+            });
+        }
+
+        function animateElement(element) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+            
+            // Add stagger effect for multiple elements
+            if (element.classList.contains('stat-item')) {
+                const statNumber = element.querySelector('h3');
+                if (statNumber) {
+                    animateCounter(statNumber);
+                }
+            }
+        }
+
+        function animateCounter(element) {
+            const target = parseInt(element.textContent.replace(/[^\d]/g, ''));
+            const duration = 2000;
+            const start = performance.now();
+            const suffix = element.textContent.replace(/[\d,]/g, '');
+            
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(target * easeOutQuart(progress));
+                
+                element.textContent = formatNumber(current) + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000) {
+                return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'K';
+            }
+            return num.toString();
+        }
+
+        function easeOutQuart(t) {
+            return 1 - (--t) * t * t * t;
+        }
+
+        function handleKeyboardNavigation(e) {
+            // Escape key closes mobile menu
+            if (e.key === 'Escape' && state.mobileMenuOpen) {
+                closeMobileMenu();
+            }
+            
+            // Tab navigation enhancement
+            if (e.key === 'Tab') {
+                // Ensure focus is visible
+                document.body.classList.add('keyboard-navigation');
+            }
+        }
+
+        function setupButtonInteractions() {
+            // Add click effects to buttons
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s ease-out;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+
+            // Handle CTA button clicks
+            document.querySelectorAll('.hero-buttons .btn, .cta .btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Show loading state
+                    const originalText = this.textContent;
+                    this.textContent = 'Loading...';
+                    this.style.opacity = '0.7';
+                    
+                    // Simulate navigation/action
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.opacity = '1';
+                        
+                        // Show success feedback
+                        showNotification('Coming soon! Stay tuned for updates.', 'info');
+                    }, 1000);
+                });
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: ${type === 'info' ? 'var(--primary-blue)' : 'var(--success-green)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+                max-width: 300px;
+                font-size: 0.9rem;
+                line-height: 1.4;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Utility function for throttling
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+
+        // Add CSS animation for ripple effect
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+            
+            .keyboard-navigation *:focus {
+                outline: 2px solid var(--primary-blue) !important;
+                outline-offset: 2px !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Performance optimization: Preload critical resources
+        window.addEventListener('load', function() {
+            // Preload images that might be needed
+            const imageUrls = [];
+            imageUrls.forEach(url => {
+                const link = document.createElement('link');
+                link.rel = 'preload';
+                link.as = 'image';
+                link.href = url;
+                document.head.appendChild(link);
+            });
+        });
+
+        // Error handling
+        window.addEventListener('error', function(e) {
+            console.error('Application error:', e.error);
+            // Could implement error reporting here
+        });
+
+        // Accessibility improvements
+        document.addEventListener('mousedown', () => {
+            document.body.classList.remove('keyboard-navigation');
+        });
+
+        // Handle reduced motion preference
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.style.setProperty('--animation-duration', '0.01ms');
+            state.userPreferences.reducedMotion = true;
+        }
+    </script>
+</body>
+</html>
