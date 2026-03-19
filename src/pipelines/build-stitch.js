@@ -19,29 +19,100 @@ import { persistBuildSession, clearBuildSession, clearPipelineCancel } from '../
 
 // --- Stitch API helpers ---
 
-var STITCH_API_BASE = 'https://api.stitch.ai/v1'
+var STITCH_MCP_URL = 'https://stitch.googleapis.com/mcp'
 
 function stitchHeaders() {
   return {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + ST.stitchKey
+    'X-Goog-Api-Key': ST.stitchKey
   }
 }
 
-function callStitchBlueprint(appDescription) {
-  return fetchWithRetry(STITCH_API_BASE + '/blueprint', {
+var _stitchProjectId = null
+
+function _mcpCall(method, params) {
+  return fetchWithRetry(STITCH_MCP_URL, {
     method: 'POST',
     headers: stitchHeaders(),
-    body: JSON.stringify({ description: appDescription, format: 'html' })
+    body: JSON.stringify({ jsonrpc: '2.0', method: method, params: params || {}, id: Date.now() })
   }, 120000).then(function (r) {
     if (!r.ok) {
       return r.json().catch(function () { return {} }).then(function (e) {
-        throw new Error('Stitch: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status))
+        var msg = (e.error && e.error.message) || 'HTTP ' + r.status
+        throw new Error('Stitch: ' + scrubKeys(msg))
       })
     }
     return r.json()
-  }).then(function (d) {
-    var html = d.html || d.scaffold || d.code || ''
+  }).then(function (rpc) {
+    if (rpc.error) {
+      throw new Error('Stitch: ' + scrubKeys(rpc.error.message || JSON.stringify(rpc.error)))
+    }
+    return rpc.result
+  })
+}
+
+function _ensureProject() {
+  if (_stitchProjectId) return Promise.resolve(_stitchProjectId)
+  return _mcpCall('tools/call', {
+    name: 'create_project',
+    arguments: { title: 'Builder App' }
+  }).then(function (result) {
+    var content = (result && result.content) || []
+    for (var i = 0; i < content.length; i++) {
+      if (content[i].type === 'text') {
+        try {
+          var parsed = JSON.parse(content[i].text)
+          _stitchProjectId = parsed.projectId || parsed.id || null
+        } catch (e) {
+          // Try extracting project ID from plain text
+          var match = (content[i].text || '').match(/[a-zA-Z0-9_-]{10,}/)
+          if (match) _stitchProjectId = match[0]
+        }
+      }
+    }
+    return _stitchProjectId
+  })
+}
+
+function callStitchBlueprint(appDescription) {
+  return _ensureProject().then(function (projectId) {
+    var args = { prompt: appDescription }
+    if (projectId) args.projectId = projectId
+    return _mcpCall('tools/call', {
+      name: 'generate_screen_from_text',
+      arguments: args
+    })
+  }).then(function (result) {
+    var content = (result && result.content) || []
+    var html = ''
+    for (var i = 0; i < content.length; i++) {
+      if (content[i].type === 'text') {
+        var text = content[i].text || ''
+        // Check if it contains HTML
+        if (text.indexOf('<') >= 0 && text.indexOf('>') >= 0) {
+          html = text
+          break
+        }
+        // Try parsing as JSON with html/code field
+        try {
+          var parsed = JSON.parse(text)
+          html = parsed.html || parsed.scaffold || parsed.code || parsed.screen || ''
+          if (html) break
+        } catch (e) { /* not JSON, continue */ }
+      }
+    }
+    // If no HTML found in text blocks, check for resource content
+    if (!html) {
+      for (var j = 0; j < content.length; j++) {
+        if (content[j].type === 'resource' && content[j].resource) {
+          var res = content[j].resource
+          if (res.mimeType && res.mimeType.indexOf('html') >= 0 && res.text) {
+            html = res.text
+            break
+          }
+        }
+      }
+    }
     if (!html || html.length < 50) {
       throw new Error('Stitch: Blueprint returned empty or invalid HTML')
     }
