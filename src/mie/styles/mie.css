@@ -990,6 +990,245 @@ body {
 .mie-comp-tab:hover { background: var(--mie-surface-hover); }
 .mie-comp-tab.active { background: rgba(255,60,172,0.1); color: var(--mie-accent); border-color: rgba(255,60,172,0.3); }
 
+/* Refresh bar */
+.mie-refresh-bar {
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--mie-border);
+  background: rgba(255,255,255,0.01);
+}
+.mie-refresh-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--mie-text-muted);
+  padding: 4px 0;
+}
+.mie-refresh-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.mie-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(61,90,254,0.1);
+  border: 1px solid rgba(61,90,254,0.25);
+  color: var(--mie-accent2);
+  font-family: var(--fb);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mie-refresh-btn:hover { background: rgba(61,90,254,0.18); }
+.mie-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.mie-refresh-icon { font-size: 14px; }
+.mie-refresh-ts {
+  font-size: 11px;
+  color: var(--mie-text-muted);
+  margin-left: auto;
+}
+.mie-refresh-dropdown-wrap {
+  position: relative;
+}
+.mie-refresh-section-btn {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--mie-surface);
+  border: 1px solid var(--mie-border);
+  color: var(--mie-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mie-refresh-section-btn:hover { background: var(--mie-surface-hover); }
+.mie-refresh-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: rgba(20,20,40,0.95);
+  border: 1px solid var(--mie-border-hover);
+  border-radius: 10px;
+  padding: 4px;
+  z-index: 200;
+  min-width: 160px;
+  backdrop-filter: blur(12px);
+}
+.mie-refresh-dropdown.open { display: block; }
+.mie-refresh-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--mie-text-secondary);
+  font-family: var(--fb);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.mie-refresh-dropdown-item:hover { background: var(--mie-surface-hover); color: var(--mie-text); }
+.mie-refresh-status {
+  font-size: 12px;
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mie-refresh-status.loading { color: var(--mie-accent2); }
+.mie-refresh-status.success { color: #00E676; }
+.mie-refresh-status.error { color: #FF5252; }
+
+/* Spinner */
+.mie-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(61,90,254,0.2);
+  border-top-color: var(--mie-accent2);
+  border-radius: 50%;
+  animation: mie-spin 0.7s linear infinite;
+}
+@keyframes mie-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Nav custom pages */
+.mie-nav-divider {
+  height: 1px;
+  background: var(--mie-border);
+  margin: 8px 16px;
+}
+.mie-nav-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mie-text-muted);
+  padding: 6px 16px 4px;
+}
+.mie-nav-custom-page {
+  position: relative;
+}
+.mie-nav-delete-btn {
+  display: none;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--mie-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+}
+.mie-nav-custom-page:hover .mie-nav-delete-btn { display: block; }
+.mie-nav-delete-btn:hover { color: #FF5252; background: rgba(255,82,82,0.1); }
+
+/* Page Creator */
+.mie-page-creator { max-width: 800px; margin: 0 auto; }
+.mie-page-input-row {
+  display: flex;
+  gap: 10px;
+}
+.mie-page-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: var(--mie-rs);
+  background: var(--mie-surface);
+  border: 1px solid var(--mie-border);
+  color: var(--mie-text);
+  font-family: var(--fb);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.mie-page-input:focus { border-color: var(--mie-accent); }
+.mie-page-input::placeholder { color: var(--mie-text-muted); }
+
+.mie-custom-page-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--mie-rs);
+  background: var(--mie-surface);
+  border: 1px solid var(--mie-border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mie-custom-page-item + .mie-custom-page-item { margin-top: 6px; }
+.mie-custom-page-item:hover { background: var(--mie-surface-hover); border-color: var(--mie-border-hover); }
+.mie-custom-page-info { flex: 1; min-width: 0; }
+.mie-custom-page-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mie-custom-page-date {
+  font-size: 10px;
+  color: var(--mie-text-muted);
+  margin-top: 2px;
+}
+.mie-custom-page-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.mie-page-action-btn {
+  background: none;
+  border: none;
+  color: var(--mie-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.mie-page-action-btn:hover { color: var(--mie-text); background: var(--mie-surface-hover); }
+
+/* Custom page view */
+.mie-custom-page-view { max-width: 900px; margin: 0 auto; }
+.mie-custom-page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.mie-custom-page-toolbar-right {
+  display: flex;
+  gap: 6px;
+}
+.mie-btn-sm {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+.mie-btn-danger { color: #FF5252; }
+.mie-btn-danger:hover { background: rgba(255,82,82,0.1); color: #FF5252; }
+.mie-custom-page-content {
+  padding: 20px;
+  background: var(--mie-glass);
+  border: 1px solid var(--mie-glass-border);
+  border-radius: var(--mie-r);
+  margin-top: 12px;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .mie-sidebar {

@@ -1,6 +1,7 @@
 // GradBridge Market Intelligence Engine — Main App
 import './styles/mie.css'
 import { renderNav } from './components/nav.js'
+import { renderRefreshBar } from './components/refresh-bar.js'
 import { renderDashboard } from './screens/dashboard.js'
 import { renderMarketMap } from './screens/market-map.js'
 import { renderCompetitorDetail } from './screens/competitor-detail.js'
@@ -8,11 +9,14 @@ import { renderGaps } from './screens/gaps.js'
 import { renderSentiment } from './screens/sentiment-screen.js'
 import { renderMessaging } from './screens/messaging.js'
 import { renderMatchTool } from './screens/match-tool.js'
+import { renderPageCreator, renderCustomPage } from './screens/page-creator.js'
+import { getCustomPages } from './lib/mie-data.js'
 
 var state = {
   screen: 'overview',
   mode: 'internal', // 'internal' | 'borrower'
   selectedCompetitor: null,
+  selectedPageId: null,
   sidebarOpen: false,
 }
 
@@ -25,12 +29,15 @@ var SCREEN_TITLES = {
   'sentiment': 'Sentiment Feed',
   'match-tool': 'Borrower Match Tool',
   'competitor-detail': 'Competitor Detail',
+  'page-creator': 'Page Creator',
+  'custom-page': 'Custom Page',
 }
 
 function navigate(screen, data) {
   state.screen = screen
   if (data) {
     if (data.competitor) state.selectedCompetitor = data.competitor
+    if (data.pageId) state.selectedPageId = data.pageId
   }
   render()
 }
@@ -50,15 +57,22 @@ function render() {
   var content = document.getElementById('mie-content')
   var title = document.getElementById('mie-header-title')
   var alertBadge = document.getElementById('mie-alert-badge')
+  var refreshBarEl = document.getElementById('mie-refresh-bar')
 
   // Update nav
-  renderNav(nav, state.screen, state.mode, function (screenId) {
-    navigate(screenId)
+  var customPages = getCustomPages()
+  renderNav(nav, state.screen, state.mode, function (screenId, data) {
+    navigate(screenId, data)
     closeSidebar()
-  })
+  }, customPages, state.selectedPageId)
 
   // Update title
-  title.textContent = SCREEN_TITLES[state.screen] || 'Overview'
+  if (state.screen === 'custom-page' && state.selectedPageId) {
+    var page = customPages.find(function (p) { return p.id === state.selectedPageId })
+    title.textContent = page ? page.prompt.substring(0, 40) + (page.prompt.length > 40 ? '...' : '') : 'Custom Page'
+  } else {
+    title.textContent = SCREEN_TITLES[state.screen] || 'Overview'
+  }
 
   // Show/hide alert badge
   alertBadge.style.display = state.mode === 'borrower' ? 'none' : ''
@@ -68,6 +82,9 @@ function render() {
   for (var i = 0; i < modeButtons.length; i++) {
     modeButtons[i].classList.toggle('active', modeButtons[i].dataset.mode === state.mode)
   }
+
+  // Render refresh bar
+  renderRefreshBar(refreshBarEl, function () { render() })
 
   // Render screen
   switch (state.screen) {
@@ -94,6 +111,12 @@ function render() {
       break
     case 'match-tool':
       renderMatchTool(content)
+      break
+    case 'page-creator':
+      renderPageCreator(content, navigate)
+      break
+    case 'custom-page':
+      renderCustomPage(content, state.selectedPageId, navigate)
       break
     default:
       renderDashboard(content, navigate)

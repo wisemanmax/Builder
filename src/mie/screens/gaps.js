@@ -1,8 +1,9 @@
 // Segment Gap Analysis Screen
-import { SEGMENTS } from '../data/segments.js'
+import { getSegments } from '../lib/mie-data.js'
 import { scoreBar } from '../components/score-bar.js'
 
 export function renderGaps(container) {
+  var SEGMENTS = getSegments()
   var sorted = SEGMENTS.slice().sort(function (a, b) { return b.opportunityScore - a.opportunityScore })
 
   var html = ''

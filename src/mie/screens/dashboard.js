@@ -1,9 +1,13 @@
 // Dashboard / Overview screen with leaderboard
-import { COMPETITORS, SCORE_DIMENSIONS, COMPETITIVE_ALERTS } from '../data/competitors.js'
+import { getCompetitors, getScoreDimensions, getAlerts } from '../lib/mie-data.js'
 import { scoreBar, scoreBadge } from '../components/score-bar.js'
 import { scoreColor } from '../lib/scoring.js'
 
 export function renderDashboard(container, navigate) {
+  var COMPETITORS = getCompetitors()
+  var SCORE_DIMENSIONS = getScoreDimensions()
+  var COMPETITIVE_ALERTS = getAlerts()
+
   // Sort competitors by composite score descending
   var sorted = COMPETITORS.slice().sort(function (a, b) { return b.scores.composite - a.scores.composite })
 
