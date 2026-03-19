@@ -220,13 +220,15 @@ function retryStage(fn, stageName, maxRetries, statusCallback) {
 // --- Stage implementations ---
 
 /**
- * Stage 1 — Intake
+ * Stage 1 — Intake (The Contract)
  * Pull Thought Engine output + user rules, prep full context payload.
+ * NEW: Generate a Data Mapping Schema to prevent Claude from guessing where data goes.
  */
 function runIntake(context) {
   var activeThought = context.activeThought || null
   var specText = 'No specification provided'
   var rulesText = 'No specific rules'
+  var dataMapping = []
 
   if (activeThought) {
     // Extract specification from thought brief
@@ -241,6 +243,9 @@ function runIntake(context) {
           + ', accent=' + (activeThought.brief.design.accent || 'blue')
           + ', layout=' + (activeThought.brief.design.layout || 'standard')
       }
+
+      // Generate Data Mapping Schema from features and brief
+      dataMapping = _generateDataMapping(activeThought.brief)
     }
 
     // Extract linked rules merged with profile global rules
@@ -261,9 +266,53 @@ function runIntake(context) {
     prompt: context.prompt,
     specText: specText,
     rulesText: rulesText,
+    dataMapping: dataMapping,
     activeThought: activeThought,
     appDescription: _buildAppDescription(context, specText, rulesText)
   }
+}
+
+/**
+ * Generate a Data Mapping Schema from the thought brief.
+ * Maps UI fields/features to their storage keys in localStorage/Supabase.
+ * This prevents Claude from inventing arbitrary data keys during hydration.
+ */
+function _generateDataMapping(brief) {
+  var mappings = []
+  var appName = (brief.name || 'app').toLowerCase().replace(/[^a-z0-9]/g, '_')
+
+  // Map each feature to a storage key
+  var features = brief.features || []
+  for (var i = 0; i < features.length; i++) {
+    var feature = features[i]
+    var slug = feature.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+    mappings.push({
+      uiElement: feature,
+      storageKey: appName + '_' + slug,
+      storageType: 'localStorage',
+      dataType: 'array'
+    })
+  }
+
+  // Map common UI patterns to standard keys
+  var whatItDoes = brief.whatItDoes || []
+  for (var j = 0; j < whatItDoes.length; j++) {
+    var action = whatItDoes[j].toLowerCase()
+    if (action.indexOf('user') >= 0 || action.indexOf('profile') >= 0 || action.indexOf('account') >= 0) {
+      mappings.push({ uiElement: 'User Profile', storageKey: appName + '_user_profile', storageType: 'localStorage', dataType: 'object' })
+    }
+    if (action.indexOf('setting') >= 0 || action.indexOf('preference') >= 0 || action.indexOf('config') >= 0) {
+      mappings.push({ uiElement: 'Settings', storageKey: appName + '_settings', storageType: 'localStorage', dataType: 'object' })
+    }
+    if (action.indexOf('list') >= 0 || action.indexOf('item') >= 0 || action.indexOf('task') >= 0 || action.indexOf('todo') >= 0) {
+      mappings.push({ uiElement: 'Items List', storageKey: appName + '_items', storageType: 'localStorage', dataType: 'array' })
+    }
+  }
+
+  // Always include app state key
+  mappings.push({ uiElement: 'App State', storageKey: appName + '_state', storageType: 'localStorage', dataType: 'object' })
+
+  return mappings
 }
 
 /**
@@ -295,9 +344,46 @@ var SYS_CLAUDE_BLUEPRINT = 'You are a senior UI engineer. Generate a clean, well
   + '\nThis scaffold will be enhanced with full logic in the next stage. Focus on creating a complete, beautiful UI shell.'
 
 /**
- * Stage 2 — Blueprint
+ * Extract the structural tag skeleton from HTML (tags only, no text/attributes content values).
+ * Used to generate a "clean copy" fingerprint for structure diffing in Stage 4.
+ */
+function _extractHtmlStructure(html) {
+  // Extract all opening and self-closing HTML tags with their tag names
+  var tags = html.match(/<\/?[a-zA-Z][a-zA-Z0-9]*[^>]*\/?>/g) || []
+  // Normalize: keep only tag names and key structural attributes (id, class, data-)
+  var structure = []
+  for (var i = 0; i < tags.length; i++) {
+    var tag = tags[i]
+    // Extract tag name
+    var nameMatch = tag.match(/^<\/?([a-zA-Z][a-zA-Z0-9]*)/)
+    if (!nameMatch) continue
+    var tagName = nameMatch[1].toLowerCase()
+    // Skip script/style content tags — we only care about DOM structure
+    if (tagName === 'script' || tagName === 'style') continue
+    structure.push(tag.replace(/\s+/g, ' ').trim())
+  }
+  return structure
+}
+
+/**
+ * Generate a simple hash of an array of strings for quick comparison.
+ */
+function _simpleHash(arr) {
+  var str = arr.join('|')
+  var hash = 0
+  for (var i = 0; i < str.length; i++) {
+    var ch = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + ch
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  return 'sh_' + Math.abs(hash).toString(36)
+}
+
+/**
+ * Stage 2 — Blueprint (Stitch)
  * Call Stitch API with app description → return HTML scaffold.
  * Falls back to Claude if Stitch API fails.
+ * NEW: Output is now LOCKED. Saves a clean copy + structural hash for Stage 4 diffing.
  */
 function runBlueprint(intakePayload) {
   return callStitchBlueprint(intakePayload.appDescription).catch(function (stitchErr) {
@@ -309,12 +395,24 @@ function runBlueprint(intakePayload) {
       }
       return html
     })
+  }).then(function (html) {
+    // Lock the blueprint: save clean copy structure for Stage 4 comparison
+    var structure = _extractHtmlStructure(html)
+    return {
+      html: html,
+      cleanCopy: {
+        structure: structure,
+        hash: _simpleHash(structure),
+        tagCount: structure.length
+      }
+    }
   })
 }
 
 /**
- * Stage 3 — Assemble
- * Pass Stitch HTML + full context to Claude Sonnet using SYS_STITCH_ENHANCE.
+ * Stage 3 — Assemble (Claude "Hydration")
+ * Pass Stitch HTML + full context + Data Mapping Schema to Claude using SYS_STITCH_ENHANCE.
+ * Claude is forbidden from adding new HTML tags — hydration only.
  */
 function runAssemble(stitchHTML, intakePayload) {
   var sys = SYS_STITCH_ENHANCE
@@ -329,10 +427,19 @@ function runAssemble(stitchHTML, intakePayload) {
     sys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + intakePayload.specText
   }
 
+  // Inject Data Mapping Schema so Claude knows exactly where data goes
+  if (intakePayload.dataMapping && intakePayload.dataMapping.length > 0) {
+    sys += '\n\nDATA MAPPING SCHEMA (use these exact keys — do NOT invent your own):\n'
+    for (var i = 0; i < intakePayload.dataMapping.length; i++) {
+      var m = intakePayload.dataMapping[i]
+      sys += '- UI: "' + m.uiElement + '" → storage: ' + m.storageType + '["' + m.storageKey + '"] (type: ' + m.dataType + ')\n'
+    }
+  }
+
   // Inject profile context (org identity, global rules, learned preferences)
   sys = injectProfileContext(sys)
 
-  var userMsg = 'STITCH BLUEPRINT (HTML scaffold to enhance with full logic):\n\n'
+  var userMsg = 'STITCH BLUEPRINT (LOCKED HTML scaffold — hydrate with logic, do NOT modify DOM structure):\n\n'
     + stitchHTML
     + '\n\nORIGINAL USER REQUEST:\n' + intakePayload.prompt
 
@@ -340,10 +447,15 @@ function runAssemble(stitchHTML, intakePayload) {
 }
 
 /**
- * Stage 4 — Verify
- * Run automated checks → return checksReport JSON.
+ * Stage 4 — Verify (Automated Guardrails)
+ * Run automated checks + Structure Diff → return checksReport JSON.
+ * NEW: Compares assembled HTML structure against Blueprint clean copy.
+ * If Claude added even one <div>, the build fails and loops back to Stage 3.
+ *
+ * @param {string} assembledHTML - The assembled HTML from Stage 3
+ * @param {Object} [blueprintCleanCopy] - The clean copy from Stage 2 { structure, hash, tagCount }
  */
-function runVerify(assembledHTML) {
+function runVerify(assembledHTML, blueprintCleanCopy) {
   // Run local static analysis checks
   var localChecks = runLocalChecks(assembledHTML)
 
@@ -390,9 +502,64 @@ function runVerify(assembledHTML) {
   var handlerMatches = assembledHTML.match(/addEventListener|onclick|onsubmit|onchange|oninput/gi)
   withHandlers = handlerMatches ? handlerMatches.length : 0
 
+  // --- Structure Diff: compare against Blueprint clean copy ---
+  var structureDiff = { passed: true, addedTags: [], removedTags: [], violations: 0 }
+
+  if (blueprintCleanCopy && blueprintCleanCopy.structure) {
+    var assembledStructure = _extractHtmlStructure(assembledHTML)
+    var assembledHash = _simpleHash(assembledStructure)
+
+    if (assembledHash !== blueprintCleanCopy.hash) {
+      // Hashes differ — find which tags were added/removed
+      var blueprintSet = {}
+      for (var bi = 0; bi < blueprintCleanCopy.structure.length; bi++) {
+        var bTag = blueprintCleanCopy.structure[bi]
+        blueprintSet[bTag] = (blueprintSet[bTag] || 0) + 1
+      }
+      var assembledSet = {}
+      for (var ai = 0; ai < assembledStructure.length; ai++) {
+        var aTag = assembledStructure[ai]
+        assembledSet[aTag] = (assembledSet[aTag] || 0) + 1
+      }
+
+      // Find added tags (in assembled but not in blueprint)
+      for (var tag in assembledSet) {
+        var diff = assembledSet[tag] - (blueprintSet[tag] || 0)
+        if (diff > 0) {
+          for (var d = 0; d < diff; d++) {
+            structureDiff.addedTags.push(tag.length > 80 ? tag.slice(0, 80) + '…' : tag)
+          }
+        }
+      }
+
+      // Find removed tags (in blueprint but not in assembled)
+      for (var rTag in blueprintSet) {
+        var rDiff = blueprintSet[rTag] - (assembledSet[rTag] || 0)
+        if (rDiff > 0) {
+          for (var rd = 0; rd < rDiff; rd++) {
+            structureDiff.removedTags.push(rTag.length > 80 ? rTag.slice(0, 80) + '…' : rTag)
+          }
+        }
+      }
+
+      structureDiff.violations = structureDiff.addedTags.length
+      if (structureDiff.violations > 0) {
+        structureDiff.passed = false
+      }
+    }
+  }
+
+  // Also detect STRUCTURAL_GAP comments left by Claude
+  var gapMatches = assembledHTML.match(/STRUCTURAL_GAP:\s*[^\n*]+/g) || []
+  var structuralGaps = gapMatches.map(function (g) {
+    return g.replace('STRUCTURAL_GAP:', '').trim()
+  })
+
   var failCount = localChecks.filter(function (c) { return !c.passed }).length
-  var totalCount = localChecks.length
-  var score = totalCount > 0 ? Math.round(((totalCount - failCount) / totalCount) * 100) : 100
+  // Structure violations count as failures too
+  if (!structureDiff.passed) failCount += structureDiff.violations
+  var totalCount = localChecks.length + (blueprintCleanCopy ? 1 : 0)
+  var score = totalCount > 0 ? Math.round(((totalCount - Math.min(failCount, totalCount)) / totalCount) * 100) : 100
 
   return {
     valid: htmlValidity.passed,
@@ -411,6 +578,8 @@ function runVerify(assembledHTML) {
       issues: (!(/DOMContentLoaded/.test(assembledHTML)) ? ['Missing DOMContentLoaded init'] : [])
         .concat(!(/localStorage/.test(assembledHTML)) ? ['Missing localStorage persistence'] : [])
     },
+    structureDiff: structureDiff,
+    structuralGaps: structuralGaps,
     summary: score >= 80 ? 'Good quality — ' + failCount + ' minor issues' : 'Needs attention — ' + failCount + ' issues found',
     localChecks: localChecks
   }
@@ -479,7 +648,16 @@ function populateReviewFindings(containerId, findings) {
  * Feed HTML + reviewFindings[] to Claude using SYS_STITCH_FIX1.
  * If critical findings existed, re-run Stage 4 checks — if issues remain fire SYS_STITCH_FIX2.
  */
-function runPolish(assembledHTML, reviewFindings) {
+/**
+ * Stage 6 — Polish (Claude "The Surgeon")
+ * Feed HTML + reviewFindings[] to Claude using Functional Patching.
+ * Claude locates specific functions/blocks and replaces only that logic.
+ *
+ * @param {string} assembledHTML
+ * @param {Array} reviewFindings
+ * @param {Object} [cleanCopy] - Blueprint clean copy for re-verification
+ */
+function runPolish(assembledHTML, reviewFindings, cleanCopy) {
   var hasCritical = reviewFindings.some(function (f) {
     return (f.severity || '').toLowerCase() === 'critical'
   })
@@ -493,15 +671,15 @@ function runPolish(assembledHTML, reviewFindings) {
   }
 
   var findingsText = JSON.stringify(reviewFindings, null, 2)
-  var userMsg = 'REVIEW FINDINGS:\n' + findingsText + '\n\nHTML APP TO FIX:\n\n' + assembledHTML.slice(0, 60000)
+  var userMsg = 'REVIEW FINDINGS (apply Functional Patching — fix ONLY the specific functions/blocks listed):\n' + findingsText + '\n\nHTML APP TO PATCH:\n\n' + assembledHTML.slice(0, 60000)
   var sys = injectProfileContext(SYS_STITCH_FIX1)
 
   return callClaude(sys, userMsg, 0.2).then(function (patchedV1) {
     if (!hasCritical) {
       return { html: patchedV1, secondPass: false }
     }
-    // Re-run Stage 4 checks on patched v1
-    var recheck = runVerify(patchedV1)
+    // Re-run Stage 4 checks on patched v1 (with structure diff)
+    var recheck = runVerify(patchedV1, cleanCopy)
     var stillHasIssues = recheck.score < 80
 
     if (!stillHasIssues) {
@@ -510,7 +688,7 @@ function runPolish(assembledHTML, reviewFindings) {
 
     // Second pass repair
     var recheckText = JSON.stringify(recheck, null, 2)
-    var userMsg2 = 'REMAINING ISSUES (from re-verification):\n' + recheckText + '\n\nHTML APP:\n\n' + patchedV1.slice(0, 60000)
+    var userMsg2 = 'REMAINING ISSUES (from re-verification — apply Functional Patching):\n' + recheckText + '\n\nHTML APP:\n\n' + patchedV1.slice(0, 60000)
     var sys2 = injectProfileContext(SYS_STITCH_FIX2)
 
     return callClaude(sys2, userMsg2, 0.2).then(function (finalHTML) {
@@ -570,6 +748,65 @@ function notifyUser(title, body) {
   } catch (e) { /* notifications not available */ }
 }
 
+/**
+ * Generate a Build Manifest summarizing which requirements were met,
+ * structural gaps identified, and overall build quality.
+ */
+function _generateBuildManifest(intakePayload, checksReport, reviewFindings, cleanCopy) {
+  var manifest = {
+    timestamp: new Date().toISOString(),
+    requirementsMet: [],
+    requirementsPartial: [],
+    structuralGaps: [],
+    qualityScore: checksReport ? checksReport.score : 0,
+    structureIntegrity: 'unknown',
+    reviewFindingsSummary: { critical: 0, warning: 0, info: 0, total: 0 }
+  }
+
+  // Map features to requirement status
+  var brief = (intakePayload.activeThought && intakePayload.activeThought.brief) || {}
+  var features = brief.features || []
+  var whatItDoes = brief.whatItDoes || []
+
+  // All features from the brief are "requirements"
+  var allReqs = features.concat(whatItDoes)
+  for (var i = 0; i < allReqs.length; i++) {
+    manifest.requirementsMet.push(allReqs[i])
+  }
+
+  // Structural gaps from STRUCTURAL_GAP comments in the code
+  if (checksReport && checksReport.structuralGaps) {
+    manifest.structuralGaps = checksReport.structuralGaps
+    // Move any gapped requirements from "met" to "partial"
+    for (var g = 0; g < manifest.structuralGaps.length; g++) {
+      var gap = manifest.structuralGaps[g].toLowerCase()
+      for (var r = manifest.requirementsMet.length - 1; r >= 0; r--) {
+        if (manifest.requirementsMet[r].toLowerCase().indexOf(gap.split(' ')[0]) >= 0) {
+          manifest.requirementsPartial.push(manifest.requirementsMet.splice(r, 1)[0] + ' (structural gap — missing from blueprint)')
+        }
+      }
+    }
+  }
+
+  // Structure integrity
+  if (cleanCopy && checksReport && checksReport.structureDiff) {
+    manifest.structureIntegrity = checksReport.structureDiff.passed ? 'intact' : 'modified (' + checksReport.structureDiff.violations + ' violations)'
+  }
+
+  // Review findings summary
+  if (reviewFindings && reviewFindings.length) {
+    manifest.reviewFindingsSummary.total = reviewFindings.length
+    for (var f = 0; f < reviewFindings.length; f++) {
+      var sev = ((reviewFindings[f].severity || '') + '').toLowerCase()
+      if (sev === 'critical') manifest.reviewFindingsSummary.critical++
+      else if (sev === 'warning') manifest.reviewFindingsSummary.warning++
+      else manifest.reviewFindingsSummary.info++
+    }
+  }
+
+  return manifest
+}
+
 // --- Main pipeline orchestrator ---
 
 /**
@@ -616,10 +853,12 @@ export function runStitchPipeline(context, callbacks) {
 
   var intakePayload = null
   var stitchHTML = null
+  var blueprintCleanCopy = null
   var assembledHTML = null
   var checksReport = null
   var reviewFindings = null
   var finalHTML = null
+  var buildManifest = null
 
   // --- Halt handler ---
   function haltWithOptions(stageName, stageIndex, error) {
@@ -673,13 +912,16 @@ export function runStitchPipeline(context, callbacks) {
       prompt: intakePayload.prompt,
       specText: intakePayload.specText,
       rulesText: intakePayload.rulesText,
+      dataMappingCount: (intakePayload.dataMapping || []).length,
       hasThought: !!intakePayload.activeThought
     })
 
-    updateStage(0, 'passed', 'Context ready')
-    if (containerId) updateStitchStage(containerId, 0, PIPE5_STATUS.PASSED, 'Context ready')
-    updatePS(pid, 0, 'done', 'Context ready ✓')
-    addMsg({ role: 'asst', type: 'text', text: 'Intake complete — context payload assembled.' })
+    var mappingCount = (intakePayload.dataMapping || []).length
+    var intakeDetail = 'Context ready' + (mappingCount > 0 ? ' · ' + mappingCount + ' data mappings' : '')
+    updateStage(0, 'passed', intakeDetail)
+    if (containerId) updateStitchStage(containerId, 0, PIPE5_STATUS.PASSED, intakeDetail)
+    updatePS(pid, 0, 'done', intakeDetail + ' ✓')
+    addMsg({ role: 'asst', type: 'text', text: 'Intake complete — unified payload assembled' + (mappingCount > 0 ? ' with ' + mappingCount + ' data mappings.' : '.') })
 
     // ── Stage 2: Blueprint ──
     checkPipelineCancel()
@@ -696,18 +938,21 @@ export function runStitchPipeline(context, callbacks) {
       if (containerId) updateStitchStage(containerId, 1, PIPE5_STATUS.RUNNING, statusMsg)
       updatePS(pid, 1, 'active', statusMsg)
     })
-  }).then(function (html) {
-    stitchHTML = html
+  }).then(function (blueprintResult) {
+    stitchHTML = blueprintResult.html
+    blueprintCleanCopy = blueprintResult.cleanCopy
     storeInProgressiveLearner(runId, 'blueprint', {
       htmlLength: stitchHTML.length,
+      structureHash: blueprintCleanCopy.hash,
+      tagCount: blueprintCleanCopy.tagCount,
       preview: stitchHTML.slice(0, 500)
     })
 
-    updateStage(1, 'passed', 'Scaffold received (' + Math.round(stitchHTML.length / 1024) + 'KB)')
-    if (containerId) updateStitchStage(containerId, 1, PIPE5_STATUS.PASSED, 'Scaffold received')
-    updatePS(pid, 1, 'done', 'Blueprint ready ✓')
+    updateStage(1, 'passed', 'Scaffold locked (' + Math.round(stitchHTML.length / 1024) + 'KB · ' + blueprintCleanCopy.tagCount + ' tags)')
+    if (containerId) updateStitchStage(containerId, 1, PIPE5_STATUS.PASSED, 'Scaffold locked')
+    updatePS(pid, 1, 'done', 'Blueprint locked ✓')
 
-    // ── Stage 3: Assemble ──
+    // ── Stage 3: Assemble (Hydration) ──
     checkPipelineCancel()
     updateStage(2, 'running', 'Claude adding logic layer…')
     if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.RUNNING, 'Claude adding logic layer…')
@@ -733,7 +978,7 @@ export function runStitchPipeline(context, callbacks) {
     if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.PASSED, 'App assembled')
     updatePS(pid, 2, 'done', 'Assembly complete ✓')
 
-    // ── Stage 4: Verify ──
+    // ── Stage 4: Verify (Automated Guardrails) ──
     checkPipelineCancel()
     updateStage(3, 'running', 'Running verification checks…')
     if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, 'Running checks…')
@@ -743,7 +988,7 @@ export function runStitchPipeline(context, callbacks) {
 
     return retryStage(function () {
       return Promise.resolve().then(function () {
-        return runVerify(assembledHTML)
+        return runVerify(assembledHTML, blueprintCleanCopy)
       })
     }, 'Verify', 2, function (statusMsg) {
       updateStage(3, 'running', statusMsg)
@@ -754,10 +999,66 @@ export function runStitchPipeline(context, callbacks) {
     storeInProgressiveLearner(runId, 'verify', {
       score: checksReport.score,
       valid: checksReport.valid,
+      structureViolations: checksReport.structureDiff ? checksReport.structureDiff.violations : 0,
+      structuralGaps: (checksReport.structuralGaps || []).length,
       summary: checksReport.summary
     })
 
+    // --- Structure Diff violation loop-back ---
+    // If Claude added HTML tags, loop back to Stage 3 with a violation report (one retry)
+    if (checksReport.structureDiff && !checksReport.structureDiff.passed && !context._structureRetried) {
+      var violationCount = checksReport.structureDiff.violations
+      var addedTags = checksReport.structureDiff.addedTags.slice(0, 10)
+      addMsg({ role: 'asst', type: 'text', text: 'Structure violation: Claude added ' + violationCount + ' HTML tag(s). Re-running hydration with violation report…' })
+
+      updateStage(3, 'failed', violationCount + ' structure violation(s)')
+      if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.FAILED, violationCount + ' violation(s)')
+      context._structureRetried = true
+
+      // Re-run Stage 3 with violation report injected
+      updateStage(2, 'running', 'Re-hydrating (structure fix)…')
+      if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.RUNNING, 'Re-hydrating…')
+
+      var violationSys = SYS_STITCH_ENHANCE
+        + '\n\nSTRUCTURE VIOLATION REPORT — YOUR PREVIOUS OUTPUT FAILED:\n'
+        + 'You added ' + violationCount + ' HTML tags that were NOT in the blueprint. This is forbidden.\n'
+        + 'Tags you added (remove ALL of these):\n' + addedTags.map(function (t) { return '  - ' + t }).join('\n')
+        + '\n\nYou MUST return the scaffold HTML with ZERO new tags. Use only existing elements.'
+      violationSys = injectProfileContext(violationSys)
+
+      var violationMsg = 'STITCH BLUEPRINT (LOCKED — do NOT add tags):\n\n' + stitchHTML
+        + '\n\nYOUR PREVIOUS (REJECTED) OUTPUT:\n' + assembledHTML.slice(0, 30000)
+        + '\n\nORIGINAL USER REQUEST:\n' + intakePayload.prompt
+
+      return callClaude(violationSys, violationMsg, 0.2).then(function (retriedHTML) {
+        assembledHTML = retriedHTML
+        // Re-verify
+        checksReport = runVerify(assembledHTML, blueprintCleanCopy)
+
+        var statusDetail = 'Score: ' + checksReport.score + '/100'
+        if (checksReport.structureDiff && !checksReport.structureDiff.passed) {
+          statusDetail += ' (' + checksReport.structureDiff.violations + ' structural violation(s) remain)'
+        }
+        var verifyStatus = checksReport.score >= 60 ? 'passed' : 'failed'
+
+        updateStage(2, 'passed', 'Re-hydrated')
+        if (containerId) updateStitchStage(containerId, 2, PIPE5_STATUS.PASSED, 'Re-hydrated')
+        updateStage(3, verifyStatus, statusDetail)
+        if (containerId) updateStitchStage(containerId, 3, verifyStatus === 'passed' ? PIPE5_STATUS.PASSED : PIPE5_STATUS.FAILED, statusDetail)
+        updatePS(pid, 3, verifyStatus === 'passed' ? 'done' : 'warn', statusDetail)
+
+        if (checksReport.localChecks) {
+          addMsg({ role: 'asst', type: 'checks', checks: checksReport.localChecks })
+        }
+        addMsg({ role: 'asst', type: 'text', text: 'Re-verification: ' + checksReport.summary })
+        return checksReport
+      })
+    }
+
     var statusDetail = 'Score: ' + checksReport.score + '/100'
+    if (checksReport.structureDiff && checksReport.structureDiff.violations > 0) {
+      statusDetail += ' (' + checksReport.structureDiff.violations + ' structural violation(s))'
+    }
     var verifyStatus = checksReport.score >= 60 ? 'passed' : 'failed'
 
     updateStage(3, verifyStatus, statusDetail)
@@ -820,7 +1121,7 @@ export function runStitchPipeline(context, callbacks) {
     if (containerId) updateStitchEstimate(containerId, '< 1 min remaining')
 
     return retryStage(function () {
-      return runPolish(assembledHTML, reviewFindings)
+      return runPolish(assembledHTML, reviewFindings, blueprintCleanCopy)
     }, 'Polish', 2, function (statusMsg) {
       updateStage(5, 'running', statusMsg)
       if (containerId) updateStitchStage(containerId, 5, PIPE5_STATUS.RUNNING, statusMsg)
@@ -845,9 +1146,13 @@ export function runStitchPipeline(context, callbacks) {
 
     // ── Stage 7: Deliver ──
     checkPipelineCancel()
-    updateStage(6, 'running', 'Delivering…')
-    if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, 'Delivering…')
+    updateStage(6, 'running', 'Generating build manifest…')
+    if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.RUNNING, 'Generating manifest…')
     updatePS(pid, 6, 'active', 'Delivering…')
+
+    // Generate Build Manifest — tells the user exactly what was met and what gaps exist
+    buildManifest = _generateBuildManifest(intakePayload, checksReport, reviewFindings, blueprintCleanCopy)
+    storeInProgressiveLearner(runId, 'manifest', buildManifest)
 
     // Push to GitHub branch if configured
     if (hasGitHub) {
@@ -932,7 +1237,8 @@ export function runStitchPipeline(context, callbacks) {
     storeInProgressiveLearner(runId, 'deliver', {
       mode: mode,
       appId: appId,
-      appName: appName
+      appName: appName,
+      manifest: buildManifest
     })
 
     clearInterval(timerInterval)
@@ -964,6 +1270,35 @@ export function runStitchPipeline(context, callbacks) {
           break
         }
       }
+    }
+
+    // Show Build Manifest
+    if (buildManifest) {
+      var manifestHtml = '<div style="margin-top:8px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:11px">'
+        + '<div style="font-weight:700;color:rgba(255,255,255,.9);margin-bottom:6px">\uD83D\uDCCB Build Manifest</div>'
+      if (buildManifest.requirementsMet.length) {
+        manifestHtml += '<div style="color:rgba(255,255,255,.5);margin-bottom:3px">Requirements met:</div>'
+        for (var mi = 0; mi < buildManifest.requirementsMet.length; mi++) {
+          manifestHtml += '<div style="color:rgba(139,92,246,.8);padding-left:8px">\u2713 ' + esc(buildManifest.requirementsMet[mi]) + '</div>'
+        }
+      }
+      if (buildManifest.requirementsPartial.length) {
+        manifestHtml += '<div style="color:rgba(255,214,0,.6);margin-top:4px;margin-bottom:3px">Partial (structural gaps):</div>'
+        for (var pi = 0; pi < buildManifest.requirementsPartial.length; pi++) {
+          manifestHtml += '<div style="color:rgba(255,214,0,.5);padding-left:8px">\u26A0 ' + esc(buildManifest.requirementsPartial[pi]) + '</div>'
+        }
+      }
+      if (buildManifest.structuralGaps.length) {
+        manifestHtml += '<div style="color:rgba(255,82,82,.6);margin-top:4px;margin-bottom:3px">Structural gaps (missing from blueprint):</div>'
+        for (var gi = 0; gi < buildManifest.structuralGaps.length; gi++) {
+          manifestHtml += '<div style="color:rgba(255,82,82,.5);padding-left:8px">\u2717 ' + esc(buildManifest.structuralGaps[gi]) + '</div>'
+        }
+      }
+      manifestHtml += '<div style="color:rgba(255,255,255,.3);margin-top:6px;font-size:10px">'
+        + 'Quality: ' + buildManifest.qualityScore + '/100 \u00B7 Structure: ' + buildManifest.structureIntegrity
+        + ' \u00B7 Findings: ' + buildManifest.reviewFindingsSummary.critical + 'C/' + buildManifest.reviewFindingsSummary.warning + 'W/' + buildManifest.reviewFindingsSummary.info + 'I'
+        + '</div></div>'
+      addMsg({ role: 'asst', type: 'text', html: manifestHtml })
     }
 
     var g = grad(appCi)
