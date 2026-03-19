@@ -13,7 +13,10 @@ import { runPipeline2 } from '../pipelines/build-pipeline2.js'
 import { runWebsitePipeline } from '../pipelines/build-website.js'
 import { runWebsite2Pipeline } from '../pipelines/build-website2.js'
 import { runSelfUpdatePipeline } from '../pipelines/builder-plus.js'
-import { classifyIntent, callClaudeChat } from '../lib/ai.js'
+import { runStitchPipeline } from '../pipelines/build-stitch.js'
+import { renderStitchTracker, updateStitchStage, updateStitchEstimate, updateStitchTime } from '../components/stitch-tracker.js'
+import { classifyIntent, callClaudeChat, resetCostAccum } from '../lib/ai.js'
+import { clearPipelineCancel } from '../lib/state.js'
 
 // Pending images for next message (array of {base64, mediaType, name})
 var _pendingImages = []
@@ -203,7 +206,9 @@ export function sendMsg() {
 }
 
 function _runBuild(text, existing, customName, images) {
-  if (ST.pipelineMode === 'website2') {
+  if (ST.pipelineMode === 'stitch') {
+    _runStitchBuild(text, existing, customName, images)
+  } else if (ST.pipelineMode === 'website2') {
     runWebsite2Pipeline(text, existing, customName, images)
   } else if (ST.pipelineMode === 'website') {
     runWebsitePipeline(text, existing, customName, images)
@@ -214,6 +219,71 @@ function _runBuild(text, existing, customName, images) {
   }
   syncStopButton()
   _startStopBtnSync()
+}
+
+function _runStitchBuild(text, existing, customName, images) {
+  resetCostAccum()
+  clearPipelineCancel()
+  ST._building = true
+  var sb = $('send-btn'); if (sb) sb.disabled = true
+  var pid = 'sp' + Date.now()
+  var containerId = 'stitch-' + Date.now()
+
+  // Render the 7-stage tracker
+  addMsg({ role: 'asst', type: 'typing-pipeline' })
+  setTimeout(function () {
+    var typingEl = document.querySelector('.msg-typing-pipeline')
+    if (typingEl) typingEl.remove()
+    addMsg({ role: 'asst', type: 'text', html: '<div id="' + containerId + '"></div>' })
+    setTimeout(function () {
+      renderStitchTracker(containerId)
+
+      // Build context object
+      var activeThought = ST.activeThoughtId
+        ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId })
+        : null
+
+      var context = {
+        prompt: text,
+        activeThought: activeThought,
+        pid: pid,
+        containerId: containerId,
+        existingApp: existing,
+        customName: customName
+      }
+
+      var callbacks = {
+        updateStage: function (idx, status, detail) {
+          updateStitchStage(containerId, idx,
+            status === 'running' ? 'running' : status === 'passed' ? 'passed' : status === 'failed' ? 'failed' : 'running',
+            detail)
+        },
+        updateEstimate: function (text) {
+          updateStitchEstimate(containerId, text)
+        },
+        updateTime: function (text) {
+          updateStitchTime(containerId, text)
+        }
+      }
+
+      runStitchPipeline(context, callbacks).catch(function (err) {
+        ST._building = false
+        var sb2 = $('send-btn'); if (sb2) sb2.disabled = false
+        if (err.message === 'STITCH_HALT') {
+          var safeMsg = err.originalError || 'Pipeline halted'
+          addMsg({
+            role: 'asst', type: 'text',
+            html: '<strong>Pipeline halted at ' + esc(err.stageName || 'unknown') + '</strong>: ' + esc(safeMsg)
+              + '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">'
+              + '<button class="chip" onclick="chipSend(\'Retry from ' + esc(err.stageName || '') + '\')">🔄 (a) Retry</button>'
+              + '<button class="chip" onclick="document.querySelector(\'[data-mode=standard]\').click()">↩ (b) Standard pipeline</button>'
+              + '<button class="chip" onclick="void(0)">✕ (c) Abort</button>'
+              + '</div>'
+          })
+        }
+      })
+    }, 50)
+  }, 300)
 }
 
 function _handleChat(text, images) {
