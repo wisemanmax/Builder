@@ -129,9 +129,9 @@
         <div class="di-img" style="background:linear-gradient(135deg,#B44FFF,#3D5AFE)">&#x1F527;</div>
         <div class="di-lbl">Builder+</div>
       </div>
-      <div class="di" onclick="syncFromGitHub()">
-        <div class="di-img" style="background:rgba(255,255,255,.12)">&#x1F504;</div>
-        <div class="di-lbl">Sync</div>
+      <div class="di" onclick="openTemplates()">
+        <div class="di-img" style="background:linear-gradient(135deg,#FF3CAC,#784BA0)">&#x1F4C2;</div>
+        <div class="di-lbl">Templates</div>
       </div>
       <div class="di" onclick="openSettings()">
         <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
@@ -413,6 +413,29 @@
       </div>
     </div>
     <div class="ssfooter">The Builder &middot; Claude + GPT-4o + GitHub Pages &middot; PWA</div>
+  </div>
+</div>
+
+<!-- TEMPLATE GALLERY -->
+<div id="template-overlay">
+  <div class="ssheet">
+    <div class="ssh"></div>
+    <div class="sshead">
+      <span class="sshead-title">&#x1F4C2; Templates</span>
+      <button class="ssclose" id="tpl-sheet-close">&#x2715;</button>
+    </div>
+    <div class="tpl-sheet-body">
+      <div class="tpl-cats" id="tpl-sheet-cats"></div>
+      <div class="tpl-grid" id="tpl-sheet-grid"></div>
+    </div>
+  </div>
+  <div class="tpl-preview-overlay" id="tpl-sheet-preview" onclick="if(event.target===this)closeTplSheetPreview()">
+    <div class="tpl-preview-modal">
+      <div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-sheet-preview-name"></span><button class="tpl-preview-close" onclick="closeTplSheetPreview()">&#x2715;</button></div>
+      <div class="tpl-preview-frame" id="tpl-sheet-preview-frame"></div>
+      <div class="tpl-preview-info">Structural preview &mdash; AI fills in full content when built</div>
+      <div class="tpl-preview-actions"><button class="tpl-preview-use" id="tpl-sheet-preview-use">Use This Template</button></div>
+    </div>
   </div>
 </div>
 

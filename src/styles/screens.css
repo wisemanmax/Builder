@@ -116,6 +116,11 @@
 .btn-full:hover{transform:translateY(-1px)}
 .btn-full:active{transform:scale(.97)}
 
+/* TEMPLATE GALLERY OVERLAY */
+#template-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);backdrop-filter:blur(14px);display:none;align-items:flex-end}
+#template-overlay.on{display:flex}
+.tpl-sheet-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+
 /* SETTINGS */
 #settings-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);backdrop-filter:blur(14px);display:none;align-items:flex-end}
 #settings-overlay.on{display:flex}
