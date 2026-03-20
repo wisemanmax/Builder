@@ -106,6 +106,44 @@ export function formatBriefForPrompt(brief) {
 }
 
 /**
+ * Format a think engine brief with conversation highlights for richer context.
+ * Includes the structured spec from formatBriefForPrompt plus key user statements
+ * from the ideation conversation history.
+ */
+export function formatBriefWithConversation(thought) {
+  if (!thought) return 'No specification provided'
+  var specText = formatBriefForPrompt(thought.brief)
+  var conv = thought.conversation || []
+  if (!conv.length) return specText
+
+  // Extract substantive user messages (skip short ones and system markers)
+  var userMsgs = []
+  for (var i = 0; i < conv.length; i++) {
+    var c = conv[i]
+    if (c.role !== 'user') continue
+    var txt = (c.text || '').trim()
+    if (txt.length < 15) continue
+    if (txt.indexOf('[Round reset') === 0) continue
+    if (txt.indexOf('Round:') === 0) continue
+    if (txt === 'Confirmed. Lock in this specification.') continue
+    userMsgs.push(txt)
+  }
+
+  if (!userMsgs.length) return specText
+
+  // Sort by length descending and take top 5 most substantive
+  userMsgs.sort(function (a, b) { return b.length - a.length })
+  userMsgs = userMsgs.slice(0, 5)
+
+  var lines = [specText, '\n### IDEATION CONTEXT', 'Key points from the user\'s ideation session:']
+  for (var j = 0; j < userMsgs.length; j++) {
+    var excerpt = userMsgs[j].length > 200 ? userMsgs[j].slice(0, 200) + '\u2026' : userMsgs[j]
+    lines.push('- "' + excerpt + '"')
+  }
+  return lines.join('\n')
+}
+
+/**
  * Merge profile global rules with per-thought project rules.
  * Returns { mustRules, mustNotRules, niceToHave } merged arrays.
  */

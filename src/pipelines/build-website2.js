@@ -4,7 +4,7 @@ import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
 import { callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit, callGPTRaw2, callGPTMultiTurn2, callGPTWithStream, callGPTAudit2, resetCostAccum } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
-import { injectProfileContext } from '../lib/profile-context.js'
+import { injectProfileContext, formatBriefWithConversation, mergeRulesWithProfile } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
@@ -160,7 +160,27 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     updatePS(pid, 0, 'active', 'Analyzing site content and structure\u2026')
     var reconMsg = 'Analyze this website/site description and extract all content, navigation, branding, and structure. Build a CONTENT_MANIFEST of every stat, name, number, and claim found:\n\n' + prompt
     if (images && images.length) reconMsg += '\n\n[' + images.length + ' screenshot' + (images.length > 1 ? 's' : '') + ' attached \u2014 analyze the visual design, layout, colors, typography, and content from these images]'
-    return retryStep(function () { return _raw(SYS_WEB2_RECON, reconMsg, 6000, images) }, 2, 'Recon').then(function (raw) {
+
+    // Inject think engine spec and rules into recon
+    var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
+    var _specText = ''
+    var _rulesText = ''
+    var effectiveReconSys = SYS_WEB2_RECON
+    if (activeThought) {
+      if (activeThought.brief) {
+        _specText = formatBriefWithConversation(activeThought)
+        effectiveReconSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + _specText
+      }
+      var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
+      var merged = mergeRulesWithProfile(linkedRules)
+      if (merged.mustRules.length || merged.mustNotRules.length) {
+        _rulesText = 'MUST DO:\n' + merged.mustRules.map(function (r) { return '- ' + r }).join('\n')
+          + '\nMUST NOT DO:\n' + merged.mustNotRules.map(function (r) { return '- ' + r }).join('\n')
+        if (merged.niceToHave.length) _rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
+        effectiveReconSys += '\n\nUSER RULES (follow these constraints strictly):\n' + _rulesText
+      }
+    }
+    return retryStep(function () { return _raw(effectiveReconSys, reconMsg, 6000, images) }, 2, 'Recon').then(function (raw) {
       reconJSON = raw
       updatePS(pid, 0, 'done', 'Recon complete \u2713'); _persistProgress(0)
       addMsg({ role: 'asst', type: 'text', text: 'Site content, structure, and content manifest extracted.' })
@@ -227,9 +247,27 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
     if (images && images.length) buildMsg += '\n\n[' + images.length + ' screenshot' + (images.length > 1 ? 's' : '') + ' attached \u2014 replicate the visual design as closely as possible]'
 
+    // Inject think engine context into build system prompt
+    var effectiveBuildSys = existingApp ? SYS_WEB2_UPDATE : SYS_WEB2_BUILD
+    if (activeThought) {
+      if (_rulesText) effectiveBuildSys += '\n\nUSER RULES (follow these constraints strictly):\n' + _rulesText
+      if (_specText) effectiveBuildSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + _specText
+      if (!existingApp && activeThought.brief) {
+        buildMsg = 'BUILD THIS WEBSITE: ' + (activeThought.brief.name || customName || 'My Site')
+          + '\n\nAdditional notes from user: ' + prompt
+          + '\n\nCONTEXT: Single-file HTML website with multi-page routing via showPage(). All pages in one file.'
+          + '\n\nRECON DATA (SOURCE CONTENT \u2014 use this, do not invent):\n' + reconJSON
+          + '\n\nBRAND TOKENS:\n' + brandJSON
+          + '\n\nSTRUCTURE MAP:\n' + structureJSON
+          + '\n\nDESIGN DECISIONS:\n' + designJSON
+        if (images && images.length) buildMsg += '\n\n[' + images.length + ' screenshot' + (images.length > 1 ? 's' : '') + ' attached \u2014 replicate the visual design as closely as possible]'
+      }
+    }
+    effectiveBuildSys = injectProfileContext(effectiveBuildSys)
+
     var charCount = 0
     thinkingText = ''
-    return _buildStream(existingApp ? SYS_WEB2_UPDATE : SYS_WEB2_BUILD, buildMsg, 4000, function (type, text) {
+    return _buildStream(effectiveBuildSys, buildMsg, 4000, function (type, text) {
       if (type === 'text') { charCount += text.length; updatePS(pid, 4, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
@@ -246,6 +284,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     var totalFixed = 0
     var repairHistory = []
     var fixSys = SYS_WEB2_FIX.replace('{RECON}', reconJSON)
+    if (_rulesText) fixSys += '\n\nUSER RULES (follow these constraints strictly):\n' + _rulesText
 
     function runValidationPass() {
       passNum++
