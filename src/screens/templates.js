@@ -63,8 +63,17 @@ function closeTplSheetPreview() {
   var overlay = $('tpl-sheet-preview')
   if (!overlay) return
   overlay.classList.remove('on')
+  var modal = overlay.querySelector('.tpl-preview-modal')
+  if (modal) modal.classList.remove('fullscreen')
   var frame = $('tpl-sheet-preview-frame')
   if (frame) frame.innerHTML = ''
+}
+
+function toggleTplSheetPreviewFullscreen() {
+  var overlay = $('tpl-sheet-preview')
+  if (!overlay) return
+  var modal = overlay.querySelector('.tpl-preview-modal')
+  if (modal) modal.classList.toggle('fullscreen')
 }
 
 function filterTemplates(cat) {
@@ -82,4 +91,5 @@ function filterTemplates(cat) {
 window.selectTemplate = selectTemplate
 window.openTplSheetPreview = openTplSheetPreview
 window.closeTplSheetPreview = closeTplSheetPreview
+window.toggleTplSheetPreviewFullscreen = toggleTplSheetPreviewFullscreen
 window._tplSheetFilter = filterTemplates
