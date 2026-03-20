@@ -401,7 +401,7 @@ export function callGPTThink(sys, messages, maxTokens) {
   return fetchWithRetry(OPENAI_API_URL, {
     method: 'POST',
     headers: gptHeaders(),
-    body: JSON.stringify({ model: GPT_THINK_MODEL, max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }].concat(messages) }),
+    body: JSON.stringify({ model: GPT_THINK_MODEL, max_completion_tokens: maxTokens, messages: [{ role: 'system', content: sys }].concat(messages) }),
   }, 120000).then(handleGPTError).then(function (d) {
     trackUsage('GPT Think', GPT_THINK_MODEL, d.usage)
     return stripFences(extractGPTText(d))
