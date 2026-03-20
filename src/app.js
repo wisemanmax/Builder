@@ -13,7 +13,7 @@ import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
 import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, templateSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle, checkInterruptedBuild, recoverInterruptedBuild, dismissRecovery, stopPipeline } from './screens/build.js'
 import { openBuildHistory, closeBuildHistory, initBuildHistory } from './screens/build-history.js'
-import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, initThinkSheet } from './screens/think.js'
+import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, confirmThinkBrief, editThinkBrief, initThinkSheet } from './screens/think.js'
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
 import { openSettings, initSettings } from './screens/settings.js'
@@ -191,6 +191,8 @@ export function init() {
   window.thinkOptionSelect = thinkOptionSelect
   window.finishThink = finishThink
   window.refineThink = refineThink
+  window.confirmThinkBrief = confirmThinkBrief
+  window.editThinkBrief = editThinkBrief
   window.sendThinkMsg = sendThinkMsg
   window.studioSend = studioSend
   window.studioSetFullscreen = studioSetFullscreen

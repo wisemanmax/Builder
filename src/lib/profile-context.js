@@ -70,6 +70,42 @@ export function injectProfileContext(sysPrompt) {
 }
 
 /**
+ * Format a think engine brief into structured markdown for injection into build prompts.
+ * Preserves all fields including technical constraints that were previously lost.
+ */
+export function formatBriefForPrompt(brief) {
+  if (!brief) return 'No specification provided'
+  var lines = []
+  lines.push('## APP SPECIFICATION')
+  lines.push('**Name:** ' + (brief.name || 'App'))
+  if (brief.audience) lines.push('**Audience:** ' + brief.audience)
+  if (brief.whatItDoes && brief.whatItDoes.length) {
+    lines.push('\n### MUST BUILD')
+    for (var i = 0; i < brief.whatItDoes.length; i++) lines.push('- ' + brief.whatItDoes[i])
+  }
+  if (brief.features && brief.features.length) {
+    lines.push('\n### KEY FEATURES')
+    for (var j = 0; j < brief.features.length; j++) lines.push('- ' + brief.features[j])
+  }
+  if (brief.whatItWontDo && brief.whatItWontDo.length) {
+    lines.push('\n### MUST EXCLUDE')
+    for (var k = 0; k < brief.whatItWontDo.length; k++) lines.push('- ' + brief.whatItWontDo[k])
+  }
+  if (brief.design) {
+    lines.push('\n### DESIGN SYSTEM')
+    if (brief.design.theme) lines.push('- Theme: ' + brief.design.theme)
+    if (brief.design.accent) lines.push('- Accent: ' + brief.design.accent)
+    if (brief.design.layout) lines.push('- Layout: ' + brief.design.layout)
+  }
+  if (brief.technical) {
+    lines.push('\n### TECHNICAL')
+    if (brief.technical.storage) lines.push('- Storage: ' + brief.technical.storage)
+    if (brief.technical.offline !== undefined) lines.push('- Offline: ' + brief.technical.offline)
+  }
+  return lines.join('\n')
+}
+
+/**
  * Merge profile global rules with per-thought project rules.
  * Returns { mustRules, mustNotRules, niceToHave } merged arrays.
  */
