@@ -1,6 +1,6 @@
 import { ST, persist, saveKeys } from '../lib/state.js'
 import { hydrateBuildSession, clearBuildSession, requestPipelineCancel } from '../lib/state.js'
-import { $, esc, toast, autoResize } from '../lib/utils.js'
+import { $, esc, escAttr, toast, autoResize } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS, PIPE5_NAMES, PIPE5_ICONS } from '../config/constants.js'
 import { _syncStitchGate } from './settings.js'
@@ -32,7 +32,7 @@ function _renderImagePreviews() {
   var html = ''
   for (var i = 0; i < _pendingImages.length; i++) {
     html += '<div class="img-thumb" data-idx="' + i + '">'
-      + '<img src="data:' + _pendingImages[i].mediaType + ';base64,' + _pendingImages[i].base64 + '" alt="' + esc(_pendingImages[i].name) + '">'
+      + '<img src="data:' + _pendingImages[i].mediaType + ';base64,' + _pendingImages[i].base64 + '" alt="' + escAttr(_pendingImages[i].name) + '">'
       + '<button class="img-thumb-rm" data-idx="' + i + '">&times;</button>'
       + '</div>'
   }

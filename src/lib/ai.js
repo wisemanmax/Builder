@@ -342,20 +342,6 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
 
   var _streamUsage = {}
 
-  function attemptStream(n) {
-    return _nativeFetch.call(window, url, opts).then(handleClaudeError)
-    .then(function (r) {
-      // handleClaudeError returns parsed JSON for ok responses, but for streaming
-      // we need the raw response — re-fetch approach kept for consistency
-      return r
-    }).catch(function () {
-      // For streaming, we need the raw response body, not parsed JSON
-      // Re-do the fetch to get the stream
-      return null
-    })
-  }
-
-  // Streaming needs raw response, not JSON-parsed — use direct fetch
   function attemptStreamDirect(n) {
     return _nativeFetch.call(window, url, opts).then(function (r) {
       if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) { throw new Error('Claude: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status)) })

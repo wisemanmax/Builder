@@ -1,0 +1,240 @@
+/* ======== DESKTOP RESPONSIVE LAYOUT ======== */
+/* Breakpoints: 768px (tablet), 1024px (desktop), 1440px (wide desktop) */
+
+/* --- Tablet and up (768px+) --- */
+@media (min-width: 768px) {
+  /* App grid: 6 columns on tablet */
+  .app-grid { grid-template-columns: repeat(6, 1fr); gap: 22px 12px; padding: 16px 24px 20px }
+
+  /* Larger app icons */
+  .aicon-img { width: 72px; height: 72px; border-radius: 18px; font-size: 32px }
+  .aicon-label { max-width: 80px; font-size: 12px }
+
+  /* Home header spacing */
+  .home-hdr { padding: 14px 28px 6px }
+  .statusbar { padding: 16px 28px 0 }
+
+  /* Dock: centered, auto-width */
+  .dock { margin: 0 auto 28px; max-width: 520px; padding-bottom: env(safe-area-inset-bottom, 0px) }
+  .dock-inner { padding: 14px 24px; border-radius: 28px }
+  .di-img { width: 52px; height: 52px; border-radius: 15px; font-size: 23px }
+  .di-lbl { font-size: 11px }
+  .di { padding: 6px 14px }
+
+  /* Bottom sheets: max-width centered, not full width */
+  .bs { max-width: 680px; margin: 0 auto; border-radius: 26px 26px 0 0 }
+  .psheet { max-width: 640px; margin: 0 auto }
+  .ssheet { max-width: 580px; margin: 0 auto }
+  .bh-sheet { max-width: 640px; margin: 0 auto }
+
+  /* Builder sheet: taller on bigger screens */
+  .bs { max-height: 92dvh }
+
+  /* Chat bubbles: wider max-width */
+  .ubub { max-width: 65% }
+  .awrap { max-width: 85% }
+
+  /* Onboarding card wider */
+  .ob-wrap { max-width: 520px; padding: 64px 32px 56px }
+
+  /* Context menu wider */
+  #ctx-menu { min-width: 200px }
+
+  /* Settings card: bigger padding */
+  .ssbody { padding: 20px 24px }
+  .sscard { padding: 18px }
+
+  /* Project sheet body */
+  .psh-body { padding: 20px 24px }
+
+  /* Viewer bar */
+  .vbar { gap: 12px; padding: max(16px, env(safe-area-inset-top, 16px)) 20px 12px }
+  .vbar-btn { padding: 8px 16px; font-size: 12px }
+
+  /* Studio editor taller */
+  #studio-editor { height: 260px }
+
+  /* Template grid: 3 columns */
+  .tpl-grid { grid-template-columns: repeat(3, 1fr) }
+  .tpl-section { max-width: 480px }
+
+  /* Toast positioning */
+  .toast { bottom: 60px }
+
+  /* Install banner centered */
+  #install-banner { max-width: 500px; left: 50%; right: auto; transform: translateX(-50%); border-radius: 16px; bottom: 16px; border: 1.5px solid rgba(255,255,255,.1) }
+  #install-banner.on { display: flex }
+
+  /* Feedback card wider */
+  .fb-card { width: 400px }
+
+  /* Pipeline card wider */
+  .pipe-card { min-width: 320px }
+
+  /* Profile picker positioned better */
+  .profile-picker { top: 80px; right: 28px }
+
+  /* Emoji picker wider */
+  .ebox { width: 340px }
+  .egrid { grid-template-columns: repeat(8, 1fr) }
+}
+
+/* --- Desktop (1024px+) --- */
+@media (min-width: 1024px) {
+  /* App grid: 8 columns */
+  .app-grid { grid-template-columns: repeat(8, 1fr); gap: 24px 16px; padding: 20px 40px 24px }
+
+  /* Larger icons on desktop */
+  .aicon-img { width: 78px; height: 78px; border-radius: 20px; font-size: 34px }
+  .aicon-label { max-width: 90px }
+
+  /* Home header */
+  .home-hdr { padding: 16px 40px 8px }
+  .home-title { font-size: 34px }
+  .statusbar { padding: 18px 40px 0 }
+
+  /* Dock */
+  .dock { max-width: 600px }
+  .dock-inner { padding: 14px 28px; gap: 4px }
+  .di { padding: 8px 16px; border-radius: 16px }
+  .di-img { width: 54px; height: 54px }
+
+  /* Builder sheet: sidebar style on desktop */
+  #builder-sheet.open { justify-content: center }
+  .bs { max-width: 720px; max-height: 88dvh; border-radius: 26px; margin: 0 auto; box-shadow: 0 24px 80px rgba(0,0,0,.7) }
+
+  /* Chat area improvements */
+  #chat-scroll { padding: 16px 8px 10px }
+  .ubub { max-width: 55% }
+  .awrap { max-width: 75% }
+  .abub { font-size: 14px; padding: 11px 16px }
+  .ubub { font-size: 14px; padding: 11px 16px }
+
+  /* Input area */
+  #chat-input { font-size: 15px }
+  .bs-input { padding: 12px 18px; padding-bottom: max(18px, env(safe-area-inset-bottom, 18px)) }
+
+  /* Wider settings */
+  .ssheet { max-width: 620px; border-radius: 24px; margin: auto; max-height: 88dvh }
+  #settings-overlay.on { align-items: center }
+
+  /* Project sheet centered */
+  .psheet { max-width: 680px; border-radius: 24px; margin: auto; max-height: 88dvh }
+  #project-sheet.open { align-items: center }
+
+  /* Build history centered */
+  .bh-sheet { max-width: 680px; border-radius: 24px; margin: auto; max-height: 88dvh }
+  #build-history-overlay.on { align-items: center }
+
+  /* Think sheet centered */
+  #think-sheet.open { justify-content: center }
+  #think-sheet .bs { max-width: 680px; border-radius: 26px; max-height: 88dvh }
+
+  /* Org think sheet centered */
+  #org-think-sheet.open { justify-content: center }
+  #org-think-sheet .bs { max-width: 680px; border-radius: 26px; max-height: 88dvh }
+
+  /* Onboarding: wider and centered */
+  .ob-wrap { max-width: 560px; padding: 72px 40px 64px }
+  .ob-logo h1 { font-size: 48px }
+  .lmark { width: 96px; height: 96px; border-radius: 28px; font-size: 46px }
+  .section-card { padding: 20px }
+
+  /* Viewer / Studio split layout */
+  .vbar { padding: max(16px, env(safe-area-inset-top, 16px)) 24px 12px }
+
+  /* Template grid: 3 columns, wider */
+  .tpl-grid { grid-template-columns: repeat(3, 1fr); gap: 10px }
+  .tpl-section { max-width: 560px }
+
+  /* Stitch modal centered */
+  .stitch-modal { max-width: 400px; padding: 32px 28px }
+
+  /* Tooltip wider */
+  .aicon-tooltip { min-width: 200px; max-width: 280px }
+
+  /* Hover states more prominent for mouse users */
+  .aicon:hover .aicon-img { transform: scale(1.08); transition: transform .2s cubic-bezier(.34,1.56,.64,1) }
+  .chip:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,60,172,.2) }
+  .di:hover .di-img { transform: scale(1.06); transition: transform .2s }
+  .btn-p:hover { transform: translateY(-2px) }
+  .tpl-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3) }
+}
+
+/* --- Wide Desktop (1440px+) --- */
+@media (min-width: 1440px) {
+  /* App grid: 10 columns */
+  .app-grid { grid-template-columns: repeat(10, 1fr); gap: 28px 18px; padding: 24px 60px 28px }
+
+  /* Home header */
+  .home-hdr { padding: 20px 60px 10px }
+  .home-title { font-size: 38px }
+  .statusbar { padding: 20px 60px 0 }
+
+  /* Dock */
+  .dock { max-width: 680px }
+
+  /* Wider sheets for large screens */
+  .bs { max-width: 800px }
+  .ssheet { max-width: 680px }
+  .psheet { max-width: 740px }
+  .bh-sheet { max-width: 740px }
+
+  /* Onboarding */
+  .ob-wrap { max-width: 600px }
+
+  /* Chat messages */
+  .ubub { max-width: 50% }
+  .awrap { max-width: 65% }
+}
+
+/* --- Ultrawide (1920px+) --- */
+@media (min-width: 1920px) {
+  .app-grid { grid-template-columns: repeat(12, 1fr); padding: 28px 80px 32px }
+  .home-hdr { padding: 22px 80px 12px }
+  .statusbar { padding: 22px 80px 0 }
+}
+
+/* --- Desktop hover & interaction improvements --- */
+@media (hover: hover) and (pointer: fine) {
+  /* Cursor pointer on interactive elements */
+  .aicon { cursor: pointer }
+  .aicon:hover .aicon-label { color: rgba(255,255,255,.9) }
+
+  /* Remove tap highlight for mouse users */
+  * { -webkit-tap-highlight-color: transparent }
+
+  /* Scrollbar styling for desktop */
+  ::-webkit-scrollbar { width: 6px; height: 6px }
+  ::-webkit-scrollbar-track { background: transparent }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2) }
+
+  /* App grid scrollbar */
+  .app-grid::-webkit-scrollbar { display: block; width: 6px }
+  .app-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 3px }
+
+  /* Hide drag handles on desktop (not needed for mouse) */
+  .bs-handle { cursor: default; opacity: 0.3 }
+  .psh-handle { cursor: default; opacity: 0.3 }
+  .bh-handle { cursor: default; opacity: 0.3 }
+  .ssh { cursor: default; opacity: 0.3 }
+
+  /* Better focus styles for keyboard nav */
+  .fi:focus { border-color: var(--pk); box-shadow: 0 0 0 3px rgba(255,60,172,.18) }
+  .btn-p:focus-visible { box-shadow: 0 0 0 3px rgba(255,60,172,.4), 0 8px 30px rgba(255,60,172,.4) }
+  .chip:focus-visible { box-shadow: 0 0 0 2px rgba(255,60,172,.4) }
+  .bs-btn:focus-visible { box-shadow: 0 0 0 2px rgba(255,255,255,.3) }
+  .vbar-btn:focus-visible { box-shadow: 0 0 0 2px rgba(255,255,255,.3) }
+
+  /* Delete button visible on hover */
+  .aicon:hover .aicon-del { display: flex; opacity: 0.6 }
+  .aicon:hover .aicon-del:hover { opacity: 1 }
+}
+
+/* --- Print styles --- */
+@media print {
+  #wp, .dock, .statusbar, #install-banner, #ctx-menu, .toast { display: none !important }
+  .screen { position: static }
+  body { background: #fff; color: #000 }
+}

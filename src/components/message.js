@@ -130,7 +130,7 @@ export function addMsg(cfg) {
     if (cfg.images && cfg.images.length) {
       imgHtml = '<div class="user-imgs">'
       for (var ii = 0; ii < cfg.images.length; ii++) {
-        imgHtml += '<img src="data:' + cfg.images[ii].mediaType + ';base64,' + cfg.images[ii].base64 + '" alt="' + esc(cfg.images[ii].name || 'image') + '">'
+        imgHtml += '<img src="data:' + cfg.images[ii].mediaType + ';base64,' + cfg.images[ii].base64 + '" alt="' + escAttr(cfg.images[ii].name || 'image') + '">'
       }
       imgHtml += '</div>'
     }
@@ -197,7 +197,7 @@ export function addMsg(cfg) {
       var auditAvStyle = isClaudeAudit ? 'background:var(--g1)' : 'background:var(--gg);font-family:var(--fh);font-size:10px;font-weight:800'
       row.innerHTML = '<div class="awrap"><div class="aav" style="' + auditAvStyle + '">' + auditBadge + '</div><div style="flex:1;min-width:0"><div class="audit-card"><div class="audit-hdr"><div class="gbadge" style="' + (isClaudeAudit ? 'background:var(--g1)' : '') + '">' + auditBadge + '</div><div class="audit-title">' + auditTitle + '</div><span class="ab ' + (bugs.length ? 'bugs' : 'clean') + '">' + (bugs.length ? bugs.length + ' Bug' + (bugs.length !== 1 ? 's' : '') : '\u2713 Clean') + '</span></div>' + bhtml + '</div></div></div>'
     } else if (cfg.type === 'preview-card') {
-      row.innerHTML = '<div class="awrap"><div class="aav">\uD83D\uDC41</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview \u2014 ' + esc(cfg.appName || 'App') + '</div><span class="pcc-branch">' + esc(cfg.branch || 'local') + '</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="' + escAttr(cfg.code || '') + '"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\'' + esc(cfg.appId || '') + '\',\'' + esc(cfg.pid || '') + '\');">\uD83D\uDD0D Full Screen</button></div></div></div></div></div>'
+      row.innerHTML = '<div class="awrap"><div class="aav">\uD83D\uDC41</div><div style="flex:1;min-width:0"><div class="preview-chat-card"><div class="pcc-top"><div class="pcc-label">Preview \u2014 ' + esc(cfg.appName || 'App') + '</div><span class="pcc-branch">' + esc(cfg.branch || 'local') + '</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="' + escAttr(cfg.code || '') + '"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\'' + escAttr(cfg.appId || '') + '\',\'' + escAttr(cfg.pid || '') + '\');">\uD83D\uDD0D Full Screen</button></div></div></div></div></div>'
     } else if (cfg.type === 'blueprint-preview') {
       var bpId = 'bp-' + Date.now()
       var bpPid = esc(cfg.pid || '')

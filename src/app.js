@@ -140,6 +140,32 @@ export function init() {
   $('ib-add').addEventListener('click', function () { if (_installPrompt) _installPrompt.prompt(); $('install-banner').classList.remove('on') })
   $('ib-x').addEventListener('click', function () { $('install-banner').classList.remove('on'); localStorage.setItem('pwa_dis', '1') })
 
+  // Keyboard shortcuts for desktop
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      // Close modals/sheets in priority order (topmost first)
+      var stitchModal = $('stitch-key-modal')
+      if (stitchModal && stitchModal.classList.contains('on')) { stitchModal.classList.remove('on'); return }
+      var emojiOv = $('emoji-overlay')
+      if (emojiOv && emojiOv.classList.contains('on')) { emojiOv.classList.remove('on'); return }
+      var feedbackOv = $('feedback-overlay')
+      if (feedbackOv && feedbackOv.classList.contains('on')) { feedbackOv.classList.remove('on'); return }
+      var settingsOv = $('settings-overlay')
+      if (settingsOv && settingsOv.classList.contains('on')) { settingsOv.classList.remove('on'); return }
+      var bhOv = $('build-history-overlay')
+      if (bhOv && bhOv.classList.contains('on')) { closeBuildHistory(); return }
+      var projectSh = $('project-sheet')
+      if (projectSh && projectSh.classList.contains('open')) { closeProject(); return }
+      var thinkSh = $('think-sheet')
+      if (thinkSh && thinkSh.classList.contains('open')) { closeThink(); return }
+      var orgThinkSh = $('org-think-sheet')
+      if (orgThinkSh && orgThinkSh.classList.contains('open')) { closeOrgThink(); return }
+      var builderSh = $('builder-sheet')
+      if (builderSh && builderSh.classList.contains('open')) { closeBuilder(); return }
+      closeCtx()
+    }
+  })
+
   // Expose functions for HTML onclick handlers
   window.openBuilder = openBuilder
   window.openApp = openApp

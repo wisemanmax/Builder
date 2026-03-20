@@ -87,7 +87,7 @@ export function openProjectSheet(id) {
   $('project-sheet').classList.add('open')
 }
 
-export function closeProject() { $('project-sheet').classList.remove('on'); $('project-sheet').classList.remove('open'); ST.projectAppId = null }
+export function closeProject() { $('project-sheet').classList.remove('open'); ST.projectAppId = null }
 
 export function copyUrl() {
   var app = null; var id = ST.projectAppId || ST.activeAppId

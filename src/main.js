@@ -4,6 +4,7 @@ import './styles/screens.css'
 import './styles/components.css'
 import './styles/pipeline.css'
 import './styles/chat.css'
+import './styles/desktop.css'
 
 // Install key guard (must be first JS import)
 import './lib/key-guard.js'
