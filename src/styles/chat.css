@@ -65,11 +65,11 @@
 /* Template preview modal */
 .tpl-preview-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .tpl-preview-overlay.on{display:flex}
-.tpl-preview-modal{background:#141425;border:1.5px solid rgba(255,255,255,.12);border-radius:20px;max-width:680px;width:92%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.tpl-preview-modal{background:#141425;border:1.5px solid rgba(255,255,255,.12);border-radius:20px;max-width:680px;width:92%;max-height:85dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .tpl-preview-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
 .tpl-preview-name{font-family:var(--fh);font-size:14px;font-weight:700;color:rgba(255,255,255,.85)}
-.tpl-preview-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:18px;cursor:pointer;padding:0 2px;transition:color .15s}
-.tpl-preview-close:hover{color:rgba(255,255,255,.8)}
+.tpl-preview-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:18px;cursor:pointer;padding:6px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;transition:color .15s;border-radius:8px}
+.tpl-preview-close:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.08)}
 .tpl-preview-frame{flex:1;min-height:350px;overflow:hidden;position:relative}
 .tpl-preview-frame iframe{width:100%;height:100%;border:none;pointer-events:none}
 .tpl-preview-info{font-size:10px;color:rgba(255,255,255,.3);text-align:center;padding:8px 16px 0}
@@ -78,15 +78,20 @@
 .tpl-preview-use:hover{transform:scale(1.04)}
 .tpl-preview-use:active{transform:scale(.96)}
 /* Fullscreen toggle button */
-.tpl-preview-fullscreen{background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:0 4px;transition:color .15s;line-height:1}
-.tpl-preview-fullscreen:hover{color:rgba(255,255,255,.8)}
+.tpl-preview-fullscreen{background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:6px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;transition:color .15s;line-height:1;border-radius:8px}
+.tpl-preview-fullscreen:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.08)}
 .tpl-preview-hdr-right{display:flex;align-items:center;gap:8px}
 
 /* Fullscreen state */
-.tpl-preview-modal.fullscreen{max-width:100%;width:100%;max-height:100vh;height:100vh;border-radius:0;border:none}
-.tpl-preview-modal.fullscreen .tpl-preview-frame{min-height:0;flex:1}
+.tpl-preview-modal.fullscreen{max-width:100%;width:100%;max-height:100dvh;height:100dvh;border-radius:0;border:none;overflow:hidden}
+.tpl-preview-modal.fullscreen .tpl-preview-frame{min-height:0;flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.tpl-preview-modal.fullscreen .tpl-preview-frame iframe{pointer-events:auto;min-height:100%}
+.tpl-preview-modal.fullscreen .tpl-preview-hdr{padding:max(14px,env(safe-area-inset-top,14px)) 18px 10px;background:rgba(20,20,37,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);flex-shrink:0;z-index:2;border-bottom:1px solid rgba(255,255,255,.1)}
+.tpl-preview-modal.fullscreen .tpl-preview-info{display:none}
+.tpl-preview-modal.fullscreen .tpl-preview-actions{padding:10px 18px max(12px,env(safe-area-inset-bottom,12px));background:rgba(20,20,37,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);flex-shrink:0;z-index:2;border-top:1px solid rgba(255,255,255,.1)}
+@media(display-mode:standalone){.tpl-preview-modal.fullscreen .tpl-preview-hdr{padding-top:max(env(safe-area-inset-top,14px),14px)}}
 
-@media(max-width:480px){.tpl-preview-modal{width:98%;max-height:90vh}.tpl-preview-frame{min-height:260px}}
+@media(max-width:480px){.tpl-preview-modal{width:98%;max-height:90dvh}.tpl-preview-frame{min-height:260px}}
 
 .mrow{display:flex;padding:3px 13px;animation:mIn .24s cubic-bezier(.34,1.56,.64,1) both}
 @keyframes mIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
