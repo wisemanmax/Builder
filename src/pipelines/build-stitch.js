@@ -5,7 +5,7 @@ import { SYS_STITCH_ENHANCE, SYS_STITCH_VERIFY, GPT4O_STITCH_REVIEW, SYS_STITCH_
 import { PIPE5_STATUS, GRADS } from '../config/constants.js'
 import { callClaudeRaw, callClaude, callGPTRaw2, fetchWithRetry, resetCostAccum } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
-import { injectProfileContext, mergeRulesWithProfile } from '../lib/profile-context.js'
+import { injectProfileContext, mergeRulesWithProfile, formatBriefForPrompt } from '../lib/profile-context.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { updateStitchStage, updateStitchEstimate, updateStitchTime } from '../components/stitch-tracker.js'
 import { addMsg, updatePS } from '../components/message.js'
@@ -231,18 +231,9 @@ function runIntake(context) {
   var dataMapping = []
 
   if (activeThought) {
-    // Extract specification from thought brief
+    // Extract specification from thought brief using structured formatter
     if (activeThought.brief) {
-      specText = 'App Name: ' + (activeThought.brief.name || 'App') + '\n'
-        + 'What it does: ' + (activeThought.brief.whatItDoes || []).join(', ') + '\n'
-        + 'What it won\'t do: ' + (activeThought.brief.whatItWontDo || []).join(', ') + '\n'
-        + 'Target audience: ' + (activeThought.brief.audience || 'General') + '\n'
-        + 'Key features: ' + (activeThought.brief.features || []).join(', ')
-      if (activeThought.brief.design) {
-        specText += '\nDesign: theme=' + (activeThought.brief.design.theme || 'dark')
-          + ', accent=' + (activeThought.brief.design.accent || 'blue')
-          + ', layout=' + (activeThought.brief.design.layout || 'standard')
-      }
+      specText = formatBriefForPrompt(activeThought.brief)
 
       // Generate Data Mapping Schema from features and brief
       dataMapping = _generateDataMapping(activeThought.brief)

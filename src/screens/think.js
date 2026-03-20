@@ -2,7 +2,8 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
 import { THINK_ROUND_LABELS } from '../config/constants.js'
 import { SYS_THINK } from '../config/prompts.js'
-import { callGPTRawMultiTurn, resetCostAccum } from '../lib/ai.js'
+import { callClaudeRawMultiTurn, callGPTRawMultiTurn, resetCostAccum } from '../lib/ai.js'
+import { injectProfileContext } from '../lib/profile-context.js'
 import { calculateBuildCost } from '../lib/cost.js'
 import { ghSyncThoughtAndRules } from '../lib/github.js'
 import { openBuilder } from './build.js'
@@ -104,7 +105,7 @@ export function sendThinkMsg() {
   var inp = $('think-input')
   var text = inp.value.trim()
   if (!text || ST._thinking) return
-  if (!ST.gptKey) { toast('Add your OpenAI API key in Settings first'); return }
+  if (!ST.key && !ST.gptKey) { toast('Add an API key in Settings first'); return }
 
   ST._thinking = true
   var sb = $('think-send-btn'); if (sb) sb.disabled = true
@@ -117,13 +118,13 @@ export function sendThinkMsg() {
 
   addThinkMsg({ type: 'typing' })
 
-  // Build proper multi-turn messages from conversation history
+  // Build proper multi-turn messages from conversation history (exclude last entry — it's the current message)
   var apiMessages = []
-  for (var i = 0; i < _thinkState.conversation.length; i++) {
+  for (var i = 0; i < _thinkState.conversation.length - 1; i++) {
     var c = _thinkState.conversation[i]
     apiMessages.push({ role: c.role === 'user' ? 'user' : 'assistant', content: c.text })
   }
-  // Add current user message with round metadata
+  // Add current user message with round metadata (single source — no duplication)
   apiMessages.push({
     role: 'user',
     content: 'Round: ' + _thinkState.round + '/' + _thinkState.maxRounds
@@ -132,7 +133,12 @@ export function sendThinkMsg() {
       + '\n\n' + text
   })
 
-  callGPTRawMultiTurn(SYS_THINK, apiMessages, 2000).then(function (raw) {
+  var effectiveSys = injectProfileContext(SYS_THINK)
+  var aiCall = ST.key
+    ? callClaudeRawMultiTurn(effectiveSys, apiMessages, 2000)
+    : callGPTRawMultiTurn(effectiveSys, apiMessages, 2000)
+
+  aiCall.then(function (raw) {
     var ti = $('think-typing'); if (ti) ti.remove()
     var parsed
     try { parsed = JSON.parse(raw) } catch (e) {
@@ -152,12 +158,25 @@ export function sendThinkMsg() {
     if (parsed.brief && parsed.rules) {
       _thinkState.brief = parsed.brief
       _thinkState.rules = parsed.rules
-      renderThinkSummary(parsed.brief, parsed.rules)
+      if (parsed.draft) {
+        // Draft mode — show summary with confirm/edit buttons
+        renderThinkSummary(parsed.brief, parsed.rules)
+        // Replace default actions with draft-specific actions
+        var existingActions = $('think-scroll').querySelector('.think-actions')
+        if (existingActions) existingActions.remove()
+        var actRow = document.createElement('div')
+        actRow.className = 'think-actions'
+        actRow.innerHTML = '<button class="ta-save" onclick="confirmThinkBrief()">\u2705 Looks good, lock it in</button>'
+          + '<button class="ta-refine" onclick="editThinkBrief()">\u270F\uFE0F I want to change something</button>'
+        $('think-scroll').appendChild(actRow)
+      } else {
+        renderThinkSummary(parsed.brief, parsed.rules)
+      }
     } else if (parsed.options && parsed.options.length > 0) {
       addThinkMsg({ type: 'options', options: parsed.options })
     }
 
-    saveThought(_thinkState.brief ? 'complete' : 'draft')
+    saveThought(parsed.brief && !parsed.draft ? 'complete' : 'draft')
     ST._thinking = false
     if (sb) sb.disabled = false
     scrollThinkBot()
@@ -297,11 +316,26 @@ export function finishThink() {
   })
 }
 
+export function confirmThinkBrief() {
+  $('think-input').value = 'Confirmed. Lock in this specification.'
+  sendThinkMsg()
+}
+
+export function editThinkBrief() {
+  $('think-input').focus()
+  $('think-input').placeholder = 'What would you like to change?'
+  addThinkMsg({ type: 'ai', text: 'What would you like to change? You can mention specific sections.' })
+  _thinkState.conversation.push({ role: 'ai', text: 'What would you like to change? You can mention specific sections.', round: _thinkState.round })
+  scrollThinkBot()
+}
+
 export function refineThink() {
   _thinkState.round = Math.max(1, _thinkState.round - 1)
   renderThinkProgress(_thinkState.round)
   _thinkState.brief = null
   _thinkState.rules = null
+  // Inject context marker so AI understands the round reset
+  _thinkState.conversation.push({ role: 'user', text: '[Round reset to ' + _thinkState.round + '. The previous summary was rejected. Continue refining from this round.]', round: _thinkState.round })
   addThinkMsg({ type: 'ai', text: 'No problem! Let\'s keep refining. What would you like to change or add?' })
   _thinkState.conversation.push({ role: 'ai', text: 'Let\'s keep refining. What would you like to change or add?', round: _thinkState.round })
   scrollThinkBot()

@@ -3,7 +3,7 @@ import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/uti
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
 import { SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_PLAN } from '../config/prompts.js'
-import { injectProfileContext, mergeRulesWithProfile } from '../lib/profile-context.js'
+import { injectProfileContext, mergeRulesWithProfile, formatBriefForPrompt } from '../lib/profile-context.js'
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callClaudeAudit, resetCostAccum } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
@@ -185,14 +185,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
         effectiveSys += '\n\nUSER RULES (follow these constraints strictly):\n' + rulesText
       }
       if (activeThought.brief) {
-        specText = 'App Name: ' + (activeThought.brief.name || 'App') + '\n'
-          + 'What it does: ' + (activeThought.brief.whatItDoes || []).join(', ') + '\n'
-          + 'What it won\'t do: ' + (activeThought.brief.whatItWontDo || []).join(', ') + '\n'
-          + 'Target audience: ' + (activeThought.brief.audience || 'General') + '\n'
-          + 'Key features: ' + (activeThought.brief.features || []).join(', ')
-        if (activeThought.brief.design) {
-          specText += '\nDesign: theme=' + (activeThought.brief.design.theme || 'dark') + ', accent=' + (activeThought.brief.design.accent || 'blue') + ', layout=' + (activeThought.brief.design.layout || 'standard')
-        }
+        specText = formatBriefForPrompt(activeThought.brief)
         effectiveSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
       }
       if (!existingApp && activeThought.brief) {

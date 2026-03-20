@@ -1,7 +1,8 @@
 import { ST, persist } from '../lib/state.js'
 import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
 import { SYS_ORG_THINK } from '../config/prompts.js'
-import { callGPTRawMultiTurn, callClaudeRaw } from '../lib/ai.js'
+import { callClaudeRawMultiTurn, callGPTRawMultiTurn, callClaudeRaw } from '../lib/ai.js'
+import { injectProfileContext } from '../lib/profile-context.js'
 import { renderProfileChip } from '../components/profile-switcher.js'
 
 var ORG_ROUND_LABELS = ['Vision & Mission', 'Principles & Standards', 'Brand Identity', 'Roadmap & Future']
@@ -104,11 +105,13 @@ export function sendOrgMsg() {
   _orgState.conversation.push({ role: 'user', text: text, round: _orgState.round })
   addOrgMsg({ type: 'typing' })
 
+  // Build multi-turn messages from history (exclude last entry — it's the current message)
   var apiMessages = []
-  for (var i = 0; i < _orgState.conversation.length; i++) {
+  for (var i = 0; i < _orgState.conversation.length - 1; i++) {
     var c = _orgState.conversation[i]
     apiMessages.push({ role: c.role === 'user' ? 'user' : 'assistant', content: c.text })
   }
+  // Add current message with round metadata (single source — no duplication)
   apiMessages.push({
     role: 'user',
     content: 'Round: ' + _orgState.round + '/' + _orgState.maxRounds
@@ -117,9 +120,10 @@ export function sendOrgMsg() {
       + '\n\n' + text
   })
 
-  var aiCall = hasGPT
-    ? callGPTRawMultiTurn(SYS_ORG_THINK, apiMessages, 2000)
-    : callClaudeRaw(SYS_ORG_THINK, apiMessages.map(function (m) { return m.role + ': ' + m.content }).join('\n\n'), 2000)
+  var effectiveSys = injectProfileContext(SYS_ORG_THINK)
+  var aiCall = hasClaude
+    ? callClaudeRawMultiTurn(effectiveSys, apiMessages, 2000)
+    : callGPTRawMultiTurn(effectiveSys, apiMessages, 2000)
 
   aiCall.then(function (raw) {
     var ti = $('org-think-typing'); if (ti) ti.remove()
@@ -232,6 +236,8 @@ export function refineOrgThink() {
   _orgState.round = Math.max(1, _orgState.round - 1)
   _orgState.done = false
   renderOrgProgress(_orgState.round)
+  // Inject context marker so AI understands the round reset
+  _orgState.conversation.push({ role: 'user', text: '[Round reset to ' + _orgState.round + '. Previous profile was rejected. Continue refining from this round.]', round: _orgState.round })
   addOrgMsg({ type: 'ai', text: 'No problem! Let\'s refine. What would you like to change?' })
   _orgState.conversation.push({ role: 'ai', text: 'Let\'s refine. What would you like to change?', round: _orgState.round })
   scrollOrgBot()
