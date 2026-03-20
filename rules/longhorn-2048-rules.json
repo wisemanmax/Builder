@@ -1,0 +1,24 @@
+{
+  "id": "ammyy57ro1ukc56",
+  "name": "Longhorn 2048 Rules",
+  "linkedThoughtId": "ammyxzjqbbqib23",
+  "mustRules": [
+    "Implement only standard classic 2048 rules on a 4x4 grid with no gameplay modifiers",
+    "Provide exactly two backend capabilities in v1: score submission and leaderboard retrieval",
+    "Persist leaderboard records with nickname, best score, and date only",
+    "Overwrite an existing nickname record only when a newly submitted score is higher",
+    "Optimize UI and controls for mobile web touch interaction and responsive small screens",
+    "Validate nickname and submission payloads on the server before writing leaderboard data"
+  ],
+  "mustNotRules": [
+    "Must not require account creation, authentication, or session-based user identity",
+    "Must not include social features, alternate game modes, moderation dashboards, or admin tooling"
+  ],
+  "niceToHave": [
+    "Animate leaderboard rank transitions or score highlights in an arcade style",
+    "Store the last used nickname locally to speed up repeat submissions",
+    "Add lightweight sound effects for milestone celebrations if performance remains smooth"
+  ],
+  "createdAt": "2026-03-20T13:40:21.780Z",
+  "updatedAt": "2026-03-20T13:40:21.780Z"
+}
