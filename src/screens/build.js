@@ -15,8 +15,9 @@ import { runWebsite2Pipeline } from '../pipelines/build-website2.js'
 import { runSelfUpdatePipeline } from '../pipelines/builder-plus.js'
 import { runStitchPipeline } from '../pipelines/build-stitch.js'
 import { renderStitchTracker, updateStitchStage, updateStitchEstimate, updateStitchTime } from '../components/stitch-tracker.js'
-import { classifyIntent, callClaudeChat, resetCostAccum } from '../lib/ai.js'
+import { classifyIntent, callClaudeChat, callClaudeRaw, resetCostAccum } from '../lib/ai.js'
 import { clearPipelineCancel } from '../lib/state.js'
+import { runQuickEdit } from '../pipelines/quick-edit.js'
 
 // Pending images for next message (array of {base64, mediaType, name})
 var _pendingImages = []
@@ -186,10 +187,11 @@ export function sendMsg() {
   }
   var customName = $('app-name-input').value.trim()
   var existing = ST.activeAppId ? ST.apps.find(function (a) { return a.id === ST.activeAppId }) : null
-  // If editing an existing app, skip classification — always run pipeline
+  // If editing an existing app, classify change magnitude for quick vs full pipeline
   if (existing) {
     $('app-name-input').value = ''
-    _runBuild(text, existing, customName, images)
+    // Quick edit for small changes (CSS tweaks, text, colors, simple additions)
+    _classifyAndRoute(text, existing, customName, images)
     return
   }
   // Classify intent before routing
@@ -219,6 +221,34 @@ function _runBuild(text, existing, customName, images) {
   }
   syncStopButton()
   _startStopBtnSync()
+}
+
+var SYS_CLASSIFY_MAGNITUDE = 'Classify this change request for an existing web app as either "quick" or "full".\nQuick: CSS tweaks, color changes, text edits, simple style updates, adding/removing a single element, toggling visibility, font changes.\nFull: New features, new pages/views, adding data models, architectural changes, API integrations, complex interactive components.\nReturn ONLY JSON: {"magnitude":"quick"} or {"magnitude":"full"}'
+
+function _classifyAndRoute(text, existing, customName, images) {
+  // Short prompts that look like simple edits → quick classify
+  var isLikelyQuick = text.length < 100 && !images.length
+  if (!isLikelyQuick) {
+    _runBuild(text, existing, customName, images)
+    return
+  }
+  ST._building = true; $('send-btn').disabled = true
+  callClaudeRaw(SYS_CLASSIFY_MAGNITUDE, text, 50).then(function (raw) {
+    ST._building = false; $('send-btn').disabled = false
+    try {
+      var parsed = JSON.parse(raw)
+      if (parsed.magnitude === 'quick') {
+        runQuickEdit(text, existing, images)
+        syncStopButton()
+        _startStopBtnSync()
+        return
+      }
+    } catch (e) {}
+    _runBuild(text, existing, customName, images)
+  }).catch(function () {
+    ST._building = false; $('send-btn').disabled = false
+    _runBuild(text, existing, customName, images)
+  })
 }
 
 function _runStitchBuild(text, existing, customName, images) {

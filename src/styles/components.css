@@ -273,3 +273,15 @@
 .att-row{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:10px;color:rgba(255,255,255,.45);padding:2px 0}
 .att-row span:last-child{color:rgba(255,255,255,.7);font-family:var(--fm)}
 .att-view{margin-top:6px;font-size:10px;color:var(--pk);font-weight:600;text-align:center;cursor:pointer}
+
+/* ======== SHARE CARD ======== */
+.share-overlay{position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.share-modal{background:#1A1A2E;border-radius:var(--r);padding:20px;width:320px;max-width:90vw;border:1.5px solid rgba(255,255,255,.1);box-shadow:0 20px 60px rgba(0,0,0,.65);animation:popIn .28s cubic-bezier(.34,1.56,.64,1);position:relative}
+.share-close{position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;padding:4px 8px}
+.share-close:hover{color:#fff}
+.share-card-title{font-family:var(--fh);font-size:15px;font-weight:700;text-align:center;margin-bottom:4px}
+.share-btn{padding:8px 14px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-family:var(--fh);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s}
+.share-btn:hover{background:rgba(255,255,255,.14)}
+.share-btn-primary{background:linear-gradient(135deg,#3D5AFE,#00E5FF);border-color:transparent;color:#fff}
+.share-btn-primary:hover{opacity:.9}

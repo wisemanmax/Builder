@@ -11,13 +11,15 @@ import { runLocalChecks } from '../lib/checks.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
 import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
+import { createStreamingPreview } from '../lib/streaming-preview.js'
+import { autoInjectSupabase } from '../lib/supabase-setup.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 
 // Check IDs that are advisory-only and should not count as critical failures
-var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
+var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs', 'has-theme-color', 'has-mobile-web-app']
 
 // Retry wrapper for pipeline steps — retries on network/timeout errors
 function retryStep(fn, maxRetries, label) {
@@ -102,7 +104,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? ('builder/app-' + appId + '-' + Date.now().toString(36)) : ''
 
-  var v1, v2, specText, rulesText, fixSys, thinkingText
+  var v1, v2, specText, rulesText, fixSys, thinkingText, _streamPreview
 
   function withContext(sysPrompt) {
     return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
@@ -202,12 +204,22 @@ export function runPipeline(prompt, existingApp, customName, images) {
     if (images && images.length) { userMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached — study them carefully and replicate the design, layout, colors, and style as closely as possible]' }
     var charCount = 0
     thinkingText = ''
+    // Set up streaming live preview
+    _streamPreview = null
+    var previewIframe = $('viewer-iframe')
+    if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
+
     return callClaudeWithThinkingStream(effectiveSys, userMsg, 2000, function (type, text) {
-      if (type === 'text') { charCount += text.length; updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
+      if (type === 'text') {
+        charCount += text.length
+        updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars')
+        if (_streamPreview) _streamPreview.pushChunk(text)
+      }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
   }).then(function (code) {
     v1 = code
+    if (_streamPreview) { _streamPreview.finalize(v1); _streamPreview.destroy() }
     updatePS(pid, 2, 'done', 'Build complete \u2713'); _persistProgress(2)
     // Save app locally early so code survives a crash
     _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
@@ -436,7 +448,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
         var allSql = tables.map(function (t) { return t.sql || '' }).concat(backend.rls || []).filter(Boolean).join('\n\n')
         updatePS(pid, 9, 'done', tables.length + ' table' + (tables.length !== 1 ? 's' : '') + ' designed \u2713')
         addMsg({ role: 'asst', type: 'schema', sql: allSql, tables: tables })
-        if (backend.injectedHTML && backend.injectedHTML.indexOf('<!DOCTYPE') >= 0 && backend.injectedHTML.length > 500) { v2 = backend.injectedHTML }
+        if (backend.injectedHTML && backend.injectedHTML.indexOf('<!DOCTYPE') >= 0 && backend.injectedHTML.length > 500) { v2 = autoInjectSupabase(backend.injectedHTML) }
       }).catch(function (e) {
         updatePS(pid, 9, 'warn', 'Backend gen skipped: ' + scrubKeys(e.message || String(e)))
       })

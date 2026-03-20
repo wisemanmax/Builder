@@ -7,6 +7,7 @@ import { renderGrid } from '../components/app-icon.js'
 import { openBuilder, closeBuilder } from './build.js'
 import { openProjectSheet, closeProject } from './project.js'
 import { runPipeline } from '../pipelines/build-pipeline.js'
+import { renderShareCard } from '../lib/share.js'
 
 export function openApp(id) {
   var app = null; for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === id) { app = ST.apps[i]; break } }
@@ -79,6 +80,22 @@ export function openCurrentInViewer() {
 
 export function copyViewerUrl() { var url = $('vbar-url').dataset.url; if (url) copyToClipboard(url, 'URL'); else toast('No live URL yet', 3000) }
 
+export function openShareCard() {
+  var app = ST.viewingApp
+  if (!app) { toast('No app selected', 3000); return }
+  // Create share modal overlay
+  var existing = $('share-overlay')
+  if (existing) existing.remove()
+  var overlay = document.createElement('div')
+  overlay.id = 'share-overlay'
+  overlay.className = 'share-overlay'
+  overlay.innerHTML = '<div class="share-modal"><button id="share-close" class="share-close">\u2715</button><div id="share-card-container"></div></div>'
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove() })
+  $('share-close').addEventListener('click', function () { overlay.remove() })
+  renderShareCard(app, 'share-card-container')
+}
+
 export function initStudio() {
   $('vback').addEventListener('click', function () {
     if (getPreviewPid()) {
@@ -109,6 +126,9 @@ export function initStudio() {
   })
   $('vbar-proj').addEventListener('click', function () { if (ST.viewingApp) openProjectSheet(ST.viewingApp.id) })
   $('vbar-fs-toggle').addEventListener('click', function () { studioSetFullscreen(!ST._studioFullscreen) })
+  // Share button
+  var shareBtn = $('vbar-share-btn')
+  if (shareBtn) shareBtn.addEventListener('click', openShareCard)
 
   // Studio editor
   $('se-header-toggle').addEventListener('click', function (e) {
