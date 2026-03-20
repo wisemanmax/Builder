@@ -1,5 +1,22 @@
 [
   {
+    "id": "bashys",
+    "name": "BashYs",
+    "icon": "🎯",
+    "ci": 3,
+    "url": "https://wisemanmax.github.io/builder/apps/bashys.html",
+    "path": "apps/bashys.html",
+    "prompts": [
+      {
+        "ts": "2026-03-20T02:04:51.264Z",
+        "type": "initial",
+        "text": "create a copy of grad bridge.com"
+      }
+    ],
+    "createdAt": "2026-03-20T02:04:51.264Z",
+    "updatedAt": "2026-03-20T02:04:51.264Z"
+  },
+  {
     "id": "2048bw",
     "name": "2048BW",
     "icon": "📦",
