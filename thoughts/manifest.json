@@ -1,57 +1,24 @@
 [
   {
-    "id": "ammysx8m2fksih7",
-    "name": "HubSpot Dev Vault",
+    "id": "ammzb95uaz8287y",
+    "name": "DeltaConnect",
     "status": "complete",
     "rounds": 6,
-    "linkedRulesId": "ammyt5kqtwyzd2n",
+    "linkedRulesId": "ammzbd6c48pypjq",
     "linkedAppId": null,
-    "path": "thoughts/hubspot-dev-vault.json",
-    "createdAt": "2026-03-20T11:14:21.893Z",
-    "updatedAt": "2026-03-20T11:20:40.513Z"
+    "path": "thoughts/deltaconnect.json",
+    "createdAt": "2026-03-20T19:48:00.706Z",
+    "updatedAt": "2026-03-20T19:50:28.178Z"
   },
   {
-    "id": "ammuwt31wykz",
-    "name": "Student Loan Info App",
-    "status": "built",
-    "rounds": 4,
-    "linkedRulesId": "ammux3ddji2k",
-    "linkedAppId": "retry",
-    "path": "thoughts/student-loan-info-app.json",
-    "createdAt": "2026-03-17T17:52:08.169Z",
-    "updatedAt": "2026-03-17T17:59:51.414Z"
-  },
-  {
-    "id": "ammukstso4zc",
-    "name": "Daily Budget Tracker",
-    "status": "built",
-    "rounds": 3,
-    "linkedRulesId": "ammukx0mnfd9",
-    "linkedAppId": "budget-tracker-2",
-    "path": "thoughts/daily-budget-tracker.json",
-    "createdAt": "2026-03-17T12:16:08.149Z",
-    "updatedAt": "2026-03-17T12:18:59.567Z"
-  },
-  {
-    "id": "ammuf7o4505v",
-    "name": "Hip-Hop Link Tree",
+    "id": "ammyxzjqbbqib23",
+    "name": "Longhorn 2048",
     "status": "complete",
     "rounds": 6,
-    "linkedRulesId": "ammuff1go6ei",
+    "linkedRulesId": "ammyy57ro1ukc56",
     "linkedAppId": null,
-    "path": "thoughts/hip-hop-link-tree.json",
-    "createdAt": "2026-03-17T09:40:32.714Z",
-    "updatedAt": "2026-03-17T09:45:02.759Z"
-  },
-  {
-    "id": "ammtvfgq6nie",
-    "name": "Retro Tiles",
-    "status": "built",
-    "rounds": 5,
-    "linkedRulesId": "ammtvnpo89fx",
-    "linkedAppId": "2048bw",
-    "path": "thoughts/retro-tiles.json",
-    "createdAt": "2026-03-17T00:28:33.746Z",
-    "updatedAt": "2026-03-17T00:31:55.064Z"
+    "path": "thoughts/longhorn-2048.json",
+    "createdAt": "2026-03-20T13:36:30.336Z",
+    "updatedAt": "2026-03-20T13:40:21.778Z"
   }
 ]
