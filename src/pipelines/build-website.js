@@ -13,6 +13,7 @@ import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 import { autoInjectSupabase } from '../lib/supabase-setup.js'
+import { getTemplateSkeleton } from '../lib/template-loader.js'
 import {
   SYS_WEB_DECOMPOSE, SYS_WEB_SCAFFOLD, SYS_WEB_TOKENS, SYS_WEB_DATA,
   SYS_WEB_SHARED, SYS_WEB_FEATURES, SYS_WEB_LAYOUT, SYS_WEB_PAGES,
@@ -185,6 +186,17 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     })
   }
 
+  // Resolve template skeleton before pipeline starts (same pattern as thought engine)
+  var _templateSkeleton = null
+  if (!existingApp && ST._pendingTemplate) {
+    var pending = ST._pendingTemplate
+    ST._pendingTemplate = null
+    p = p.then(function () {
+      return (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
+        .then(function (skeleton) { _templateSkeleton = skeleton })
+    })
+  }
+
   p.then(function () {
     // Step 0 — Decompose
     checkPipelineCancel()
@@ -212,6 +224,12 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
         decomposeMsg = 'Build a website based on the specification above.\n\nSite Name: ' + (activeThought.brief.name || customName || 'My Site') + '\n\nAdditional notes: ' + prompt
         if (images && images.length) decomposeMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached]'
       }
+    }
+    // Inject template skeleton into decompose context (same as thought engine pattern)
+    if (_templateSkeleton) {
+      decomposeMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture — expand, customize, and fill in all features):\n'
+        + _templateSkeleton
+        + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
     }
     return retryStep(function () { return callClaudeRaw(effectiveDecomposeSys, decomposeMsg, 4000, images) }, 2, 'Decompose').then(function (raw) {
       decomposition = raw

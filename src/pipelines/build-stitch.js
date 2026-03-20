@@ -18,6 +18,7 @@ import { openProjectSheet } from '../screens/project.js'
 import { persistBuildSession, clearBuildSession, clearPipelineCancel } from '../lib/state.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
 import { autoInjectSupabase } from '../lib/supabase-setup.js'
+import { getTemplateSkeleton } from '../lib/template-loader.js'
 
 // --- Stitch API helpers ---
 
@@ -318,6 +319,11 @@ function _buildAppDescription(context, specText, rulesText) {
   }
   if (rulesText !== 'No specific rules') {
     desc += '\n\nDESIGN RULES:\n' + rulesText
+  }
+  if (context._templateSkeleton) {
+    desc += '\n\nTEMPLATE SKELETON (use as your starting architecture — expand, customize, and fill in all features):\n'
+      + context._templateSkeleton
+      + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
   }
   return desc
 }
@@ -892,7 +898,18 @@ export function runStitchPipeline(context, callbacks) {
 
   // --- Stage execution ---
 
-  return Promise.resolve().then(function () {
+  // Resolve template skeleton before pipeline starts (same pattern as thought engine)
+  var tplPromise = Promise.resolve()
+  if (!existingApp && ST._pendingTemplate) {
+    var pending = ST._pendingTemplate
+    ST._pendingTemplate = null
+    tplPromise = (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
+      .then(function (skeleton) {
+        context._templateSkeleton = skeleton
+      })
+  }
+
+  return tplPromise.then(function () {
     // ── Stage 1: Intake ──
     checkPipelineCancel()
     updateStage(0, 'running', 'Preparing context…')
