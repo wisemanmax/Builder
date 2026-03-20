@@ -1,254 +1,173 @@
 <!DOCTYPE html>
-
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>The Ritual - Daily Dashboard</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "on-tertiary": "#f7f0ff",
-                        "surface-bright": "#f5f6f7",
-                        "surface-variant": "#dadddf",
-                        "secondary": "#9b3f00",
-                        "surface-container-low": "#eff1f2",
-                        "tertiary-fixed": "#b8a3ff",
-                        "on-secondary-fixed-variant": "#893700",
-                        "secondary-fixed": "#ffc5aa",
-                        "on-tertiary-fixed-variant": "#4000ad",
-                        "on-secondary-container": "#7b3100",
-                        "surface-tint": "#006859",
-                        "error": "#b31b25",
-                        "tertiary": "#652fe7",
-                        "on-surface-variant": "#595c5d",
-                        "secondary-dim": "#883700",
-                        "tertiary-container": "#b8a3ff",
-                        "on-surface": "#2c2f30",
-                        "surface-container-high": "#e0e3e4",
-                        "surface": "#f5f6f7",
-                        "on-tertiary-container": "#370096",
-                        "tertiary-dim": "#5819db",
-                        "on-secondary-fixed": "#5c2300",
-                        "on-primary-fixed-variant": "#006455",
-                        "background": "#f5f6f7",
-                        "primary": "#006859",
-                        "on-error": "#ffefee",
-                        "surface-dim": "#d1d5d7",
-                        "on-secondary": "#fff0ea",
-                        "inverse-on-surface": "#9b9d9e",
-                        "on-tertiary-fixed": "#1c0055",
-                        "primary-fixed": "#61f4d8",
-                        "inverse-primary": "#6bfde0",
-                        "on-primary": "#c2ffef",
-                        "error-dim": "#9f0519",
-                        "tertiary-fixed-dim": "#ab93ff",
-                        "surface-container": "#e6e8ea",
-                        "surface-container-lowest": "#ffffff",
-                        "on-primary-fixed": "#00443a",
-                        "secondary-fixed-dim": "#ffb28c",
-                        "primary-fixed-dim": "#4fe5ca",
-                        "surface-container-highest": "#dadddf",
-                        "error-container": "#fb5151",
-                        "primary-container": "#61f4d8",
-                        "inverse-surface": "#0c0f10",
-                        "primary-dim": "#005a4d",
-                        "secondary-container": "#ffc5aa",
-                        "on-error-container": "#570008",
-                        "on-background": "#2c2f30",
-                        "on-primary-container": "#00594c",
-                        "outline": "#757778",
-                        "outline-variant": "#abadae"
-                    },
-                    fontFamily: {
-                        "headline": ["Plus Jakarta Sans"],
-                        "body": ["Be Vietnam Pro"],
-                        "label": ["Be Vietnam Pro"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Habit Tracker</title>
 <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body {
-            font-family: 'Be Vietnam Pro', sans-serif;
-            background-color: #f5f6f7;
-            color: #2c2f30;
-        }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-surface selection:bg-primary-container selection:text-on-primary-container">
-<!-- TopAppBar -->
-<nav class="fixed top-0 w-full z-50 bg-zinc-50/80 backdrop-blur-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
-<div class="flex justify-between items-center px-6 py-4 w-full">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-teal-600" data-icon="spa">spa</span>
-<span class="font-['Plus_Jakarta_Sans'] text-teal-700 font-black italic tracking-tighter text-lg">The Ritual</span>
-</div>
-<div class="flex items-center gap-4">
-<button class="material-symbols-outlined text-zinc-500 hover:bg-zinc-200/50 p-2 rounded-full transition-colors active:scale-95" data-icon="notifications">notifications</button>
-<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden active:scale-95 transition-transform duration-200">
-<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="Close up portrait of a smiling woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwI2PgqYGQAKzYeZu1kkwMdj0NLsnH4u4_IJuwWmU_SbSfVsFFlIBb2VfOS6d-cfhmOa4PetWK95pMdin4_hHn3ENtKKDXuWtJ56xRQs3RZZh45u6Ql108T6VlUiT6P2I-2OByMfJfIVYwCL5NxIg8Xr5kfiJB4Caum4jz2ciDLkeCiW66166yhV74y4ZyEJGNhf3ViXJkh8nJJ_ONOTw5f1aN9EMNDU2OabwVbxis-aQqHagEFfcHn4mgDtJ1Oli3vNN_zXmm3Uk"/>
-</div>
-</div>
+:root{--bg:#0a0a1a;--surface:#12122a;--surface2:#1a1a35;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#00BFA5;--accent2:#00E676;--streak:#FF6D00;--radius:16px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.top-nav{position:fixed;top:0;width:100%;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);z-index:100;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.nav-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;letter-spacing:-.02em}
+.nav-brand span{color:var(--accent)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.nav-btn{background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:6px;border-radius:50%;transition:background .15s}
+.nav-btn:hover{background:rgba(255,255,255,.08)}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.main{max-width:600px;margin:0 auto;padding:72px 16px 100px}
+.header{margin-bottom:28px}
+.header-date{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--text2);margin-bottom:4px}
+.header-title{font-size:28px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
+.header-sub{font-size:13px;color:var(--text2)}
+.header-sub em{color:var(--accent);font-style:normal;font-weight:600}
+.overview{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px}
+.progress-card{grid-column:span 2;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.progress-info h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.progress-info p{font-size:12px;color:var(--text2);max-width:180px;line-height:1.5}
+.progress-btn{margin-top:14px;padding:8px 18px;background:var(--accent);color:#000;font-weight:700;font-size:12px;border:none;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s}
+.progress-btn:hover{opacity:.85}
+.ring-wrap{position:relative;flex-shrink:0}
+.ring-wrap svg{width:100px;height:100px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10}
+.ring-fill{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;stroke-dasharray:251;stroke-dashoffset:100;transition:stroke-dashoffset .6s}
+.ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.streak-card{background:linear-gradient(135deg,rgba(255,109,0,.15),rgba(255,109,0,.05));border:1px solid rgba(255,109,0,.2);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;justify-content:space-between}
+.streak-card .streak-icon{font-size:28px;margin-bottom:8px}
+.streak-card h3{font-size:18px;font-weight:700;color:#FFB74D}
+.streak-card p{font-size:11px;color:var(--text2);line-height:1.5;margin-top:8px}
+.best-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;justify-content:center}
+.best-card .best-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:6px}
+.best-card .best-val{font-size:22px;font-weight:800;color:var(--accent)}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-hdr h2{font-size:18px;font-weight:700}
+.section-hdr button{background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer}
+.habit-list{display:flex;flex-direction:column;gap:10px}
+.habit-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:border-color .15s}
+.habit-card:hover{border-color:rgba(255,255,255,.15)}
+.habit-card.done{background:rgba(0,191,165,.06);border-color:rgba(0,191,165,.2)}
+.habit-icon{width:42px;height:42px;border-radius:12px;border:2px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all .15s}
+.habit-card.done .habit-icon{background:var(--accent);border-color:var(--accent);color:#000;font-size:16px}
+.habit-info{flex:1;min-width:0}
+.habit-name{font-size:14px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.habit-card.done .habit-name span:first-child{text-decoration:line-through;color:var(--text2)}
+.habit-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.badge-wellness{background:rgba(180,79,255,.15);color:#CE93D8}
+.badge-health{background:rgba(255,109,0,.15);color:#FFB74D}
+.badge-mindset{background:rgba(0,191,165,.15);color:var(--accent)}
+.badge-fitness{background:rgba(61,90,254,.15);color:#82B1FF}
+.habit-detail{font-size:11px;color:var(--text2)}
+.habit-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.habit-progress{width:80px;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.habit-progress-fill{height:100%;background:var(--streak);border-radius:3px;transition:width .3s}
+.habit-more{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:4px;opacity:0;transition:opacity .15s}
+.habit-card:hover .habit-more{opacity:1}
+.fab{position:fixed;right:20px;bottom:84px;width:52px;height:52px;border-radius:16px;background:var(--accent);color:#000;border:none;font-size:26px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,191,165,.35);transition:transform .15s;z-index:90}
+.fab:hover{transform:scale(1.08)}
+.fab:active{transform:scale(.94)}
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;display:flex;justify-content:space-around;align-items:center;padding:10px 16px 20px;background:rgba(10,10,26,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);z-index:100}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:18px;color:var(--text2);text-decoration:none;padding:4px 14px;border-radius:12px;transition:all .15s;cursor:pointer;border:none;background:none}
+.bnav-item span{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.bnav-item.active{color:var(--accent);background:rgba(0,191,165,.1)}
+@media(max-width:480px){.overview{grid-template-columns:1fr}.progress-card{grid-column:span 1;flex-direction:column;text-align:center}.progress-info p{max-width:100%}.ring-wrap svg{width:80px;height:80px}.ring-label{font-size:18px}.main{padding:64px 12px 90px}}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+<div class="nav-brand">&#x1F33F; <span>The Ritual</span></div>
+<div class="nav-actions">
+<button class="nav-btn" title="Notifications">&#x1F514;</button>
+<div class="avatar">A</div>
 </div>
 </nav>
-<main class="pt-24 pb-32 px-6 max-w-5xl mx-auto">
-<!-- Header Section -->
-<header class="mb-10">
-<p class="font-label text-on-surface-variant text-sm tracking-widest uppercase mb-1">Monday, Oct 24</p>
-<h1 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Good morning, Alex.</h1>
-<p class="font-body text-on-surface-variant mt-2">Your focus today: <span class="text-primary font-semibold">Mindful Resilience</span></p>
+<div class="main">
+<header class="header">
+<div class="header-date">Monday, Oct 24</div>
+<h1 class="header-title">Good morning, Alex.</h1>
+<p class="header-sub">Your focus today: <em>Mindful Resilience</em></p>
 </header>
-<!-- Progress Overview Grid -->
-<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-<!-- Main Progress Ring -->
-<div class="md:col-span-2 bg-surface-container-lowest rounded-[2.5rem] p-8 flex items-center justify-between shadow-[0_12px_24px_-4px_rgba(44,47,48,0.06)] overflow-hidden relative">
-<div class="relative z-10">
-<h2 class="font-headline text-2xl font-bold mb-2">Daily Momentum</h2>
-<p class="font-body text-on-surface-variant max-w-[200px]">You've completed 4 of 7 habits today. Keep it up!</p>
-<button class="mt-6 px-6 py-3 bg-primary text-on-primary font-semibold rounded-full flex items-center gap-2 active:scale-95 transition-all shadow-[0_8px_16px_-4px_rgba(0,104,89,0.3)]">
-                        View Stats <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
-</button>
+<section class="overview">
+<div class="progress-card">
+<div class="progress-info">
+<h2>Daily Momentum</h2>
+<p>You've completed 4 of 7 habits today. Keep it up!</p>
+<button class="progress-btn">View Stats &#x2192;</button>
 </div>
-<div class="relative flex items-center justify-center">
-<svg class="w-40 h-40 transform -rotate-90">
-<circle class="text-surface-container-high" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="12"></circle>
-<circle class="text-primary" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="176" stroke-linecap="round" stroke-width="12"></circle>
-</svg>
-<div class="absolute inset-0 flex flex-col items-center justify-center">
-<span class="font-headline text-4xl font-extrabold tracking-tighter">60%</span>
+<div class="ring-wrap">
+<svg viewBox="0 0 90 90"><circle class="ring-bg" cx="45" cy="45" r="40"/><circle class="ring-fill" cx="45" cy="45" r="40"/></svg>
+<div class="ring-label">60%</div>
 </div>
 </div>
+<div class="streak-card">
+<div class="streak-icon">&#x1F525;</div>
+<h3>12 Day Streak</h3>
+<p>Consistent for 1.5 weeks. You're building lasting change.</p>
 </div>
-<!-- Mini Streak Card -->
-<div class="bg-primary-container/80 backdrop-blur-xl rounded-[2.5rem] p-8 flex flex-col justify-between shadow-[0_12px_24px_-4px_rgba(0,104,89,0.1)]">
-<div>
-<span class="material-symbols-outlined text-primary text-3xl mb-4" data-icon="local_fire_department" data-weight="fill">local_fire_department</span>
-<h3 class="font-headline text-xl font-bold text-on-primary-container">12 Day Streak</h3>
-</div>
-<p class="font-body text-on-primary-container/80 text-sm">Consistent for 1.5 weeks. You're building lasting change.</p>
+<div class="best-card">
+<div class="best-label">Personal Best</div>
+<div class="best-val">21 days</div>
 </div>
 </section>
-<!-- Habit List Section -->
 <section>
-<div class="flex justify-between items-end mb-6">
-<h2 class="font-headline text-2xl font-bold">Your Rituals</h2>
-<button class="text-primary font-semibold text-sm hover:underline">Manage All</button>
+<div class="section-hdr"><h2>Your Rituals</h2><button>Manage All</button></div>
+<div class="habit-list">
+<!-- Completed habit -->
+<div class="habit-card done">
+<div class="habit-icon">&#x2713;</div>
+<div class="habit-info">
+<div class="habit-name"><span>10-min Meditation</span><span class="habit-badge badge-wellness">Wellness</span></div>
+<div class="habit-detail">Completed at 7:15 AM</div>
 </div>
-<div class="space-y-4">
-<!-- Habit Card 1 (Completed) -->
-<div class="group flex items-center bg-teal-50/50 rounded-3xl p-5 transition-all duration-400 ease-out">
-<div class="flex-shrink-0 mr-5">
-<div class="w-12 h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center scale-110 shadow-lg">
-<span class="material-symbols-outlined" data-icon="check">check</span>
+<button class="habit-more">&#x22EE;</button>
 </div>
+<!-- Active habit with progress -->
+<div class="habit-card">
+<div class="habit-icon">&#x1F4A7;</div>
+<div class="habit-info">
+<div class="habit-name"><span>Drink 2L Water</span><span class="habit-badge badge-health">Health</span></div>
+<div class="habit-detail">1.2L of 2.0L reached</div>
 </div>
-<div class="flex-grow">
-<div class="flex items-center gap-2">
-<h4 class="font-headline font-bold text-lg line-through text-on-surface-variant">10-min Meditation</h4>
-<span class="px-2 py-0.5 rounded-full bg-tertiary-container text-tertiary text-[10px] font-bold uppercase tracking-wider">Wellness</span>
-</div>
-<p class="font-body text-sm text-on-surface-variant">Completed at 7:15 AM</p>
-</div>
-<button class="material-symbols-outlined text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</button>
-</div>
-<!-- Habit Card 2 (Active) -->
-<div class="group flex items-center bg-surface-container-lowest rounded-3xl p-5 hover:translate-x-1 transition-all duration-300">
-<div class="flex-shrink-0 mr-5">
-<button class="w-12 h-12 rounded-2xl border-2 border-outline-variant/30 flex items-center justify-center hover:border-primary/50 transition-colors active:scale-90">
-<span class="material-symbols-outlined text-zinc-300 group-hover:text-primary transition-colors" data-icon="water_drop">water_drop</span>
-</button>
-</div>
-<div class="flex-grow">
-<div class="flex items-center gap-2">
-<h4 class="font-headline font-bold text-lg text-on-surface">Drink 2L Water</h4>
-<span class="px-2 py-0.5 rounded-full bg-secondary-container text-secondary text-[10px] font-bold uppercase tracking-wider">Health</span>
-</div>
-<p class="font-body text-sm text-on-surface-variant">1.2L of 2.0L reached</p>
-</div>
-<div class="flex items-center gap-4">
-<div class="h-1.5 w-24 bg-surface-container-low rounded-full overflow-hidden">
-<div class="h-full bg-secondary w-[60%] rounded-full"></div>
-</div>
-<button class="material-symbols-outlined text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" data-icon="add_circle">add_circle</button>
+<div class="habit-right">
+<div class="habit-progress"><div class="habit-progress-fill" style="width:60%"></div></div>
 </div>
 </div>
-<!-- Habit Card 3 (Active) -->
-<div class="group flex items-center bg-surface-container-lowest rounded-3xl p-5 hover:translate-x-1 transition-all duration-300">
-<div class="flex-shrink-0 mr-5">
-<button class="w-12 h-12 rounded-2xl border-2 border-outline-variant/30 flex items-center justify-center hover:border-primary/50 transition-colors active:scale-90">
-<span class="material-symbols-outlined text-zinc-300 group-hover:text-primary transition-colors" data-icon="auto_stories">auto_stories</span>
-</button>
+<!-- Active habit -->
+<div class="habit-card">
+<div class="habit-icon">&#x1F4D6;</div>
+<div class="habit-info">
+<div class="habit-name"><span>Read 10 Pages</span><span class="habit-badge badge-mindset">Mindset</span></div>
+<div class="habit-detail">"Atomic Habits" by James Clear</div>
 </div>
-<div class="flex-grow">
-<div class="flex items-center gap-2">
-<h4 class="font-headline font-bold text-lg text-on-surface">Read 10 Pages</h4>
-<span class="px-2 py-0.5 rounded-full bg-tertiary-container text-tertiary text-[10px] font-bold uppercase tracking-wider">Mindset</span>
+<button class="habit-more">&#x22EE;</button>
 </div>
-<p class="font-body text-sm text-on-surface-variant">"Atomic Habits" by James Clear</p>
+<!-- Active habit -->
+<div class="habit-card">
+<div class="habit-icon">&#x1F4AA;</div>
+<div class="habit-info">
+<div class="habit-name"><span>Evening Stretching</span><span class="habit-badge badge-fitness">Fitness</span></div>
+<div class="habit-detail">Scheduled for 8:30 PM</div>
 </div>
-<button class="material-symbols-outlined text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</button>
+<button class="habit-more">&#x22EE;</button>
 </div>
-<!-- Habit Card 4 (Active) -->
-<div class="group flex items-center bg-surface-container-lowest rounded-3xl p-5 hover:translate-x-1 transition-all duration-300">
-<div class="flex-shrink-0 mr-5">
-<button class="w-12 h-12 rounded-2xl border-2 border-outline-variant/30 flex items-center justify-center hover:border-primary/50 transition-colors active:scale-90">
-<span class="material-symbols-outlined text-zinc-300 group-hover:text-primary transition-colors" data-icon="fitness_center">fitness_center</span>
-</button>
-</div>
-<div class="flex-grow">
-<div class="flex items-center gap-2">
-<h4 class="font-headline font-bold text-lg text-on-surface">Evening Stretching</h4>
-<span class="px-2 py-0.5 rounded-full bg-secondary-container text-secondary text-[10px] font-bold uppercase tracking-wider">Fitness</span>
-</div>
-<p class="font-body text-sm text-on-surface-variant">Scheduled for 8:30 PM</p>
-</div>
-<button class="material-symbols-outlined text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</button>
-</div>
+<!-- TEMPLATE: Additional habit cards, add/remove habits, reorder -->
 </div>
 </section>
-</main>
-<!-- Floating Action Button -->
-<button class="fixed right-6 bottom-28 w-16 h-16 bg-primary text-on-primary rounded-[1.5rem] shadow-[0_12px_24px_rgba(0,104,89,0.3)] flex items-center justify-center z-50 active:scale-90 transition-transform duration-200">
-<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
-</button>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-white/90 backdrop-blur-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] rounded-t-[2.5rem] z-50">
-<!-- Today (Active) -->
-<a class="flex flex-col items-center justify-center bg-teal-50 text-teal-700 rounded-3xl px-5 py-2 active:scale-90 transition-all duration-300 ease-out" href="#">
-<span class="material-symbols-outlined" data-icon="calendar_today" data-weight="fill">calendar_today</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest mt-1">Today</span>
-</a>
-<!-- Library -->
-<a class="flex flex-col items-center justify-center text-zinc-400 px-5 py-2 hover:text-teal-500 active:scale-90 transition-all duration-300 ease-out" href="#">
-<span class="material-symbols-outlined" data-icon="explore">explore</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest mt-1">Library</span>
-</a>
-<!-- Stats -->
-<a class="flex flex-col items-center justify-center text-zinc-400 px-5 py-2 hover:text-teal-500 active:scale-90 transition-all duration-300 ease-out" href="#">
-<span class="material-symbols-outlined" data-icon="insights">insights</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest mt-1">Stats</span>
-</a>
-<!-- Profile -->
-<a class="flex flex-col items-center justify-center text-zinc-400 px-5 py-2 hover:text-teal-500 active:scale-90 transition-all duration-300 ease-out" href="#">
-<span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest mt-1">Profile</span>
-</a>
+</div>
+<button class="fab">+</button>
+<nav class="bottom-nav">
+<button class="bnav-item active">&#x1F4C5;<span>Today</span></button>
+<button class="bnav-item">&#x1F9ED;<span>Library</span></button>
+<button class="bnav-item">&#x1F4CA;<span>Stats</span></button>
+<button class="bnav-item">&#x1F464;<span>Profile</span></button>
 </nav>
-</body></html>
+<script>
+var state = { habits: [], streak: 0, bestStreak: 0, date: new Date().toDateString() }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('habit_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('habit_data', JSON.stringify(state)) } catch(e){} }
+function render() { /* TEMPLATE: Update habit list, progress ring, streak count, completion percentage */ }
+/* TEMPLATE: Habit CRUD, toggle completion, streak calculation, progress tracking, daily reset, category management */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>
