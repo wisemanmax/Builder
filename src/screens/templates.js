@@ -1,5 +1,6 @@
 import { $, esc, escAttr } from '../lib/utils.js'
 import { TEMPLATES, TEMPLATE_CATEGORIES } from '../config/templates.js'
+import { getTemplateSkeleton } from '../lib/template-loader.js'
 import { openBuilder, templateSend } from './build.js'
 
 export function initTemplateSheet() {
@@ -54,7 +55,12 @@ function openTplSheetPreview(templateId) {
   var useBtn = $('tpl-sheet-preview-use')
   if (!overlay || !frame) return
   nameEl.textContent = tpl.icon + ' ' + tpl.name
-  frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(tpl.skeleton) + '"></iframe>'
+  frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#888">Loading preview\u2026</div>'
+  getTemplateSkeleton(templateId).then(function (skeleton) {
+    frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(skeleton) + '"></iframe>'
+  }).catch(function () {
+    frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#f66">Failed to load preview</div>'
+  })
   useBtn.onclick = function () { selectTemplate(templateId) }
   overlay.classList.add('on')
   // Auto-fullscreen on mobile for better UX

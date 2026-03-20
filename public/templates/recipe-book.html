@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recipe Book</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF9F43;--accent2:#FF3CAC;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:900px;width:100%;margin:0 auto;padding:16px}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+/* TEMPLATE: Recipe cards, detail view, add form, search bar, category filters */
+@media(max-width:768px){.recipe-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+<!-- TEMPLATE: Title, search input, add recipe button -->
+</header>
+<!-- TEMPLATE: Category filter tabs -->
+<div class="recipe-grid">
+<!-- TEMPLATE: Recipe cards with image placeholder, title, time, difficulty -->
+</div>
+<!-- TEMPLATE: Recipe detail modal (ingredients, steps, notes) -->
+<!-- TEMPLATE: Add/edit recipe form modal -->
+</div>
+<script>
+var state = { recipes: [], view: 'grid', search: '', category: 'all', activeRecipe: null }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('recipe_data'); if (s) state.recipes = JSON.parse(s).recipes || [] } catch(e){} if (!state.recipes.length) generateDemoData() }
+function save() { try { localStorage.setItem('recipe_data', JSON.stringify({ recipes: state.recipes })) } catch(e){} }
+function generateDemoData() { /* TEMPLATE: 5-8 demo recipes with ingredients and steps */ }
+function render() { /* TEMPLATE: Render recipe grid, search results, detail view */ }
+/* TEMPLATE: Recipe CRUD, search/filter, category management, cooking timer, serving adjuster */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

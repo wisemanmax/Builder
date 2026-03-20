@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analytics Dashboard</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#00E5FF;--success:#00E676;--warning:#FFD600;--error:#FF5252;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.dashboard{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px}
+/* TEMPLATE: KPI card, chart container, sidebar nav, data table styles */
+@media(max-width:768px){.chart-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="dashboard">
+<header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+<!-- TEMPLATE: Dashboard title, date range picker, refresh button -->
+</header>
+<section class="kpi-grid">
+<!-- TEMPLATE: KPI cards (revenue, users, conversion, growth) -->
+</section>
+<section class="chart-grid">
+<!-- TEMPLATE: Line chart (canvas), bar chart (canvas), pie chart -->
+</section>
+<!-- TEMPLATE: Data table with sorting and filtering -->
+</div>
+<script>
+var state = { data: [], dateRange: '7d', view: 'overview' }
+function init() { load(); generateDemoData(); render() }
+function load() { try { var s = localStorage.getItem('dash_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('dash_data', JSON.stringify(state)) } catch(e){} }
+function generateDemoData() { /* TEMPLATE: Generate realistic demo data */ }
+function render() { /* TEMPLATE: Render KPIs, charts (canvas), tables */ }
+/* TEMPLATE: Chart drawing on canvas, data aggregation, date filtering, export */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

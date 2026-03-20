@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiz Game</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#B44FFF;--accent2:#00E5FF;--success:#00E676;--error:#FF5252;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{max-width:600px;width:100%;padding:16px}
+/* TEMPLATE: Question card, answer buttons, progress bar, score display, results screen */
+/* TEMPLATE: Animations for correct/wrong answers */
+@media(min-width:768px){.container{padding:32px}}
+</style>
+</head>
+<body>
+<div class="container">
+<!-- TEMPLATE: Start screen with category selection -->
+<!-- TEMPLATE: Question display with multiple-choice answers -->
+<!-- TEMPLATE: Progress bar and score counter -->
+<!-- TEMPLATE: Results screen with stats and replay -->
+</div>
+<script>
+var state = { view: 'start', questions: [], current: 0, score: 0, answers: [], highScores: [] }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('quiz_data'); if (s) state.highScores = JSON.parse(s).highScores || [] } catch(e){} }
+function save() { try { localStorage.setItem('quiz_data', JSON.stringify({ highScores: state.highScores })) } catch(e){} }
+function render() { /* TEMPLATE: Render current view (start, question, results) */ }
+/* TEMPLATE: Question generation, answer checking, scoring, category filtering, timer */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

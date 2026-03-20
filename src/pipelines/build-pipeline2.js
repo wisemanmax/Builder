@@ -3,6 +3,7 @@ import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/uti
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
 import { SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_PLAN, SYS_SPEC_COMPLIANCE } from '../config/prompts.js'
+import { getTemplateSkeleton } from '../lib/template-loader.js'
 import { injectProfileContext, mergeRulesWithProfile, formatBriefWithConversation } from '../lib/profile-context.js'
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callClaudeAudit, resetCostAccum } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
@@ -163,14 +164,22 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     } else {
       userMsg = 'BUILD REQUEST: ' + prompt
         + '\n\nCONTEXT: Single-file HTML app in sandboxed iframe. Offline-only, localStorage for persistence.'
-      if (ST._pendingTemplate) {
-        userMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture \u2014 expand, customize, and fill in all features):\n'
-          + ST._pendingTemplate.skeleton
-          + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
-        ST._pendingTemplate = null
-      }
     }
 
+    // Resolve template skeleton (may need async fetch if not yet loaded)
+    var tplPromise = Promise.resolve()
+    if (!existingApp && ST._pendingTemplate) {
+      var pending = ST._pendingTemplate
+      ST._pendingTemplate = null
+      tplPromise = (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
+        .then(function (skeleton) {
+          userMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture \u2014 expand, customize, and fill in all features):\n'
+            + skeleton
+            + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
+        })
+    }
+
+    return tplPromise.then(function () {
     var effectiveSys = existingApp ? SYS_UPDATE : SYS_BUILD
     specText = 'No specification provided'
     rulesText = 'No specific rules'
@@ -212,6 +221,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
       }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
+  }) // end tplPromise.then
   }).then(function (code) {
     v1 = code
     if (_streamPreview) { _streamPreview.finalize(v1); _streamPreview.destroy() }

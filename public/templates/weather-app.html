@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weather App</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#00E5FF;--accent2:#3D5AFE;--success:#00E676;--warning:#FFD600;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:600px;width:100%;margin:0 auto;padding:16px}
+/* TEMPLATE: Current weather card, forecast row, details grid, location search */
+@media(min-width:768px){.container{max-width:800px;padding:24px}}
+</style>
+</head>
+<body>
+<div class="container">
+<!-- TEMPLATE: Location search bar -->
+<!-- TEMPLATE: Current weather hero (icon, temp, condition, feels-like) -->
+<!-- TEMPLATE: Hourly forecast horizontal scroll -->
+<!-- TEMPLATE: 7-day forecast list -->
+<!-- TEMPLATE: Details grid (humidity, wind, UV, pressure) -->
+</div>
+<script>
+var state = { locations: [], current: null, unit: 'C', view: 'main' }
+function init() { load(); generateDemoData(); render() }
+function load() { try { var s = localStorage.getItem('weather_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('weather_data', JSON.stringify(state)) } catch(e){} }
+function generateDemoData() { /* TEMPLATE: Realistic weather demo data for multiple days */ }
+function render() { /* TEMPLATE: Render current conditions, forecasts, details */ }
+/* TEMPLATE: Location management, unit toggle, weather icon mapping, forecast display */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

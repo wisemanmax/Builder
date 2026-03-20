@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pomodoro Timer</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF3CAC;--accent2:#00E5FF;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{max-width:480px;width:100%;padding:16px;text-align:center}
+/* TEMPLATE: Timer circle/ring styles, control buttons, session history list */
+/* TEMPLATE: Responsive breakpoints */
+@media(min-width:768px){.container{padding:32px}}
+</style>
+</head>
+<body>
+<div class="container">
+<!-- TEMPLATE: Timer display (circular progress), start/pause/reset buttons -->
+<!-- TEMPLATE: Session type selector (focus/short break/long break) -->
+<!-- TEMPLATE: Session history with timestamps -->
+<!-- TEMPLATE: Settings panel for custom intervals -->
+</div>
+<script>
+var state = { minutes: 25, seconds: 0, running: false, mode: 'focus', sessions: [], settings: { focus: 25, shortBreak: 5, longBreak: 15 } }
+var timer = null
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('pomo_data'); if (s) { var d = JSON.parse(s); state.sessions = d.sessions || []; state.settings = d.settings || state.settings } } catch(e){} }
+function save() { try { localStorage.setItem('pomo_data', JSON.stringify({ sessions: state.sessions, settings: state.settings })) } catch(e){} }
+function render() { /* TEMPLATE: Update timer display, session list, controls */ }
+/* TEMPLATE: Timer logic, mode switching, notification on complete, history tracking */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>
