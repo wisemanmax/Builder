@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseball Card Tracker - Advanced Collection Management</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-light: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #475569;
+            --border-light: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 0.5rem;
+            --radius-lg: 0.75rem;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: min(1200px, 100vw - 2rem);
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Buttons */
+        button {
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--radius);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 44px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+
+        button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-ghost {
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem 0;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: min(250px, 100%);
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            min-height: 44px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .filter-select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.5rem;
+            color: var(--text-primary);
+            min-height: 44px;
+            font-size: 0.875rem;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+            gap: 1.5rem;
+            min-height: 400px;
+        }
+
+        .card-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+            tabindex: 0;
+        }
+
+        .card-item:hover,
+        .card-item:focus {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-light);
+            outline: none;
+        }
+
+        .card-item:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .market-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .market-indicator.down {
+            background: var(--danger);
+        }
+
+        .market-indicator.stable {
+            background: var(--warning);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .card-details {
+            padding: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .card-value {
+            text-align: right;
+        }
+
+        .current-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .value-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .value-up { color: var(--success); }
+        .value-down { color: var(--danger); }
+        .value-stable { color: var(--warning); }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .condition-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .condition-mint {
+            background: rgb(16 185 129 / 0.1);
+            color: var(--success);
+            border: 1px solid rgb(16 185 129 / 0.2);
+        }
+
+        .condition-excellent {
+            background: rgb(59 130 246 / 0.1);
+            color: var(--accent);
+            border: 1px solid rgb(59 130 246 / 0.2);
+        }
+
+        .condition-good {
+            background: rgb(245 158 11 / 0.1);
+            color: var(--warning);
+            border: 1px solid rgb(245 158 11 / 0.2);
+        }
+
+        .condition-fair {
+            background: rgb(239 68 68 / 0.1);
+            color: var(--danger);
+            border: 1px solid rgb(239 68 68 / 0.2);
+        }
+
+        .card-type {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgb(0 0 0 / 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            backdrop-filter: blur(4px);
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: min(600px, 100vw - 2rem);
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            min-height: 44px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-description {
+            margin-bottom: 2rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 1001;
+            max-width: min(400px, 100vw - 4rem);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .filters {
+                justify-content: center;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .stats-panel {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+
+            .nav-buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .toast {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .container {
+                max-width: 100vw;
+                padding: 0 0.5rem;
+            }
+
+            .modal {
+                max-width: 100vw;
+                margin: 0;
+                border-radius: 0;
+                max-height: 100vh;
+            }
+
+            .modal-overlay {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        ⚾ Baseball Card Tracker
+                    </div>
+                    <nav class="nav-buttons">
+                        <button class="btn-primary" id="addCardBtn" aria-label="Add new card to collection">
+                            Add Card
+                        </button>
+                        <button class="btn-ghost" id="toggleViewBtn" aria-label="Toggle between grid and list view">
+                            Grid View
+                        </button>
+                        <button class="btn-ghost" id="updateMarketBtn" aria-label="Update market values for all cards">
+                            Update Market
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="container">
+                <section class="stats-panel" id="statsPanel" role="region" aria-label="Collection statistics">
+                    <!-- Stats will be inserted here -->
+                </section>
+
+                <section class="controls">
+                    <div class="search-box">
+                        <div class="search-icon">🔍</div>
+                        <input 
+                            type="text" 
+                            class="search-input" 
+                            placeholder="Search by player, team, or year..."
+                            id="searchInput"
+                            autocomplete="off"
+                            aria-label="Search baseball cards by player, team, or year"
+                        >
+                    </div>
+                    <div class="filters">
+                        <label for="conditionFilter" class="sr-only">Filter by condition</label>
+                        <select class="filter-select" id="conditionFilter" aria-label="Filter cards by condition">
+                            <option value="">All Conditions</option>
+                            <option value="mint">Mint</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                        </select>
+                        <label for="typeFilter" class="sr-only">Filter by type</label>
+                        <select class="filter-select" id="typeFilter" aria-label="Filter cards by type">
+                            <option value="">All Types</option>
+                            <option value="base">Base</option>
+                            <option value="parallel">Parallel</option>
+                            <option value="insert">Insert</option>
+                            <option value="autograph">Autograph</option>
+                            <option value="relic">Relic</option>
+                        </select>
+                        <label for="sortSelect" class="sr-only">Sort cards</label>
+                        <select class="filter-select" id="sortSelect" aria-label="Sort cards by various criteria">
+                            <option value="value-desc">Value (High to Low)</option>
+                            <option value="value-asc">Value (Low to High)</option>
+                            <option value="name-asc">Player (A-Z)</option>
+                            <option value="year-desc">Year (Newest)</option>
+                            <option value="year-asc">Year (Oldest)</option>
+                            <option value="acquired-desc">Recently Added</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="card-grid" id="cardGrid" role="region" aria-label="Baseball card collection">
+                    <!-- Cards will be inserted here -->
+                </section>
+
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">⚾</div>
+                    <h2 class="empty-title">No Cards in Collection</h2>
+                    <p class="empty-description">
+                        Start building your baseball card collection by adding your first card.
+                    </p>
+                    <button class="btn-primary" id="emptyAddBtn" aria-label="Add your first card to the collection">
+                        Add Your First Card
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Add/Edit Modal -->
+        <div class="modal-overlay" id="cardModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Add New Card</h2>
+                    <button class="btn-ghost" id="closeModalBtn" style="padding: 0.5rem;" aria-label="Close modal">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="cardForm">
+                        <div class="form-group">
+                            <label class="form-label" for="playerName">Player Name *</label>
+                            <input type="text" id="playerName" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="year">Year *</label>
+                                <input type="number" id="year" class="form-input" min="1900" max="2024" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="brand">Brand *</label>
+                                <input type="text" id="brand" class="form-input" placeholder="e.g. Topps, Panini" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="cardNumber">Card Number</label>
+                                <input type="text" id="cardNumber" class="form-input" placeholder="e.g. 150">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="team">Team</label>
+                                <input type="text" id="team" class="form-input" placeholder="e.g. Yankees">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="condition">Condition *</label>
+                                <select id="condition" class="form-input" required>
+                                    <option value="">Select condition</option>
+                                    <option value="mint">Mint</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="type">Card Type</label>
+                                <select id="type" class="form-input">
+                                    <option value="base">Base</option>
+                                    <option value="parallel">Parallel</option>
+                                    <option value="insert">Insert</option>
+                                    <option value="autograph">Autograph</option>
+                                    <option value="relic">Relic</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="currentValue">Current Value ($)</label>
+                                <input type="number" id="currentValue" class="form-input" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="acquiredValue">Acquired Value ($)</label>
+                                <input type="number" id="acquiredValue" class="form-input" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="notes">Notes</label>
+                            <textarea id="notes" class="form-input" rows="3" placeholder="Any additional notes about the card..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" form="cardForm" class="btn-primary" id="submitButton">Add Card</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast container -->
+        <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+    </div>
+
+    <style>
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+
+    <script>
+        // Application State
+        const state = {
+            cards: [],
+            filteredCards: [],
+            searchQuery: '',
+            filters: {
+                condition: '',
+                type: ''
+            },
+            sortBy: 'value-desc',
+            editingCard: null,
+            viewMode: 'grid'
+        };
+
+        // Demo Data
+        const demoCards = [
+            {
+                id: '1',
+                playerName: 'Mike Trout',
+                year: 2009,
+                brand: 'Bowman Chrome',
+                cardNumber: '18',
+                team: 'Angels',
+                condition: 'mint',
+                type: 'base',
+                currentValue: 2500.00,
+                acquiredValue: 150.00,
+                notes: 'Rookie card in perfect condition',
+                acquired: '2020-03-15',
+                marketTrend: 'up'
+            },
+            {
+                id: '2',
+                playerName: 'Ronald Acuña Jr.',
+                year: 2018,
+                brand: 'Topps Chrome',
+                cardNumber: '193',
+                team: 'Braves',
+                condition: 'excellent',
+                type: 'parallel',
+                currentValue: 850.00,
+                acquiredValue: 45.00,
+                notes: 'Refractor parallel',
+                acquired: '2019-08-22',
+                marketTrend: 'up'
+            },
+            {
+                id: '3',
+                playerName: 'Vladimir Guerrero Jr.',
+                year: 2019,
+                brand: 'Topps',
+                cardNumber: '50',
+                team: 'Blue Jays',
+                condition: 'mint',
+                type: 'insert',
+                currentValue: 425.00,
+                acquiredValue: 25.00,
+                notes: 'Future Stars insert',
+                acquired: '2020-12-10',
+                marketTrend: 'stable'
+            },
+            {
+                id: '4',
+                playerName: 'Fernando Tatis Jr.',
+                year: 2019,
+                brand: 'Panini Prizm',
+                cardNumber: '85',
+                team: 'Padres',
+                condition: 'excellent',
+                type: 'base',
+                currentValue: 320.00,
+                acquiredValue: 35.00,
+                notes: 'Rookie season card',
+                acquired: '2021-02-18',
+                marketTrend: 'down'
+            },
+            {
+                id: '5',
+                playerName: 'Shohei Ohtani',
+                year: 2021,
+                brand: 'Topps Chrome',
+                cardNumber: '100',
+                team: 'Angels',
+                condition: 'mint',
+                type: 'autograph',
+                currentValue: 1200.00,
+                acquiredValue: 800.00,
+                notes: 'MVP season autograph',
+                acquired: '2022-01-05',
+                marketTrend: 'up'
+            },
+            {
+                id: '6',
+                playerName: 'Juan Soto',
+                year: 2018,
+                brand: 'Topps',
+                cardNumber: '581',
+                team: 'Nationals',
+                condition: 'good',
+                type: 'relic',
+                currentValue: 275.00,
+                acquiredValue: 55.00,
+                notes: 'Game-used jersey piece',
+                acquired: '2021-07-30',
+                marketTrend: 'stable'
+            },
+            {
+                id: '7',
+                playerName: 'Bo Bichette',
+                year: 2020,
+                brand: 'Bowman',
+                cardNumber: '28',
+                team: 'Blue Jays',
+                condition: 'excellent',
+                type: 'parallel',
+                currentValue: 180.00,
+                acquiredValue: 20.00,
+                notes: 'Chrome refractor',
+                acquired: '2020-11-12',
+                marketTrend: 'up'
+            },
+            {
+                id: '8',
+                playerName: 'Yordan Alvarez',
+                year: 2019,
+                brand: 'Topps Chrome',
+                cardNumber: '205',
+                team: 'Astros',
+                condition: 'mint',
+                type: 'base',
+                currentValue: 195.00,
+                acquiredValue: 15.00,
+                notes: 'ROY winner rookie',
+                acquired: '2021-04-08',
+                marketTrend: 'stable'
+            }
+        ];
+
+        // Utility Functions
+        function generateId() {
+            return Date.now().toString() + Math.random().toString(36).substr(2, 5);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Storage Functions
+        function saveToStorage() {
+            try {
+                if (state.cards.length > 0) {
+                    const dataSize = JSON.stringify(state.cards).length;
+                    if (dataSize > 5000000) { // ~5MB limit check
+                        throw new Error('Storage quota exceeded');
+                    }
+                }
+                localStorage.setItem('baseballCards', JSON.stringify(state.cards));
+            } catch (error) {
+                if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+                    showToast('Storage quota exceeded. Please delete some cards.', 'error');
+                } else {
+                    showToast('Storage error: Unable to save changes', 'error');
+                }
+                console.error('Storage error:', error);
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const stored = localStorage.getItem('baseballCards');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        state.cards = parsed;
+                    } else {
+                        throw new Error('Invalid data format');
+                    }
+                } else {
+                    // Load demo data for first time users
+                    state.cards = [...demoCards];
+                    saveToStorage();
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                state.cards = [...demoCards];
+                showToast('Loaded demo data due to storage error', 'error');
+            }
+        }
+
+        // Market Update Simulation
+        function simulateMarketUpdate() {
+            state.cards.forEach(card => {
+                const changePercent = (Math.random() - 0.5) * 0.2; // ±10% change
+                const oldValue = card.currentValue;
+                card.currentValue = Math.max(1, oldValue * (1 + changePercent));
+                
+                if (changePercent > 0.02) {
+                    card.marketTrend = 'up';
+                } else if (changePercent < -0.02) {
+                    card.marketTrend = 'down';
+                } else {
+                    card.marketTrend = 'stable';
+                }
+            });
+            
+            saveToStorage();
+            applyFiltersAndSort();
+            showToast('Market values updated!', 'success');
+        }
+
+        // Stats Calculation
+        function calculateStats() {
+            const totalCards = state.cards.length;
+            const totalValue = state.cards.reduce((sum, card) => sum + card.currentValue, 0);
+            const totalInvested = state.cards.reduce((sum, card) => sum + (card.acquiredValue || 0), 0);
+            const totalGain = totalValue - totalInvested;
+            
+            return {
+                totalCards,
+                totalValue,
+                totalInvested,
+                totalGain,
+                averageValue: totalCards > 0 ? totalValue / totalCards : 0
+            };
+        }
+
+        // Filter and Sort Functions
+        function applyFiltersAndSort() {
+            let filtered = [...state.cards];
+            
+            // Search filter
+            if (state.searchQuery) {
+                const query = state.searchQuery.toLowerCase();
+                filtered = filtered.filter(card =>
+                    card.playerName.toLowerCase().includes(query) ||
+                    card.team.toLowerCase().includes(query) ||
+                    card.brand.toLowerCase().includes(query) ||
+                    card.year.toString().includes(query)
+                );
+            }
+            
+            // Condition filter
+            if (state.filters.condition) {
+                filtered = filtered.filter(card => card.condition === state.filters.condition);
+            }
+            
+            // Type filter
+            if (state.filters.type) {
+                filtered = filtered.filter(card => card.type === state.filters.type);
+            }
+            
+            // Sort
+            const [sortField, sortOrder] = state.sortBy.split('-');
+            filtered.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch (sortField) {
+                    case 'value':
+                        aVal = a.currentValue;
+                        bVal = b.currentValue;
+                        break;
+                    case 'name':
+                        aVal = a.playerName.toLowerCase();
+                        bVal = b.playerName.toLowerCase();
+                        break;
+                    case 'year':
+                        aVal = a.year;
+                        bVal = b.year;
+                        break;
+                    case 'acquired':
+                        aVal = new Date(a.acquired);
+                        bVal = new Date(b.acquired);
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (sortOrder === 'asc') {
+                    return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                } else {
+                    return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+                }
+            });
+            
+            state.filteredCards = filtered;
+            render();
+        }
+
+        // Render Functions
+        function renderStats() {
+            const stats = calculateStats();
+            const panel = document.getElementById('statsPanel');
+            
+            panel.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalCards}</div>
+                    <div class="stat-label">Total Cards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${formatCurrency(stats.totalValue)}</div>
+                    <div class="stat-label">Collection Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${formatCurrency(stats.totalInvested)}</div>
+                    <div class="stat-label">Total Invested</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: ${stats.totalGain >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                        ${stats.totalGain >= 0 ? '+' : ''}${formatCurrency(stats.totalGain)}
+                    </div>
+                    <div class="stat-label">Total Gain/Loss</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${formatCurrency(stats.averageValue)}</div>
+                    <div class="stat-label">Average Value</div>
+                </div>
+            `;
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (state.filteredCards.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = state.filteredCards.map(card => {
+                const gain = card.currentValue - (card.acquiredValue || 0);
+                const gainPercent = card.acquiredValue ? ((gain / card.acquiredValue) * 100) : 0;
+                
+                return `
+                    <div class="card-item" data-card-id="${card.id}" role="button" aria-label="Edit ${card.playerName} card">
+                        <div class="card-image">
+                            <div class="market-indicator ${card.marketTrend}" aria-label="Market trend: ${card.marketTrend}"></div>
+                            No Image Available
+                        </div>
+                        <div class="card-details">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">${card.playerName}</div>
+                                    <div class="card-subtitle">${card.year} ${card.brand} #${card.cardNumber || 'N/A'}</div>
+                                </div>
+                                <div class="card-value">
+                                    <div class="current-value">${formatCurrency(card.currentValue)}</div>
+                                    <div class="value-change ${gain >= 0 ? 'value-up' : 'value-down'}">
+                                        ${gain >= 0 ? '+' : ''}${formatCurrency(gain)}
+                                        (${gainPercent >= 0 ? '+' : ''}${gainPercent.toFixed(1)}%)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-meta">
+                                <span class="condition-badge condition-${card.condition}">
+                                    ${card.condition}
+                                </span>
+                                <span class="card-type">${card.type}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function render() {
+            renderStats();
+            renderCards();
+        }
+
+        // Modal Functions
+        function openAddModal() {
+            state.editingCard = null;
+            document.getElementById('modalTitle').textContent = 'Add New Card';
+            document.getElementById('submitButton').textContent = 'Add Card';
+            document.getElementById('cardForm').reset();
+            document.getElementById('cardModal').classList.add('active');
+            
+            // Focus management
+            setTimeout(() => {
+                document.getElementById('playerName').focus();
+            }, 100);
+        }
+
+        function editCard(cardId) {
+            const card = state.cards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            state.editingCard = card;
+            document.getElementById('modalTitle').textContent = 'Edit Card';
+            document.getElementById('submitButton').textContent = 'Update Card';
+            
+            // Populate form
+            document.getElementById('playerName').value = card.playerName;
+            document.getElementById('year').value = card.year;
+            document.getElementById('brand').value = card.brand;
+            document.getElementById('cardNumber').value = card.cardNumber || '';
+            document.getElementById('team').value = card.team || '';
+            document.getElementById('condition').value = card.condition;
+            document.getElementById('type').value = card.type;
+            document.getElementById('currentValue').value = card.currentValue;
+            document.getElementById('acquiredValue').value = card.acquiredValue || '';
+            document.getElementById('notes').value = card.notes || '';
+            
+            document.getElementById('cardModal').classList.add('active');
+            
+            // Focus management
+            setTimeout(() => {
+                document.getElementById('playerName').focus();
+            }, 100);
+        }
+
+        function closeModal() {
+            document.getElementById('cardModal').classList.remove('active');
+            state.editingCard = null;
+        }
+
+        function deleteCard(cardId) {
+            if (confirm('Are you sure you want to delete this card?')) {
+                state.cards = state.cards.filter(card => card.id !== cardId);
+                saveToStorage();
+                applyFiltersAndSort();
+                showToast('Card deleted successfully!', 'success');
+            }
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            // Form validation
+            const requiredFields = ['playerName', 'year', 'brand', 'condition'];
+            const missingFields = [];
+            
+            for (const field of requiredFields) {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    missingFields.push(field);
+                    element.focus();
+                }
+            }
+            
+            if (missingFields.length > 0) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const cardData = {
+                playerName: document.getElementById('playerName').value.trim(),
+                year: parseInt(document.getElementById('year').value),
+                brand: document.getElementById('brand').value.trim(),
+                cardNumber: document.getElementById('cardNumber').value.trim(),
+                team: document.getElementById('team').value.trim(),
+                condition: document.getElementById('condition').value,
+                type: document.getElementById('type').value,
+                currentValue: parseFloat(document.getElementById('currentValue').value) || 0,
+                acquiredValue: parseFloat(document.getElementById('acquiredValue').value) || 0,
+                notes: document.getElementById('notes').value.trim(),
+                marketTrend: 'stable'
+            };
+            
+            if (state.editingCard) {
+                // Update existing card
+                const index = state.cards.findIndex(c => c.id === state.editingCard.id);
+                state.cards[index] = { ...state.editingCard, ...cardData };
+                showToast('Card updated successfully!', 'success');
+            } else {
+                // Add new card
+                const newCard = {
+                    ...cardData,
+                    id: generateId(),
+                    acquired: new Date().toISOString().split('T')[0]
+                };
+                state.cards.push(newCard);
+                showToast('Card added successfully!', 'success');
+            }
+            
+            saveToStorage();
+            applyFiltersAndSort();
+            closeModal();
+        }
+
+        // Toast Function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event Handlers
+        function toggleView() {
+            const btn = document.getElementById('toggleViewBtn');
+            btn.textContent = btn.textContent === 'Grid View' ? 'List View' : 'Grid View';
+        }
+
+        // Search handler with debounce
+        const handleSearch = debounce((event) => {
+            state.searchQuery = event.target.value;
+            applyFiltersAndSort();
+        }, 300);
+
+        // Initialize App
+        function init() {
+            loadFromStorage();
+            applyFiltersAndSort();
+            
+            // Event listeners
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            
+            document.getElementById('conditionFilter').addEventListener('change', (e) => {
+                state.filters.condition = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            document.getElementById('typeFilter').addEventListener('change', (e) => {
+                state.filters.type = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            document.getElementById('sortSelect').addEventListener('change', (e) => {
+                state.sortBy = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            // Button event listeners
+            document.getElementById('addCardBtn').addEventListener('click', openAddModal);
+            document.getElementById('emptyAddBtn').addEventListener('click', openAddModal);
+            document.getElementById('toggleViewBtn').addEventListener('click', toggleView);
+            document.getElementById('updateMarketBtn').addEventListener('click', simulateMarketUpdate);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('cardForm').addEventListener('submit', handleSubmit);
+            
+            // Modal overlay click handler
+            document.getElementById('cardModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    closeModal();
+                }
+            });
+            
+            // Card click handler with event delegation
+            document.getElementById('cardGrid').addEventListener('click', (e) => {
+                const cardItem = e.target.closest('.card-item');
+                if (cardItem) {
+                    const cardId = cardItem.dataset.cardId;
+                    editCard(cardId);
+                }
+            });
+            
+            // Keyboard navigation for cards
+            document.getElementById('cardGrid').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    const cardItem = e.target.closest('.card-item');
+                    if (cardItem) {
+                        e.preventDefault();
+                        const cardId = cardItem.dataset.cardId;
+                        editCard(cardId);
+                    }
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        }
+
+        // Start the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
