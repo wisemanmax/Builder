@@ -3,9 +3,9 @@ import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/uti
 import { ghPageUrl } from '../lib/utils.js'
 import { SYS_STITCH_ENHANCE, SYS_STITCH_VERIFY, GPT4O_STITCH_REVIEW, SYS_STITCH_FIX1, SYS_STITCH_FIX2 } from '../config/prompts-stitch.js'
 import { PIPE5_STATUS, GRADS } from '../config/constants.js'
-import { callClaudeRaw, callClaude, callGPTRaw2, fetchWithRetry, resetCostAccum } from '../lib/ai.js'
+import { callClaudeRaw, callClaude, callClaudeWithThinkingStream, callGPTRaw2, fetchWithRetry, resetCostAccum } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
-import { injectProfileContext, mergeRulesWithProfile, formatBriefForPrompt } from '../lib/profile-context.js'
+import { injectProfileContext, mergeRulesWithProfile, formatBriefWithConversation } from '../lib/profile-context.js'
 import { runLocalChecks } from '../lib/checks.js'
 import { updateStitchStage, updateStitchEstimate, updateStitchTime } from '../components/stitch-tracker.js'
 import { addMsg, updatePS } from '../components/message.js'
@@ -233,7 +233,7 @@ function runIntake(context) {
   if (activeThought) {
     // Extract specification from thought brief using structured formatter
     if (activeThought.brief) {
-      specText = formatBriefForPrompt(activeThought.brief)
+      specText = formatBriefWithConversation(activeThought)
 
       // Generate Data Mapping Schema from features and brief
       dataMapping = _generateDataMapping(activeThought.brief)
@@ -436,7 +436,12 @@ function runAssemble(stitchHTML, intakePayload) {
     + stitchHTML
     + '\n\nORIGINAL USER REQUEST:\n' + intakePayload.prompt
 
-  return callClaude(sys, userMsg, 0.3)
+  var _assembleThinking = ''
+  return callClaudeWithThinkingStream(sys, userMsg, 2000, function (type, text) {
+    if (type === 'thinking') { _assembleThinking += text }
+  }).then(function (html) {
+    return { html: html, thinkingText: _assembleThinking }
+  })
 }
 
 /**
@@ -978,8 +983,9 @@ export function runStitchPipeline(context, callbacks) {
       if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, statusMsg)
       updatePS(pid, 3, 'active', statusMsg)
     })
-  }).then(function (html) {
-    assembledHTML = html
+  }).then(function (assembleResult) {
+    assembledHTML = assembleResult.html
+    var assembleThinking = assembleResult.thinkingText || ''
     storeInProgressiveLearner(runId, 'assemble', {
       htmlLength: assembledHTML.length,
       preview: assembledHTML.slice(0, 500)
@@ -988,6 +994,9 @@ export function runStitchPipeline(context, callbacks) {
     updateStage(3, 'passed', 'App assembled (' + Math.round(assembledHTML.length / 1024) + 'KB)')
     if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.PASSED, 'App assembled')
     updatePS(pid, 3, 'done', 'Assembly complete ✓')
+    if (assembleThinking.trim()) {
+      addMsg({ role: 'asst', type: 'thinking', text: assembleThinking.trim() })
+    }
 
     // ── Stage 4: Verify (Automated Guardrails) ──
     checkPipelineCancel()

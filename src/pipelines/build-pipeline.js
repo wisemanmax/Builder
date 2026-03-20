@@ -2,8 +2,8 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
 import { MAX_FIX_PASSES } from '../config/constants.js'
-import { SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN } from '../config/prompts.js'
-import { injectProfileContext, mergeRulesWithProfile, formatBriefForPrompt } from '../lib/profile-context.js'
+import { SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_ENHANCE, SYS_BACKEND, SYS_PLAN, SYS_SPEC_COMPLIANCE } from '../config/prompts.js'
+import { injectProfileContext, mergeRulesWithProfile, formatBriefWithConversation } from '../lib/profile-context.js'
 import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callGPT, callGPTReview, resetCostAccum } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
 import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
@@ -188,7 +188,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
         effectiveSys += '\n\nUSER RULES (follow these constraints strictly):\n' + rulesText
       }
       if (activeThought.brief) {
-        specText = formatBriefForPrompt(activeThought.brief)
+        specText = formatBriefWithConversation(activeThought)
         effectiveSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
       }
       if (!existingApp && activeThought.brief) {
@@ -404,6 +404,27 @@ export function runPipeline(prompt, existingApp, customName, images) {
       addMsg({ role: 'asst', type: 'text', text: 'Enhancement review skipped — continuing with current build.' })
       return Promise.resolve()
     })
+  }).then(function () {
+    // Spec compliance check (runs when a thought brief is active)
+    var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
+    if (activeThought && activeThought.brief && v2) {
+      var complianceInput = 'APP SPECIFICATION:\n' + specText + '\n\nUSER RULES:\n' + rulesText + '\n\nGENERATED CODE:\n' + v2.slice(0, 40000)
+      return retryStep(function () { return callClaudeRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000) }, 1, 'Compliance').then(function (raw) {
+        try {
+          var compliance = JSON.parse(raw)
+          addMsg({ role: 'asst', type: 'text', html: '<div style="padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:11px">'
+            + '<div style="font-weight:700;color:rgba(255,255,255,.9);margin-bottom:6px">Spec Compliance: ' + (compliance.score || 0) + '/100</div>'
+            + (compliance.matched && compliance.matched.length ? '<div style="color:rgba(255,255,255,.5);margin-bottom:2px">Matched:</div>' + compliance.matched.map(function (m) { return '<div style="color:rgba(76,175,80,.8);padding-left:8px">\u2713 ' + esc(m) + '</div>' }).join('') : '')
+            + (compliance.missing && compliance.missing.length ? '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Missing:</div>' + compliance.missing.map(function (m) { return '<div style="color:rgba(255,214,0,.7);padding-left:8px">\u26A0 ' + esc(m) + '</div>' }).join('') : '')
+            + (compliance.violations && compliance.violations.length ? '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Violations:</div>' + compliance.violations.map(function (m) { return '<div style="color:rgba(255,82,82,.7);padding-left:8px">\u2717 ' + esc(m) + '</div>' }).join('') : '')
+            + '</div>' })
+          if (compliance.score < 50) {
+            addMsg({ role: 'asst', type: 'text', text: 'Low spec compliance (' + compliance.score + '/100). The built app may not match your ideation brief. Consider re-running the think engine or providing more specific requirements.' })
+          }
+        } catch (e) { /* compliance parse failed — non-critical */ }
+      }).catch(function () { /* compliance check failed — non-critical, continue */ })
+    }
+    return Promise.resolve()
   }).then(function () {
     // Step 9 — Backend
     checkPipelineCancel()

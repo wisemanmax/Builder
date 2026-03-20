@@ -3,7 +3,7 @@ import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/uti
 import { ghPageUrl } from '../lib/utils.js'
 import { callClaudeRaw, resetCostAccum } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
-import { injectProfileContext } from '../lib/profile-context.js'
+import { injectProfileContext, formatBriefWithConversation, mergeRulesWithProfile } from '../lib/profile-context.js'
 import { ghCreateBranch, ghPushTree, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
 import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
 import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
@@ -191,6 +191,27 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     var decomposeMsg = 'Build a website for: ' + prompt
     if (images && images.length) decomposeMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached]'
     var effectiveDecomposeSys = injectProfileContext(SYS_WEB_DECOMPOSE)
+
+    // Inject think engine spec and rules into decompose step
+    var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
+    if (activeThought) {
+      if (activeThought.brief) {
+        var specText = formatBriefWithConversation(activeThought)
+        effectiveDecomposeSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
+      }
+      var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
+      var merged = mergeRulesWithProfile(linkedRules)
+      if (merged.mustRules.length || merged.mustNotRules.length) {
+        var rulesText = 'MUST DO:\n' + merged.mustRules.map(function (r) { return '- ' + r }).join('\n')
+          + '\nMUST NOT DO:\n' + merged.mustNotRules.map(function (r) { return '- ' + r }).join('\n')
+        if (merged.niceToHave.length) rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
+        effectiveDecomposeSys += '\n\nUSER RULES (follow these constraints strictly):\n' + rulesText
+      }
+      if (!existingApp && activeThought.brief) {
+        decomposeMsg = 'Build a website based on the specification above.\n\nSite Name: ' + (activeThought.brief.name || customName || 'My Site') + '\n\nAdditional notes: ' + prompt
+        if (images && images.length) decomposeMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached]'
+      }
+    }
     return retryStep(function () { return callClaudeRaw(effectiveDecomposeSys, decomposeMsg, 4000, images) }, 2, 'Decompose').then(function (raw) {
       decomposition = raw
       updatePS(pid, 0, 'done', 'Decomposition complete \u2713')
