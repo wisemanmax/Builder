@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#652fe7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGhlIFJpdHVhbCIsInNob3J0X25hbWUiOiJSaXR1YWwiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJ0aGVtZV9jb2xvciI6IiM2NTJmZTciLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Y3ZjBmZiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2ZztiYXNlNjQsc3ZnPHN2ZyB4bWxucz1cImh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnXCIgdmlld0JveD1cIjAgMCAxOTIgMTkyXCI+PGNpcmNsZSBjeD1cIjk2XCIgY3k9XCI5NlwiIHI9XCI5NlwiIGZpbGw9XCIjNjUyZmU3XCIvPjwvc3ZnPiJ9XX0=">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <title>The Ritual</title>
+    <style>
+        :root {
+            --color-primary: #652fe7;
+            --color-secondary: #006859;
+            --color-accent: #b31b25;
+            --color-dark: #2c2f30;
+            --color-light: #f7f0ff;
+            --color-text: #2c2f30;
+            --color-text-muted: #006859;
+            --color-border: #e0e0e0;
+            --font-heading: 'Be Vietnam Pro', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --radius-sm: 2.5rem;
+            --radius-md: 2.5rem;
+            --radius-lg: 2.5rem;
+            --radius-xl: 2.5rem;
+            --transition-default: all 0.3s ease;
+            --shadow-sm: 0 4px 20px -4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 20px -4px rgba(0,0,0,0.05);
+            --shadow-lg: 0 4px 20px -4px rgba(0,0,0,0.05);
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            background-color: var(--color-light);
+            color: var(--color-text);
+            overflow-x: hidden;
+        }
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            letter-spacing: -0.02em;
+        }
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+        }
+        h3 {
+            font-size: clamp(1.2rem, 2vw, 1.75rem);
+        }
+        p {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: var(--radius-md);
+            transition: var(--transition-default);
+        }
+        button:focus, button:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: clamp(1rem, 5vw, 3rem);
+        }
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .progress-overview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        .habit-list {
+            padding: 2rem 0;
+        }
+        .bottom-navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--color-light);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem 0;
+        }
+        .bottom-navigation a {
+            text-decoration: none;
+            color: var(--color-text);
+            font-weight: bold;
+        }
+        .bottom-navigation a:focus, .bottom-navigation a:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        .progress-ring {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(var(--color-primary) 60%, var(--color-border) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--color-text);
+        }
+        .habit-item {
+            background: var(--color-light);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1rem;
+            padding: 1rem;
+            transition: var(--transition-default);
+        }
+        .habit-item:hover {
+            box-shadow: var(--shadow-md);
+        }
+        @media (max-width: 849px) {
+            .container {
+                padding: 1rem;
+            }
+        }
+        @media (min-width: 850px) {
+            .container {
+                max-width: 1200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero" aria-labelledby="hero-heading hero-paragraph">
+        <h1 id="hero-heading">Good morning, Alex.</h1>
+        <p id="hero-paragraph">Your focus today: Mindful Resilience</p>
+    </header>
+    <main id="home" class="container">
+        <section class="progress-overview" aria-labelledby="progress-heading">
+            <h2 id="progress-heading">Daily Momentum</h2>
+            <div class="progress-ring" aria-label="Progress ring showing 60% completion">60%</div>
+            <p>You've completed 4 of 7 habits today. Keep it up!</p>
+            <p>12 Day Streak</p>
+            <p>Consistent for 1.5 weeks. You're building lasting change.</p>
+            <button id="view-stats">View Stats</button>
+        </section>
+        <section class="habit-list" aria-labelledby="habits-heading">
+            <h2 id="habits-heading">Your Rituals</h2>
+            <div class="habit-item" aria-labelledby="habit-1-heading">
+                <h3 id="habit-1-heading">Completed at 7:15 AM</h3>
+                <p>1.2L of 2.0L reached</p>
+                <button>Mark as Incomplete</button>
+            </div>
+            <div class="habit-item" aria-labelledby="habit-2-heading">
+                <h3 id="habit-2-heading">"Atomic Habits" by James Clear</h3>
+                <p>Scheduled for 8:30 PM</p>
+                <button>Mark as Complete</button>
+            </div>
+        </section>
+    </main>
+    <nav class="bottom-navigation" aria-label="Main Navigation">
+        <a href="#" id="nav-today">Today</a>
+        <a href="#" id="nav-library">Library</a>
+        <a href="#" id="nav-stats">Stats</a>
+        <a href="#" id="nav-profile">Profile</a>
+    </nav>
+    <script>
+        function showPage(id) {
+            const pages = document.querySelectorAll('main');
+            let pageFound = false;
+            pages.forEach(page => {
+                if (page.id === id) {
+                    page.style.display = 'block';
+                    pageFound = true;
+                } else {
+                    page.style.display = 'none';
+                }
+            });
+            if (!pageFound) {
+                console.warn(`Page with id '${id}' not found.`);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('home');
+            document.getElementById('view-stats').addEventListener('click', () => showPage('stats'));
+            document.getElementById('nav-today').addEventListener('click', () => showPage('home'));
+            document.getElementById('nav-library').addEventListener('click', () => showPage('library'));
+            document.getElementById('nav-stats').addEventListener('click', () => showPage('stats'));
+            document.getElementById('nav-profile').addEventListener('click', () => showPage('profile'));
+        });
+    </script>
+</body>
+</html>
