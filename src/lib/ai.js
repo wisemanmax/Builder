@@ -2,7 +2,7 @@ import { ST } from './state.js'
 import { scrubKeys } from './utils.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
 import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CHAT } from '../config/prompts.js'
-import { CLAUDE_MODEL, GPT_MODEL, GPT_MINI_MODEL, ANTHROPIC_API_URL, OPENAI_API_URL } from '../config/constants.js'
+import { CLAUDE_MODEL, GPT_MODEL, GPT_MINI_MODEL, GEMINI_MODEL, ANTHROPIC_API_URL, OPENAI_API_URL, GEMINI_API_URL } from '../config/constants.js'
 
 function claudeHeaders() {
   return { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'anthropic-dangerous-direct-browser-access': 'true' }
@@ -544,6 +544,46 @@ export function callGPTAudit2(code, customSysPrompt) {
       try { var p = JSON.parse(raw); return Array.isArray(p) ? p : [] }
       catch (e) { return [] }
     })
+}
+
+// --- Gemini API ---
+
+function geminiCatch(e) {
+  if (e.message && e.message.indexOf('Gemini:') === 0) throw e
+  throw new Error(classifyFetchError(e, 'Gemini'))
+}
+
+export function callGeminiRaw(sys, msg, maxTokens) {
+  maxTokens = maxTokens || 4000
+  var url = GEMINI_API_URL + GEMINI_MODEL + ':generateContent?key=' + ST.geminiKey
+  return fetchWithRetry(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: sys }] },
+      contents: [{ role: 'user', parts: [{ text: msg }] }],
+      generationConfig: { maxOutputTokens: maxTokens, temperature: 0.3 }
+    }),
+  }, 120000).then(function (r) {
+    if (!r.ok) return r.json().catch(function () { return {} }).then(function (e) {
+      throw new Error('Gemini: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status))
+    })
+    return r.json()
+  }).then(function (d) {
+    var text = ''
+    if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) {
+      for (var i = 0; i < d.candidates[0].content.parts.length; i++) {
+        if (d.candidates[0].content.parts[i].text) { text += d.candidates[0].content.parts[i].text }
+      }
+    }
+    // Track usage
+    var usage = d.usageMetadata || {}
+    trackUsage('Gemini Review', GEMINI_MODEL, {
+      prompt_tokens: usage.promptTokenCount || 0,
+      completion_tokens: usage.candidatesTokenCount || 0
+    })
+    return stripFences(text)
+  }).catch(geminiCatch)
 }
 
 export function classifyIntent(msg, images) {

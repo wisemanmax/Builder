@@ -7,7 +7,7 @@ import { renderGrid } from '../components/app-icon.js'
 import { renderProfilesSettings } from './profiles.js'
 
 export function openSettings() {
-  $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey; $('s-stitch').value = ST.stitchKey
+  $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey; $('s-stitch').value = ST.stitchKey; $('s-gemini').value = ST.geminiKey
   $('s-gh-token').value = ST.ghToken; $('s-gh-user').value = ST.ghUser; $('s-gh-repo').value = ST.ghRepo; $('s-gh-domain').value = ST.ghCustomDomain
   $('s-sb-url').value = ST.sbUrl; $('s-sb-anon').value = ST.sbAnon
   $('s-audit-pill').classList.toggle('on', ST.auditEnabled)
@@ -32,7 +32,7 @@ export function initSettings() {
     })
   }
   $('s-save-ai').addEventListener('click', function () {
-    ST.key = $('s-anth').value.trim(); ST.gptKey = $('s-gpt').value.trim(); ST.stitchKey = $('s-stitch').value.trim(); saveKeys()
+    ST.key = $('s-anth').value.trim(); ST.gptKey = $('s-gpt').value.trim(); ST.stitchKey = $('s-stitch').value.trim(); ST.geminiKey = $('s-gemini').value.trim(); saveKeys()
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
     // Test Stitch key if provided
     if (ST.stitchKey) {

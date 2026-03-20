@@ -50,6 +50,7 @@ export const KEY_STORE = {
   ANTH: 'bldr_key',
   GPT: 'bldr_gptKey',
   STITCH: 'bldr_stitchKey',
+  GEMINI: 'bldr_geminiKey',
   GH_TOKEN: 'bldr_ghToken',
   GH_USER: 'bldr_ghUser',
   GH_REPO: 'bldr_ghRepo',
@@ -129,8 +130,10 @@ export const PIPE4_ICONS = [
 
 export const PIPE5_NAMES = [
   'Stitch \u00B7 Intake',
+  'Gemini \u00B7 Intake Review',
   'Stitch \u00B7 Blueprint',
-  'Blueprint Review',
+  'Gemini \u00B7 Blueprint Review',
+  'Blueprint Preview',
   'Stitch \u00B7 Assemble',
   'Stitch \u00B7 Verify',
   'GPT-4o \u00B7 Review',
@@ -139,7 +142,7 @@ export const PIPE5_NAMES = [
 ]
 
 export const PIPE5_ICONS = [
-  '\uD83D\uDCE5', '\uD83D\uDCDD', '\uD83D\uDC41', '\uD83E\uDDF5', '\u2705',
+  '\uD83D\uDCE5', '\u2728', '\uD83D\uDCDD', '\u2728', '\uD83D\uDC41', '\uD83E\uDDF5', '\u2705',
   '\uD83D\uDD0D', '\u2728', '\uD83D\uDE80',
 ]
 
@@ -158,6 +161,7 @@ export var COST_RATES = {
   'claude-sonnet-4-20250514': { input: 3.00, output: 15.00, cacheRead: 0.30, cacheWrite: 3.75 },
   'gpt-4o': { input: 2.50, output: 10.00 },
   'gpt-4o-mini': { input: 0.15, output: 0.60 },
+  'gemini-2.5-flash': { input: 0.15, output: 0.60 },
 }
 export var COST_MARKUP = 7
 
@@ -165,5 +169,7 @@ export var COST_MARKUP = 7
 export var CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 export var GPT_MODEL = 'gpt-4o'
 export var GPT_MINI_MODEL = 'gpt-4o-mini'
+export var GEMINI_MODEL = 'gemini-2.5-flash'
 export var ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 export var OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
+export var GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/'

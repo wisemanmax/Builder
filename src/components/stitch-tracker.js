@@ -3,10 +3,10 @@ import { PIPE5_NAMES, PIPE5_ICONS, PIPE5_STATUS } from '../config/constants.js'
 
 /**
  * Stitch-Claude Chat Builder — Flawless Pipeline
- * 8-stage live tracker component (shell only, no execution logic)
+ * 10-stage live tracker component (shell only, no execution logic)
  */
 
-// Render the 8-stage horizontal stepper tracker
+// Render the 10-stage horizontal stepper tracker
 export function renderStitchTracker(containerId) {
   var el = $(containerId)
   if (!el) return
