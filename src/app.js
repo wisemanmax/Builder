@@ -17,6 +17,7 @@ import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, re
 import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
 import { openSettings, initSettings } from './screens/settings.js'
+import { openTemplates, closeTemplates, initTemplateSheet } from './screens/templates.js'
 import { openOrgThink, closeOrgThink, sendOrgMsg, orgOptionSelect, finishOrgThink, refineOrgThink, initOrgThinkSheet } from './screens/org-think.js'
 import { renderProfileChip, showProfilePicker, initProfilePicker, cycleProfile } from './components/profile-switcher.js'
 import { initFeedbackCard } from './components/feedback-card.js'
@@ -100,6 +101,7 @@ export function init() {
   initContextMenu(openApp, openProjectSheet, openBuilder, delApp)
   initPipelineToggle()
   initBuildHistory()
+  initTemplateSheet()
 
   // Builder sheet
   $('bs-close').addEventListener('click', closeBuilder)
@@ -155,6 +157,8 @@ export function init() {
       if (emojiOv && emojiOv.classList.contains('on')) { emojiOv.classList.remove('on'); return }
       var feedbackOv = $('feedback-overlay')
       if (feedbackOv && feedbackOv.classList.contains('on')) { feedbackOv.classList.remove('on'); return }
+      var templateOv = $('template-overlay')
+      if (templateOv && templateOv.classList.contains('on')) { closeTemplates(); return }
       var settingsOv = $('settings-overlay')
       if (settingsOv && settingsOv.classList.contains('on')) { settingsOv.classList.remove('on'); return }
       var bhOv = $('build-history-overlay')
@@ -176,6 +180,7 @@ export function init() {
   window.openApp = openApp
   window.openThink = openThink
   window.openSettings = openSettings
+  window.openTemplates = openTemplates
   window.openProjectSheet = openProjectSheet
   window.openCustomizeBuilder = openCustomizeBuilder
   window.chipSend = chipSend
@@ -217,10 +222,6 @@ export function init() {
   window.cycleProfile = cycleProfile
   window.selfUpdateBuilder = selfUpdateBuilder
   window.pullFromGitHub = pullFromGitHub
-  window.syncFromGitHub = function () {
-    var p = pullFromGitHub()
-    if (p && p.then) p.then(function () { renderGrid() })
-  }
   window.pullFromSupabase = pullFromSupabase
   window.copyToClipboard = copyToClipboard
   window.toast = toast
