@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradBridge Student Loans - Second Chances, Brighter Futures</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-primary: #4A5FC1;
+            --color-secondary: #3B4DB0;
+            --color-accent: #FFD700;
+            --color-dark: #2C3B8F;
+            --color-light: #F8F9FA;
+            --color-text: #2C3B8F;
+            --color-text-muted: #6B7280;
+            --color-border: #E5E7EB;
+            
+            --gradient-primary: linear-gradient(135deg, #4A5FC1 0%, #3B4DB0 100%);
+            --gradient-accent: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Source Sans Pro', sans-serif;
+            
+            --text-h1: clamp(2.5rem, 6vw, 4rem);
+            --text-h2: clamp(1.75rem, 4vw, 2.75rem);
+            --text-h3: clamp(1.3rem, 2.5vw, 1.85rem);
+            --text-body: clamp(0.95rem, 1.5vw, 1.1rem);
+            --text-small: 0.875rem;
+            
+            --line-height: 1.6;
+            --letter-spacing-heading: -0.02em;
+            --letter-spacing-body: 0;
+            
+            --max-width: 1200px;
+            --container-padding: clamp(1rem, 5vw, 3rem);
+            --section-spacing: clamp(4rem, 10vw, 8rem);
+            
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 30px;
+            
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 20px rgba(74, 95, 193, 0.15);
+            --shadow-lg: 0 8px 40px rgba(74, 95, 193, 0.2);
+            
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: var(--text-body);
+            line-height: var(--line-height);
+            color: var(--color-text);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--container-padding);
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus styles for accessibility */
+        *:focus {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+
+        .btn:focus-visible,
+        .nav-link:focus-visible,
+        .social-link:focus-visible {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(74, 95, 193, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            opacity: 0.9;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+            color: var(--color-accent);
+        }
+
+        .nav-cta {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            font-size: var(--text-small);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--gradient-accent);
+            color: var(--color-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Page Container */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--gradient-primary);
+            color: white;
+            padding: var(--section-spacing) 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 100%;
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: var(--text-h1);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            letter-spacing: var(--letter-spacing-heading);
+        }
+
+        .hero-script {
+            font-family: 'Dancing Script', cursive;
+            color: var(--color-accent);
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-script::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            line-height: 1.7;
+        }
+
+        /* Features Section */
+        .features {
+            padding: var(--section-spacing) 0;
+            background: var(--color-light);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-family: var(--font-heading);
+            font-size: var(--text-h2);
+            color: var(--color-text);
+            margin-bottom: 1rem;
+            letter-spacing: var(--letter-spacing-heading);
+        }
+
+        .section-header .accent-text {
+            font-family: 'Dancing Script', cursive;
+            color: var(--color-primary);
+            font-size: 1.2em;
+            position: relative;
+            display: inline-block;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--color-border);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .feature-card p {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Stats Section */
+        .stats {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .stats h2 {
+            font-family: var(--font-heading);
+            font-size: var(--text-h2);
+            margin-bottom: 1rem;
+            letter-spacing: var(--letter-spacing-heading);
+        }
+
+        .stats .accent-underline {
+            font-family: 'Dancing Script', cursive;
+            color: var(--color-accent);
+            position: relative;
+            display: inline-block;
+            font-size: 1.2em;
+        }
+
+        .stats .accent-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+        }
+
+        /* Process Section */
+        .process {
+            padding: var(--section-spacing) 0;
+            background: white;
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .process-step {
+            background: var(--color-light);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            position: relative;
+            border: 1px solid var(--color-border);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 2rem;
+            background: var(--gradient-primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .process-step h3 {
+            color: var(--color-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .process-step p {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Resources Section */
+        .resources {
+            padding: var(--section-spacing) 0;
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .resource-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .resource-image {
+            height: 200px;
+            background: var(--color-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--color-primary);
+        }
+
+        .resource-content {
+            padding: 1.5rem;
+        }
+
+        .resource-card h3 {
+            color: var(--color-text);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-card p {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .btn-tertiary {
+            background: var(--gradient-primary);
+            color: white;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            width: 100%;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--color-dark);
+            color: white;
+            padding: 3rem 0 2rem;
+        }
+
+        .footer-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-nav a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .footer-nav a:hover {
+            color: white;
+        }
+
+        .footer-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .footer-logo img {
+            height: 40px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .social-link:hover {
+            background: var(--color-primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 90%;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--color-text-muted);
+        }
+
+        .modal h2 {
+            font-family: var(--font-heading);
+            color: var(--color-text);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .modal p {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-muted);
+        }
+
+        .modal .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Form styles */
+        .application-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--color-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 95, 193, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: var(--color-primary);
+                flex-direction: column;
+                padding: 2rem;
+                gap: 1rem;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-cta {
+                display: none;
+            }
+
+            .hero-content {
+                text-align: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .process-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-nav {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --container-padding: 1rem;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .process-step {
+                padding: 1.5rem;
+            }
+
+            .modal {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Live region for page navigation announcements -->
+    <div id="page-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="container nav-container">
+            <a href="#" class="logo" data-page="home" aria-label="GradBridge home">GradBridge</a>
+            <ul class="nav-menu" id="navMenu" role="menubar">
+                <li role="none"><a href="#" class="nav-link" data-page="student-loans" role="menuitem">Student Loans</a></li>
+                <li role="none"><a href="#" class="nav-link" data-page="resources" role="menuitem">Resources</a></li>
+                <li role="none"><a href="#" class="nav-link" data-page="partners" role="menuitem">Partners</a></li>
+                <li role="none"><a href="#" class="nav-link" data-page="about-us" role="menuitem">About Us</a></li>
+            </ul>
+            <div class="nav-cta">
+                <button class="btn btn-primary" data-modal="application" aria-label="Apply for student loan">Apply Now</button>
+                <button class="btn btn-ghost" data-modal="signin" aria-label="Sign in to account">Sign In</button>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu" aria-expanded="false">☰</button>
+        </div>
+    </nav>
+
+    <!-- Sign In Modal -->
+    <div class="modal-overlay" id="signinModal" role="dialog" aria-labelledby="signin-title" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" data-close="signin" aria-label="Close sign in modal">&times;</button>
+            <h2 id="signin-title">Sign In</h2>
+            <p>Access your GradBridge account to track your application and manage your student loan.</p>
+            <a href="#" class="btn btn-primary">Continue to Sign In</a>
+            <a href="#" class="btn btn-ghost">Create New Account</a>
+        </div>
+    </div>
+
+    <!-- Application Modal -->
+    <div class="modal-overlay" id="applicationModal" role="dialog" aria-labelledby="application-title" aria-hidden="true">
+        <div class="modal">
+            <button class="modal-close" data-close="application" aria-label="Close application modal">&times;</button>
+            <h2 id="application-title">Start Your Application</h2>
+            <p>Get started with your second-chance private student loan application. The process takes less than 15 minutes.</p>
+            <form class="application-form" id="applicationForm">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="school">School</label>
+                    <select id="school" name="school" required>
+                        <option value="">Select your school</option>
+                        <option value="participating-school">Participating School</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Begin Application</button>
+                <button type="button" class="btn btn-ghost" data-close="application">Learn More First</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div class="page active" id="home">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>
+                        Second Chances,<br>
+                        <span class="hero-script">Brighter Futures</span>.
+                    </h1>
+                    <p>We bridge the gap when traditional lenders have denied your student loan, providing the financial support you need to continue your education and build a brighter future.</p>
+                    <button class="btn btn-primary" data-modal="application">Apply Now</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Achieve Your <span class="accent-text">Education Dreams</span>.</h2>
+                    <p>If you've been denied for a traditional private student loan, GradBridge is here to help. Our second-look private student loan program is designed for students who fell just outside traditional lending criteria.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">✓</div>
+                        <h3>Simple Application</h3>
+                        <p>Our simple, digital application process will give you a decision in less than 15 minutes</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">🎓</div>
+                        <h3>Over 2,000 Schools</h3>
+                        <p>We support undergraduate and graduate programs from over 2,000 schools across the country</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">↻</div>
+                        <h3>Second Chances Expanded eligibility</h3>
+                        <p>We look through unique underwriting so even students that have been declined by other lenders may get a second chance at approval</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">$</div>
+                        <h3>Flexible Repayment Options</h3>
+                        <p>While in school you can choose from a variety of options: Interest only, $25 fixed or no payments</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">👤</div>
+                        <h3>Cosigner Support</h3>
+                        <p>We make it easy for you to apply with a cosigner to maximize your chances of being approved for a loan</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="container">
+                <h2>Approximately 42% of college dropouts cite financial struggles as the primary reason for leaving school.</h2>
+                <p class="accent-underline">GradBridge removes the financial barriers to graduation</p>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="process">
+            <div class="container">
+                <div class="section-header">
+                    <h2>How it <span class="accent-text">Works</span>.</h2>
+                    <p>With a simple application process and expanded eligibility, we provide access to the funding you need to continue your education and build a brighter future.</p>
+                </div>
+                <div class="process-grid">
+                    <div class="process-step">
+                        <div class="step-number">1</div>
+                        <h3>Get Started with GradBridge</h3>
+                        <p>If you applied for a private student loan and didn't get approved, you can apply with GradBridge. We specialize in reviewing applications that fell just outside traditional approval criteria.</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">2</div>
+                        <h3>Complete a Short Application</h3>
+                        <p>The process is fast, secure, and only takes a few minutes. Complete your application with GradBridge to get started.</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">3</div>
+                        <h3>We Work with Your School</h3>
+                        <p>If approved, we'll coordinate directly with your school to certify the loan amount and send the funds on your behalf. We take care of ensuring your loan proceeds pay your cost of attendance.</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">4</div>
+                        <h3>Stay on Track</h3>
+                        <p>During the process, you'll receive regular updates and easy-to-understand repayment options. If you selected an in-school payment plan, we'll help you stay on track with your payments.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section class="resources">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Plan for college with confidence using our <span class="accent-text">Free Resources</span>.</h2>
+                </div>
+                <div class="resources-grid">
+                    <article class="resource-card">
+                        <div class="resource-image" aria-hidden="true">💰</div>
+                        <div class="resource-content">
+                            <h3>The Hidden Costs of College You Should Plan For</h3>
+                            <p>College costs more than just tuition. Learn about the hidden expenses that can catch...</p>
+                            <a href="#" class="btn btn-tertiary">Read Full Article</a>
+                        </div>
+                    </article>
+                    <article class="resource-card">
+                        <div class="resource-image" aria-hidden="true">📱</div>
+                        <div class="resource-content">
+                            <h3>Student Loan Denied? Here's What to Do Next</h3>
+                            <p>If your student loan application was denied, don't panic. Learn why it happens and how...</p>
+                            <a href="#" class="btn btn-tertiary">Read Full Article</a>
+                        </div>
+                    </article>
+                    <article class="resource-card">
+                        <div class="resource-image" aria-hidden="true">📊</div>
+                        <div class="resource-content">
+                            <h3>How Your Credit Score Affects Private Student Loan Approval</h3>
+                            <p>Learn how credit scores impact private student loan approval and why most...</p>
+                            <a href="#" class="btn btn-tertiary">Read Full Article</a>
+                        </div>
+                    </article>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn btn-primary" data-page="resources">View All Resources</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Student Loans Page -->
+    <div class="page" id="student-loans">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Student Loans for <span class="hero-script">Second Chances</span></h1>
+                    <p>Our private student loan program is specifically designed for students who have been denied by traditional lenders. We provide the funding you need to continue your education.</p>
+                    <button class="btn btn-primary" data-modal="application">Apply Now</button>
+                </div>
+            </div>
+        </section>
+        
+        <section class="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Loan Details</h2>
+                    <p>Everything you need to know about GradBridge student loans.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Resources Page -->
+    <div class="page" id="resources">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1><span class="hero-script">Free Resources</span> for Your Educational Journey</h1>
+                    <p>Access helpful guides and articles to help you navigate college financing and make informed decisions about your education.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Partners Page -->
+    <div class="page" id="partners">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Our <span class="hero-script">Partners</span></h1>
+                    <p>We work with schools and organizations across the country to provide students with access to educational funding.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- About Us Page -->
+    <div class="page" id="about-us">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>About <span class="hero-script">GradBridge</span></h1>
+                    <p>We're committed to helping students achieve their educational dreams by providing second-chance private student loans.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-logo">
+                <h3 style="font-family: var(--font-heading); color: white;">GradBridge</h3>
+            </div>
+            
+            <nav class="footer-nav" aria-label="Footer navigation">
+                <a href="#" data-page="student-loans">Student Loans</a>
+                <a href="#" data-page="resources">Resources</a>
+                <a href="#" data-page="partners">Partners</a>
+                <a href="#" data-page="about-us">About Us</a>
+                <a href="#">In the News</a>
+                <a href="#">For Schools</a>
+                <a href="#">FAQs</a>
+                <a href="#">Careers</a>
+            </nav>
+
+            <div class="social-links" role="list" aria-label="Social media links">
+                <a href="#" class="social-link" role="listitem" aria-label="Instagram">📷</a>
+                <a href="#" class="social-link" role="listitem" aria-label="LinkedIn">💼</a>
+                <a href="#" class="social-link" role="listitem" aria-label="Facebook">📘</a>
+                <a href="#" class="social-link" role="listitem" aria-label="Twitter">🐦</a>
+                <a href="#" class="social-link" role="listitem" aria-label="TikTok">🎵</a>
+            </div>
+
+            <div class="footer-bottom">
+                <p>800 North King Street, Suite 304-3596, Wilmington, DE 19801, (877) 427-5123</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Accessibility</a>
+                </div>
+                <p style="margin-top: 1rem;">GradBridge Student Loans are originated by Hatch Bank, a California-chartered industrial bank</p>
+                <p style="margin-top: 1rem; font-size: 0.75rem; opacity: 0.8;">
+                    GradBridge loans are second-look private student loans and are not affiliated with the federal student loan program. As such, they do not offer the same repayment benefits that may be available with federal loans. GradBridge loans are for students currently enrolled at a participating schools. All loans will be subject to eligibility requirements, responsible lending criteria, and credit approval.<br><br>
+                    Source: Based on data from <a href="https://educationdata.org/college-dropout-rates" style="color: var(--color-accent);">Education Data, report on College Dropout Rates</a> as of 12/09/2025.<br><br>
+                    Repayment Options: While in school, applicants may choose one of the following repayment options (i) Interest-Only: Pay only the interest each month to reduce total loan cost; (ii) $25 Fixed Payments: Pay $25 per month to help lower accrued interest; or (iii) No Payment: Make no payments while in school, interest accrues and is added to the loan balance. Each choice impacts the total loan cost. For the $25 repayment example, assume a $10,000 loan with an interest rate of 10.05% APR that will have 30 months of in-school payments of $25, followed by 120 months of principal and interest payments of $305.15 per month. Example as of 21/2026.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Page routing
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                
+                // Announce page change to screen readers
+                const announcements = document.getElementById('page-announcements');
+                const pageTitle = targetPage.querySelector('h1')?.textContent || pageId;
+                announcements.textContent = `Navigated to ${pageTitle} page`;
+            }
+            
+            // Close mobile menu if open
+            const navMenu = document.getElementById('navMenu');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            navMenu.classList.remove('active');
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
+            // Store current page
+            localStorage.setItem('currentPage', pageId);
+        }
+
+        // Modal functionality
+        function openModal(modalType) {
+            const modal = document.getElementById(modalType + 'Modal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                
+                // Focus first focusable element
+                const firstFocusable = modal.querySelector('button, input, select, textarea, a[href]');
+                if (firstFocusable) {
+                    firstFocusable.focus();
+                }
+            }
+        }
+
+        function closeModal(modalType) {
+            const modal = document.getElementById(modalType + 'Modal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Page navigation
+            document.addEventListener('click', function(e) {
+                if (e.target.hasAttribute('data-page')) {
+                    e.preventDefault();
+                    showPage(e.target.getAttribute('data-page'));
+                }
+                
+                if (e.target.hasAttribute('data-modal')) {
+                    e.preventDefault();
+                    openModal(e.target.getAttribute('data-modal'));
+                }
+                
+                if (e.target.hasAttribute('data-close')) {
+                    e.preventDefault();
+                    closeModal(e.target.getAttribute('data-close'));
+                }
+                
+                // Close modals when clicking overlay
+                if (e.target.classList.contains('modal-overlay')) {
+                    e.target.classList.remove('active');
+                    e.target.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const navMenu = document.getElementById('navMenu');
+            
+            if (mobileMenuBtn && navMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    const isExpanded = navMenu.classList.contains('active');
+                    navMenu.classList.toggle('active');
+                    mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                });
+            }
+
+            // Form submission
+            const applicationForm = document.getElementById('applicationForm');
+            if (applicationForm) {
+                applicationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Simple form validation
+                    const inputs = this.querySelectorAll('input[required], select[required]');
+                    let isValid = true;
+                    
+                    inputs.forEach(input => {
+                        if (!input.value.trim()) {
+                            isValid = false;
+                            input.style.borderColor = '#ef4444';
+                        } else {
+                            input.style.borderColor = '#d1d5db';
+                        }
+                    });
+                    
+                    if (isValid) {
+                        // Store form data in localStorage
+                        const formData = new FormData(this);
+                        const data = Object.fromEntries(formData.entries());
+                        localStorage.setItem('applicationData', JSON.stringify(data));
+                        
+                        // Show success message
+                        this.innerHTML = '<div style="text-align: center; padding: 2rem;"><h3>Application Submitted!</h3><p>We\'ll review your application and get back to you soon.</p></div>';
+                    }
+                });
+            }
+
+            // Initialize page from localStorage
+            const savedPage = localStorage.getItem('currentPage');
+            if (savedPage) {
+                showPage(savedPage);
+            }
+
+            // Handle escape key to close modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const activeModal = document.querySelector('.modal-overlay.active');
+                    if (activeModal) {
+                        activeModal.classList.remove('active');
+                        activeModal.setAttribute('aria-hidden', 'true');
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            });
+
+            // Navbar scroll effect
+            let lastScrollTop = 0;
+            const navbar = document.querySelector('.navbar');
+            
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    navbar.style.transform = 'translateY(-100%)';
+                } else {
+                    navbar.style.transform = 'translateY(0)';
+                }
+                
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            });
+        });
+    </script>
+</body>
+</html>
