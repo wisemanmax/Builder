@@ -1,29 +1,11 @@
 [
   {
-    "id": "ammtvnpo89fx",
-    "name": "Retro Tiles Rules",
-    "linkedThoughtId": "ammtvfgq6nie",
-    "ruleCount": 12,
-    "path": "rules/retro-tiles-rules.json",
-    "createdAt": "2026-03-17T00:31:55.064Z",
-    "updatedAt": "2026-03-17T00:31:55.064Z"
-  },
-  {
-    "id": "ammuff1go6ei",
-    "name": "Hip-Hop Link Tree Rules",
-    "linkedThoughtId": "ammuf7o4505v",
-    "ruleCount": 12,
-    "path": "rules/hip-hop-link-tree-rules.json",
-    "createdAt": "2026-03-17T09:45:02.760Z",
-    "updatedAt": "2026-03-17T09:45:02.760Z"
-  },
-  {
-    "id": "ammukx0mnfd9",
-    "name": "Daily Budget Tracker Rules",
-    "linkedThoughtId": "ammukstso4zc",
-    "ruleCount": 11,
-    "path": "rules/daily-budget-tracker-rules.json",
-    "createdAt": "2026-03-17T12:18:59.567Z",
-    "updatedAt": "2026-03-17T12:18:59.567Z"
+    "id": "ammy9tq2x16apb8",
+    "name": "Baseball Card Tracker Rules",
+    "linkedThoughtId": "ammy9k9hmdh66m8",
+    "ruleCount": 7,
+    "path": "rules/baseball-card-tracker-rules.json",
+    "createdAt": "2026-03-20T02:19:34.857Z",
+    "updatedAt": "2026-03-20T02:19:34.857Z"
   }
 ]
