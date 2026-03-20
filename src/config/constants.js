@@ -158,6 +158,7 @@ export var COST_RATES = {
   'claude-sonnet-4-20250514': { input: 3.00, output: 15.00, cacheRead: 0.30, cacheWrite: 3.75 },
   'gpt-4o': { input: 2.50, output: 10.00 },
   'gpt-4o-mini': { input: 0.15, output: 0.60 },
+  'gpt-5.4': { input: 5.00, output: 20.00 },
 }
 export var COST_MARKUP = 7
 
@@ -165,5 +166,6 @@ export var COST_MARKUP = 7
 export var CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 export var GPT_MODEL = 'gpt-4o'
 export var GPT_MINI_MODEL = 'gpt-4o-mini'
+export var GPT_THINK_MODEL = 'gpt-5.4'
 export var ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 export var OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
