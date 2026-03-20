@@ -1,5 +1,27 @@
 [
   {
+    "id": "card-tracker",
+    "name": "Card Tracker",
+    "icon": "🎯",
+    "ci": 3,
+    "url": "https://wisemanmax.github.io/builder/apps/card-tracker.html",
+    "path": "apps/card-tracker.html",
+    "prompts": [
+      {
+        "ts": "2026-03-20T02:22:28.859Z",
+        "type": "initial",
+        "text": "Make me an advance baseball card tracking app"
+      },
+      {
+        "ts": "2026-03-20T02:34:04.465Z",
+        "type": "update",
+        "text": "Keep all current code, upgrade UI to mirror picture"
+      }
+    ],
+    "createdAt": "2026-03-20T02:22:28.859Z",
+    "updatedAt": "2026-03-20T02:34:04.465Z"
+  },
+  {
     "id": "bashys",
     "name": "BashYs",
     "icon": "🎯",
