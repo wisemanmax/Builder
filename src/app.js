@@ -24,6 +24,8 @@ import { renderProfilesSettings, initProfilesSettings } from './screens/profiles
 import { selfUpdateBuilder } from './pipelines/builder-plus.js'
 import { pullFromGitHub } from './lib/github.js'
 import { pullFromSupabase } from './lib/storage.js'
+import { decompressShareData } from './lib/share.js'
+import { openShareCard } from './screens/studio.js'
 
 export function init() {
   // Global error guard — suppress only cross-origin/blob errors, log all others
@@ -62,6 +64,9 @@ export function init() {
 
   // Emoji grid
   initEmojiPicker()
+
+  // Handle share URLs (#/share/{compressed-data})
+  _handleShareUrl()
 
   // Initial screen
   if (ST.key) {
@@ -223,4 +228,28 @@ export function init() {
   window.stopPipeline = stopPipeline
   window.openBuildHistory = openBuildHistory
   window.closeBuildHistory = closeBuildHistory
+  window.openShareCard = openShareCard
+}
+
+function _handleShareUrl() {
+  var hash = window.location.hash
+  if (!hash || hash.indexOf('#/share/') !== 0) return
+  var data = hash.substring(8) // Remove '#/share/'
+  if (!data) return
+  // Clear the hash
+  try { history.replaceState(null, '', window.location.pathname) } catch (e) {}
+  // Decompress and display
+  decompressShareData(data).then(function (html) {
+    if (!html) { toast('Could not load shared app', 3000); return }
+    // Show in a full-screen viewer
+    var viewer = document.createElement('div')
+    viewer.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000'
+    viewer.innerHTML = '<div style="position:absolute;top:8px;right:12px;z-index:1;display:flex;gap:8px">'
+      + '<button id="share-viewer-close" style="padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:12px;cursor:pointer">\u2715 Close</button>'
+      + '</div>'
+      + '<iframe style="width:100%;height:100%;border:none" sandbox="allow-scripts allow-forms allow-modals"></iframe>'
+    document.body.appendChild(viewer)
+    viewer.querySelector('iframe').srcdoc = html
+    viewer.querySelector('#share-viewer-close').addEventListener('click', function () { viewer.remove() })
+  })
 }

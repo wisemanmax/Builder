@@ -4,6 +4,7 @@ import { ghPageUrl } from '../lib/utils.js'
 import { renderGrid } from '../components/app-icon.js'
 import { openBuilder } from './build.js'
 import { costSummaryHTML } from '../lib/cost.js'
+import { generateShareUrl } from '../lib/share.js'
 
 export function openProjectSheet(id) {
   ST.projectAppId = id
@@ -92,8 +93,17 @@ export function closeProject() { $('project-sheet').classList.remove('open'); ST
 export function copyUrl() {
   var app = null; var id = ST.projectAppId || ST.activeAppId
   for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === id) { app = ST.apps[i]; break } }
-  if (app && app.ghPushed && ghPageUrl(app.id)) copyToClipboard(ghPageUrl(app.id), 'URL')
-  else toast('Push to GitHub first', 3000)
+  if (app && app.ghPushed && ghPageUrl(app.id)) {
+    copyToClipboard(ghPageUrl(app.id), 'URL')
+  } else if (app) {
+    // Generate a compressed share link as fallback
+    generateShareUrl(app).then(function (url) {
+      if (url) copyToClipboard(url, 'Share link')
+      else toast('App too large to share via link. Push to GitHub for a live URL.', 4000)
+    })
+  } else {
+    toast('No app found', 3000)
+  }
 }
 
 export function editCurrentApp() {

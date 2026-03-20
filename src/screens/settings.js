@@ -5,6 +5,7 @@ import { testGitHub, pullFromGitHub } from '../lib/github.js'
 import { pullFromSupabase } from '../lib/storage.js'
 import { renderGrid } from '../components/app-icon.js'
 import { renderProfilesSettings } from './profiles.js'
+import { testSupabaseConnection } from '../lib/supabase-setup.js'
 
 export function openSettings() {
   $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey; $('s-stitch').value = ST.stitchKey
@@ -62,8 +63,22 @@ export function initSettings() {
     ST.sbUrl = url; ST.sbAnon = anon; saveKeys()
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
     toast('Supabase credentials saved \u2713')
+    // Auto-test connection
+    testSupabaseConnection().then(function (ok) {
+      toast(ok ? '\u2713 Supabase connected' : '\u2717 Supabase connection failed \u2014 check URL and key', 4000)
+    })
   })
   $('s-pull').addEventListener('click', pullFromSupabase)
+  // Supabase test connection button
+  var sbTestBtn = $('s-sb-test')
+  if (sbTestBtn) {
+    sbTestBtn.addEventListener('click', function () {
+      toast('Testing Supabase connection\u2026')
+      testSupabaseConnection().then(function (ok) {
+        toast(ok ? '\u2713 Supabase connected' : '\u2717 Connection failed', 4000)
+      })
+    })
+  }
   var backendPill = $('s-backend-pill')
   if (backendPill) {
     backendPill.classList.toggle('on', ST.backendEnabled)

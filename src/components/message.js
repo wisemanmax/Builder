@@ -154,8 +154,8 @@ export function addMsg(cfg) {
       row.innerHTML = '<div class="awrap"><div class="aav">\u26A1</div><div class="abub">' + (cfg.html || esc(cfg.text || '')) + '</div></div>'
     } else if (cfg.type === 'pipeline') {
       row.id = cfg.id
-      var pNames = cfg.pipelineType === 'stitch' ? PIPE5_NAMES : cfg.pipelineType === 'website2' ? PIPE4_NAMES : cfg.pipelineType === 'website' ? PIPE3_NAMES : cfg.pipelineType === 'builder2' ? PIPE2_NAMES : PIPE_NAMES
-      var pIcons = cfg.pipelineType === 'stitch' ? PIPE5_ICONS : cfg.pipelineType === 'website2' ? PIPE4_ICONS : cfg.pipelineType === 'website' ? PIPE3_ICONS : cfg.pipelineType === 'builder2' ? PIPE2_ICONS : PIPE_ICONS
+      var pNames = cfg.names || (cfg.pipelineType === 'stitch' ? PIPE5_NAMES : cfg.pipelineType === 'website2' ? PIPE4_NAMES : cfg.pipelineType === 'website' ? PIPE3_NAMES : cfg.pipelineType === 'builder2' ? PIPE2_NAMES : PIPE_NAMES)
+      var pIcons = cfg.icons || (cfg.pipelineType === 'stitch' ? PIPE5_ICONS : cfg.pipelineType === 'website2' ? PIPE4_ICONS : cfg.pipelineType === 'website' ? PIPE3_ICONS : cfg.pipelineType === 'builder2' ? PIPE2_ICONS : PIPE_ICONS)
       if (cfg.pipelineType) _pipeTypes[cfg.id] = cfg.pipelineType
       var phtml = '<div class="awrap"><div class="aav">\u26A1</div><div style="flex:1;min-width:0"><div class="pipe-card" id="' + cfg.id + '-inner">'
       for (var i = 0; i < pNames.length; i++) {

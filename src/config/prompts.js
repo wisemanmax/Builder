@@ -36,6 +36,12 @@ export const SYS_BUILD = 'You are a senior principal engineer. You ship enterpri
   + '\nPERFORMANCE:\n'
   + '- Debounce inputs (300ms). Animate only transform/opacity (GPU-accelerated)\n'
   + '- Batch DOM updates. Wrap localStorage in try/catch\n'
+  + '\nPWA READY:\n'
+  + '- Include <meta name="theme-color" content="#1a1a2e"> (match your dark theme bg)\n'
+  + '- Include <meta name="apple-mobile-web-app-capable" content="yes">\n'
+  + '- Include <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
+  + '- Include <link rel="manifest" href="data:application/json;base64,..." > with inline manifest (name, short_name, start_url, display:standalone, theme_color, background_color, icons array with a 192px SVG data URI icon)\n'
+  + '- This makes the app installable on mobile home screens\n'
   + '\nTHE BAR: Every app must look like a polished SaaS product. No rough edges.'
 
 export const SYS_UPDATE = 'You are a senior principal engineer. You are modifying an existing single-file HTML web app based on a user\'s change request.\n'

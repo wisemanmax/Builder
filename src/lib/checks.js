@@ -48,6 +48,14 @@ export function runLocalChecks(code) {
     add('Design', 'has-css-vars', 'Uses CSS custom properties',
       /--[\w-]+\s*:/.test(code), 'CSS variables enable consistent theming')
 
+    // --- PWA Readiness ---
+    add('PWA', 'has-theme-color', 'Has theme-color meta tag',
+      /<meta[^>]*name\s*=\s*["']theme-color["'][^>]*>/i.test(code),
+      'Add <meta name="theme-color"> for mobile browser theming')
+    add('PWA', 'has-mobile-web-app', 'Mobile web app capable',
+      /<meta[^>]*apple-mobile-web-app-capable/i.test(code),
+      'Add apple-mobile-web-app-capable for iOS home screen support')
+
     // --- Responsive Design (Enterprise Quality) ---
     var hasMediaQueries = /@media/.test(code)
     var mediaQueryCount = (code.match(/@media/g) || []).length
