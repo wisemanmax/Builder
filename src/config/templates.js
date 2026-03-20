@@ -16,7 +16,7 @@ export const TEMPLATES = [
     icon: '\uD83D\uDD25',
     category: 'productivity',
     desc: 'Daily habits with streaks and calendar heatmap',
-    skeleton: '<!DOCTYPE html>
+    skeleton: `<!DOCTYPE html>
 
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
@@ -269,7 +269,7 @@ export const TEMPLATES = [
 <span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest mt-1">Profile</span>
 </a>
 </nav>
-</body></html>',
+</body></html>`,
   },
   {
     id: 'pomodoro',
