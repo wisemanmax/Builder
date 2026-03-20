@@ -16,6 +16,8 @@ import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
 import { persistBuildSession, clearBuildSession, clearPipelineCancel } from '../lib/state.js'
+import { createStreamingPreview } from '../lib/streaming-preview.js'
+import { autoInjectSupabase } from '../lib/supabase-setup.js'
 
 // --- Stitch API helpers ---
 
@@ -405,7 +407,7 @@ function runBlueprint(intakePayload) {
  * Pass Stitch HTML + full context + Data Mapping Schema to Claude using SYS_STITCH_ENHANCE.
  * Claude is forbidden from adding new HTML tags — hydration only.
  */
-function runAssemble(stitchHTML, intakePayload) {
+function runAssemble(stitchHTML, intakePayload, streamPreview) {
   var sys = SYS_STITCH_ENHANCE
 
   // Inject user rules into system prompt
@@ -439,7 +441,9 @@ function runAssemble(stitchHTML, intakePayload) {
   var _assembleThinking = ''
   return callClaudeWithThinkingStream(sys, userMsg, 2000, function (type, text) {
     if (type === 'thinking') { _assembleThinking += text }
+    else if (type === 'text' && streamPreview) { streamPreview.pushChunk(text) }
   }).then(function (html) {
+    if (streamPreview) { streamPreview.finalize(html); streamPreview.destroy() }
     return { html: html, thinkingText: _assembleThinking }
   })
 }
@@ -976,8 +980,13 @@ export function runStitchPipeline(context, callbacks) {
     updateEstimate('~1-2 min remaining')
     if (containerId) updateStitchEstimate(containerId, '~1-2 min remaining')
 
+    // Set up streaming live preview for hydration
+    var _assemblePreview = null
+    var _previewIframe = $('viewer-iframe')
+    if (_previewIframe) _assemblePreview = createStreamingPreview('viewer-iframe')
+
     return retryStage(function () {
-      return runAssemble(stitchHTML, intakePayload)
+      return runAssemble(stitchHTML, intakePayload, _assemblePreview)
     }, 'Assemble', 2, function (statusMsg) {
       updateStage(3, 'running', statusMsg)
       if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.RUNNING, statusMsg)
@@ -1168,6 +1177,9 @@ export function runStitchPipeline(context, callbacks) {
     if (containerId) updateStitchStage(containerId, 6, PIPE5_STATUS.PASSED, polishDetail)
     updatePS(pid, 6, 'done', polishDetail + ' ✓')
     addMsg({ role: 'asst', type: 'text', text: 'Polish complete — ' + polishDetail })
+
+    // Supabase auto-injection
+    if (finalHTML && ST.backendEnabled && ST.sbUrl) { finalHTML = autoInjectSupabase(finalHTML) }
 
     // Save locally before deliver stage
     _saveStitchApp(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, false)

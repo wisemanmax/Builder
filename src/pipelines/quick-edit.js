@@ -12,6 +12,7 @@ import { addMsg, updatePS, scrollBot, clearPipelineSteps } from '../components/m
 import { pushToSupabase } from '../lib/storage.js'
 import { renderGrid } from '../components/app-icon.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
+import { autoInjectSupabase } from '../lib/supabase-setup.js'
 
 var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
 
@@ -59,6 +60,8 @@ export function runQuickEdit(prompt, existingApp, images) {
     }
   }, images).then(function (code) {
     v2 = code
+    // Supabase auto-injection
+    if (v2 && ST.backendEnabled && ST.sbUrl) { v2 = autoInjectSupabase(v2) }
     updatePS(pid, 0, 'done', 'Edit complete \u2713')
 
     // Step 1 — Automated Checks

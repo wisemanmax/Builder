@@ -54,6 +54,11 @@ export const SYS_UPDATE = 'You are a senior principal engineer. You are modifyin
   + '6. ZERO external dependencies — no CDN scripts/links. You may use @import for Google Fonts only\n'
   + '7. Must work as a standalone HTML file\n'
   + '8. Use localStorage for persistence. Do NOT use alert(), confirm(), prompt(), window.open(), location.href, or cookies\n'
+  + '\nPWA READY (ensure these are present in the output):\n'
+  + '- Include <meta name="theme-color" content="#1a1a2e"> (match the app\'s dark theme bg)\n'
+  + '- Include <meta name="apple-mobile-web-app-capable" content="yes">\n'
+  + '- Include <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
+  + '- Include <link rel="manifest" href="data:application/json;base64,..." > with inline manifest (name, short_name, start_url, display:standalone, theme_color, background_color, icons array with a 192px SVG data URI icon)\n'
   + '\nQUALITY BAR: The modified app must look like a polished SaaS product. Maintain responsive design, accessibility, and visual quality.'
 
 export const SYS_FIX = 'You are a senior engineer performing targeted bug fixes on a single-file HTML app.\n'
