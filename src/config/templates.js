@@ -16,7 +16,7 @@ export const TEMPLATES = [
     icon: '\uD83D\uDD25',
     category: 'productivity',
     desc: 'Daily habits with streaks and calendar heatmap',
-    skeleton: '<!DOCTYPE html>
+    skeleton: `<!DOCTYPE html>
 
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
@@ -269,7 +269,7 @@ export const TEMPLATES = [
 <span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest mt-1">Profile</span>
 </a>
 </nav>
-</body></html>',
+</body></html>`,
   },
   {
     id: 'pomodoro',
@@ -277,7 +277,41 @@ export const TEMPLATES = [
     icon: '\u23F1\uFE0F',
     category: 'productivity',
     desc: 'Focus timer with intervals and session history',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Pomodoro Timer</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF3CAC;--accent2:#00E5FF;--success:#00E676;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}\n.container{max-width:480px;width:100%;padding:16px;text-align:center}\n/* TEMPLATE: Timer circle/ring styles, control buttons, session history list */\n/* TEMPLATE: Responsive breakpoints */\n@media(min-width:768px){.container{padding:32px}}\n</style>\n</head>\n<body>\n<div class="container">\n<!-- TEMPLATE: Timer display (circular progress), start/pause/reset buttons -->\n<!-- TEMPLATE: Session type selector (focus/short break/long break) -->\n<!-- TEMPLATE: Session history with timestamps -->\n<!-- TEMPLATE: Settings panel for custom intervals -->\n</div>\n<script>\nvar state = { minutes: 25, seconds: 0, running: false, mode: \'focus\', sessions: [], settings: { focus: 25, shortBreak: 5, longBreak: 15 } }\nvar timer = null\nfunction init() { load(); render() }\nfunction load() { try { var s = localStorage.getItem(\'pomo_data\'); if (s) { var d = JSON.parse(s); state.sessions = d.sessions || []; state.settings = d.settings || state.settings } } catch(e){} }\nfunction save() { try { localStorage.setItem(\'pomo_data\', JSON.stringify({ sessions: state.sessions, settings: state.settings })) } catch(e){} }\nfunction render() { /* TEMPLATE: Update timer display, session list, controls */ }\n/* TEMPLATE: Timer logic, mode switching, notification on complete, history tracking */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pomodoro Timer</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF3CAC;--accent2:#00E5FF;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{max-width:480px;width:100%;padding:16px;text-align:center}
+/* TEMPLATE: Timer circle/ring styles, control buttons, session history list */
+/* TEMPLATE: Responsive breakpoints */
+@media(min-width:768px){.container{padding:32px}}
+</style>
+</head>
+<body>
+<div class="container">
+<!-- TEMPLATE: Timer display (circular progress), start/pause/reset buttons -->
+<!-- TEMPLATE: Session type selector (focus/short break/long break) -->
+<!-- TEMPLATE: Session history with timestamps -->
+<!-- TEMPLATE: Settings panel for custom intervals -->
+</div>
+<script>
+var state = { minutes: 25, seconds: 0, running: false, mode: 'focus', sessions: [], settings: { focus: 25, shortBreak: 5, longBreak: 15 } }
+var timer = null
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('pomo_data'); if (s) { var d = JSON.parse(s); state.sessions = d.sessions || []; state.settings = d.settings || state.settings } } catch(e){} }
+function save() { try { localStorage.setItem('pomo_data', JSON.stringify({ sessions: state.sessions, settings: state.settings })) } catch(e){} }
+function render() { /* TEMPLATE: Update timer display, session list, controls */ }
+/* TEMPLATE: Timer logic, mode switching, notification on complete, history tracking */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'kanban',
@@ -285,7 +319,41 @@ export const TEMPLATES = [
     icon: '\uD83D\uDCCB',
     category: 'productivity',
     desc: 'Drag-and-drop task board with columns',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Kanban Board</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#FF3CAC;--success:#00E676;--warning:#FFD600;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}\n.board{display:flex;gap:16px;padding:16px;overflow-x:auto;min-height:calc(100vh - 64px)}\n.column{min-width:280px;flex:1;background:var(--surface);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px}\n/* TEMPLATE: Card styles, drag states, add-task form, column headers */\n/* TEMPLATE: Mobile: stack columns vertically with horizontal scroll */\n@media(max-width:768px){.board{flex-direction:column;overflow-x:visible}.column{min-width:100%}}\n</style>\n</head>\n<body>\n<header style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between">\n<!-- TEMPLATE: Board title, add-column button -->\n</header>\n<div class="board" id="board">\n<!-- TEMPLATE: Columns (To Do, In Progress, Done) with draggable cards -->\n</div>\n<script>\nvar state = { columns: [ { id: \'todo\', name: \'To Do\', cards: [] }, { id: \'progress\', name: \'In Progress\', cards: [] }, { id: \'done\', name: \'Done\', cards: [] } ] }\nfunction init() { load(); render() }\nfunction load() { try { var s = localStorage.getItem(\'kanban_data\'); if (s) state = JSON.parse(s) } catch(e){} }\nfunction save() { try { localStorage.setItem(\'kanban_data\', JSON.stringify(state)) } catch(e){} }\nfunction render() { /* TEMPLATE: Render columns and cards with drag handles */ }\n/* TEMPLATE: Drag-and-drop logic, card CRUD, column management */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kanban Board</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#FF3CAC;--success:#00E676;--warning:#FFD600;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.board{display:flex;gap:16px;padding:16px;overflow-x:auto;min-height:calc(100vh - 64px)}
+.column{min-width:280px;flex:1;background:var(--surface);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px}
+/* TEMPLATE: Card styles, drag states, add-task form, column headers */
+/* TEMPLATE: Mobile: stack columns vertically with horizontal scroll */
+@media(max-width:768px){.board{flex-direction:column;overflow-x:visible}.column{min-width:100%}}
+</style>
+</head>
+<body>
+<header style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+<!-- TEMPLATE: Board title, add-column button -->
+</header>
+<div class="board" id="board">
+<!-- TEMPLATE: Columns (To Do, In Progress, Done) with draggable cards -->
+</div>
+<script>
+var state = { columns: [ { id: 'todo', name: 'To Do', cards: [] }, { id: 'progress', name: 'In Progress', cards: [] }, { id: 'done', name: 'Done', cards: [] } ] }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('kanban_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('kanban_data', JSON.stringify(state)) } catch(e){} }
+function render() { /* TEMPLATE: Render columns and cards with drag handles */ }
+/* TEMPLATE: Drag-and-drop logic, card CRUD, column management */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'quiz-game',
@@ -293,7 +361,40 @@ export const TEMPLATES = [
     icon: '\uD83E\uDDE0',
     category: 'games',
     desc: 'Interactive quiz with scoring and categories',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Quiz Game</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#B44FFF;--accent2:#00E5FF;--success:#00E676;--error:#FF5252;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}\n.container{max-width:600px;width:100%;padding:16px}\n/* TEMPLATE: Question card, answer buttons, progress bar, score display, results screen */\n/* TEMPLATE: Animations for correct/wrong answers */\n@media(min-width:768px){.container{padding:32px}}\n</style>\n</head>\n<body>\n<div class="container">\n<!-- TEMPLATE: Start screen with category selection -->\n<!-- TEMPLATE: Question display with multiple-choice answers -->\n<!-- TEMPLATE: Progress bar and score counter -->\n<!-- TEMPLATE: Results screen with stats and replay -->\n</div>\n<script>\nvar state = { view: \'start\', questions: [], current: 0, score: 0, answers: [], highScores: [] }\nfunction init() { load(); render() }\nfunction load() { try { var s = localStorage.getItem(\'quiz_data\'); if (s) state.highScores = JSON.parse(s).highScores || [] } catch(e){} }\nfunction save() { try { localStorage.setItem(\'quiz_data\', JSON.stringify({ highScores: state.highScores })) } catch(e){} }\nfunction render() { /* TEMPLATE: Render current view (start, question, results) */ }\n/* TEMPLATE: Question generation, answer checking, scoring, category filtering, timer */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiz Game</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#B44FFF;--accent2:#00E5FF;--success:#00E676;--error:#FF5252;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{max-width:600px;width:100%;padding:16px}
+/* TEMPLATE: Question card, answer buttons, progress bar, score display, results screen */
+/* TEMPLATE: Animations for correct/wrong answers */
+@media(min-width:768px){.container{padding:32px}}
+</style>
+</head>
+<body>
+<div class="container">
+<!-- TEMPLATE: Start screen with category selection -->
+<!-- TEMPLATE: Question display with multiple-choice answers -->
+<!-- TEMPLATE: Progress bar and score counter -->
+<!-- TEMPLATE: Results screen with stats and replay -->
+</div>
+<script>
+var state = { view: 'start', questions: [], current: 0, score: 0, answers: [], highScores: [] }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('quiz_data'); if (s) state.highScores = JSON.parse(s).highScores || [] } catch(e){} }
+function save() { try { localStorage.setItem('quiz_data', JSON.stringify({ highScores: state.highScores })) } catch(e){} }
+function render() { /* TEMPLATE: Render current view (start, question, results) */ }
+/* TEMPLATE: Question generation, answer checking, scoring, category filtering, timer */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'analytics-dashboard',
@@ -301,7 +402,49 @@ export const TEMPLATES = [
     icon: '\uD83D\uDCCA',
     category: 'dashboards',
     desc: 'Data dashboard with charts and KPI cards',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Analytics Dashboard</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#00E5FF;--success:#00E676;--warning:#FFD600;--error:#FF5252;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}\n.dashboard{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}\n.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}\n.chart-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px}\n/* TEMPLATE: KPI card, chart container, sidebar nav, data table styles */\n@media(max-width:768px){.chart-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}\n@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}\n</style>\n</head>\n<body>\n<div class="dashboard">\n<header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">\n<!-- TEMPLATE: Dashboard title, date range picker, refresh button -->\n</header>\n<section class="kpi-grid">\n<!-- TEMPLATE: KPI cards (revenue, users, conversion, growth) -->\n</section>\n<section class="chart-grid">\n<!-- TEMPLATE: Line chart (canvas), bar chart (canvas), pie chart -->\n</section>\n<!-- TEMPLATE: Data table with sorting and filtering -->\n</div>\n<script>\nvar state = { data: [], dateRange: \'7d\', view: \'overview\' }\nfunction init() { load(); generateDemoData(); render() }\nfunction load() { try { var s = localStorage.getItem(\'dash_data\'); if (s) state = JSON.parse(s) } catch(e){} }\nfunction save() { try { localStorage.setItem(\'dash_data\', JSON.stringify(state)) } catch(e){} }\nfunction generateDemoData() { /* TEMPLATE: Generate realistic demo data */ }\nfunction render() { /* TEMPLATE: Render KPIs, charts (canvas), tables */ }\n/* TEMPLATE: Chart drawing on canvas, data aggregation, date filtering, export */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analytics Dashboard</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#00E5FF;--success:#00E676;--warning:#FFD600;--error:#FF5252;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.dashboard{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px}
+/* TEMPLATE: KPI card, chart container, sidebar nav, data table styles */
+@media(max-width:768px){.chart-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="dashboard">
+<header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+<!-- TEMPLATE: Dashboard title, date range picker, refresh button -->
+</header>
+<section class="kpi-grid">
+<!-- TEMPLATE: KPI cards (revenue, users, conversion, growth) -->
+</section>
+<section class="chart-grid">
+<!-- TEMPLATE: Line chart (canvas), bar chart (canvas), pie chart -->
+</section>
+<!-- TEMPLATE: Data table with sorting and filtering -->
+</div>
+<script>
+var state = { data: [], dateRange: '7d', view: 'overview' }
+function init() { load(); generateDemoData(); render() }
+function load() { try { var s = localStorage.getItem('dash_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('dash_data', JSON.stringify(state)) } catch(e){} }
+function generateDemoData() { /* TEMPLATE: Generate realistic demo data */ }
+function render() { /* TEMPLATE: Render KPIs, charts (canvas), tables */ }
+/* TEMPLATE: Chart drawing on canvas, data aggregation, date filtering, export */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'weather-app',
@@ -309,7 +452,41 @@ export const TEMPLATES = [
     icon: '\u26C5',
     category: 'dashboards',
     desc: 'Weather dashboard with forecasts and conditions',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Weather App</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#00E5FF;--accent2:#3D5AFE;--success:#00E676;--warning:#FFD600;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}\n.container{max-width:600px;width:100%;margin:0 auto;padding:16px}\n/* TEMPLATE: Current weather card, forecast row, details grid, location search */\n@media(min-width:768px){.container{max-width:800px;padding:24px}}\n</style>\n</head>\n<body>\n<div class="container">\n<!-- TEMPLATE: Location search bar -->\n<!-- TEMPLATE: Current weather hero (icon, temp, condition, feels-like) -->\n<!-- TEMPLATE: Hourly forecast horizontal scroll -->\n<!-- TEMPLATE: 7-day forecast list -->\n<!-- TEMPLATE: Details grid (humidity, wind, UV, pressure) -->\n</div>\n<script>\nvar state = { locations: [], current: null, unit: \'C\', view: \'main\' }\nfunction init() { load(); generateDemoData(); render() }\nfunction load() { try { var s = localStorage.getItem(\'weather_data\'); if (s) state = JSON.parse(s) } catch(e){} }\nfunction save() { try { localStorage.setItem(\'weather_data\', JSON.stringify(state)) } catch(e){} }\nfunction generateDemoData() { /* TEMPLATE: Realistic weather demo data for multiple days */ }\nfunction render() { /* TEMPLATE: Render current conditions, forecasts, details */ }\n/* TEMPLATE: Location management, unit toggle, weather icon mapping, forecast display */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weather App</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#00E5FF;--accent2:#3D5AFE;--success:#00E676;--warning:#FFD600;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:600px;width:100%;margin:0 auto;padding:16px}
+/* TEMPLATE: Current weather card, forecast row, details grid, location search */
+@media(min-width:768px){.container{max-width:800px;padding:24px}}
+</style>
+</head>
+<body>
+<div class="container">
+<!-- TEMPLATE: Location search bar -->
+<!-- TEMPLATE: Current weather hero (icon, temp, condition, feels-like) -->
+<!-- TEMPLATE: Hourly forecast horizontal scroll -->
+<!-- TEMPLATE: 7-day forecast list -->
+<!-- TEMPLATE: Details grid (humidity, wind, UV, pressure) -->
+</div>
+<script>
+var state = { locations: [], current: null, unit: 'C', view: 'main' }
+function init() { load(); generateDemoData(); render() }
+function load() { try { var s = localStorage.getItem('weather_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('weather_data', JSON.stringify(state)) } catch(e){} }
+function generateDemoData() { /* TEMPLATE: Realistic weather demo data for multiple days */ }
+function render() { /* TEMPLATE: Render current conditions, forecasts, details */ }
+/* TEMPLATE: Location management, unit toggle, weather icon mapping, forecast display */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'portfolio',
@@ -317,7 +494,48 @@ export const TEMPLATES = [
     icon: '\uD83C\uDFA8',
     category: 'portfolios',
     desc: 'Personal portfolio with projects and contact',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Portfolio</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF3CAC;--accent2:#3D5AFE;--success:#00E676;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);scroll-behavior:smooth}\nnav{position:fixed;top:0;width:100%;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);z-index:100;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}\n.section{max-width:1000px;margin:0 auto;padding:80px 16px 40px}\n.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}\n/* TEMPLATE: Hero section, about section, project cards, skills grid, contact form */\n@media(max-width:768px){.project-grid{grid-template-columns:1fr}nav{padding:10px 16px}}\n</style>\n</head>\n<body>\n<nav>\n<!-- TEMPLATE: Logo/name, nav links (About, Projects, Skills, Contact), hamburger on mobile -->\n</nav>\n<!-- TEMPLATE: Hero section with name, title, CTA -->\n<section class="section" id="about">\n<!-- TEMPLATE: About me with photo placeholder and bio -->\n</section>\n<section class="section" id="projects">\n<div class="project-grid">\n<!-- TEMPLATE: Project cards with image, title, description, tech tags, links -->\n</div>\n</section>\n<!-- TEMPLATE: Skills section with categorized skill bars/tags -->\n<!-- TEMPLATE: Contact section with form -->\n<script>\nvar state = { menuOpen: false }\nfunction init() { render(); setupNav() }\nfunction setupNav() { /* TEMPLATE: Mobile hamburger toggle, smooth scroll, active section highlight */ }\nfunction render() { /* TEMPLATE: Render projects, skills, animate on scroll */ }\n/* TEMPLATE: Scroll animations, form handling, mobile nav, project filtering */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF3CAC;--accent2:#3D5AFE;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);scroll-behavior:smooth}
+nav{position:fixed;top:0;width:100%;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);z-index:100;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.section{max-width:1000px;margin:0 auto;padding:80px 16px 40px}
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+/* TEMPLATE: Hero section, about section, project cards, skills grid, contact form */
+@media(max-width:768px){.project-grid{grid-template-columns:1fr}nav{padding:10px 16px}}
+</style>
+</head>
+<body>
+<nav>
+<!-- TEMPLATE: Logo/name, nav links (About, Projects, Skills, Contact), hamburger on mobile -->
+</nav>
+<!-- TEMPLATE: Hero section with name, title, CTA -->
+<section class="section" id="about">
+<!-- TEMPLATE: About me with photo placeholder and bio -->
+</section>
+<section class="section" id="projects">
+<div class="project-grid">
+<!-- TEMPLATE: Project cards with image, title, description, tech tags, links -->
+</div>
+</section>
+<!-- TEMPLATE: Skills section with categorized skill bars/tags -->
+<!-- TEMPLATE: Contact section with form -->
+<script>
+var state = { menuOpen: false }
+function init() { render(); setupNav() }
+function setupNav() { /* TEMPLATE: Mobile hamburger toggle, smooth scroll, active section highlight */ }
+function render() { /* TEMPLATE: Render projects, skills, animate on scroll */ }
+/* TEMPLATE: Scroll animations, form handling, mobile nav, project filtering */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'landing-page',
@@ -325,7 +543,52 @@ export const TEMPLATES = [
     icon: '\uD83D\uDE80',
     category: 'landing',
     desc: 'Product landing page with features and pricing',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Product Landing Page</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#FF3CAC;--success:#00E676;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);scroll-behavior:smooth}\nnav{position:fixed;top:0;width:100%;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);z-index:100;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}\n.section{max-width:1100px;margin:0 auto;padding:80px 16px 40px}\n.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}\n.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:900px;margin:0 auto}\n/* TEMPLATE: Hero, feature cards, pricing cards, testimonials, CTA, footer */\n@media(max-width:768px){.features-grid,.pricing-grid{grid-template-columns:1fr}}\n</style>\n</head>\n<body>\n<nav>\n<!-- TEMPLATE: Logo, nav links (Features, Pricing, Testimonials), CTA button -->\n</nav>\n<!-- TEMPLATE: Hero section with headline, subheadline, CTA buttons, product screenshot -->\n<section class="section" id="features">\n<div class="features-grid">\n<!-- TEMPLATE: Feature cards with icon, title, description -->\n</div>\n</section>\n<section class="section" id="pricing">\n<div class="pricing-grid">\n<!-- TEMPLATE: Pricing tiers (Free, Pro, Enterprise) with feature lists -->\n</div>\n</section>\n<!-- TEMPLATE: Testimonials carousel/grid -->\n<!-- TEMPLATE: Final CTA section -->\n<!-- TEMPLATE: Footer with links -->\n<script>\nvar state = { menuOpen: false, billingCycle: \'monthly\' }\nfunction init() { render(); setupNav() }\nfunction setupNav() { /* TEMPLATE: Mobile hamburger, smooth scroll, sticky nav */ }\nfunction render() { /* TEMPLATE: Render pricing toggle, testimonials, scroll animations */ }\n/* TEMPLATE: Pricing toggle (monthly/annual), scroll animations, mobile nav */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Product Landing Page</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#FF3CAC;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);scroll-behavior:smooth}
+nav{position:fixed;top:0;width:100%;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);z-index:100;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.section{max-width:1100px;margin:0 auto;padding:80px 16px 40px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:900px;margin:0 auto}
+/* TEMPLATE: Hero, feature cards, pricing cards, testimonials, CTA, footer */
+@media(max-width:768px){.features-grid,.pricing-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+<!-- TEMPLATE: Logo, nav links (Features, Pricing, Testimonials), CTA button -->
+</nav>
+<!-- TEMPLATE: Hero section with headline, subheadline, CTA buttons, product screenshot -->
+<section class="section" id="features">
+<div class="features-grid">
+<!-- TEMPLATE: Feature cards with icon, title, description -->
+</div>
+</section>
+<section class="section" id="pricing">
+<div class="pricing-grid">
+<!-- TEMPLATE: Pricing tiers (Free, Pro, Enterprise) with feature lists -->
+</div>
+</section>
+<!-- TEMPLATE: Testimonials carousel/grid -->
+<!-- TEMPLATE: Final CTA section -->
+<!-- TEMPLATE: Footer with links -->
+<script>
+var state = { menuOpen: false, billingCycle: 'monthly' }
+function init() { render(); setupNav() }
+function setupNav() { /* TEMPLATE: Mobile hamburger, smooth scroll, sticky nav */ }
+function render() { /* TEMPLATE: Render pricing toggle, testimonials, scroll animations */ }
+/* TEMPLATE: Pricing toggle (monthly/annual), scroll animations, mobile nav */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'calculator',
@@ -333,7 +596,44 @@ export const TEMPLATES = [
     icon: '\uD83E\uDDEE',
     category: 'tools',
     desc: 'Scientific calculator with history',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Calculator</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#FF3CAC;--success:#00E676;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}\n.calc{max-width:360px;width:100%;padding:16px}\n.display{background:var(--surface);border-radius:var(--radius);padding:20px 16px;margin-bottom:12px;text-align:right}\n.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}\n/* TEMPLATE: Button styles, display expression/result, history panel */\n@media(min-width:768px){.calc{padding:24px}}\n</style>\n</head>\n<body>\n<div class="calc">\n<div class="display">\n<!-- TEMPLATE: Expression line and result line -->\n</div>\n<div class="buttons">\n<!-- TEMPLATE: Number pad, operators, scientific functions, clear/equals -->\n</div>\n<!-- TEMPLATE: History panel (toggleable) -->\n</div>\n<script>\nvar state = { expression: \'\', result: \'0\', history: [], mode: \'basic\' }\nfunction init() { load(); render() }\nfunction load() { try { var s = localStorage.getItem(\'calc_data\'); if (s) state.history = JSON.parse(s).history || [] } catch(e){} }\nfunction save() { try { localStorage.setItem(\'calc_data\', JSON.stringify({ history: state.history })) } catch(e){} }\nfunction render() { /* TEMPLATE: Update display, buttons, history list */ }\n/* TEMPLATE: Input handling, expression parsing, calculation, keyboard support, history */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculator</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#FF3CAC;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.calc{max-width:360px;width:100%;padding:16px}
+.display{background:var(--surface);border-radius:var(--radius);padding:20px 16px;margin-bottom:12px;text-align:right}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+/* TEMPLATE: Button styles, display expression/result, history panel */
+@media(min-width:768px){.calc{padding:24px}}
+</style>
+</head>
+<body>
+<div class="calc">
+<div class="display">
+<!-- TEMPLATE: Expression line and result line -->
+</div>
+<div class="buttons">
+<!-- TEMPLATE: Number pad, operators, scientific functions, clear/equals -->
+</div>
+<!-- TEMPLATE: History panel (toggleable) -->
+</div>
+<script>
+var state = { expression: '', result: '0', history: [], mode: 'basic' }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('calc_data'); if (s) state.history = JSON.parse(s).history || [] } catch(e){} }
+function save() { try { localStorage.setItem('calc_data', JSON.stringify({ history: state.history })) } catch(e){} }
+function render() { /* TEMPLATE: Update display, buttons, history list */ }
+/* TEMPLATE: Input handling, expression parsing, calculation, keyboard support, history */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'budget-tracker',
@@ -341,7 +641,42 @@ export const TEMPLATES = [
     icon: '\uD83D\uDCB0',
     category: 'productivity',
     desc: 'Expense tracking with categories and charts',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Budget Tracker</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#00E676;--accent2:#FF5252;--warning:#FFD600;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}\n.container{max-width:700px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}\n/* TEMPLATE: Summary cards, transaction list, add form, category breakdown chart */\n@media(min-width:768px){.container{padding:24px}}\n</style>\n</head>\n<body>\n<div class="container">\n<header style="display:flex;align-items:center;justify-content:space-between">\n<!-- TEMPLATE: Title, month selector, add transaction button -->\n</header>\n<!-- TEMPLATE: Balance summary cards (income, expenses, balance) -->\n<!-- TEMPLATE: Category breakdown (canvas pie chart) -->\n<!-- TEMPLATE: Transaction list with category icons, amounts, dates -->\n<!-- TEMPLATE: Add/edit transaction modal -->\n</div>\n<script>\nvar state = { transactions: [], categories: [\'Food\',\'Transport\',\'Housing\',\'Entertainment\',\'Shopping\',\'Bills\',\'Health\',\'Other\'], month: new Date().getMonth(), year: new Date().getFullYear() }\nfunction init() { load(); render() }\nfunction load() { try { var s = localStorage.getItem(\'budget_data\'); if (s) state = JSON.parse(s) } catch(e){} }\nfunction save() { try { localStorage.setItem(\'budget_data\', JSON.stringify(state)) } catch(e){} }\nfunction render() { /* TEMPLATE: Render summary, chart, transaction list */ }\n/* TEMPLATE: Transaction CRUD, category totals, chart drawing, month navigation, export */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Budget Tracker</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#00E676;--accent2:#FF5252;--warning:#FFD600;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:700px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+/* TEMPLATE: Summary cards, transaction list, add form, category breakdown chart */
+@media(min-width:768px){.container{padding:24px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header style="display:flex;align-items:center;justify-content:space-between">
+<!-- TEMPLATE: Title, month selector, add transaction button -->
+</header>
+<!-- TEMPLATE: Balance summary cards (income, expenses, balance) -->
+<!-- TEMPLATE: Category breakdown (canvas pie chart) -->
+<!-- TEMPLATE: Transaction list with category icons, amounts, dates -->
+<!-- TEMPLATE: Add/edit transaction modal -->
+</div>
+<script>
+var state = { transactions: [], categories: ['Food','Transport','Housing','Entertainment','Shopping','Bills','Health','Other'], month: new Date().getMonth(), year: new Date().getFullYear() }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('budget_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('budget_data', JSON.stringify(state)) } catch(e){} }
+function render() { /* TEMPLATE: Render summary, chart, transaction list */ }
+/* TEMPLATE: Transaction CRUD, category totals, chart drawing, month navigation, export */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'recipe-book',
@@ -349,7 +684,46 @@ export const TEMPLATES = [
     icon: '\uD83C\uDF73',
     category: 'tools',
     desc: 'Recipe collection with search and meal planning',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Recipe Book</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF9F43;--accent2:#FF3CAC;--success:#00E676;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}\n.container{max-width:900px;width:100%;margin:0 auto;padding:16px}\n.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}\n/* TEMPLATE: Recipe cards, detail view, add form, search bar, category filters */\n@media(max-width:768px){.recipe-grid{grid-template-columns:1fr}}\n</style>\n</head>\n<body>\n<div class="container">\n<header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">\n<!-- TEMPLATE: Title, search input, add recipe button -->\n</header>\n<!-- TEMPLATE: Category filter tabs -->\n<div class="recipe-grid">\n<!-- TEMPLATE: Recipe cards with image placeholder, title, time, difficulty -->\n</div>\n<!-- TEMPLATE: Recipe detail modal (ingredients, steps, notes) -->\n<!-- TEMPLATE: Add/edit recipe form modal -->\n</div>\n<script>\nvar state = { recipes: [], view: \'grid\', search: \'\', category: \'all\', activeRecipe: null }\nfunction init() { load(); render() }\nfunction load() { try { var s = localStorage.getItem(\'recipe_data\'); if (s) state.recipes = JSON.parse(s).recipes || [] } catch(e){} if (!state.recipes.length) generateDemoData() }\nfunction save() { try { localStorage.setItem(\'recipe_data\', JSON.stringify({ recipes: state.recipes })) } catch(e){} }\nfunction generateDemoData() { /* TEMPLATE: 5-8 demo recipes with ingredients and steps */ }\nfunction render() { /* TEMPLATE: Render recipe grid, search results, detail view */ }\n/* TEMPLATE: Recipe CRUD, search/filter, category management, cooking timer, serving adjuster */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recipe Book</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF9F43;--accent2:#FF3CAC;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:900px;width:100%;margin:0 auto;padding:16px}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+/* TEMPLATE: Recipe cards, detail view, add form, search bar, category filters */
+@media(max-width:768px){.recipe-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+<!-- TEMPLATE: Title, search input, add recipe button -->
+</header>
+<!-- TEMPLATE: Category filter tabs -->
+<div class="recipe-grid">
+<!-- TEMPLATE: Recipe cards with image placeholder, title, time, difficulty -->
+</div>
+<!-- TEMPLATE: Recipe detail modal (ingredients, steps, notes) -->
+<!-- TEMPLATE: Add/edit recipe form modal -->
+</div>
+<script>
+var state = { recipes: [], view: 'grid', search: '', category: 'all', activeRecipe: null }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('recipe_data'); if (s) state.recipes = JSON.parse(s).recipes || [] } catch(e){} if (!state.recipes.length) generateDemoData() }
+function save() { try { localStorage.setItem('recipe_data', JSON.stringify({ recipes: state.recipes })) } catch(e){} }
+function generateDemoData() { /* TEMPLATE: 5-8 demo recipes with ingredients and steps */ }
+function render() { /* TEMPLATE: Render recipe grid, search results, detail view */ }
+/* TEMPLATE: Recipe CRUD, search/filter, category management, cooking timer, serving adjuster */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
   {
     id: 'mood-journal',
@@ -357,6 +731,41 @@ export const TEMPLATES = [
     icon: '\uD83C\uDF19',
     category: 'productivity',
     desc: 'Daily mood tracking with emoji ratings and insights',
-    skeleton: '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Mood Journal</title>\n<style>\n:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#B44FFF;--accent2:#FF3CAC;--success:#00E676;--radius:12px}\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}\n.container{max-width:600px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}\n/* TEMPLATE: Mood selector, entry card, calendar view, stats/insights */\n@media(min-width:768px){.container{padding:24px}}\n</style>\n</head>\n<body>\n<div class="container">\n<header style="display:flex;align-items:center;justify-content:space-between">\n<!-- TEMPLATE: Title, view toggle (list/calendar), date navigation -->\n</header>\n<!-- TEMPLATE: Today\'s mood entry (emoji picker, note, tags) -->\n<!-- TEMPLATE: Calendar view with mood colors per day -->\n<!-- TEMPLATE: Entry history list -->\n<!-- TEMPLATE: Insights/stats (average mood, streaks, patterns) -->\n</div>\n<script>\nvar state = { entries: [], view: \'list\', month: new Date().getMonth(), year: new Date().getFullYear() }\nfunction init() { load(); render() }\nfunction load() { try { var s = localStorage.getItem(\'mood_data\'); if (s) state.entries = JSON.parse(s).entries || [] } catch(e){} }\nfunction save() { try { localStorage.setItem(\'mood_data\', JSON.stringify({ entries: state.entries })) } catch(e){} }\nfunction render() { /* TEMPLATE: Render mood entry form, calendar, history, insights */ }\n/* TEMPLATE: Mood entry CRUD, calendar rendering, mood stats, tag management, export */\ndocument.addEventListener(\'DOMContentLoaded\', init)\n</script>\n</body>\n</html>',
+    skeleton: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mood Journal</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#B44FFF;--accent2:#FF3CAC;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:600px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+/* TEMPLATE: Mood selector, entry card, calendar view, stats/insights */
+@media(min-width:768px){.container{padding:24px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header style="display:flex;align-items:center;justify-content:space-between">
+<!-- TEMPLATE: Title, view toggle (list/calendar), date navigation -->
+</header>
+<!-- TEMPLATE: Today's mood entry (emoji picker, note, tags) -->
+<!-- TEMPLATE: Calendar view with mood colors per day -->
+<!-- TEMPLATE: Entry history list -->
+<!-- TEMPLATE: Insights/stats (average mood, streaks, patterns) -->
+</div>
+<script>
+var state = { entries: [], view: 'list', month: new Date().getMonth(), year: new Date().getFullYear() }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('mood_data'); if (s) state.entries = JSON.parse(s).entries || [] } catch(e){} }
+function save() { try { localStorage.setItem('mood_data', JSON.stringify({ entries: state.entries })) } catch(e){} }
+function render() { /* TEMPLATE: Render mood entry form, calendar, history, insights */ }
+/* TEMPLATE: Mood entry CRUD, calendar rendering, mood stats, tag management, export */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>`,
   },
 ]
