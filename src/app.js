@@ -22,6 +22,7 @@ import { openOrgThink, closeOrgThink, sendOrgMsg, orgOptionSelect, finishOrgThin
 import { renderProfileChip, showProfilePicker, initProfilePicker, cycleProfile } from './components/profile-switcher.js'
 import { initFeedbackCard } from './components/feedback-card.js'
 import { renderProfilesSettings, initProfilesSettings } from './screens/profiles.js'
+import { openThoughtsFolder, closeThoughtsFolder, initThoughtsFolder, openThoughtDetail } from './screens/thoughts.js'
 import { selfUpdateBuilder } from './pipelines/builder-plus.js'
 import { pullFromGitHub } from './lib/github.js'
 import { pullFromSupabase } from './lib/storage.js'
@@ -102,6 +103,7 @@ export function init() {
   initPipelineToggle()
   initBuildHistory()
   initTemplateSheet()
+  initThoughtsFolder()
 
   // Builder sheet
   $('bs-close').addEventListener('click', closeBuilder)
@@ -157,6 +159,8 @@ export function init() {
       if (emojiOv && emojiOv.classList.contains('on')) { emojiOv.classList.remove('on'); return }
       var feedbackOv = $('feedback-overlay')
       if (feedbackOv && feedbackOv.classList.contains('on')) { feedbackOv.classList.remove('on'); return }
+      var thoughtsOv = $('thoughts-overlay')
+      if (thoughtsOv && thoughtsOv.classList.contains('on')) { closeThoughtsFolder(); return }
       var templateOv = $('template-overlay')
       if (templateOv && templateOv.classList.contains('on')) { closeTemplates(); return }
       var settingsOv = $('settings-overlay')
@@ -229,6 +233,9 @@ export function init() {
   window.stopPipeline = stopPipeline
   window.openBuildHistory = openBuildHistory
   window.closeBuildHistory = closeBuildHistory
+  window.openThoughtsFolder = openThoughtsFolder
+  window.closeThoughtsFolder = closeThoughtsFolder
+  window.openThoughtDetail = openThoughtDetail
   window.openShareCard = openShareCard
 }
 
