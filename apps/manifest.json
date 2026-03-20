@@ -4,7 +4,7 @@
     "name": "2048BW",
     "icon": "📦",
     "ci": 1,
-    "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
+    "url": "https://wisemanmax.github.io/builder/apps/2048bw.html",
     "path": "apps/2048bw.html",
     "prompts": [
       {
@@ -31,7 +31,7 @@
     "name": "BashYs",
     "icon": "🎯",
     "ci": 3,
-    "url": "https://Wisemanmax.github.io/Builder/apps/bashys.html",
+    "url": "https://wisemanmax.github.io/builder/apps/bashys.html",
     "path": "apps/bashys.html",
     "prompts": [
       {
@@ -48,7 +48,7 @@
     "name": "Card Tracker",
     "icon": "🎯",
     "ci": 3,
-    "url": "https://Wisemanmax.github.io/Builder/apps/card-tracker.html",
+    "url": "https://wisemanmax.github.io/builder/apps/card-tracker.html",
     "path": "apps/card-tracker.html",
     "prompts": [
       {
@@ -70,7 +70,7 @@
     "name": "Gradbridgeapp3",
     "icon": "📦",
     "ci": 1,
-    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgeapp3.html",
+    "url": "https://wisemanmax.github.io/builder/apps/gradbridgeapp3.html",
     "path": "apps/gradbridgeapp3.html",
     "prompts": [
       {
@@ -97,7 +97,7 @@
     "name": "Gradbridgesite",
     "icon": "📦",
     "ci": 2,
-    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
+    "url": "https://wisemanmax.github.io/builder/apps/gradbridgesite.html",
     "path": "apps/gradbridgesite.html",
     "prompts": [
       {
@@ -114,7 +114,7 @@
     "name": "Knucklebones",
     "icon": "🎯",
     "ci": 0,
-    "url": "https://Wisemanmax.github.io/Builder/apps/knucklebones.html",
+    "url": "https://wisemanmax.github.io/builder/apps/knucklebones.html",
     "path": "apps/knucklebones.html",
     "prompts": [
       {
@@ -136,7 +136,7 @@
     "name": "Lasttest",
     "icon": "📦",
     "ci": 4,
-    "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
+    "url": "https://wisemanmax.github.io/builder/apps/lasttest.html",
     "path": "apps/lasttest.html",
     "prompts": [
       {
@@ -153,7 +153,7 @@
     "name": "ti84bill",
     "icon": "📦",
     "ci": 2,
-    "url": "https://Wisemanmax.github.io/Builder/apps/ti84bill.html",
+    "url": "https://wisemanmax.github.io/builder/apps/ti84bill.html",
     "path": "apps/ti84bill.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.616Z",
@@ -164,7 +164,7 @@
     "name": "waterapp",
     "icon": "📦",
     "ci": 0,
-    "url": "https://Wisemanmax.github.io/Builder/apps/waterapp.html",
+    "url": "https://wisemanmax.github.io/builder/apps/waterapp.html",
     "path": "apps/waterapp.html",
     "prompts": [],
     "createdAt": "2026-03-17T20:36:01.728Z",
