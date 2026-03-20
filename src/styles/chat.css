@@ -7,7 +7,8 @@
 .bs-top{padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
 .bs-info .bs-title{font-family:var(--fh);font-size:17px;font-weight:800}
 .bs-info .bs-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px}
-.pipe-toggle{display:flex;gap:2px;margin-top:6px;background:rgba(255,255,255,.06);border-radius:8px;padding:2px;width:fit-content}
+.pipe-toggle{display:flex;gap:2px;margin-top:6px;background:rgba(255,255,255,.06);border-radius:8px;padding:2px;overflow-x:auto;max-width:100%;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pipe-toggle::-webkit-scrollbar{height:0}
 .pt-btn{padding:4px 12px;border-radius:6px;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:var(--fh);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
 .pt-btn.active{background:var(--g1);color:#fff;box-shadow:0 2px 8px rgba(255,60,172,.3)}
 .pt-btn:not(.active):hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.06)}
@@ -123,3 +124,59 @@
 .ft-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-family:var(--fm);font-size:11px;color:rgba(255,255,255,.55)}
 .ft-icon{font-size:12px;width:16px;text-align:center;flex-shrink:0}
 .ft-path{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ======== MOBILE TIGHTENING (<=480px) ======== */
+@media(max-width:480px){
+  /* Hide redundant builder subtitle (ihint at bottom shows same info) */
+  #builder-sheet .bs-sub{display:none}
+
+  /* Tighter header */
+  .bs-handle{margin:8px auto 0}
+  .bs-top{padding:8px 12px 6px}
+  .bs-info .bs-title{font-size:15px}
+  .pt-btn{padding:3px 9px;font-size:9px}
+  .pipe-toggle{margin-top:4px}
+  .model-toggle{margin-top:3px}
+  .mt-btn{padding:3px 9px;font-size:9px}
+
+  /* Tighter chat area */
+  #chat-scroll{padding:8px 0 4px}
+  #think-scroll{padding:8px 0 4px}
+  #org-think-scroll{padding:8px 0 4px}
+  .mrow{padding:2px 10px}
+  .ubub{padding:7px 11px;font-size:12.5px;border-radius:16px 16px 3px 16px}
+  .abub{padding:7px 11px;font-size:12.5px;border-radius:3px 16px 16px 16px}
+  .aav{width:24px;height:24px;border-radius:7px;font-size:11px}
+  .awrap{gap:6px}
+
+  /* Tighter input area */
+  .bs-input{padding:6px 10px;padding-bottom:max(16px,env(safe-area-inset-bottom,16px))}
+  .name-row{margin-bottom:5px}
+  .name-row .fi{padding:7px 10px;font-size:12px;border-radius:11px}
+  .ibox{padding:6px 8px;border-radius:14px}
+  #chat-input{font-size:13px}
+  .ihint{margin-top:3px;font-size:9px}
+  .ia-btn{width:28px;height:28px;border-radius:8px;font-size:13px}
+  #send-btn{width:28px;height:28px;border-radius:8px;font-size:13px}
+
+  /* Think sheet tightening */
+  .ts-progress{padding:4px 12px 6px;gap:8px}
+  .ts-dot{width:7px;height:7px}
+  .think-options{gap:5px;padding:4px 12px 6px}
+  .think-opt{padding:7px 11px;font-size:11px;line-height:1.3}
+  #think-input{font-size:14px;min-height:40px}
+  #think-sheet .ibox{border-radius:16px;padding:8px 10px;min-height:48px}
+  #think-send-btn{width:32px;height:32px;border-radius:9px;font-size:14px}
+
+  /* Welcome screens */
+  .chat-welcome{padding:12px 14px 6px;gap:6px}
+  .cw-icon{font-size:30px}
+  .cw-title{font-size:17px}
+  .cw-sub{font-size:11px;line-height:1.5}
+  .chips{gap:5px}
+  .chip{padding:5px 9px;font-size:10px}
+  .think-welcome{padding:12px 14px 6px;gap:6px}
+  .tw-icon{font-size:30px}
+  .tw-title{font-size:17px}
+  .tw-sub{font-size:11px;line-height:1.5}
+}

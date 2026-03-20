@@ -285,3 +285,12 @@
 .share-btn:hover{background:rgba(255,255,255,.14)}
 .share-btn-primary{background:linear-gradient(135deg,#3D5AFE,#00E5FF);border-color:transparent;color:#fff}
 .share-btn-primary:hover{opacity:.9}
+
+/* ======== MOBILE TIGHTENING (<=480px) ======== */
+@media(max-width:480px){
+  .thought-selector{padding:4px 12px 4px}
+  .thought-chip{padding:3px 8px 3px 10px;font-size:10px}
+  .thought-chip .tc-x{width:14px;height:14px;font-size:9px}
+  .tc-attach{padding:4px 10px;font-size:10px}
+  .tc-rules{font-size:9px}
+}
