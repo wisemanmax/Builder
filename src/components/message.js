@@ -85,7 +85,8 @@ function _renderTemplateGallery() {
   for (var i = 0; i < TEMPLATES.length; i++) {
     var t = TEMPLATES[i]
     cards += '<div class="tpl-card" data-cat="' + t.category + '" onclick="templateSend(\'' + t.id + '\')">'
-      + '<div class="tpl-card-icon">' + t.icon + '</div>'
+      + '<div class="tpl-card-top"><div class="tpl-card-icon">' + t.icon + '</div>'
+      + '<button class="tpl-card-preview" onclick="event.stopPropagation();_tplPreview(\'' + t.id + '\')" title="Preview">\uD83D\uDD0D</button></div>'
       + '<div class="tpl-card-name">' + esc(t.name) + '</div>'
       + '<div class="tpl-card-desc">' + esc(t.desc) + '</div>'
       + '</div>'
@@ -95,6 +96,13 @@ function _renderTemplateGallery() {
     + '<div class="tpl-gallery" id="tpl-gallery" style="display:none">'
     + '<div class="tpl-cats" id="tpl-cats">' + cats + '</div>'
     + '<div class="tpl-grid" id="tpl-grid">' + cards + '</div>'
+    + '</div></div>'
+    + '<div class="tpl-preview-overlay" id="tpl-preview-overlay" onclick="if(event.target===this)_tplPreviewClose()">'
+    + '<div class="tpl-preview-modal">'
+    + '<div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-preview-name"></span><button class="tpl-preview-close" onclick="_tplPreviewClose()">\u2715</button></div>'
+    + '<div class="tpl-preview-frame" id="tpl-preview-frame"></div>'
+    + '<div class="tpl-preview-info">Structural preview \u2014 AI fills in full content when built</div>'
+    + '<div class="tpl-preview-actions"><button class="tpl-preview-use" id="tpl-preview-use">Use This Template</button></div>'
     + '</div></div>'
 }
 
@@ -117,6 +125,30 @@ window._tplFilter = function (cat) {
   for (var j = 0; j < cards.length; j++) {
     cards[j].style.display = (cat === 'all' || cards[j].dataset.cat === cat) ? '' : 'none'
   }
+}
+
+// Open template preview modal with iframe
+window._tplPreview = function (templateId) {
+  var tpl = TEMPLATES.find(function (t) { return t.id === templateId })
+  if (!tpl) return
+  var overlay = $('tpl-preview-overlay')
+  var nameEl = $('tpl-preview-name')
+  var frame = $('tpl-preview-frame')
+  var useBtn = $('tpl-preview-use')
+  if (!overlay || !frame) return
+  nameEl.textContent = tpl.icon + ' ' + tpl.name
+  frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(tpl.skeleton) + '"></iframe>'
+  useBtn.onclick = function () { window.templateSend(templateId); _tplPreviewClose() }
+  overlay.classList.add('on')
+}
+
+// Close template preview modal and destroy iframe
+window._tplPreviewClose = function () {
+  var overlay = $('tpl-preview-overlay')
+  if (!overlay) return
+  overlay.classList.remove('on')
+  var frame = $('tpl-preview-frame')
+  if (frame) frame.innerHTML = ''
 }
 
 export function addMsg(cfg) {
