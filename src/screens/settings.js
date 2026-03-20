@@ -10,7 +10,7 @@ import { testSupabaseConnection } from '../lib/supabase-setup.js'
 export function openSettings() {
   $('s-anth').value = ST.key; $('s-gpt').value = ST.gptKey; $('s-stitch').value = ST.stitchKey
   $('s-gh-token').value = ST.ghToken; $('s-gh-user').value = ST.ghUser; $('s-gh-repo').value = ST.ghRepo; $('s-gh-domain').value = ST.ghCustomDomain
-  $('s-sb-url').value = ST.sbUrl; $('s-sb-anon').value = ST.sbAnon
+  $('s-sb-url').value = ST.sbUrl; $('s-sb-anon').value = ST.sbAnon; $('s-sb-apikey').value = ST.sbApiKey
   $('s-audit-pill').classList.toggle('on', ST.auditEnabled)
   $('s-sync-pill').classList.toggle('on', ST.sbEnabled)
   var bp = $('s-backend-pill'); if (bp) bp.classList.toggle('on', ST.backendEnabled)
@@ -58,15 +58,21 @@ export function initSettings() {
   $('s-audit-pill').addEventListener('click', function () { ST.auditEnabled = !ST.auditEnabled; saveKeys(); $('s-audit-pill').classList.toggle('on', ST.auditEnabled); toast(ST.auditEnabled ? 'GPT audit enabled' : 'GPT audit disabled') })
   $('s-sync-pill').addEventListener('click', function () { ST.sbEnabled = !ST.sbEnabled; saveKeys(); $('s-sync-pill').classList.toggle('on', ST.sbEnabled); $('s-sb-exp').style.display = ST.sbEnabled ? 'flex' : 'none'; toast(ST.sbEnabled ? 'Supabase sync enabled' : 'Sync disabled') })
   $('s-save-sb').addEventListener('click', function () {
-    var url = $('s-sb-url').value.trim(), anon = $('s-sb-anon').value.trim()
-    if (!url || !anon) { toast('Enter both Supabase fields'); return }
-    ST.sbUrl = url; ST.sbAnon = anon; saveKeys()
+    var url = $('s-sb-url').value.trim(), anon = $('s-sb-anon').value.trim(), apiKey = $('s-sb-apikey').value.trim()
+    if (!url || !anon) { toast('Enter Supabase URL and Anon Key at minimum'); return }
+    ST.sbUrl = url; ST.sbAnon = anon; ST.sbApiKey = apiKey; saveKeys()
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
     toast('Supabase credentials saved \u2713')
     // Auto-test connection
     testSupabaseConnection().then(function (ok) {
       toast(ok ? '\u2713 Supabase connected' : '\u2717 Supabase connection failed \u2014 check URL and key', 4000)
     })
+    // Validate API key if provided
+    if (apiKey && url) {
+      _validateSupabaseApiKey(url, apiKey)
+    } else {
+      var statusEl = $('s-sb-apikey-status'); if (statusEl) statusEl.style.display = 'none'
+    }
   })
   $('s-pull').addEventListener('click', pullFromSupabase)
   // Supabase test connection button
@@ -106,6 +112,42 @@ function _testStitchKey(key) {
     else toast('\u2717 Stitch API error (HTTP ' + res.status + ')', 4000)
   }).catch(function () {
     toast('\u2717 Could not reach Stitch API', 4000)
+  })
+}
+
+function _validateSupabaseApiKey(url, apiKey) {
+  var statusEl = $('s-sb-apikey-status')
+  if (!statusEl) return
+  statusEl.style.display = 'block'
+  statusEl.style.background = 'rgba(255,255,255,.06)'
+  statusEl.style.color = 'rgba(255,255,255,.5)'
+  statusEl.textContent = 'Validating API key\u2026'
+  // Test the service_role key by hitting the auth admin endpoint
+  fetch(url + '/auth/v1/settings', {
+    headers: {
+      'apikey': apiKey,
+      'Authorization': 'Bearer ' + apiKey
+    }
+  }).then(function (r) {
+    if (r.ok) {
+      statusEl.style.background = 'rgba(0,230,118,.08)'
+      statusEl.style.color = 'rgba(0,230,118,.9)'
+      statusEl.textContent = '\u2713 API key is valid'
+      toast('\u2713 Supabase API key verified', 3000)
+    } else if (r.status === 401 || r.status === 403) {
+      statusEl.style.background = 'rgba(255,82,82,.08)'
+      statusEl.style.color = 'rgba(255,82,82,.9)'
+      statusEl.textContent = '\u2717 Invalid API key (HTTP ' + r.status + ')'
+      toast('\u2717 Supabase API key invalid', 4000)
+    } else {
+      statusEl.style.background = 'rgba(255,214,0,.08)'
+      statusEl.style.color = 'rgba(255,214,0,.9)'
+      statusEl.textContent = '\u26A0 Unexpected response (HTTP ' + r.status + ')'
+    }
+  }).catch(function () {
+    statusEl.style.background = 'rgba(255,82,82,.08)'
+    statusEl.style.color = 'rgba(255,82,82,.9)'
+    statusEl.textContent = '\u2717 Could not reach Supabase \u2014 check URL'
   })
 }
 

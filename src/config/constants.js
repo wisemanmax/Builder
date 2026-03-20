@@ -56,6 +56,7 @@ export const KEY_STORE = {
   GH_DOMAIN: 'bldr_ghDomain',
   SB_URL: 'bldr_sbUrl',
   SB_ANON: 'bldr_sbAnon',
+  SB_API_KEY: 'bldr_sbApiKey',
   SB_ON: 'bldr_sbOn',
   AUDIT: 'bldr_audit',
   BACKEND: 'bldr_backend',
