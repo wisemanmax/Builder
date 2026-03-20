@@ -12,6 +12,7 @@ import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
+import { autoInjectSupabase } from '../lib/supabase-setup.js'
 import {
   SYS_WEB_DECOMPOSE, SYS_WEB_SCAFFOLD, SYS_WEB_TOKENS, SYS_WEB_DATA,
   SYS_WEB_SHARED, SYS_WEB_FEATURES, SYS_WEB_LAYOUT, SYS_WEB_PAGES,
@@ -357,6 +358,9 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
       previewHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + esc(appName) + ' Preview</title><style>body{background:#0a0a0a;color:#fff;font-family:system-ui;padding:40px;text-align:center}h1{font-size:24px;margin-bottom:16px}p{color:rgba(255,255,255,.5);margin-bottom:32px}.files{text-align:left;max-width:500px;margin:0 auto}.f{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);font-family:monospace;font-size:13px;color:rgba(255,255,255,.7)}</style></head><body><h1>' + esc(appName) + '</h1><p>' + keys.length + ' files generated — clone the repo and run npm install && npm run dev to preview</p><div class="files">' + keys.map(function (f) { return '<div class="f">' + esc(f) + '</div>' }).join('') + '</div></body></html>'
     })
   }).then(function () {
+    // Supabase auto-injection
+    if (previewHtml && ST.backendEnabled && ST.sbUrl) { previewHtml = autoInjectSupabase(previewHtml) }
+
     // Step 11 — Preview
     updatePS(pid, 11, 'done', 'Preview ready')
     setPreview(appId, previewHtml)

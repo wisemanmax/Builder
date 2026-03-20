@@ -18,6 +18,8 @@ import {
   SYS_WEB2_RECON, SYS_WEB2_BRAND, SYS_WEB2_STRUCTURE, SYS_WEB2_DESIGN, SYS_WEB2_BUILD, SYS_WEB2_UPDATE, SYS_WEB2_FIX, SYS_WEB2_AUDIT
 } from '../config/prompts-website2.js'
 import { SYS_AUDIT } from '../config/prompts.js'
+import { createStreamingPreview } from '../lib/streaming-preview.js'
+import { autoInjectSupabase } from '../lib/supabase-setup.js'
 
 // Provider-aware wrappers — route to Claude or GPT based on user toggle
 function _raw(sys, msg, maxTokens, images) {
@@ -132,7 +134,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? ('builder/site2-' + appId + '-' + Date.now().toString(36)) : ''
 
-  var v1, v2, reconJSON, brandJSON, structureJSON, designJSON, thinkingText
+  var v1, v2, reconJSON, brandJSON, structureJSON, designJSON, thinkingText, _streamPreview
 
   function _persistProgress(lastStep) {
     persistBuildSession({
@@ -267,12 +269,21 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
     var charCount = 0
     thinkingText = ''
+    // Set up streaming live preview
+    _streamPreview = null
+    var previewIframe = $('viewer-iframe')
+    if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
+
     return _buildStream(effectiveBuildSys, buildMsg, 4000, function (type, text) {
-      if (type === 'text') { charCount += text.length; updatePS(pid, 4, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
+      if (type === 'text') {
+        charCount += text.length; updatePS(pid, 4, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars')
+        if (_streamPreview) _streamPreview.pushChunk(text)
+      }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
   }).then(function (code) {
     v1 = code
+    if (_streamPreview) { _streamPreview.finalize(v1); _streamPreview.destroy() }
     updatePS(pid, 4, 'done', 'Build complete \u2713'); _persistProgress(4)
     _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
     if (thinkingText.trim()) {
@@ -363,6 +374,9 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
     return runValidationPass()
   }).then(function () {
+    // Supabase auto-injection
+    if (v2 && ST.backendEnabled && ST.sbUrl) { v2 = autoInjectSupabase(v2) }
+
     // Step 8 — Push to branch
     if (hasGitHub) {
       updatePS(pid, 8, 'active', 'Pushing to ' + branchName + '\u2026')

@@ -56,6 +56,11 @@ export const SYS_STITCH_ENHANCE = 'You are a senior principal engineer performin
   + '- Micro-interactions on user actions. Toast notifications (not alerts)\n'
   + '- Confirmation for destructive actions. Search/filter for 5+ item lists\n'
   + '- Smooth transitions on view changes. Error states with recovery paths\n'
+  + '\nPWA READY (add these to <head> — they do NOT count as structural HTML tags):\n'
+  + '- Include <meta name="theme-color" content="#1a1a2e"> (match your dark theme bg)\n'
+  + '- Include <meta name="apple-mobile-web-app-capable" content="yes">\n'
+  + '- Include <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
+  + '- Include <link rel="manifest" href="data:application/json;base64,..." > with inline manifest (name, short_name, start_url, display:standalone, theme_color, background_color, icons array with a 192px SVG data URI icon)\n'
   + '\nTHE BAR: The assembled app must look and behave like a polished SaaS product. No rough edges. Every button must work. Every form must submit. Every list must be searchable/filterable.'
 
 export const SYS_STITCH_VERIFY = 'You are a quality verification engine for single-file HTML apps.\n'

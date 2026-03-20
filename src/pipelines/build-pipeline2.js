@@ -15,6 +15,8 @@ import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
+import { createStreamingPreview } from '../lib/streaming-preview.js'
+import { autoInjectSupabase } from '../lib/supabase-setup.js'
 
 // Check IDs that are advisory-only and should not count as critical failures
 var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
@@ -104,7 +106,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? ('builder/app-' + appId + '-' + Date.now().toString(36)) : ''
 
-  var v1, v2, specText, rulesText, fixSys, thinkingText
+  var v1, v2, specText, rulesText, fixSys, thinkingText, _streamPreview
 
   function withContext(sysPrompt) {
     return sysPrompt.replace('{SPEC}', specText).replace('{RULES}', rulesText)
@@ -198,12 +200,21 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     if (images && images.length) { userMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached \u2014 study them carefully and replicate the design, layout, colors, and style as closely as possible]' }
     var charCount = 0
     thinkingText = ''
+    // Set up streaming live preview
+    _streamPreview = null
+    var previewIframe = $('viewer-iframe')
+    if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
+
     return callClaudeWithThinkingStream(effectiveSys, userMsg, 2000, function (type, text) {
-      if (type === 'text') { charCount += text.length; updatePS(pid, 1, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars') }
+      if (type === 'text') {
+        charCount += text.length; updatePS(pid, 1, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars')
+        if (_streamPreview) _streamPreview.pushChunk(text)
+      }
       else if (type === 'thinking') { thinkingText += text }
     }, images)
   }).then(function (code) {
     v1 = code
+    if (_streamPreview) { _streamPreview.finalize(v1); _streamPreview.destroy() }
     updatePS(pid, 1, 'done', 'Build complete \u2713'); _persistProgress(1)
     // Save app locally early so code survives a crash
     _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
@@ -315,6 +326,9 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     }
     return Promise.resolve()
   }).then(function () {
+    // Supabase auto-injection
+    if (v2 && ST.backendEnabled && ST.sbUrl) { v2 = autoInjectSupabase(v2) }
+
     // Step 5 — Push to branch
     checkPipelineCancel()
     if (hasGitHub) {

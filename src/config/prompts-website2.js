@@ -221,6 +221,11 @@ export const SYS_WEB2_BUILD = 'You are a senior principal engineer. You build pi
   + '- Semantic HTML: header, main, nav, section, button\n'
   + '- Keyboard-accessible with visible focus rings. WCAG AA contrast\n'
   + '- Labels on form inputs, aria-live for dynamic content\n'
+  + '\nPWA READY:\n'
+  + '- Include <meta name="theme-color" content="#1a1a2e"> (match your dark theme bg)\n'
+  + '- Include <meta name="apple-mobile-web-app-capable" content="yes">\n'
+  + '- Include <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
+  + '- Include <link rel="manifest" href="data:application/json;base64,..." > with inline manifest (name, short_name, start_url, display:standalone, theme_color, background_color, icons array with a 192px SVG data URI icon)\n'
   + '\nTHE BAR: The result must look like the real website — a polished, professional multi-page site. Not a prototype.'
 
 export const SYS_WEB2_UPDATE = 'You are a senior principal engineer. You are modifying an existing single-file HTML website based on a user\'s change request.\n'
