@@ -99,7 +99,7 @@ function _renderTemplateGallery() {
     + '</div></div>'
     + '<div class="tpl-preview-overlay" id="tpl-preview-overlay" onclick="if(event.target===this)_tplPreviewClose()">'
     + '<div class="tpl-preview-modal">'
-    + '<div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-preview-name"></span><button class="tpl-preview-close" onclick="_tplPreviewClose()">\u2715</button></div>'
+    + '<div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-preview-name"></span><div class="tpl-preview-hdr-right"><button class="tpl-preview-fullscreen" onclick="_tplPreviewFullscreen()" id="tpl-preview-fs" title="Toggle fullscreen">\u26F6</button><button class="tpl-preview-close" onclick="_tplPreviewClose()">\u2715</button></div></div>'
     + '<div class="tpl-preview-frame" id="tpl-preview-frame"></div>'
     + '<div class="tpl-preview-info">Structural preview \u2014 AI fills in full content when built</div>'
     + '<div class="tpl-preview-actions"><button class="tpl-preview-use" id="tpl-preview-use">Use This Template</button></div>'
@@ -147,8 +147,18 @@ window._tplPreviewClose = function () {
   var overlay = $('tpl-preview-overlay')
   if (!overlay) return
   overlay.classList.remove('on')
+  var modal = overlay.querySelector('.tpl-preview-modal')
+  if (modal) modal.classList.remove('fullscreen')
   var frame = $('tpl-preview-frame')
   if (frame) frame.innerHTML = ''
+}
+
+// Toggle fullscreen on template preview modal
+window._tplPreviewFullscreen = function () {
+  var overlay = $('tpl-preview-overlay')
+  if (!overlay) return
+  var modal = overlay.querySelector('.tpl-preview-modal')
+  if (modal) modal.classList.toggle('fullscreen')
 }
 
 export function addMsg(cfg) {

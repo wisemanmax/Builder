@@ -77,6 +77,15 @@
 .tpl-preview-use{padding:10px 28px;border:none;border-radius:12px;background:var(--g1);color:#fff;font-family:var(--fh);font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(255,60,172,.38);transition:transform .15s,opacity .15s}
 .tpl-preview-use:hover{transform:scale(1.04)}
 .tpl-preview-use:active{transform:scale(.96)}
+/* Fullscreen toggle button */
+.tpl-preview-fullscreen{background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:0 4px;transition:color .15s;line-height:1}
+.tpl-preview-fullscreen:hover{color:rgba(255,255,255,.8)}
+.tpl-preview-hdr-right{display:flex;align-items:center;gap:8px}
+
+/* Fullscreen state */
+.tpl-preview-modal.fullscreen{max-width:100%;width:100%;max-height:100vh;height:100vh;border-radius:0;border:none}
+.tpl-preview-modal.fullscreen .tpl-preview-frame{min-height:0;flex:1}
+
 @media(max-width:480px){.tpl-preview-modal{width:98%;max-height:90vh}.tpl-preview-frame{min-height:260px}}
 
 .mrow{display:flex;padding:3px 13px;animation:mIn .24s cubic-bezier(.34,1.56,.64,1) both}
