@@ -2,7 +2,7 @@ import { ST, persist } from '../lib/state.js'
 import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
 import { THINK_ROUND_LABELS } from '../config/constants.js'
 import { SYS_THINK } from '../config/prompts.js'
-import { callClaudeRawMultiTurn, callGPTRawMultiTurn, resetCostAccum } from '../lib/ai.js'
+import { callGPTThink, resetCostAccum } from '../lib/ai.js'
 import { injectProfileContext } from '../lib/profile-context.js'
 import { calculateBuildCost } from '../lib/cost.js'
 import { ghSyncThoughtAndRules } from '../lib/github.js'
@@ -105,7 +105,7 @@ export function sendThinkMsg() {
   var inp = $('think-input')
   var text = inp.value.trim()
   if (!text || ST._thinking) return
-  if (!ST.key && !ST.gptKey) { toast('Add an API key in Settings first'); return }
+  if (!ST.gptKey) { toast('Add an OpenAI API key in Settings first'); return }
 
   ST._thinking = true
   var sb = $('think-send-btn'); if (sb) sb.disabled = true
@@ -134,9 +134,7 @@ export function sendThinkMsg() {
   })
 
   var effectiveSys = injectProfileContext(SYS_THINK)
-  var aiCall = ST.key
-    ? callClaudeRawMultiTurn(effectiveSys, apiMessages, 2000)
-    : callGPTRawMultiTurn(effectiveSys, apiMessages, 2000)
+  var aiCall = callGPTThink(effectiveSys, apiMessages, 2000)
 
   aiCall.then(function (raw) {
     var ti = $('think-typing'); if (ti) ti.remove()

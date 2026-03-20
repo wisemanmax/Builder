@@ -2,7 +2,7 @@ import { ST } from './state.js'
 import { scrubKeys } from './utils.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
 import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CHAT } from '../config/prompts.js'
-import { CLAUDE_MODEL, GPT_MODEL, GPT_MINI_MODEL, ANTHROPIC_API_URL, OPENAI_API_URL } from '../config/constants.js'
+import { CLAUDE_MODEL, GPT_MODEL, GPT_MINI_MODEL, GPT_THINK_MODEL, ANTHROPIC_API_URL, OPENAI_API_URL } from '../config/constants.js'
 
 function claudeHeaders() {
   return { 'Content-Type': 'application/json', 'x-api-key': ST.key, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'anthropic-dangerous-direct-browser-access': 'true' }
@@ -392,6 +392,18 @@ export function callGPTRawMultiTurn(sys, messages, maxTokens) {
     body: JSON.stringify({ model: GPT_MINI_MODEL, max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }].concat(messages) }),
   }, 120000).then(handleGPTError).then(function (d) {
     trackUsage('GPT Multi', GPT_MINI_MODEL, d.usage)
+    return stripFences(extractGPTText(d))
+  }).catch(gptCatch)
+}
+
+export function callGPTThink(sys, messages, maxTokens) {
+  maxTokens = maxTokens || 4000
+  return fetchWithRetry(OPENAI_API_URL, {
+    method: 'POST',
+    headers: gptHeaders(),
+    body: JSON.stringify({ model: GPT_THINK_MODEL, max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: sys }].concat(messages) }),
+  }, 120000).then(handleGPTError).then(function (d) {
+    trackUsage('GPT Think', GPT_THINK_MODEL, d.usage)
     return stripFences(extractGPTText(d))
   }).catch(gptCatch)
 }

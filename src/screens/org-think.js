@@ -1,7 +1,7 @@
 import { ST, persist } from '../lib/state.js'
 import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
 import { SYS_ORG_THINK } from '../config/prompts.js'
-import { callClaudeRawMultiTurn, callGPTRawMultiTurn, callClaudeRaw } from '../lib/ai.js'
+import { callGPTThink, callClaudeRaw } from '../lib/ai.js'
 import { injectProfileContext } from '../lib/profile-context.js'
 import { renderProfileChip } from '../components/profile-switcher.js'
 
@@ -92,10 +92,7 @@ export function sendOrgMsg() {
   var text = inp.value.trim()
   if (!text || _orgState.done) return
 
-  // Use GPT if available, otherwise fall back to Claude
-  var hasGPT = !!ST.gptKey
-  var hasClaude = !!ST.key
-  if (!hasGPT && !hasClaude) { toast('Add an API key in Settings first'); return }
+  if (!ST.gptKey) { toast('Add an OpenAI API key in Settings first'); return }
 
   var sb = $('org-think-send-btn'); if (sb) sb.disabled = true
   inp.value = ''; inp.style.height = ''
@@ -121,9 +118,7 @@ export function sendOrgMsg() {
   })
 
   var effectiveSys = injectProfileContext(SYS_ORG_THINK)
-  var aiCall = hasClaude
-    ? callClaudeRawMultiTurn(effectiveSys, apiMessages, 2000)
-    : callGPTRawMultiTurn(effectiveSys, apiMessages, 2000)
+  var aiCall = callGPTThink(effectiveSys, apiMessages, 2000)
 
   aiCall.then(function (raw) {
     var ti = $('org-think-typing'); if (ti) ti.remove()
