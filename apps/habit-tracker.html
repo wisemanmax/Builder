@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4CAF50">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiSGFiaXQgVHJhY2tlciIsInNob3J0X25hbWUiOiJIYWJpdCIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInRoZW1lX2NvbG9yIjoiIzRhY2Y1MCIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwiaWNvbnMiOlt7InNyYyI6IiIsInNpemUiOiIxOTJ4MTkyIn1dfQ==">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <title>Habit Tracker</title>
+  <style>
+    :root {
+      --color-primary: #4CAF50;
+      --color-secondary: #FFFFFF;
+      --color-accent: #4CAF50;
+      --color-dark: #333333;
+      --color-light: #F5F5F5;
+      --color-text: #333333;
+      --color-text-muted: #4CAF50;
+      --color-border: #E0E0E0;
+      --font-heading: 'Merriweather', serif;
+      --font-body: 'Nunito', sans-serif;
+      --line-height: 1.6;
+      --letter-spacing-heading: -0.02em;
+      --letter-spacing-body: 0;
+      --max-width: 100%;
+      --container-padding: clamp(1rem, 5vw, 3rem);
+      --section-spacing: clamp(3rem, 8vw, 6rem);
+      --grid-columns: auto-fill, minmax(280px, 1fr);
+      --border-radius-sm: 4px;
+      --border-radius-md: 4px;
+      --border-radius-lg: 4px;
+      --border-radius-xl: 4px;
+      --transition: all 0.3s ease;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.15);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.2);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: var(--font-body);
+      line-height: var(--line-height);
+      color: var(--color-text);
+      background-color: var(--color-light);
+    }
+    .header {
+      font-family: var(--font-heading);
+      background-color: var(--color-primary);
+      color: var(--color-secondary);
+      padding: 1rem;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--container-padding);
+    }
+    .nav a {
+      color: var(--color-secondary);
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+    .nav a:hover, .nav a:focus {
+      text-decoration: underline;
+    }
+    .nav a:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    .hero {
+      padding: var(--section-spacing) var(--container-padding);
+      text-align: center;
+      background: var(--color-primary);
+      color: var(--color-secondary);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-family: var(--font-heading);
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+      margin-bottom: 2rem;
+    }
+    .btn-primary {
+      background-color: var(--color-accent);
+      color: var(--color-secondary);
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-primary:hover, .btn-primary:focus {
+      background-color: var(--color-dark);
+    }
+    .btn-primary:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    .features, .testimonials, .cta {
+      padding: var(--section-spacing) var(--container-padding);
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+    .features h2, .testimonials h2, .cta h2 {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-family: var(--font-heading);
+      margin-bottom: 1rem;
+    }
+    .features p, .testimonials p, .cta p {
+      font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    }
+    .footer {
+      background-color: var(--color-dark);
+      color: var(--color-secondary);
+      padding: var(--section-spacing) var(--container-padding);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .footer a {
+      color: var(--color-secondary);
+      text-decoration: none;
+      margin: 0.5rem 0;
+    }
+    .footer a:hover, .footer a:focus {
+      text-decoration: underline;
+    }
+    .footer a:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    @media (min-width: 768px) {
+      .nav {
+        flex-direction: row;
+      }
+    }
+    @media (min-width: 1024px) {
+      .features, .testimonials, .cta {
+        display: grid;
+        grid-template-columns: var(--grid-columns);
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav" role="navigation" aria-label="Main Navigation">
+      <div class="logo"><a href="/" aria-label="Habit Tracker Home">Habit Tracker</a></div>
+      <div class="menu">
+        <a href="/" aria-label="Home">Home</a>
+        <a href="/features" aria-label="Features">Features</a>
+        <a href="/testimonials" aria-label="Testimonials">Testimonials</a>
+        <a href="/contact" aria-label="Contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div id="home" class="page" style="display: block;">
+      <section class="hero">
+        <h1>Track Your Habits</h1>
+        <p>Our habit tracker helps you build and maintain good habits with ease.</p>
+        <button class="btn-primary" id="ctaButton">Get Started Now</button>
+      </section>
+      <section class="features">
+        <h2>Build Better Routines</h2>
+        <p>Easily track your progress and stay motivated with our intuitive interface.</p>
+      </section>
+      <section class="testimonials">
+        <h2>Join Thousands of Happy Users</h2>
+        <p>"This app has changed my life!" - User A, 5 stars</p>
+        <p>"A must-have for anyone looking to improve their habits." - User B, 4.5 stars</p>
+        <p><small>Results may vary based on individual usage.</small></p>
+      </section>
+      <section class="cta">
+        <h2>Get Started Now</h2>
+        <p>Final call to action encouraging sign-ups.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <h3>Company</h3>
+      <a href="/about-us">About Us</a>
+      <a href="/careers">Careers</a>
+    </div>
+    <div>
+      <h3>Support</h3>
+      <a href="/help-center">Help Center</a>
+      <a href="/contact-us">Contact Us</a>
+    </div>
+    <div>
+      <a href="https://twitter.com/habittracker">Twitter</a>
+      <a href="https://linkedin.com/company/habittracker">LinkedIn</a>
+    </div>
+    <div>
+      <a href="https://habittracker.com/privacy">Privacy Policy</a>
+      <a href="https://habittracker.com/terms">Terms of Service</a>
+    </div>
+    <div>
+      <p>© 2023 Habit Tracker</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('ctaButton').addEventListener('click', function() {
+      showPage('cta');
+    });
+
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+      });
+      document.getElementById(id).style.display = 'block';
+    }
+  </script>
+</body>
+</html>
