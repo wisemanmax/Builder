@@ -135,6 +135,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
   var branchName = hasGitHub ? ('builder/site2-' + appId + '-' + Date.now().toString(36)) : ''
 
   var v1, v2, reconJSON, brandJSON, structureJSON, designJSON, thinkingText, _streamPreview
+  var activeThought, _specText, _rulesText
 
   function _persistProgress(lastStep) {
     persistBuildSession({
@@ -164,9 +165,9 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     if (images && images.length) reconMsg += '\n\n[' + images.length + ' screenshot' + (images.length > 1 ? 's' : '') + ' attached \u2014 analyze the visual design, layout, colors, typography, and content from these images]'
 
     // Inject think engine spec and rules into recon
-    var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
-    var _specText = ''
-    var _rulesText = ''
+    activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
+    _specText = ''
+    _rulesText = ''
     var effectiveReconSys = SYS_WEB2_RECON
     if (activeThought) {
       if (activeThought.brief) {
