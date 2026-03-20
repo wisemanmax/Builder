@@ -16,12 +16,13 @@ export const TEMPLATES = [
     icon: '\uD83D\uDD25',
     category: 'productivity',
     desc: 'Daily habits with streaks and calendar heatmap',
-    skeleton: `<!DOCTYPE html>
+    skeleton: '<!DOCTYPE html>
+
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>The Ritual - Daily Dashboard</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"><\/script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -92,7 +93,7 @@ export const TEMPLATES = [
                 },
             },
         }
-    <\/script>
+    </script>
 <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -268,7 +269,7 @@ export const TEMPLATES = [
 <span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest mt-1">Profile</span>
 </a>
 </nav>
-</body></html>`,
+</body></html>',
   },
   {
     id: 'pomodoro',
