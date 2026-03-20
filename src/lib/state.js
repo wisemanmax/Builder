@@ -4,7 +4,7 @@ export const ST = {
   apps: [],
   key: '', gptKey: '', stitchKey: '',
   ghToken: '', ghUser: '', ghRepo: '', ghCustomDomain: '',
-  sbUrl: '', sbAnon: '', sbEnabled: false, auditEnabled: true,
+  sbUrl: '', sbAnon: '', sbApiKey: '', sbEnabled: false, auditEnabled: true,
   backendEnabled: false,
   website2Provider: 'claude',
   activeAppId: null, pendingIcon: '🎯', pendingColor: 0,
@@ -73,6 +73,7 @@ export function hydrate() {
   ST.ghCustomDomain = localStorage.getItem(KEY_STORE.GH_DOMAIN) || ''
   ST.sbUrl = localStorage.getItem(KEY_STORE.SB_URL) || ''
   ST.sbAnon = localStorage.getItem(KEY_STORE.SB_ANON) || ''
+  ST.sbApiKey = localStorage.getItem(KEY_STORE.SB_API_KEY) || ''
   ST.sbEnabled = localStorage.getItem(KEY_STORE.SB_ON) === 'true'
   ST.auditEnabled = localStorage.getItem(KEY_STORE.AUDIT) !== 'false'
   ST.backendEnabled = localStorage.getItem(KEY_STORE.BACKEND) === 'true'
@@ -90,6 +91,7 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.GH_DOMAIN, ST.ghCustomDomain)
   localStorage.setItem(KEY_STORE.SB_URL, ST.sbUrl)
   localStorage.setItem(KEY_STORE.SB_ANON, ST.sbAnon)
+  localStorage.setItem(KEY_STORE.SB_API_KEY, ST.sbApiKey)
   localStorage.setItem(KEY_STORE.SB_ON, String(ST.sbEnabled))
   localStorage.setItem(KEY_STORE.AUDIT, String(ST.auditEnabled))
   localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled))
@@ -146,7 +148,7 @@ export function clearBuildSession() {
 export function keyStatusHTML() {
   var items = [
     ['Anthropic', ST.key], ['OpenAI', ST.gptKey], ['Stitch', ST.stitchKey],
-    ['GitHub Token', ST.ghToken], ['Supabase Anon', ST.sbAnon],
+    ['GitHub Token', ST.ghToken], ['Supabase Anon', ST.sbAnon], ['Supabase API Key', ST.sbApiKey],
   ]
   var rows = ''
   for (var i = 0; i < items.length; i++) {
