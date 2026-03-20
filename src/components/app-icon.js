@@ -62,10 +62,21 @@ export function renderGrid() {
     for (var i = 0; i < ST.apps.length; i++) {
       var app = ST.apps[i]
       var g = grad(app.ci)
+      var hasLinkedThought = false
+      for (var ti = 0; ti < ST.thoughts.length; ti++) {
+        if (ST.thoughts[ti].linkedAppId === app.id) { hasLinkedThought = true; break }
+      }
       html += '<div class="aicon" style="animation-delay:' + i * .04 + 's" data-id="' + app.id + '" onclick="handleTap(\'' + app.id + '\')" oncontextmenu="showCtx(event,\'' + app.id + '\');return false">'
-        + '<div class="aicon-img" style="background:' + g + '">' + app.icon + '</div>'
+        + '<div class="aicon-img" style="background:' + g + '">' + app.icon
+        + (hasLinkedThought ? '<span class="aicon-thought-badge">\uD83D\uDCAD</span>' : '')
+        + '</div>'
         + '<button class="aicon-del" onclick="delApp(\'' + app.id + '\');event.stopPropagation()">\u2715</button>'
         + '<div class="aicon-label">' + esc(app.name) + '</div></div>'
+    }
+    if (ST.thoughts.length > 0) {
+      html += '<div class="aicon tf-tile" onclick="openThoughtsFolder()">'
+        + '<div class="aicon-img" style="background:var(--g4)">\uD83D\uDCAD</div>'
+        + '<div class="aicon-label">Thoughts</div></div>'
     }
     html += '<div class="aicon new-tile" onclick="openBuilder()"><div class="aicon-img">\u2726</div><div class="aicon-label">New App</div></div>'
   }
