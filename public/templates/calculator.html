@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculator</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#3D5AFE;--accent2:#FF3CAC;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.calc{max-width:360px;width:100%;padding:16px}
+.display{background:var(--surface);border-radius:var(--radius);padding:20px 16px;margin-bottom:12px;text-align:right}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+/* TEMPLATE: Button styles, display expression/result, history panel */
+@media(min-width:768px){.calc{padding:24px}}
+</style>
+</head>
+<body>
+<div class="calc">
+<div class="display">
+<!-- TEMPLATE: Expression line and result line -->
+</div>
+<div class="buttons">
+<!-- TEMPLATE: Number pad, operators, scientific functions, clear/equals -->
+</div>
+<!-- TEMPLATE: History panel (toggleable) -->
+</div>
+<script>
+var state = { expression: '', result: '0', history: [], mode: 'basic' }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('calc_data'); if (s) state.history = JSON.parse(s).history || [] } catch(e){} }
+function save() { try { localStorage.setItem('calc_data', JSON.stringify({ history: state.history })) } catch(e){} }
+function render() { /* TEMPLATE: Update display, buttons, history list */ }
+/* TEMPLATE: Input handling, expression parsing, calculation, keyboard support, history */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

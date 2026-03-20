@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mood Journal</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#B44FFF;--accent2:#FF3CAC;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:600px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+/* TEMPLATE: Mood selector, entry card, calendar view, stats/insights */
+@media(min-width:768px){.container{padding:24px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header style="display:flex;align-items:center;justify-content:space-between">
+<!-- TEMPLATE: Title, view toggle (list/calendar), date navigation -->
+</header>
+<!-- TEMPLATE: Today's mood entry (emoji picker, note, tags) -->
+<!-- TEMPLATE: Calendar view with mood colors per day -->
+<!-- TEMPLATE: Entry history list -->
+<!-- TEMPLATE: Insights/stats (average mood, streaks, patterns) -->
+</div>
+<script>
+var state = { entries: [], view: 'list', month: new Date().getMonth(), year: new Date().getFullYear() }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('mood_data'); if (s) state.entries = JSON.parse(s).entries || [] } catch(e){} }
+function save() { try { localStorage.setItem('mood_data', JSON.stringify({ entries: state.entries })) } catch(e){} }
+function render() { /* TEMPLATE: Render mood entry form, calendar, history, insights */ }
+/* TEMPLATE: Mood entry CRUD, calendar rendering, mood stats, tag management, export */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

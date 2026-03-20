@@ -1,6 +1,7 @@
 import { $, esc, escAttr } from '../lib/utils.js'
 import { PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS, PIPE5_NAMES, PIPE5_ICONS } from '../config/constants.js'
 import { TEMPLATES, TEMPLATE_CATEGORIES } from '../config/templates.js'
+import { getTemplateSkeleton } from '../lib/template-loader.js'
 import { approveAndMerge, requestChanges, resolveRetry, approveBlueprintContinue, rejectBlueprint } from './approval-card.js'
 import { costCardHTML } from '../lib/cost.js'
 
@@ -137,7 +138,12 @@ window._tplPreview = function (templateId) {
   var useBtn = $('tpl-preview-use')
   if (!overlay || !frame) return
   nameEl.textContent = tpl.icon + ' ' + tpl.name
-  frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(tpl.skeleton) + '"></iframe>'
+  frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#888">Loading preview\u2026</div>'
+  getTemplateSkeleton(templateId).then(function (skeleton) {
+    frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(skeleton) + '"></iframe>'
+  }).catch(function () {
+    frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#f66">Failed to load preview</div>'
+  })
   useBtn.onclick = function () { window.templateSend(templateId); _tplPreviewClose() }
   overlay.classList.add('on')
 }

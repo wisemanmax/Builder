@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#FF3CAC;--accent2:#3D5AFE;--success:#00E676;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);scroll-behavior:smooth}
+nav{position:fixed;top:0;width:100%;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);z-index:100;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.section{max-width:1000px;margin:0 auto;padding:80px 16px 40px}
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+/* TEMPLATE: Hero section, about section, project cards, skills grid, contact form */
+@media(max-width:768px){.project-grid{grid-template-columns:1fr}nav{padding:10px 16px}}
+</style>
+</head>
+<body>
+<nav>
+<!-- TEMPLATE: Logo/name, nav links (About, Projects, Skills, Contact), hamburger on mobile -->
+</nav>
+<!-- TEMPLATE: Hero section with name, title, CTA -->
+<section class="section" id="about">
+<!-- TEMPLATE: About me with photo placeholder and bio -->
+</section>
+<section class="section" id="projects">
+<div class="project-grid">
+<!-- TEMPLATE: Project cards with image, title, description, tech tags, links -->
+</div>
+</section>
+<!-- TEMPLATE: Skills section with categorized skill bars/tags -->
+<!-- TEMPLATE: Contact section with form -->
+<script>
+var state = { menuOpen: false }
+function init() { render(); setupNav() }
+function setupNav() { /* TEMPLATE: Mobile hamburger toggle, smooth scroll, active section highlight */ }
+function render() { /* TEMPLATE: Render projects, skills, animate on scroll */ }
+/* TEMPLATE: Scroll animations, form handling, mobile nav, project filtering */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

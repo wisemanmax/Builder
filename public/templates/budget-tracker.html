@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Budget Tracker</title>
+<style>
+:root{--bg:#0a0a1a;--surface:#12122a;--border:rgba(255,255,255,.08);--text:#e8e8f0;--text2:rgba(255,255,255,.55);--accent:#00E676;--accent2:#FF5252;--warning:#FFD600;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:700px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+/* TEMPLATE: Summary cards, transaction list, add form, category breakdown chart */
+@media(min-width:768px){.container{padding:24px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header style="display:flex;align-items:center;justify-content:space-between">
+<!-- TEMPLATE: Title, month selector, add transaction button -->
+</header>
+<!-- TEMPLATE: Balance summary cards (income, expenses, balance) -->
+<!-- TEMPLATE: Category breakdown (canvas pie chart) -->
+<!-- TEMPLATE: Transaction list with category icons, amounts, dates -->
+<!-- TEMPLATE: Add/edit transaction modal -->
+</div>
+<script>
+var state = { transactions: [], categories: ['Food','Transport','Housing','Entertainment','Shopping','Bills','Health','Other'], month: new Date().getMonth(), year: new Date().getFullYear() }
+function init() { load(); render() }
+function load() { try { var s = localStorage.getItem('budget_data'); if (s) state = JSON.parse(s) } catch(e){} }
+function save() { try { localStorage.setItem('budget_data', JSON.stringify(state)) } catch(e){} }
+function render() { /* TEMPLATE: Render summary, chart, transaction list */ }
+/* TEMPLATE: Transaction CRUD, category totals, chart drawing, month navigation, export */
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>

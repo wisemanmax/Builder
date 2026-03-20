@@ -5,6 +5,7 @@ import { ghPageUrl } from '../lib/utils.js'
 import { GRADS, PIPE_NAMES, PIPE_ICONS, PIPE2_NAMES, PIPE2_ICONS, PIPE3_NAMES, PIPE3_ICONS, PIPE4_NAMES, PIPE4_ICONS, PIPE5_NAMES, PIPE5_ICONS } from '../config/constants.js'
 import { _syncStitchGate } from './settings.js'
 import { TEMPLATES } from '../config/templates.js'
+import { getTemplateSkeleton } from '../lib/template-loader.js'
 import { addMsg, resetChat, hydrateLiveChat } from '../components/message.js'
 import { renderThoughtSelector } from '../components/thought-card.js'
 import { getPreviewPid, getApprovalGates } from '../components/approval-card.js'
@@ -162,7 +163,13 @@ export function chipSend(t) { $('chat-input').value = t; autoResize($('chat-inpu
 export function templateSend(templateId) {
   var tpl = TEMPLATES.find(function (t) { return t.id === templateId })
   if (!tpl) return
-  ST._pendingTemplate = tpl
+  ST._pendingTemplate = { id: tpl.id, name: tpl.name, icon: tpl.icon, skeleton: null }
+  // Eagerly fetch skeleton — completes while user edits prompt
+  getTemplateSkeleton(templateId).then(function (skeleton) {
+    if (ST._pendingTemplate && ST._pendingTemplate.id === templateId) {
+      ST._pendingTemplate.skeleton = skeleton
+    }
+  })
   $('chat-input').value = 'Build a ' + tpl.name.toLowerCase()
   autoResize($('chat-input'))
   var w = $('chat-welcome'); if (w) w.style.display = 'none'
