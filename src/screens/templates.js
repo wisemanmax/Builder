@@ -57,6 +57,13 @@ function openTplSheetPreview(templateId) {
   frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(tpl.skeleton) + '"></iframe>'
   useBtn.onclick = function () { selectTemplate(templateId) }
   overlay.classList.add('on')
+  // Auto-fullscreen on mobile for better UX
+  var modal = overlay.querySelector('.tpl-preview-modal')
+  if (modal && window.innerWidth <= 480) {
+    modal.classList.add('fullscreen')
+  }
+  // Prevent background scroll
+  document.body.style.overflow = 'hidden'
 }
 
 function closeTplSheetPreview() {
@@ -67,13 +74,22 @@ function closeTplSheetPreview() {
   if (modal) modal.classList.remove('fullscreen')
   var frame = $('tpl-sheet-preview-frame')
   if (frame) frame.innerHTML = ''
+  // Restore background scroll
+  document.body.style.overflow = ''
 }
 
 function toggleTplSheetPreviewFullscreen() {
   var overlay = $('tpl-sheet-preview')
   if (!overlay) return
   var modal = overlay.querySelector('.tpl-preview-modal')
-  if (modal) modal.classList.toggle('fullscreen')
+  if (!modal) return
+  modal.classList.toggle('fullscreen')
+  var btn = $('tpl-sheet-preview-fs')
+  if (btn) {
+    var isFs = modal.classList.contains('fullscreen')
+    btn.innerHTML = isFs ? '&#x2716;' : '&#x26F6;'
+    btn.title = isFs ? 'Exit fullscreen' : 'Toggle fullscreen'
+  }
 }
 
 function filterTemplates(cat) {
