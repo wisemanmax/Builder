@@ -20,6 +20,7 @@ import {
 import { SYS_AUDIT } from '../config/prompts.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
 import { autoInjectSupabase } from '../lib/supabase-setup.js'
+import { getTemplateSkeleton } from '../lib/template-loader.js'
 
 // Provider-aware wrappers — route to Claude or GPT based on user toggle
 function _raw(sys, msg, maxTokens, images) {
@@ -158,6 +159,17 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     })
   }
 
+  // Resolve template skeleton before pipeline starts (same pattern as thought engine)
+  var _templateSkeleton = null
+  if (!existingApp && ST._pendingTemplate) {
+    var pending = ST._pendingTemplate
+    ST._pendingTemplate = null
+    p = p.then(function () {
+      return (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
+        .then(function (skeleton) { _templateSkeleton = skeleton })
+    })
+  }
+
   p.then(function () {
     // Step 0 — Recon (Data Gathering + Content Manifest)
     updatePS(pid, 0, 'active', 'Analyzing site content and structure\u2026')
@@ -182,6 +194,12 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         if (merged.niceToHave.length) _rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
         effectiveReconSys += '\n\nUSER RULES (follow these constraints strictly):\n' + _rulesText
       }
+    }
+    // Inject template skeleton into recon context (same as thought engine pattern)
+    if (_templateSkeleton) {
+      reconMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture — expand, customize, and fill in all features):\n'
+        + _templateSkeleton
+        + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
     }
     return retryStep(function () { return _raw(effectiveReconSys, reconMsg, 6000, images) }, 2, 'Recon').then(function (raw) {
       reconJSON = raw
