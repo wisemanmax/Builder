@@ -58,6 +58,9 @@
   .tpl-grid { grid-template-columns: repeat(3, 1fr) }
   .tpl-section { max-width: 480px }
 
+  /* Template preview modal */
+  .tpl-preview-modal { max-width: 720px }
+
   /* Toast positioning */
   .toast { bottom: 60px }
 
@@ -146,6 +149,10 @@
   /* Template grid: 3 columns, wider */
   .tpl-grid { grid-template-columns: repeat(3, 1fr); gap: 10px }
   .tpl-section { max-width: 560px }
+
+  /* Template preview modal wider on desktop */
+  .tpl-preview-modal { max-width: 800px }
+  .tpl-preview-frame { min-height: 420px }
 
   /* Stitch modal centered */
   .stitch-modal { max-width: 400px; padding: 32px 28px }
