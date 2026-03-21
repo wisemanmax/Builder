@@ -11,7 +11,10 @@ export function renderProfileChip() {
   var profile = null
   if (ST.activeProfileId) {
     for (var i = 0; i < ST.profiles.length; i++) {
-      if (ST.profiles[i].id === ST.activeProfileId) { profile = ST.profiles[i]; break }
+      if (ST.profiles[i].id === ST.activeProfileId) {
+        profile = ST.profiles[i]
+        break
+      }
     }
   }
   if (profile) {
@@ -34,7 +37,10 @@ export function cycleProfile() {
   var currentIdx = -1
   if (ST.activeProfileId) {
     for (var i = 0; i < ST.profiles.length; i++) {
-      if (ST.profiles[i].id === ST.activeProfileId) { currentIdx = i; break }
+      if (ST.profiles[i].id === ST.activeProfileId) {
+        currentIdx = i
+        break
+      }
     }
   }
   var nextIdx = currentIdx + 1
@@ -55,10 +61,13 @@ export function cycleProfile() {
 export function showProfilePicker() {
   var el = $('profile-picker')
   if (!el) return
-  var html = '<div class="pp-item' + (!ST.activeProfileId ? ' active' : '') + '" data-id="">'
-    + '<span class="pp-name">No Profile</span>'
-    + '<span class="pp-desc">Vanilla Builder mode</span>'
-    + '</div>'
+  var html =
+    '<div class="pp-item' +
+    (!ST.activeProfileId ? ' active' : '') +
+    '" data-id="">' +
+    '<span class="pp-name">No Profile</span>' +
+    '<span class="pp-desc">Vanilla Builder mode</span>' +
+    '</div>'
   for (var i = 0; i < ST.profiles.length; i++) {
     var p = ST.profiles[i]
     var isActive = p.id === ST.activeProfileId
@@ -66,10 +75,21 @@ export function showProfilePicker() {
     var ruleCount = 0
     var gr = p.globalRules || {}
     ruleCount += (gr.mustRules || []).length + (gr.mustNotRules || []).length + (gr.niceToHave || []).length
-    html += '<div class="pp-item' + (isActive ? ' active' : '') + '" data-id="' + p.id + '">'
-      + '<span class="pp-name">' + (p.name || 'Unnamed') + '</span>'
-      + '<span class="pp-desc">' + ruleCount + ' rules \u00B7 ' + fbCount + ' feedback</span>'
-      + '</div>'
+    html +=
+      '<div class="pp-item' +
+      (isActive ? ' active' : '') +
+      '" data-id="' +
+      p.id +
+      '">' +
+      '<span class="pp-name">' +
+      (p.name || 'Unnamed') +
+      '</span>' +
+      '<span class="pp-desc">' +
+      ruleCount +
+      ' rules \u00B7 ' +
+      fbCount +
+      ' feedback</span>' +
+      '</div>'
   }
   el.innerHTML = html
   el.classList.add('on')
@@ -87,7 +107,12 @@ export function initProfilePicker() {
     picker.classList.remove('on')
     if (id) {
       var p = null
-      for (var i = 0; i < ST.profiles.length; i++) { if (ST.profiles[i].id === id) { p = ST.profiles[i]; break } }
+      for (var i = 0; i < ST.profiles.length; i++) {
+        if (ST.profiles[i].id === id) {
+          p = ST.profiles[i]
+          break
+        }
+      }
       toast('Profile: ' + (p ? p.name : 'Active'))
     } else {
       toast('Profile deactivated')
@@ -112,17 +137,20 @@ export function createProfile(name) {
       vision: '',
       principles: [],
       brandIdentity: { theme: 'dark', accentColor: '', fonts: '', tone: '' },
-      roadmap: []
+      roadmap: [],
     },
     globalRules: { mustRules: [], mustNotRules: [], niceToHave: [] },
     learnedPreferences: {
-      positivePatterns: [], negativePatterns: [],
-      designPrefs: [], functionalPrefs: [],
-      lastAnalyzedAt: '', feedbackCount: 0
+      positivePatterns: [],
+      negativePatterns: [],
+      designPrefs: [],
+      functionalPrefs: [],
+      lastAnalyzedAt: '',
+      feedbackCount: 0,
     },
     feedback: [],
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   }
   ST.profiles.push(profile)
   persist()
@@ -130,7 +158,9 @@ export function createProfile(name) {
 }
 
 export function deleteProfile(profileId) {
-  ST.profiles = ST.profiles.filter(function (p) { return p.id !== profileId })
+  ST.profiles = ST.profiles.filter(function (p) {
+    return p.id !== profileId
+  })
   if (ST.activeProfileId === profileId) setActiveProfile(null)
   persist()
   renderProfileChip()

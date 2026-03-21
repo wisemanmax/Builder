@@ -10,10 +10,14 @@ export function generateShareUrl(app) {
   var baseUrl = _getBaseUrl()
   // Try compression
   if (typeof CompressionStream !== 'undefined') {
-    return _compressGzip(app.code).then(function (b64) {
-      if (b64.length > 50000) return '' // Too large for URL
-      return baseUrl + '#/share/' + b64
-    }).catch(function () { return '' })
+    return _compressGzip(app.code)
+      .then(function (b64) {
+        if (b64.length > 50000) return '' // Too large for URL
+        return baseUrl + '#/share/' + b64
+      })
+      .catch(function () {
+        return ''
+      })
   }
   return Promise.resolve('')
 }
@@ -39,7 +43,9 @@ export function decompressShareData(b64) {
       })
     }
     return read()
-  } catch (e) { return Promise.resolve('') }
+  } catch (e) {
+    return Promise.resolve('')
+  }
 }
 
 function _compressGzip(text) {
@@ -128,7 +134,10 @@ function _encodeQR(text) {
   var version = 1
   var capacities = [0, 17, 32, 53, 78, 106, 134, 154, 192, 230, 271]
   for (var v = 1; v <= 10; v++) {
-    if (data.length <= capacities[v]) { version = v; break }
+    if (data.length <= capacities[v]) {
+      version = v
+      break
+    }
     if (v === 10) return null // Too long
   }
 
@@ -146,8 +155,8 @@ function _encodeQR(text) {
 
   // Timing patterns
   for (var t = 8; t < moduleCount - 8; t++) {
-    modules[6][t] = (t % 2 === 0)
-    modules[t][6] = (t % 2 === 0)
+    modules[6][t] = t % 2 === 0
+    modules[t][6] = t % 2 === 0
   }
 
   // Data encoding — simplified bit placement
@@ -171,7 +180,7 @@ function _encodeQR(text) {
   for (var col = moduleCount - 1; col >= 0; col -= 2) {
     if (col === 6) col-- // Skip timing column
     for (var row = 0; row < moduleCount; row++) {
-      var actualRow = upward ? (moduleCount - 1 - row) : row
+      var actualRow = upward ? moduleCount - 1 - row : row
       for (var dc = 0; dc < 2; dc++) {
         var c2 = col - dc
         if (c2 < 0 || c2 >= moduleCount) continue
@@ -189,11 +198,14 @@ function _encodeQR(text) {
 function _placeFinderPattern(modules, row, col) {
   for (var r = -1; r <= 7; r++) {
     for (var c = -1; c <= 7; c++) {
-      var rr = row + r, cc = col + c
+      var rr = row + r,
+        cc = col + c
       if (rr < 0 || rr >= modules.length || cc < 0 || cc >= modules.length) continue
-      if ((r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
-          (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
-          (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+      if (
+        (r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
+        (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
+        (r >= 2 && r <= 4 && c >= 2 && c <= 4)
+      ) {
         modules[rr][cc] = true
       } else {
         modules[rr][cc] = false
@@ -210,7 +222,7 @@ function _getReservedMap(modules, size) {
       // Finder patterns + separators
       var inFinder = (r < 9 && c < 9) || (r < 9 && c >= size - 8) || (r >= size - 8 && c < 9)
       // Timing patterns
-      var inTiming = (r === 6 || c === 6)
+      var inTiming = r === 6 || c === 6
       map[r][c] = inFinder || inTiming
     }
   }
@@ -243,11 +255,16 @@ export function renderShareCard(app, containerId) {
 
   var liveUrl = ghPageUrl(app.id)
 
-  var html = '<div class="share-card">'
-    + '<div class="share-card-title">Share ' + (app.icon || '') + ' ' + (app.name || 'App') + '</div>'
-    + '<canvas id="share-qr-canvas" width="200" height="200" style="margin:12px auto;display:block;border-radius:8px"></canvas>'
-    + '<div id="share-qr-status" style="text-align:center;font-size:10px;color:rgba(255,255,255,.4);margin-bottom:8px">Generating\u2026</div>'
-    + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+  var html =
+    '<div class="share-card">' +
+    '<div class="share-card-title">Share ' +
+    (app.icon || '') +
+    ' ' +
+    (app.name || 'App') +
+    '</div>' +
+    '<canvas id="share-qr-canvas" width="200" height="200" style="margin:12px auto;display:block;border-radius:8px"></canvas>' +
+    '<div id="share-qr-status" style="text-align:center;font-size:10px;color:rgba(255,255,255,.4);margin-bottom:8px">Generating\u2026</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
 
   if (liveUrl) {
     html += '<button id="share-copy-live" class="share-btn">\uD83C\uDF10 Copy Live URL</button>'
@@ -260,7 +277,10 @@ export function renderShareCard(app, containerId) {
 
   html += '</div>'
   if (liveUrl) {
-    html += '<div style="text-align:center;font-size:10px;color:rgba(255,255,255,.35);margin-top:8px;word-break:break-all">' + liveUrl + '</div>'
+    html +=
+      '<div style="text-align:center;font-size:10px;color:rgba(255,255,255,.35);margin-top:8px;word-break:break-all">' +
+      liveUrl +
+      '</div>'
   }
   html += '</div>'
 
@@ -291,20 +311,27 @@ export function renderShareCard(app, containerId) {
   // Event listeners
   setTimeout(function () {
     var copyLive = $('share-copy-live')
-    if (copyLive) copyLive.addEventListener('click', function () { copyToClipboard(liveUrl, 'Live URL') })
+    if (copyLive)
+      copyLive.addEventListener('click', function () {
+        copyToClipboard(liveUrl, 'Live URL')
+      })
 
     var copyLink = $('share-copy-link')
-    if (copyLink) copyLink.addEventListener('click', function () {
-      if (shareUrl) copyToClipboard(shareUrl, 'Share link')
-      else {
-        generateShareUrl(app).then(function (url) {
-          if (url) copyToClipboard(url, 'Share link')
-          else toast('App too large to share via link', 3000)
-        })
-      }
-    })
+    if (copyLink)
+      copyLink.addEventListener('click', function () {
+        if (shareUrl) copyToClipboard(shareUrl, 'Share link')
+        else {
+          generateShareUrl(app).then(function (url) {
+            if (url) copyToClipboard(url, 'Share link')
+            else toast('App too large to share via link', 3000)
+          })
+        }
+      })
 
     var nativeBtn = $('share-native')
-    if (nativeBtn) nativeBtn.addEventListener('click', function () { shareViaWebShare(app) })
+    if (nativeBtn)
+      nativeBtn.addEventListener('click', function () {
+        shareViaWebShare(app)
+      })
   }, 50)
 }

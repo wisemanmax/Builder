@@ -15,7 +15,10 @@ export function showFeedbackCard(appId, appName, prompt) {
   return new Promise(function (resolve) {
     _feedbackResolve = resolve
     var el = $('feedback-overlay')
-    if (!el) { resolve(); return }
+    if (!el) {
+      resolve()
+      return
+    }
 
     $('fb-app-name').textContent = appName || 'App'
     // Reset state
@@ -61,9 +64,15 @@ export function initFeedbackCard() {
   // Submit
   $('fb-submit').addEventListener('click', function () {
     var profile = getActiveProfile()
-    if (!profile) { _closeFeedback(); return }
+    if (!profile) {
+      _closeFeedback()
+      return
+    }
     var rating = parseInt(el.dataset.rating || '0', 10)
-    if (!rating) { toast('Tap a star rating first'); return }
+    if (!rating) {
+      toast('Tap a star rating first')
+      return
+    }
 
     var activeTags = el.querySelectorAll('.fb-tag.active')
     var tags = []
@@ -78,7 +87,7 @@ export function initFeedbackCard() {
       liked: ($('fb-liked').value || '').trim(),
       disliked: ($('fb-disliked').value || '').trim(),
       tags: tags,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     }
     if (!profile.feedback) profile.feedback = []
     profile.feedback.push(entry)
@@ -97,5 +106,8 @@ export function initFeedbackCard() {
 function _closeFeedback() {
   var el = $('feedback-overlay')
   if (el) el.classList.remove('on')
-  if (_feedbackResolve) { _feedbackResolve(); _feedbackResolve = null }
+  if (_feedbackResolve) {
+    _feedbackResolve()
+    _feedbackResolve = null
+  }
 }

@@ -9,17 +9,27 @@ export function renderDashboard(container, navigate, signal) {
   var COMPETITIVE_ALERTS = getAlerts()
 
   // Sort competitors by composite score descending
-  var sorted = COMPETITORS.slice().sort(function (a, b) { return b.scores.composite - a.scores.composite })
+  var sorted = COMPETITORS.slice().sort(function (a, b) {
+    return b.scores.composite - a.scores.composite
+  })
 
   var html = ''
 
   // KPIs
-  var gb = COMPETITORS.find(function (c) { return c.isSelf })
+  var gb = COMPETITORS.find(function (c) {
+    return c.isSelf
+  })
   var topComp = sorted[0]
   html += '<div class="mie-kpi-row">'
   html += kpi(gb.scores.composite, 'GB Composite', scoreColor(gb.scores.composite))
   html += kpi(gb.scores.accessibility, 'GB Accessibility', '#00E5FF')
-  html += kpi(sorted.filter(function (c) { return !c.isSelf }).length, 'Competitors Tracked', '#7C4DFF')
+  html += kpi(
+    sorted.filter(function (c) {
+      return !c.isSelf
+    }).length,
+    'Competitors Tracked',
+    '#7C4DFF'
+  )
   html += kpi('3', 'Active Alerts', '#FF3CAC')
   html += '</div>'
 
@@ -37,11 +47,20 @@ export function renderDashboard(container, navigate, signal) {
     var c = sorted[i]
     html += '<tr data-id="' + c.id + '">'
     html += '<td class="mie-rank">' + (i + 1) + '</td>'
-    html += '<td><div class="mie-comp-name"><span class="mie-comp-dot" style="background:' + c.color + '"></span>' + c.name + (c.isSelf ? ' <span style="font-size:10px;color:var(--mie-accent)">(You)</span>' : '') + '</div></td>'
+    html +=
+      '<td><div class="mie-comp-name"><span class="mie-comp-dot" style="background:' +
+      c.color +
+      '"></span>' +
+      c.name +
+      (c.isSelf ? ' <span style="font-size:10px;color:var(--mie-accent)">(You)</span>' : '') +
+      '</div></td>'
     html += '<td>' + scoreBadge(c.scores.composite) + '</td>'
     for (var dd = 0; dd < SCORE_DIMENSIONS.length; dd++) {
       var key = SCORE_DIMENSIONS[dd].key
-      html += '<td class="mie-hide-mobile">' + scoreBar(c.scores[key], { showValue: true, size: 'small', color: SCORE_DIMENSIONS[dd].color }) + '</td>'
+      html +=
+        '<td class="mie-hide-mobile">' +
+        scoreBar(c.scores[key], { showValue: true, size: 'small', color: SCORE_DIMENSIONS[dd].color }) +
+        '</td>'
     }
     html += '<td class="mie-hide-mobile"><span class="mie-segment-tag">' + c.segment + '</span></td>'
     html += '</tr>'
@@ -72,14 +91,28 @@ export function renderDashboard(container, navigate, signal) {
   // Click to navigate to competitor detail
   var rows = container.querySelectorAll('.mie-table tbody tr')
   for (var r = 0; r < rows.length; r++) {
-    rows[r].addEventListener('click', function () {
-      var id = this.dataset.id
-      var comp = COMPETITORS.find(function (c) { return c.id === id })
-      if (comp) navigate('competitor-detail', { competitor: comp })
-    }, { signal: signal })
+    rows[r].addEventListener(
+      'click',
+      function () {
+        var id = this.dataset.id
+        var comp = COMPETITORS.find(function (c) {
+          return c.id === id
+        })
+        if (comp) navigate('competitor-detail', { competitor: comp })
+      },
+      { signal: signal }
+    )
   }
 }
 
 function kpi(value, label, color) {
-  return '<div class="mie-kpi"><div class="mie-kpi-val" style="color:' + (color || '#fff') + '">' + value + '</div><div class="mie-kpi-label">' + label + '</div></div>'
+  return (
+    '<div class="mie-kpi"><div class="mie-kpi-val" style="color:' +
+    (color || '#fff') +
+    '">' +
+    value +
+    '</div><div class="mie-kpi-label">' +
+    label +
+    '</div></div>'
+  )
 }

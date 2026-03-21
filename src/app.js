@@ -11,14 +11,53 @@ import { renderThoughtSelector, detachThought, showThoughtPicker, pickThought } 
 
 import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
-import { openBuilder, closeBuilder, openCustomizeBuilder, chipSend, templateSend, sendMsg, handleImageFiles, removeImage, initPipelineToggle, checkInterruptedBuild, recoverInterruptedBuild, dismissRecovery, stopPipeline } from './screens/build.js'
+import {
+  openBuilder,
+  closeBuilder,
+  openCustomizeBuilder,
+  chipSend,
+  templateSend,
+  sendMsg,
+  handleImageFiles,
+  removeImage,
+  initPipelineToggle,
+  checkInterruptedBuild,
+  recoverInterruptedBuild,
+  dismissRecovery,
+  stopPipeline,
+} from './screens/build.js'
 import { openBuildHistory, closeBuildHistory, initBuildHistory } from './screens/build-history.js'
-import { openThink, closeThink, sendThinkMsg, thinkOptionSelect, finishThink, refineThink, confirmThinkBrief, editThinkBrief, initThinkSheet } from './screens/think.js'
-import { openApp, studioSend, studioSetFullscreen, openCurrentInViewer, copyViewerUrl, initStudio } from './screens/studio.js'
+import {
+  openThink,
+  closeThink,
+  sendThinkMsg,
+  thinkOptionSelect,
+  finishThink,
+  refineThink,
+  confirmThinkBrief,
+  editThinkBrief,
+  initThinkSheet,
+} from './screens/think.js'
+import {
+  openApp,
+  studioSend,
+  studioSetFullscreen,
+  openCurrentInViewer,
+  copyViewerUrl,
+  initStudio,
+} from './screens/studio.js'
 import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
 import { openSettings, initSettings } from './screens/settings.js'
 import { openTemplates, closeTemplates, initTemplateSheet } from './screens/templates.js'
-import { openOrgThink, closeOrgThink, sendOrgMsg, orgOptionSelect, finishOrgThink, refineOrgThink, initOrgThinkSheet } from './screens/org-think.js'
+import {
+  openOrgThink,
+  closeOrgThink,
+  sendOrgMsg,
+  orgOptionSelect,
+  finishOrgThink,
+  refineOrgThink,
+  initOrgThinkSheet,
+} from './screens/org-think.js'
 import { renderProfileChip, showProfilePicker, initProfilePicker, cycleProfile } from './components/profile-switcher.js'
 import { initFeedbackCard } from './components/feedback-card.js'
 import { renderProfilesSettings, initProfilesSettings } from './screens/profiles.js'
@@ -40,18 +79,31 @@ export function init() {
     var reason = e.reason
     var msg = (reason && reason.message) || String(reason || '')
     // Suppress pipeline cancellation (intentional) but log everything else
-    if (msg === 'PIPELINE_CANCELLED') { e.preventDefault(); return }
+    if (msg === 'PIPELINE_CANCELLED') {
+      e.preventDefault()
+      return
+    }
     console.warn('[Builder] Unhandled rejection:', reason)
   })
 
   // PWA setup
   if ('serviceWorker' in navigator) {
-    try { navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {}) } catch (e) {}
+    try {
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {})
+    } catch (e) {}
   }
   var _installPrompt = null
   window.addEventListener('beforeinstallprompt', function (e) {
-    e.preventDefault(); _installPrompt = e
-    setTimeout(function () { try { if (!localStorage.getItem('pwa_dis')) { var b = document.getElementById('install-banner'); if (b) b.classList.add('on') } } catch (x) {} }, 800)
+    e.preventDefault()
+    _installPrompt = e
+    setTimeout(function () {
+      try {
+        if (!localStorage.getItem('pwa_dis')) {
+          var b = document.getElementById('install-banner')
+          if (b) b.classList.add('on')
+        }
+      } catch (x) {}
+    }, 800)
   })
 
   // Hydrate state
@@ -72,7 +124,9 @@ export function init() {
 
   // Initial screen
   if (ST.key) {
-    showScreen('home'); renderGrid(); renderProfileChip()
+    showScreen('home')
+    renderGrid()
+    renderProfileChip()
     // Check for interrupted builds after a short delay to let UI settle
     setTimeout(function () {
       var interrupted = checkInterruptedBuild()
@@ -81,12 +135,13 @@ export function init() {
         recoverInterruptedBuild(interrupted)
       }
     }, 600)
-  }
-  else showScreen('onboard')
+  } else showScreen('onboard')
 
   // Auto-sync from GitHub on startup if credentials exist but no local apps
   if (ST.key && ST.ghToken && ST.ghUser && ST.ghRepo && ST.apps.length === 0) {
-    pullFromGitHub().then(function () { renderGrid() })
+    pullFromGitHub().then(function () {
+      renderGrid()
+    })
   }
 
   // Init modules
@@ -108,30 +163,67 @@ export function init() {
   // Builder sheet
   $('bs-close').addEventListener('click', closeBuilder)
   $('bs-stop-btn').addEventListener('click', stopPipeline)
-  $('builder-sheet').addEventListener('click', function (e) { if (e.target.id === 'builder-sheet') closeBuilder() })
-  $('bs-proj-btn').addEventListener('click', function () { if (ST.activeAppId) openProjectSheet(ST.activeAppId) })
+  $('builder-sheet').addEventListener('click', function (e) {
+    if (e.target.id === 'builder-sheet') closeBuilder()
+  })
+  $('bs-proj-btn').addEventListener('click', function () {
+    if (ST.activeAppId) openProjectSheet(ST.activeAppId)
+  })
   var shY = 0
-  $('bs-handle').addEventListener('touchstart', function (e) { if (e.touches[0]) shY = e.touches[0].clientY }, { passive: true })
-  $('bs-handle').addEventListener('touchend', function (e) { if (e.changedTouches[0] && e.changedTouches[0].clientY - shY > 55) closeBuilder() }, { passive: true })
+  $('bs-handle').addEventListener(
+    'touchstart',
+    function (e) {
+      if (e.touches[0]) shY = e.touches[0].clientY
+    },
+    { passive: true }
+  )
+  $('bs-handle').addEventListener(
+    'touchend',
+    function (e) {
+      if (e.changedTouches[0] && e.changedTouches[0].clientY - shY > 55) closeBuilder()
+    },
+    { passive: true }
+  )
 
   // Input
   var inp = $('chat-input')
-  inp.addEventListener('input', function () { autoResize(inp) })
-  inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg() } })
+  inp.addEventListener('input', function () {
+    autoResize(inp)
+  })
+  inp.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMsg()
+    }
+  })
   $('send-btn').addEventListener('click', sendMsg)
 
   // Image upload
-  $('img-upload-btn').addEventListener('click', function () { $('img-file-input').click() })
-  $('img-file-input').addEventListener('change', function () { handleImageFiles(this.files); this.value = '' })
+  $('img-upload-btn').addEventListener('click', function () {
+    $('img-file-input').click()
+  })
+  $('img-file-input').addEventListener('change', function () {
+    handleImageFiles(this.files)
+    this.value = ''
+  })
   $('img-preview-row').addEventListener('click', function (e) {
     var rmBtn = e.target.closest('.img-thumb-rm')
     if (rmBtn) removeImage(parseInt(rmBtn.dataset.idx, 10))
   })
   // Drag-and-drop images onto the input area
   var ibox = $('chat-input').closest('.ibox')
-  ibox.addEventListener('dragover', function (e) { e.preventDefault(); ibox.style.borderColor = 'rgba(255,60,172,.6)' })
-  ibox.addEventListener('dragleave', function () { ibox.style.borderColor = '' })
-  ibox.addEventListener('drop', function (e) { e.preventDefault(); ibox.style.borderColor = ''; if (e.dataTransfer.files.length) handleImageFiles(e.dataTransfer.files) })
+  ibox.addEventListener('dragover', function (e) {
+    e.preventDefault()
+    ibox.style.borderColor = 'rgba(255,60,172,.6)'
+  })
+  ibox.addEventListener('dragleave', function () {
+    ibox.style.borderColor = ''
+  })
+  ibox.addEventListener('drop', function (e) {
+    e.preventDefault()
+    ibox.style.borderColor = ''
+    if (e.dataTransfer.files.length) handleImageFiles(e.dataTransfer.files)
+  })
   // Paste images from clipboard
   inp.addEventListener('paste', function (e) {
     var files = []
@@ -146,35 +238,74 @@ export function init() {
   })
 
   // PWA install banner
-  $('ib-add').addEventListener('click', function () { if (_installPrompt) _installPrompt.prompt(); $('install-banner').classList.remove('on') })
-  $('ib-x').addEventListener('click', function () { $('install-banner').classList.remove('on'); localStorage.setItem('pwa_dis', '1') })
+  $('ib-add').addEventListener('click', function () {
+    if (_installPrompt) _installPrompt.prompt()
+    $('install-banner').classList.remove('on')
+  })
+  $('ib-x').addEventListener('click', function () {
+    $('install-banner').classList.remove('on')
+    localStorage.setItem('pwa_dis', '1')
+  })
 
   // Keyboard shortcuts for desktop
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       // Close modals/sheets in priority order (topmost first)
       var stitchModal = $('stitch-key-modal')
-      if (stitchModal && stitchModal.classList.contains('on')) { stitchModal.classList.remove('on'); return }
+      if (stitchModal && stitchModal.classList.contains('on')) {
+        stitchModal.classList.remove('on')
+        return
+      }
       var emojiOv = $('emoji-overlay')
-      if (emojiOv && emojiOv.classList.contains('on')) { emojiOv.classList.remove('on'); return }
+      if (emojiOv && emojiOv.classList.contains('on')) {
+        emojiOv.classList.remove('on')
+        return
+      }
       var feedbackOv = $('feedback-overlay')
-      if (feedbackOv && feedbackOv.classList.contains('on')) { feedbackOv.classList.remove('on'); return }
+      if (feedbackOv && feedbackOv.classList.contains('on')) {
+        feedbackOv.classList.remove('on')
+        return
+      }
       var thoughtsOv = $('thoughts-overlay')
-      if (thoughtsOv && thoughtsOv.classList.contains('on')) { closeThoughtsFolder(); return }
+      if (thoughtsOv && thoughtsOv.classList.contains('on')) {
+        closeThoughtsFolder()
+        return
+      }
       var templateOv = $('template-overlay')
-      if (templateOv && templateOv.classList.contains('on')) { closeTemplates(); return }
+      if (templateOv && templateOv.classList.contains('on')) {
+        closeTemplates()
+        return
+      }
       var settingsOv = $('settings-overlay')
-      if (settingsOv && settingsOv.classList.contains('on')) { settingsOv.classList.remove('on'); return }
+      if (settingsOv && settingsOv.classList.contains('on')) {
+        settingsOv.classList.remove('on')
+        return
+      }
       var bhOv = $('build-history-overlay')
-      if (bhOv && bhOv.classList.contains('on')) { closeBuildHistory(); return }
+      if (bhOv && bhOv.classList.contains('on')) {
+        closeBuildHistory()
+        return
+      }
       var projectSh = $('project-sheet')
-      if (projectSh && projectSh.classList.contains('open')) { closeProject(); return }
+      if (projectSh && projectSh.classList.contains('open')) {
+        closeProject()
+        return
+      }
       var thinkSh = $('think-sheet')
-      if (thinkSh && thinkSh.classList.contains('open')) { closeThink(); return }
+      if (thinkSh && thinkSh.classList.contains('open')) {
+        closeThink()
+        return
+      }
       var orgThinkSh = $('org-think-sheet')
-      if (orgThinkSh && orgThinkSh.classList.contains('open')) { closeOrgThink(); return }
+      if (orgThinkSh && orgThinkSh.classList.contains('open')) {
+        closeOrgThink()
+        return
+      }
       var builderSh = $('builder-sheet')
-      if (builderSh && builderSh.classList.contains('open')) { closeBuilder(); return }
+      if (builderSh && builderSh.classList.contains('open')) {
+        closeBuilder()
+        return
+      }
       closeCtx()
     }
   })
@@ -245,19 +376,27 @@ function _handleShareUrl() {
   var data = hash.substring(8) // Remove '#/share/'
   if (!data) return
   // Clear the hash
-  try { history.replaceState(null, '', window.location.pathname) } catch (e) {}
+  try {
+    history.replaceState(null, '', window.location.pathname)
+  } catch (e) {}
   // Decompress and display
   decompressShareData(data).then(function (html) {
-    if (!html) { toast('Could not load shared app', 3000); return }
+    if (!html) {
+      toast('Could not load shared app', 3000)
+      return
+    }
     // Show in a full-screen viewer
     var viewer = document.createElement('div')
     viewer.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000'
-    viewer.innerHTML = '<div style="position:absolute;top:8px;right:12px;z-index:1;display:flex;gap:8px">'
-      + '<button id="share-viewer-close" style="padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:12px;cursor:pointer">\u2715 Close</button>'
-      + '</div>'
-      + '<iframe style="width:100%;height:100%;border:none" sandbox="allow-scripts allow-forms allow-modals"></iframe>'
+    viewer.innerHTML =
+      '<div style="position:absolute;top:8px;right:12px;z-index:1;display:flex;gap:8px">' +
+      '<button id="share-viewer-close" style="padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:12px;cursor:pointer">\u2715 Close</button>' +
+      '</div>' +
+      '<iframe style="width:100%;height:100%;border:none" sandbox="allow-scripts allow-forms allow-modals"></iframe>'
     document.body.appendChild(viewer)
     viewer.querySelector('iframe').srcdoc = html
-    viewer.querySelector('#share-viewer-close').addEventListener('click', function () { viewer.remove() })
+    viewer.querySelector('#share-viewer-close').addEventListener('click', function () {
+      viewer.remove()
+    })
   })
 }

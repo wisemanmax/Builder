@@ -16,17 +16,29 @@ function calcMatchScore(profile, competitorId) {
   // Credit alignment (30%)
   var creditScore = 0
   var creditDelta = creditMid - t.minCredit
-  if (creditDelta >= 80) { creditScore = 100; reasons.push('Your credit profile exceeds their requirements') }
-  else if (creditDelta >= 40) { creditScore = 80; reasons.push('Your credit score is well within their range') }
-  else if (creditDelta >= 0) { creditScore = 55; reasons.push('Your credit score meets their minimum threshold') }
-  else if (creditDelta >= -30) { creditScore = 30; warnings.push('Your credit score is near or below their estimated minimum') }
-  else { creditScore = 10; warnings.push('Your credit score is likely below their requirements') }
+  if (creditDelta >= 80) {
+    creditScore = 100
+    reasons.push('Your credit profile exceeds their requirements')
+  } else if (creditDelta >= 40) {
+    creditScore = 80
+    reasons.push('Your credit score is well within their range')
+  } else if (creditDelta >= 0) {
+    creditScore = 55
+    reasons.push('Your credit score meets their minimum threshold')
+  } else if (creditDelta >= -30) {
+    creditScore = 30
+    warnings.push('Your credit score is near or below their estimated minimum')
+  } else {
+    creditScore = 10
+    warnings.push('Your credit score is likely below their requirements')
+  }
 
   // Enrollment compatibility (20%)
   var enrollScore = 0
   if (t.enrollmentTypes.indexOf(profile.enrollmentStatus) >= 0) {
     enrollScore = 100
-    if (profile.enrollmentStatus !== 'full-time') reasons.push('Your enrollment type (' + profile.enrollmentStatus + ') is accepted')
+    if (profile.enrollmentStatus !== 'full-time')
+      reasons.push('Your enrollment type (' + profile.enrollmentStatus + ') is accepted')
   } else {
     enrollScore = 10
     warnings.push('Your enrollment type (' + profile.enrollmentStatus + ') may not be accepted')
@@ -38,13 +50,20 @@ function calcMatchScore(profile, competitorId) {
     cosignerScore = 90
     reasons.push('Having a cosigner strengthens your application')
   } else {
-    if (t.cosignerRequired === 'always') { cosignerScore = 5; warnings.push('This lender typically requires a cosigner') }
-    else if (t.cosignerRequired === 'often') {
+    if (t.cosignerRequired === 'always') {
+      cosignerScore = 5
+      warnings.push('This lender typically requires a cosigner')
+    } else if (t.cosignerRequired === 'often') {
       cosignerScore = creditMid >= t.minCredit + 50 ? 50 : 20
-      if (cosignerScore <= 20) warnings.push('Cosigner typically required below ' + (t.minCredit + 50) + ' credit score')
+      if (cosignerScore <= 20)
+        warnings.push('Cosigner typically required below ' + (t.minCredit + 50) + ' credit score')
+    } else if (t.cosignerRequired === 'sometimes') {
+      cosignerScore = 65
+      reasons.push('No cosigner required at your credit tier')
+    } else {
+      cosignerScore = 95
+      reasons.push('No cosigner needed')
     }
-    else if (t.cosignerRequired === 'sometimes') { cosignerScore = 65; reasons.push('No cosigner required at your credit tier') }
-    else { cosignerScore = 95; reasons.push('No cosigner needed') }
   }
 
   // Loan amount fit (15%)
@@ -77,12 +96,7 @@ function calcMatchScore(profile, competitorId) {
   }
 
   var total = Math.round(
-    creditScore * 0.30
-    + enrollScore * 0.20
-    + cosignerScore * 0.20
-    + loanScore * 0.15
-    + schoolScore * 0.15
-    + citizenPenalty
+    creditScore * 0.3 + enrollScore * 0.2 + cosignerScore * 0.2 + loanScore * 0.15 + schoolScore * 0.15 + citizenPenalty
   )
   total = Math.max(0, Math.min(100, total))
 
@@ -128,25 +142,36 @@ export function runMatch(profile) {
   }
 
   // Sort by score descending
-  results.sort(function (a, b) { return b.matchScore - a.matchScore })
+  results.sort(function (a, b) {
+    return b.matchScore - a.matchScore
+  })
 
   // Calculate GradBridge advantage score
   var bestNonGb = null
   for (var j = 0; j < results.length; j++) {
-    if (!results[j].isSelf) { bestNonGb = results[j]; break }
+    if (!results[j].isSelf) {
+      bestNonGb = results[j]
+      break
+    }
   }
 
   var gbAdvantage = 0
   if (gbResult && bestNonGb) {
-    var gbComp = COMPETITORS.find(function (c) { return c.isSelf })
+    var gbComp = COMPETITORS.find(function (c) {
+      return c.isSelf
+    })
     var bestComp = bestNonGb.competitor
     var gbSent = SENTIMENT_SCORES['gradbridge'] ? SENTIMENT_SCORES['gradbridge'].overall : 4.0
     var compSent = SENTIMENT_SCORES[bestComp.id] ? SENTIMENT_SCORES[bestComp.id].overall : 3.5
     gbAdvantage = advantageScore(
-      gbResult.matchScore, bestNonGb.matchScore,
-      gbComp.scores.accessibility, bestComp.scores.accessibility,
-      gbComp.scores.pricing, bestComp.scores.pricing,
-      gbSent, compSent
+      gbResult.matchScore,
+      bestNonGb.matchScore,
+      gbComp.scores.accessibility,
+      bestComp.scores.accessibility,
+      gbComp.scores.pricing,
+      bestComp.scores.pricing,
+      gbSent,
+      compSent
     )
   }
 

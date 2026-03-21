@@ -5,7 +5,7 @@ import { scrubKeys } from './utils.js'
  * Usage: logError('Pipeline', err)
  */
 export function logError(context, error) {
-  var msg = scrubKeys(String(error && error.message || error || 'Unknown error'))
+  var msg = scrubKeys(String((error && error.message) || error || 'Unknown error'))
   console.error('[' + context + '] ' + msg)
 }
 

@@ -12,8 +12,7 @@ export function getProfileContext() {
   var orgText = ''
   var org = profile.orgProfile || {}
   if (org.vision) {
-    orgText = 'Organization: ' + (profile.name || 'unnamed') + '\n'
-      + 'Vision: ' + org.vision + '\n'
+    orgText = 'Organization: ' + (profile.name || 'unnamed') + '\n' + 'Vision: ' + org.vision + '\n'
     if (org.principles && org.principles.length) orgText += 'Principles: ' + org.principles.join(', ') + '\n'
     if (org.brandIdentity) {
       if (org.brandIdentity.tone) orgText += 'Brand tone: ' + org.brandIdentity.tone + '\n'
@@ -30,31 +29,83 @@ export function getProfileContext() {
   var hasMustNot = gr.mustNotRules && gr.mustNotRules.length
   var hasNice = gr.niceToHave && gr.niceToHave.length
   if (hasMust || hasMustNot || hasNice) {
-    if (hasMust) profileRulesText += 'MUST DO:\n' + gr.mustRules.map(function (r) { return '- ' + r }).join('\n') + '\n'
-    if (hasMustNot) profileRulesText += 'MUST NOT DO:\n' + gr.mustNotRules.map(function (r) { return '- ' + r }).join('\n') + '\n'
-    if (hasNice) profileRulesText += 'NICE TO HAVE:\n' + gr.niceToHave.map(function (r) { return '- ' + r }).join('\n') + '\n'
+    if (hasMust)
+      profileRulesText +=
+        'MUST DO:\n' +
+        gr.mustRules
+          .map(function (r) {
+            return '- ' + r
+          })
+          .join('\n') +
+        '\n'
+    if (hasMustNot)
+      profileRulesText +=
+        'MUST NOT DO:\n' +
+        gr.mustNotRules
+          .map(function (r) {
+            return '- ' + r
+          })
+          .join('\n') +
+        '\n'
+    if (hasNice)
+      profileRulesText +=
+        'NICE TO HAVE:\n' +
+        gr.niceToHave
+          .map(function (r) {
+            return '- ' + r
+          })
+          .join('\n') +
+        '\n'
   }
 
   var prefsText = ''
   var prefs = profile.learnedPreferences || {}
   if (prefs.positivePatterns && prefs.positivePatterns.length) {
-    prefsText += 'USER LIKES:\n' + prefs.positivePatterns.map(function (p) { return '- ' + p }).join('\n') + '\n'
+    prefsText +=
+      'USER LIKES:\n' +
+      prefs.positivePatterns
+        .map(function (p) {
+          return '- ' + p
+        })
+        .join('\n') +
+      '\n'
   }
   if (prefs.negativePatterns && prefs.negativePatterns.length) {
-    prefsText += 'USER DISLIKES:\n' + prefs.negativePatterns.map(function (p) { return '- ' + p }).join('\n') + '\n'
+    prefsText +=
+      'USER DISLIKES:\n' +
+      prefs.negativePatterns
+        .map(function (p) {
+          return '- ' + p
+        })
+        .join('\n') +
+      '\n'
   }
   if (prefs.designPrefs && prefs.designPrefs.length) {
-    prefsText += 'DESIGN PREFERENCES:\n' + prefs.designPrefs.map(function (p) { return '- ' + p }).join('\n') + '\n'
+    prefsText +=
+      'DESIGN PREFERENCES:\n' +
+      prefs.designPrefs
+        .map(function (p) {
+          return '- ' + p
+        })
+        .join('\n') +
+      '\n'
   }
   if (prefs.functionalPrefs && prefs.functionalPrefs.length) {
-    prefsText += 'FUNCTIONAL PREFERENCES:\n' + prefs.functionalPrefs.map(function (p) { return '- ' + p }).join('\n') + '\n'
+    prefsText +=
+      'FUNCTIONAL PREFERENCES:\n' +
+      prefs.functionalPrefs
+        .map(function (p) {
+          return '- ' + p
+        })
+        .join('\n') +
+      '\n'
   }
 
   return {
     orgText: orgText,
     profileRulesText: profileRulesText,
     prefsText: prefsText,
-    profileName: profile.name || ''
+    profileName: profile.name || '',
   }
 }
 
@@ -65,8 +116,10 @@ export function getProfileContext() {
 export function injectProfileContext(sysPrompt) {
   var ctx = getProfileContext()
   if (ctx.orgText) sysPrompt += '\n\nORGANIZATION CONTEXT (' + ctx.profileName + '):\n' + ctx.orgText
-  if (ctx.profileRulesText) sysPrompt += '\n\nGLOBAL RULES (' + ctx.profileName + ' \u2014 always apply):\n' + ctx.profileRulesText
-  if (ctx.prefsText) sysPrompt += '\n\nLEARNED PREFERENCES (from past builds \u2014 follow these patterns):\n' + ctx.prefsText
+  if (ctx.profileRulesText)
+    sysPrompt += '\n\nGLOBAL RULES (' + ctx.profileName + ' \u2014 always apply):\n' + ctx.profileRulesText
+  if (ctx.prefsText)
+    sysPrompt += '\n\nLEARNED PREFERENCES (from past builds \u2014 follow these patterns):\n' + ctx.prefsText
   return sysPrompt
 }
 
@@ -133,10 +186,12 @@ export function formatBriefWithConversation(thought) {
   if (!userMsgs.length) return specText
 
   // Sort by length descending and take top 5 most substantive
-  userMsgs.sort(function (a, b) { return b.length - a.length })
+  userMsgs.sort(function (a, b) {
+    return b.length - a.length
+  })
   userMsgs = userMsgs.slice(0, 5)
 
-  var lines = [specText, '\n### IDEATION CONTEXT', 'Key points from the user\'s ideation session:']
+  var lines = [specText, '\n### IDEATION CONTEXT', "Key points from the user's ideation session:"]
   for (var j = 0; j < userMsgs.length; j++) {
     var excerpt = userMsgs[j].length > 200 ? userMsgs[j].slice(0, 200) + '\u2026' : userMsgs[j]
     lines.push('- "' + excerpt + '"')
@@ -158,7 +213,7 @@ export function getThoughtDesignOverrides(thought) {
     return {
       theme: design.theme || (brand && brand.theme) || null,
       accent: design.accent || (brand && brand.accentColor) || null,
-      layout: design.layout || null
+      layout: design.layout || null,
     }
   }
 
@@ -167,7 +222,7 @@ export function getThoughtDesignOverrides(thought) {
     return {
       theme: brand.theme || null,
       accent: brand.accentColor || null,
-      layout: null
+      layout: null,
     }
   }
 
@@ -185,7 +240,7 @@ export function mergeRulesWithProfile(linkedRules) {
   return {
     mustRules: (gr.mustRules || []).concat(lr.mustRules || []),
     mustNotRules: (gr.mustNotRules || []).concat(lr.mustNotRules || []),
-    niceToHave: (gr.niceToHave || []).concat(lr.niceToHave || [])
+    niceToHave: (gr.niceToHave || []).concat(lr.niceToHave || []),
   }
 }
 

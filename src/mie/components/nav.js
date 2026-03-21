@@ -19,10 +19,19 @@ export function renderNav(container, activeId, mode, onNavigate, customPages, ac
     // In borrower mode, only show match tool; in internal mode, show all internal + match tool
     if (mode === 'borrower' && item.mode !== 'borrower') continue
     var isActive = item.id === activeId ? ' mie-nav-active' : ''
-    html += '<button class="mie-nav-item' + isActive + '" data-screen="' + item.id + '">'
-      + '<span class="mie-nav-icon">' + item.icon + '</span>'
-      + '<span class="mie-nav-label">' + item.label + '</span>'
-      + '</button>'
+    html +=
+      '<button class="mie-nav-item' +
+      isActive +
+      '" data-screen="' +
+      item.id +
+      '">' +
+      '<span class="mie-nav-icon">' +
+      item.icon +
+      '</span>' +
+      '<span class="mie-nav-label">' +
+      item.label +
+      '</span>' +
+      '</button>'
   }
 
   // Custom pages section
@@ -33,7 +42,12 @@ export function renderNav(container, activeId, mode, onNavigate, customPages, ac
       var page = customPages[j]
       var isPageActive = activeId === 'custom-page' && activePageId === page.id ? ' mie-nav-active' : ''
       var shortTitle = page.prompt.length > 22 ? page.prompt.substring(0, 22) + '...' : page.prompt
-      html += '<div class="mie-nav-item mie-nav-custom-page' + isPageActive + '" data-screen="custom-page" data-page-id="' + page.id + '">'
+      html +=
+        '<div class="mie-nav-item mie-nav-custom-page' +
+        isPageActive +
+        '" data-screen="custom-page" data-page-id="' +
+        page.id +
+        '">'
       html += '<span class="mie-nav-icon">&#x1F4C4;</span>'
       html += '<span class="mie-nav-label">' + shortTitle + '</span>'
       html += '<button class="mie-nav-delete-btn" data-delete-page="' + page.id + '" title="Delete">&times;</button>'
@@ -47,30 +61,40 @@ export function renderNav(container, activeId, mode, onNavigate, customPages, ac
   var opts = signal ? { signal: signal } : undefined
   var btns = container.querySelectorAll('.mie-nav-item')
   for (var k = 0; k < btns.length; k++) {
-    btns[k].addEventListener('click', function (e) {
-      // Don't navigate if clicking the delete button
-      if (e.target.closest('.mie-nav-delete-btn')) return
-      var screen = this.dataset.screen
-      var pageId = this.dataset.pageId
-      onNavigate(screen, pageId ? { pageId: pageId } : undefined)
-    }, opts)
+    btns[k].addEventListener(
+      'click',
+      function (e) {
+        // Don't navigate if clicking the delete button
+        if (e.target.closest('.mie-nav-delete-btn')) return
+        var screen = this.dataset.screen
+        var pageId = this.dataset.pageId
+        onNavigate(screen, pageId ? { pageId: pageId } : undefined)
+      },
+      opts
+    )
   }
 
   // Delete buttons for custom pages
   var delBtns = container.querySelectorAll('.mie-nav-delete-btn')
   for (var d = 0; d < delBtns.length; d++) {
-    delBtns[d].addEventListener('click', function (e) {
-      e.stopPropagation()
-      var pageId = this.dataset.deletePage
-      deleteCustomPage(pageId)
-      // Navigate back to page creator if we deleted the active page
-      if (activeId === 'custom-page' && activePageId === pageId) {
-        onNavigate('page-creator')
-      } else {
-        onNavigate(activeId) // Re-render to update nav
-      }
-    }, opts)
+    delBtns[d].addEventListener(
+      'click',
+      function (e) {
+        e.stopPropagation()
+        var pageId = this.dataset.deletePage
+        deleteCustomPage(pageId)
+        // Navigate back to page creator if we deleted the active page
+        if (activeId === 'custom-page' && activePageId === pageId) {
+          onNavigate('page-creator')
+        } else {
+          onNavigate(activeId) // Re-render to update nav
+        }
+      },
+      opts
+    )
   }
 }
 
-export function getNavItems() { return NAV_ITEMS }
+export function getNavItems() {
+  return NAV_ITEMS
+}

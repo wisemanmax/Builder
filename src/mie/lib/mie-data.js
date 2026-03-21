@@ -12,7 +12,9 @@ function loadCache() {
   try {
     var raw = localStorage.getItem(CACHE_KEY)
     _cache = raw ? JSON.parse(raw) : {}
-  } catch (e) { _cache = {} }
+  } catch (e) {
+    _cache = {}
+  }
   return _cache
 }
 
@@ -21,7 +23,9 @@ function saveCache(section, data) {
   c[section] = data
   c._ts = Date.now()
   _cache = c
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(c)) } catch (e) {}
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(c))
+  } catch (e) {}
 }
 
 export function getCompetitors() {
@@ -29,8 +33,12 @@ export function getCompetitors() {
   return c.competitors || COMPETITORS
 }
 
-export function getScoreDimensions() { return SCORE_DIMENSIONS }
-export function getMapDimensions() { return MAP_DIMENSIONS }
+export function getScoreDimensions() {
+  return SCORE_DIMENSIONS
+}
+export function getMapDimensions() {
+  return MAP_DIMENSIONS
+}
 
 export function getAlerts() {
   var c = loadCache()
@@ -52,8 +60,12 @@ export function getSampleReviews() {
   return c.sampleReviews || SAMPLE_REVIEWS
 }
 
-export function getSentimentLabels() { return SENTIMENT_LABELS }
-export function getSentimentCategories() { return SENTIMENT_CATEGORIES }
+export function getSentimentLabels() {
+  return SENTIMENT_LABELS
+}
+export function getSentimentCategories() {
+  return SENTIMENT_CATEGORIES
+}
 
 export function getCacheTimestamp() {
   var c = loadCache()
@@ -62,7 +74,9 @@ export function getCacheTimestamp() {
 
 export function clearCache() {
   _cache = {}
-  try { localStorage.removeItem(CACHE_KEY) } catch (e) {}
+  try {
+    localStorage.removeItem(CACHE_KEY)
+  } catch (e) {}
 }
 
 export function hasApiKey() {
@@ -74,16 +88,24 @@ export function getApiKey() {
   return (localStorage.getItem('bldr_gptKey') || '').trim()
 }
 
-export function setCachedCompetitors(data) { saveCache('competitors', data) }
-export function setCachedAlerts(data) { saveCache('alerts', data) }
-export function setCachedSegments(data) { saveCache('segments', data) }
+export function setCachedCompetitors(data) {
+  saveCache('competitors', data)
+}
+export function setCachedAlerts(data) {
+  saveCache('alerts', data)
+}
+export function setCachedSegments(data) {
+  saveCache('segments', data)
+}
 export function setCachedSentiment(scores, reviews) {
   var c = loadCache()
   c.sentimentScores = scores
   c.sampleReviews = reviews
   c._ts = Date.now()
   _cache = c
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(c)) } catch (e) {}
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(c))
+  } catch (e) {}
 }
 
 // Custom pages
@@ -91,22 +113,36 @@ export function getCustomPages() {
   try {
     var raw = localStorage.getItem(PAGES_KEY)
     return raw ? JSON.parse(raw) : []
-  } catch (e) { return [] }
+  } catch (e) {
+    return []
+  }
 }
 
 export function saveCustomPage(page) {
   var pages = getCustomPages()
-  var idx = pages.findIndex(function (p) { return p.id === page.id })
+  var idx = pages.findIndex(function (p) {
+    return p.id === page.id
+  })
   if (idx >= 0) pages[idx] = page
   else pages.push(page)
-  try { localStorage.setItem(PAGES_KEY, JSON.stringify(pages)) } catch (e) {}
+  try {
+    localStorage.setItem(PAGES_KEY, JSON.stringify(pages))
+  } catch (e) {}
 }
 
 export function deleteCustomPage(id) {
-  var pages = getCustomPages().filter(function (p) { return p.id !== id })
-  try { localStorage.setItem(PAGES_KEY, JSON.stringify(pages)) } catch (e) {}
+  var pages = getCustomPages().filter(function (p) {
+    return p.id !== id
+  })
+  try {
+    localStorage.setItem(PAGES_KEY, JSON.stringify(pages))
+  } catch (e) {}
 }
 
 export function getCustomPage(id) {
-  return getCustomPages().find(function (p) { return p.id === id }) || null
+  return (
+    getCustomPages().find(function (p) {
+      return p.id === id
+    }) || null
+  )
 }

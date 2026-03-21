@@ -1,5 +1,11 @@
 // Sentiment Feed Screen
-import { getCompetitors, getSentimentScores, getSentimentLabels, getSentimentCategories, getSampleReviews } from '../lib/mie-data.js'
+import {
+  getCompetitors,
+  getSentimentScores,
+  getSentimentLabels,
+  getSentimentCategories,
+  getSampleReviews,
+} from '../lib/mie-data.js'
 
 export function renderSentiment(container, signal) {
   var COMPETITORS = getCompetitors()
@@ -24,15 +30,27 @@ export function renderSentiment(container, signal) {
   for (var ci = 0; ci < SENTIMENT_CATEGORIES.length; ci++) {
     var cat = SENTIMENT_CATEGORIES[ci]
     html += '<div style="margin-bottom:14px">'
-    html += '<div style="font-size:11px;font-weight:600;color:var(--mie-text-secondary);margin-bottom:6px">' + SENTIMENT_LABELS[cat] + '</div>'
+    html +=
+      '<div style="font-size:11px;font-weight:600;color:var(--mie-text-secondary);margin-bottom:6px">' +
+      SENTIMENT_LABELS[cat] +
+      '</div>'
     html += '<div class="mie-sent-bars">'
     for (var j = 0; j < COMPETITORS.length; j++) {
       var comp = COMPETITORS[j]
       var scores = SENTIMENT_SCORES[comp.id]
-      var val = scores ? (scores[cat] || 0) : 0
+      var val = scores ? scores[cat] || 0 : 0
       var pct = (val / 5) * 100
       var barColor = comp.color
-      html += '<div class="mie-sent-bar" style="width:' + pct + '%;background:' + barColor + ';opacity:0.7" title="' + comp.name + ': ' + val.toFixed(1) + '"></div>'
+      html +=
+        '<div class="mie-sent-bar" style="width:' +
+        pct +
+        '%;background:' +
+        barColor +
+        ';opacity:0.7" title="' +
+        comp.name +
+        ': ' +
+        val.toFixed(1) +
+        '"></div>'
     }
     html += '</div>'
     // Mini legend for this row
@@ -40,8 +58,9 @@ export function renderSentiment(container, signal) {
     for (var k = 0; k < COMPETITORS.length; k++) {
       var c2 = COMPETITORS[k]
       var s2 = SENTIMENT_SCORES[c2.id]
-      var v2 = s2 ? (s2[cat] || 0) : 0
-      html += '<span style="font-size:9px;color:' + c2.color + '">' + c2.name.split(' ')[0] + ': ' + v2.toFixed(1) + '</span>'
+      var v2 = s2 ? s2[cat] || 0 : 0
+      html +=
+        '<span style="font-size:9px;color:' + c2.color + '">' + c2.name.split(' ')[0] + ': ' + v2.toFixed(1) + '</span>'
     }
     html += '</div></div>'
   }
@@ -63,10 +82,17 @@ export function renderSentiment(container, signal) {
     var trend = ss ? ss.trend : 'stable'
     var trendIcon = trend === 'up' ? '&#x2191;' : trend === 'down' ? '&#x2193;' : '&#x2192;'
     var trendClass = 'mie-trend-' + trend
-    html += '<div style="text-align:center;padding:14px;background:var(--mie-surface);border-radius:var(--mie-rs);border:1px solid var(--mie-border)">'
-    html += '<div style="font-family:var(--fm);font-size:22px;font-weight:700;color:' + cc.color + '">' + overall.toFixed(1) + '</div>'
+    html +=
+      '<div style="text-align:center;padding:14px;background:var(--mie-surface);border-radius:var(--mie-rs);border:1px solid var(--mie-border)">'
+    html +=
+      '<div style="font-family:var(--fm);font-size:22px;font-weight:700;color:' +
+      cc.color +
+      '">' +
+      overall.toFixed(1) +
+      '</div>'
     html += '<div style="font-size:11px;font-weight:600;margin-top:2px">' + cc.name + '</div>'
-    html += '<div class="' + trendClass + '" style="font-size:11px;margin-top:4px">' + trendIcon + ' ' + trend + '</div>'
+    html +=
+      '<div class="' + trendClass + '" style="font-size:11px;margin-top:4px">' + trendIcon + ' ' + trend + '</div>'
     html += '</div>'
   }
   html += '</div></div>'
@@ -83,12 +109,16 @@ export function renderSentiment(container, signal) {
   // Tab switching
   var tabs = container.querySelectorAll('.mie-comp-tab')
   for (var t = 0; t < tabs.length; t++) {
-    tabs[t].addEventListener('click', function () {
-      for (var x = 0; x < tabs.length; x++) tabs[x].classList.remove('active')
-      this.classList.add('active')
-      var compId = this.dataset.comp
-      document.getElementById('mie-reviews-list').innerHTML = renderReviews(compId)
-    }, { signal: signal })
+    tabs[t].addEventListener(
+      'click',
+      function () {
+        for (var x = 0; x < tabs.length; x++) tabs[x].classList.remove('active')
+        this.classList.add('active')
+        var compId = this.dataset.comp
+        document.getElementById('mie-reviews-list').innerHTML = renderReviews(compId)
+      },
+      { signal: signal }
+    )
   }
 }
 
@@ -102,7 +132,9 @@ function renderReviews(compFilter) {
 
   for (var i = 0; i < compIds.length; i++) {
     var reviews = SAMPLE_REVIEWS[compIds[i]] || []
-    var comp = COMPETITORS.find(function (c) { return c.id === compIds[i] })
+    var comp = COMPETITORS.find(function (c) {
+      return c.id === compIds[i]
+    })
     for (var j = 0; j < reviews.length; j++) {
       allReviews.push({ review: reviews[j], competitor: comp })
     }
@@ -119,13 +151,21 @@ function renderReviews(compFilter) {
     var r = item.review
     html += '<div class="mie-review-card">'
     html += '<div class="mie-review-header">'
-    html += '<span style="color:' + item.competitor.color + ';font-size:11px;font-weight:600">' + item.competitor.name + '</span>'
+    html +=
+      '<span style="color:' +
+      item.competitor.color +
+      ';font-size:11px;font-weight:600">' +
+      item.competitor.name +
+      '</span>'
     html += '<span class="mie-review-source">' + r.source + '</span>'
     html += '<span class="mie-review-polarity ' + r.polarity + '">' + r.polarity + '</span>'
-    if (r.actionable) html += '<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(255,60,172,0.1);color:var(--mie-accent);font-weight:600">Actionable</span>'
+    if (r.actionable)
+      html +=
+        '<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(255,60,172,0.1);color:var(--mie-accent);font-weight:600">Actionable</span>'
     html += '</div>'
     html += '<div class="mie-review-text">"' + r.text + '"</div>'
-    html += '<div class="mie-review-date">' + r.date + ' &middot; ' + (SENTIMENT_LABELS[r.category] || r.category) + '</div>'
+    html +=
+      '<div class="mie-review-date">' + r.date + ' &middot; ' + (SENTIMENT_LABELS[r.category] || r.category) + '</div>'
     html += '</div>'
   }
 

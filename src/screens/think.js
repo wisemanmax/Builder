@@ -8,36 +8,72 @@ import { calculateBuildCost } from '../lib/cost.js'
 import { ghSyncThoughtAndRules } from '../lib/github.js'
 import { openBuilder } from './build.js'
 
-var _thinkState = { round: 1, maxRounds: 5, thoughtId: null, conversation: [], originalPrompt: '', brief: null, rules: null }
+var _thinkState = {
+  round: 1,
+  maxRounds: 5,
+  thoughtId: null,
+  conversation: [],
+  originalPrompt: '',
+  brief: null,
+  rules: null,
+}
 
 export function openThink(resumeId) {
   $('builder-sheet').classList.remove('open')
   if (resumeId) {
-    var t = null; for (var i = 0; i < ST.thoughts.length; i++) { if (ST.thoughts[i].id === resumeId) { t = ST.thoughts[i]; break } }
+    var t = null
+    for (var i = 0; i < ST.thoughts.length; i++) {
+      if (ST.thoughts[i].id === resumeId) {
+        t = ST.thoughts[i]
+        break
+      }
+    }
     if (t) {
-      _thinkState = { round: t.rounds || 1, maxRounds: 5, thoughtId: t.id, conversation: t.conversation || [], originalPrompt: t.originalPrompt || '', brief: t.brief || null, rules: null }
+      _thinkState = {
+        round: t.rounds || 1,
+        maxRounds: 5,
+        thoughtId: t.id,
+        conversation: t.conversation || [],
+        originalPrompt: t.originalPrompt || '',
+        brief: t.brief || null,
+        rules: null,
+      }
       renderThinkProgress(_thinkState.round)
-      var ts = $('think-scroll'); ts.innerHTML = ''
+      var ts = $('think-scroll')
+      ts.innerHTML = ''
       for (var j = 0; j < _thinkState.conversation.length; j++) {
         var c = _thinkState.conversation[j]
         addThinkMsg(c.role === 'user' ? { type: 'user', text: c.text } : { type: 'ai', text: c.text })
       }
       $('think-sheet').classList.add('open')
-      setTimeout(function () { $('think-input').focus() }, 420)
+      setTimeout(function () {
+        $('think-input').focus()
+      }, 420)
       return
     }
   }
-  _thinkState = { round: 1, maxRounds: 5, thoughtId: uid(), conversation: [], originalPrompt: '', brief: null, rules: null }
+  _thinkState = {
+    round: 1,
+    maxRounds: 5,
+    thoughtId: uid(),
+    conversation: [],
+    originalPrompt: '',
+    brief: null,
+    rules: null,
+  }
   resetCostAccum()
   renderThinkProgress(1)
   var ts2 = $('think-scroll')
-  ts2.innerHTML = '<div class="think-welcome">'
-    + '<div class="tw-icon">\uD83D\uDCAD</div>'
-    + '<div class="tw-title">Think It Through</div>'
-    + '<div class="tw-sub">Describe your app idea and I\'ll help you flesh it out in a few quick rounds before building.</div>'
-    + '</div>'
+  ts2.innerHTML =
+    '<div class="think-welcome">' +
+    '<div class="tw-icon">\uD83D\uDCAD</div>' +
+    '<div class="tw-title">Think It Through</div>' +
+    '<div class="tw-sub">Describe your app idea and I\'ll help you flesh it out in a few quick rounds before building.</div>' +
+    '</div>'
   $('think-sheet').classList.add('open')
-  setTimeout(function () { $('think-input').focus() }, 420)
+  setTimeout(function () {
+    $('think-input').focus()
+  }, 420)
 }
 
 export function closeThink() {
@@ -57,14 +93,21 @@ export function renderThinkProgress(round) {
   }
   el.innerHTML = html
   var label = THINK_ROUND_LABELS[Math.min(round, _thinkState.maxRounds) - 1] || ''
-  $('ts-sub').textContent = 'Round ' + Math.min(round, _thinkState.maxRounds) + ' of ' + _thinkState.maxRounds + ' \u00B7 ' + label
+  $('ts-sub').textContent =
+    'Round ' + Math.min(round, _thinkState.maxRounds) + ' of ' + _thinkState.maxRounds + ' \u00B7 ' + label
 }
 
-function scrollThinkBot() { var el = $('think-scroll'); setTimeout(function () { el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }) }, 60) }
+function scrollThinkBot() {
+  var el = $('think-scroll')
+  setTimeout(function () {
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }, 60)
+}
 
 export function addThinkMsg(cfg) {
   var s = $('think-scroll')
-  var w = s.querySelector('.think-welcome'); if (w) w.style.display = 'none'
+  var w = s.querySelector('.think-welcome')
+  if (w) w.style.display = 'none'
   var row = document.createElement('div')
   if (cfg.type === 'user') {
     row.className = 'mrow user'
@@ -72,10 +115,14 @@ export function addThinkMsg(cfg) {
   } else if (cfg.type === 'typing') {
     row.className = 'mrow asst'
     row.id = 'think-typing'
-    row.innerHTML = '<div class="awrap"><div class="aav" style="background:var(--g4)">\uD83D\uDCAD</div><div class="tbub"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>'
+    row.innerHTML =
+      '<div class="awrap"><div class="aav" style="background:var(--g4)">\uD83D\uDCAD</div><div class="tbub"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>'
   } else if (cfg.type === 'ai') {
     row.className = 'mrow asst'
-    row.innerHTML = '<div class="awrap"><div class="aav" style="background:var(--g4)">\uD83D\uDCAD</div><div class="abub">' + esc(cfg.text) + '</div></div>'
+    row.innerHTML =
+      '<div class="awrap"><div class="aav" style="background:var(--g4)">\uD83D\uDCAD</div><div class="abub">' +
+      esc(cfg.text) +
+      '</div></div>'
   } else if (cfg.type === 'options') {
     row.className = 'think-options'
     var ohtml = ''
@@ -96,7 +143,9 @@ export function thinkOptionSelect(el) {
   var text = el.textContent
   el.classList.add('selected')
   var siblings = el.parentElement.querySelectorAll('.think-opt')
-  for (var i = 0; i < siblings.length; i++) { if (siblings[i] !== el) siblings[i].classList.add('disabled') }
+  for (var i = 0; i < siblings.length; i++) {
+    if (siblings[i] !== el) siblings[i].classList.add('disabled')
+  }
   $('think-input').value = text
   sendThinkMsg()
 }
@@ -105,11 +154,16 @@ export function sendThinkMsg() {
   var inp = $('think-input')
   var text = inp.value.trim()
   if (!text || ST._thinking) return
-  if (!ST.gptKey) { toast('Add an OpenAI API key in Settings first'); return }
+  if (!ST.gptKey) {
+    toast('Add an OpenAI API key in Settings first')
+    return
+  }
 
   ST._thinking = true
-  var sb = $('think-send-btn'); if (sb) sb.disabled = true
-  inp.value = ''; inp.style.height = ''
+  var sb = $('think-send-btn')
+  if (sb) sb.disabled = true
+  inp.value = ''
+  inp.style.height = ''
 
   if (!_thinkState.originalPrompt) _thinkState.originalPrompt = text
 
@@ -127,63 +181,77 @@ export function sendThinkMsg() {
   // Add current user message with round metadata (single source — no duplication)
   apiMessages.push({
     role: 'user',
-    content: 'Round: ' + _thinkState.round + '/' + _thinkState.maxRounds
-      + '\nPhase: ' + THINK_ROUND_LABELS[Math.min(_thinkState.round, _thinkState.maxRounds) - 1]
-      + '\nOriginal idea: ' + _thinkState.originalPrompt
-      + '\n\n' + text
+    content:
+      'Round: ' +
+      _thinkState.round +
+      '/' +
+      _thinkState.maxRounds +
+      '\nPhase: ' +
+      THINK_ROUND_LABELS[Math.min(_thinkState.round, _thinkState.maxRounds) - 1] +
+      '\nOriginal idea: ' +
+      _thinkState.originalPrompt +
+      '\n\n' +
+      text,
   })
 
   var effectiveSys = injectProfileContext(SYS_THINK)
   var aiCall = callGPTThink(effectiveSys, apiMessages, 2000)
 
-  aiCall.then(function (raw) {
-    var ti = $('think-typing'); if (ti) ti.remove()
-    var parsed
-    try { parsed = JSON.parse(raw) } catch (e) {
-      parsed = { message: raw, options: [], advance: false }
-    }
-
-    if (parsed.message) {
-      addThinkMsg({ type: 'ai', text: parsed.message })
-      _thinkState.conversation.push({ role: 'ai', text: parsed.message, round: _thinkState.round })
-    }
-
-    if (parsed.advance) {
-      _thinkState.round++
-      renderThinkProgress(_thinkState.round)
-    }
-
-    if (parsed.brief && parsed.rules) {
-      _thinkState.brief = parsed.brief
-      _thinkState.rules = parsed.rules
-      if (parsed.draft) {
-        // Draft mode — show summary with confirm/edit buttons
-        renderThinkSummary(parsed.brief, parsed.rules)
-        // Replace default actions with draft-specific actions
-        var existingActions = $('think-scroll').querySelector('.think-actions')
-        if (existingActions) existingActions.remove()
-        var actRow = document.createElement('div')
-        actRow.className = 'think-actions'
-        actRow.innerHTML = '<button class="ta-save" onclick="confirmThinkBrief()">\u2705 Looks good, lock it in</button>'
-          + '<button class="ta-refine" onclick="editThinkBrief()">\u270F\uFE0F I want to change something</button>'
-        $('think-scroll').appendChild(actRow)
-      } else {
-        renderThinkSummary(parsed.brief, parsed.rules)
+  aiCall
+    .then(function (raw) {
+      var ti = $('think-typing')
+      if (ti) ti.remove()
+      var parsed
+      try {
+        parsed = JSON.parse(raw)
+      } catch (e) {
+        parsed = { message: raw, options: [], advance: false }
       }
-    } else if (parsed.options && parsed.options.length > 0) {
-      addThinkMsg({ type: 'options', options: parsed.options })
-    }
 
-    saveThought(parsed.brief && !parsed.draft ? 'complete' : 'draft')
-    ST._thinking = false
-    if (sb) sb.disabled = false
-    scrollThinkBot()
-  }).catch(function (e) {
-    var ti = $('think-typing'); if (ti) ti.remove()
-    addThinkMsg({ type: 'ai', text: 'Something went wrong: ' + scrubKeys(e.message || String(e)) + '. Try again.' })
-    ST._thinking = false
-    if (sb) sb.disabled = false
-  })
+      if (parsed.message) {
+        addThinkMsg({ type: 'ai', text: parsed.message })
+        _thinkState.conversation.push({ role: 'ai', text: parsed.message, round: _thinkState.round })
+      }
+
+      if (parsed.advance) {
+        _thinkState.round++
+        renderThinkProgress(_thinkState.round)
+      }
+
+      if (parsed.brief && parsed.rules) {
+        _thinkState.brief = parsed.brief
+        _thinkState.rules = parsed.rules
+        if (parsed.draft) {
+          // Draft mode — show summary with confirm/edit buttons
+          renderThinkSummary(parsed.brief, parsed.rules)
+          // Replace default actions with draft-specific actions
+          var existingActions = $('think-scroll').querySelector('.think-actions')
+          if (existingActions) existingActions.remove()
+          var actRow = document.createElement('div')
+          actRow.className = 'think-actions'
+          actRow.innerHTML =
+            '<button class="ta-save" onclick="confirmThinkBrief()">\u2705 Looks good, lock it in</button>' +
+            '<button class="ta-refine" onclick="editThinkBrief()">\u270F\uFE0F I want to change something</button>'
+          $('think-scroll').appendChild(actRow)
+        } else {
+          renderThinkSummary(parsed.brief, parsed.rules)
+        }
+      } else if (parsed.options && parsed.options.length > 0) {
+        addThinkMsg({ type: 'options', options: parsed.options })
+      }
+
+      saveThought(parsed.brief && !parsed.draft ? 'complete' : 'draft')
+      ST._thinking = false
+      if (sb) sb.disabled = false
+      scrollThinkBot()
+    })
+    .catch(function (e) {
+      var ti = $('think-typing')
+      if (ti) ti.remove()
+      addThinkMsg({ type: 'ai', text: 'Something went wrong: ' + scrubKeys(e.message || String(e)) + '. Try again.' })
+      ST._thinking = false
+      if (sb) sb.disabled = false
+    })
 }
 
 export function renderThinkSummary(brief, rules) {
@@ -196,7 +264,7 @@ export function renderThinkSummary(brief, rules) {
     html += '</ul>'
   }
   if (brief.whatItWontDo && brief.whatItWontDo.length) {
-    html += '<h4>What It Won\'t Do</h4><ul>'
+    html += "<h4>What It Won't Do</h4><ul>"
     for (var j = 0; j < brief.whatItWontDo.length; j++) html += '<li>' + esc(brief.whatItWontDo[j]) + '</li>'
     html += '</ul>'
   }
@@ -236,8 +304,9 @@ export function renderThinkSummary(brief, rules) {
 
   var actRow = document.createElement('div')
   actRow.className = 'think-actions'
-  actRow.innerHTML = '<button class="ta-save" onclick="finishThink()">\uD83D\uDCBE Save & Go to Build</button>'
-    + '<button class="ta-refine" onclick="refineThink()">\u270F\uFE0F Keep Refining</button>'
+  actRow.innerHTML =
+    '<button class="ta-save" onclick="finishThink()">\uD83D\uDCBE Save & Go to Build</button>' +
+    '<button class="ta-refine" onclick="refineThink()">\u270F\uFE0F Keep Refining</button>'
   $('think-scroll').appendChild(actRow)
   scrollThinkBot()
 }
@@ -254,11 +323,14 @@ export function saveThought(status) {
     linkedRulesId: null,
     linkedAppId: null,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   }
   var idx = -1
   for (var i = 0; i < ST.thoughts.length; i++) {
-    if (ST.thoughts[i].id === _thinkState.thoughtId) { idx = i; break }
+    if (ST.thoughts[i].id === _thinkState.thoughtId) {
+      idx = i
+      break
+    }
   }
   if (idx >= 0) {
     thought.createdAt = ST.thoughts[idx].createdAt
@@ -281,11 +353,14 @@ export function saveRulesFromThought(thought, rulesData) {
     mustNotRules: rulesData.must_not || [],
     niceToHave: rulesData.nice_to_have || [],
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   }
   ST.rules.push(rules)
   for (var i = 0; i < ST.thoughts.length; i++) {
-    if (ST.thoughts[i].id === thought.id) { ST.thoughts[i].linkedRulesId = rules.id; break }
+    if (ST.thoughts[i].id === thought.id) {
+      ST.thoughts[i].linkedRulesId = rules.id
+      break
+    }
   }
   persist()
   return rules
@@ -300,7 +375,14 @@ export function finishThink() {
   // Persist Think session cost on thought object
   var costData = calculateBuildCost()
   if (costData.breakdown.length > 0) {
-    thought.cost = { rawCost: costData.rawCost, userPrice: costData.userPrice, markup: costData.markup, totalInput: costData.totalInput, totalOutput: costData.totalOutput, ts: costData.ts }
+    thought.cost = {
+      rawCost: costData.rawCost,
+      userPrice: costData.userPrice,
+      markup: costData.markup,
+      totalInput: costData.totalInput,
+      totalOutput: costData.totalOutput,
+      ts: costData.ts,
+    }
     persist()
   }
   ST.activeThoughtId = thought.id
@@ -323,7 +405,11 @@ export function editThinkBrief() {
   $('think-input').focus()
   $('think-input').placeholder = 'What would you like to change?'
   addThinkMsg({ type: 'ai', text: 'What would you like to change? You can mention specific sections.' })
-  _thinkState.conversation.push({ role: 'ai', text: 'What would you like to change? You can mention specific sections.', round: _thinkState.round })
+  _thinkState.conversation.push({
+    role: 'ai',
+    text: 'What would you like to change? You can mention specific sections.',
+    round: _thinkState.round,
+  })
   scrollThinkBot()
 }
 
@@ -333,20 +419,53 @@ export function refineThink() {
   _thinkState.brief = null
   _thinkState.rules = null
   // Inject context marker so AI understands the round reset
-  _thinkState.conversation.push({ role: 'user', text: '[Round reset to ' + _thinkState.round + '. The previous summary was rejected. Continue refining from this round.]', round: _thinkState.round })
-  addThinkMsg({ type: 'ai', text: 'No problem! Let\'s keep refining. What would you like to change or add?' })
-  _thinkState.conversation.push({ role: 'ai', text: 'Let\'s keep refining. What would you like to change or add?', round: _thinkState.round })
+  _thinkState.conversation.push({
+    role: 'user',
+    text:
+      '[Round reset to ' +
+      _thinkState.round +
+      '. The previous summary was rejected. Continue refining from this round.]',
+    round: _thinkState.round,
+  })
+  addThinkMsg({ type: 'ai', text: "No problem! Let's keep refining. What would you like to change or add?" })
+  _thinkState.conversation.push({
+    role: 'ai',
+    text: "Let's keep refining. What would you like to change or add?",
+    round: _thinkState.round,
+  })
   scrollThinkBot()
 }
 
 export function initThinkSheet() {
   $('ts-close').addEventListener('click', closeThink)
-  $('think-sheet').addEventListener('click', function (e) { if (e.target.id === 'think-sheet') closeThink() })
+  $('think-sheet').addEventListener('click', function (e) {
+    if (e.target.id === 'think-sheet') closeThink()
+  })
   var tsY = 0
-  $('ts-handle').addEventListener('touchstart', function (e) { if (e.touches[0]) tsY = e.touches[0].clientY }, { passive: true })
-  $('ts-handle').addEventListener('touchend', function (e) { if (e.changedTouches[0] && e.changedTouches[0].clientY - tsY > 55) closeThink() }, { passive: true })
+  $('ts-handle').addEventListener(
+    'touchstart',
+    function (e) {
+      if (e.touches[0]) tsY = e.touches[0].clientY
+    },
+    { passive: true }
+  )
+  $('ts-handle').addEventListener(
+    'touchend',
+    function (e) {
+      if (e.changedTouches[0] && e.changedTouches[0].clientY - tsY > 55) closeThink()
+    },
+    { passive: true }
+  )
   var tInp = $('think-input')
-  tInp.addEventListener('input', function () { tInp.style.height = 'auto'; tInp.style.height = Math.min(tInp.scrollHeight, 160) + 'px' })
-  tInp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendThinkMsg() } })
+  tInp.addEventListener('input', function () {
+    tInp.style.height = 'auto'
+    tInp.style.height = Math.min(tInp.scrollHeight, 160) + 'px'
+  })
+  tInp.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendThinkMsg()
+    }
+  })
   $('think-send-btn').addEventListener('click', sendThinkMsg)
 }
