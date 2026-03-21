@@ -10,7 +10,7 @@ import {
   calculateBuildCost,
   ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest,
   runLocalChecks,
-  addMsg, updatePS, scrollBot, getPipelineSteps, clearPipelineSteps,
+  addMsg, updatePS, scrollBot, clearCurrentSession, getPipelineSteps, clearPipelineSteps,
   setPreview, clearPreview, waitForApproval, waitForRetryDecision,
   createStreamingPreview, autoInjectSupabase,
   showFeedbackCard, renderGrid, openProjectSheet,

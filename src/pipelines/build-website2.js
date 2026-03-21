@@ -11,7 +11,7 @@ import {
   calculateBuildCost,
   ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest,
   runLocalChecks,
-  addMsg, updatePS, scrollBot, registerPipeType, getPipelineSteps, clearPipelineSteps,
+  addMsg, updatePS, scrollBot, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps,
   setPreview, clearPreview, waitForApproval,
   createStreamingPreview, autoInjectSupabase,
   showFeedbackCard, renderGrid, openProjectSheet,
