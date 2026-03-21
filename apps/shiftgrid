@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#06060f" />
+  <title>SHIFTGRID</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#06060f;}
+.sg-root{min-height:100vh;max-height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;background:radial-gradient(ellipse at 50% 0%,#0e0e22 0%,#06060f 60%);font-family:'Rajdhani','Segoe UI',sans-serif;color:#e0e0ff;padding:14px 12px 0;user-select:none;-webkit-user-select:none;position:relative;}
+.sg-root::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.055) 2px,rgba(0,0,0,0.055) 4px);}
+.sg-title{font-family:'Orbitron',monospace;font-size:clamp(19px,5vw,27px);font-weight:900;letter-spacing:0.18em;background:linear-gradient(90deg,#00e5ff 0%,#ff2d95 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(0,229,255,0.28));position:relative;z-index:1;}
+.sg-subtitle{font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.22);font-family:'Orbitron',monospace;margin-top:4px;}
+.sg-wallet-row{display:flex;gap:10px;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:7px 14px;position:relative;z-index:1;}
+.sg-wallet-chip{font-family:'Orbitron',monospace;font-size:11px;display:flex;gap:6px;align-items:center;color:rgba(255,255,255,0.65);}
+.sg-screen{width:100%;max-width:440px;display:flex;flex-direction:column;position:relative;z-index:1;flex:1;overflow-y:auto;}
+.sg-tab-content{width:100%;padding-bottom:16px;}
+.sg-tab-heading{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.8);margin-bottom:14px;}
+.sg-section-label{font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);margin-bottom:8px;text-transform:uppercase;}
+.sg-hud{display:flex;gap:7px;margin-bottom:7px;width:100%;max-width:440px;position:relative;z-index:1;}
+.sg-hud-box{flex:1;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 4px;transition:border-color 0.3s;}
+.sg-hud-label{font-size:7px;letter-spacing:0.18em;color:rgba(255,255,255,0.26);margin-bottom:1px;}
+.sg-hud-val{font-family:'Orbitron',monospace;font-size:21px;font-weight:700;transition:color 0.3s,text-shadow 0.3s;}
+.sg-play-header{display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:8px;position:relative;z-index:1;}
+.sg-level-name{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.68);}
+.sg-score-disp{font-family:'Orbitron',monospace;font-size:15px;color:#ffaa00;text-shadow:0 0 10px #ffaa0044;min-width:58px;text-align:right;}
+.sg-warn-banner{background:rgba(255,45,149,0.1);border:1px solid rgba(255,45,149,0.28);border-radius:8px;padding:5px 10px;font-size:10px;color:#ff2d95;letter-spacing:0.1em;text-align:center;margin-bottom:4px;animation:pulse 0.8s ease infinite alternate;}
+@keyframes pulse{from{opacity:0.65;}to{opacity:1;}}
+.sg-toast{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;animation:tpop 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes tpop{from{opacity:0;transform:scale(0.72) translateY(4px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.sg-grid-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;}
+.sg-col-btns{display:flex;gap:3px;padding:0 35px;}
+.sg-row{display:flex;gap:3px;align-items:center;}
+.sg-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:6px;color:rgba(255,255,255,0.38);font-size:11px;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;}
+.sg-btn:hover:not(:disabled){background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);}
+.sg-btn:active:not(:disabled){transform:scale(0.85);}
+.sg-btn:disabled{opacity:0.13;cursor:default;}
+.sg-btn.flashed{background:rgba(255,255,255,0.2)!important;color:#fff!important;border-color:rgba(255,255,255,0.35)!important;}
+.sg-tile{border-radius:9px;border:2px solid;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:transform 0.1s,box-shadow 0.12s,background 0.08s,border-color 0.08s;cursor:default;}
+.sg-tile.hi{transform:scale(1.1);animation:tmatch 0.42s cubic-bezier(0.36,0.07,0.19,0.97);z-index:2;}
+@keyframes tmatch{0%{transform:scale(1);}30%{transform:scale(1.22) rotate(4deg);}65%{transform:scale(1.14) rotate(-2deg);}100%{transform:scale(1.1);}}
+.sg-diamond{width:20px;height:20px;border-radius:3px;transform:rotate(45deg);transition:background 0.1s,box-shadow 0.1s;position:relative;z-index:1;}
+.sg-glow{position:absolute;inset:0;pointer-events:none;}
+.sg-bldg-list{width:100%;margin-top:8px;position:relative;z-index:1;}
+.sg-bldg{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:1px solid;transition:all 0.4s;margin-bottom:6px;}
+.sg-bar-track{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;}
+.sg-bar-fill{height:100%;border-radius:3px;transition:width 0.45s ease,box-shadow 0.3s;}
+.sg-hint-text{font-size:10px;color:rgba(255,255,255,0.16);text-align:center;margin:8px 0 4px;line-height:1.5;position:relative;z-index:1;padding:0 8px;}
+.sg-overlay{position:fixed;inset:0;background:rgba(6,6,15,0.9);display:flex;align-items:center;justify-content:center;z-index:200;animation:fadeIn 0.28s;backdrop-filter:blur(8px);}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.sg-modal{text-align:center;padding:32px 26px;background:rgba(16,16,30,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:20px;max-width:310px;width:90%;animation:mIn 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes mIn{from{opacity:0;transform:scale(0.83) translateY(18px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.sg-modal-title{font-family:'Orbitron',monospace;font-size:clamp(15px,4vw,21px);font-weight:900;margin:7px 0 4px;letter-spacing:0.08em;}
+.sg-modal-sub{color:rgba(255,255,255,0.33);font-size:12px;margin-bottom:8px;}
+.sg-modal-rewards{display:flex;gap:8px;justify-content:center;margin:10px 0;}
+.sg-reward-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 14px;font-family:'Orbitron',monospace;font-size:12px;}
+.sg-modal-btn{border:none;border-radius:10px;padding:12px 22px;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:#06060f;cursor:pointer;letter-spacing:0.1em;transition:transform 0.12s,opacity 0.12s;}
+.sg-modal-btn:hover{opacity:0.88;transform:scale(1.04);}
+.sg-modal-outline{background:rgba(255,255,255,0.08)!important;color:#fff!important;border:1px solid rgba(255,255,255,0.15)!important;}
+.sg-district-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:4px;}
+.sg-district-node{border:1px solid;border-radius:12px;padding:12px 8px;text-align:center;transition:all 0.3s;}
+.sg-idle-card{display:flex;align-items:center;justify-content:space-between;background:rgba(255,170,0,0.05);border:1px solid rgba(255,170,0,0.18);border-radius:12px;padding:13px 15px;margin-bottom:10px;}
+.sg-collect-btn{background:linear-gradient(90deg,#ffaa00,#ff7700);border:none;border-radius:8px;padding:10px 14px;font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:#06060f;cursor:pointer;transition:transform 0.12s;}
+.sg-collect-btn:hover:not(:disabled){transform:scale(1.05);}
+.sg-upg-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.sg-upg-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:11px 9px;text-align:center;}
+.sg-pips{display:flex;gap:3px;justify-content:center;margin-bottom:7px;}
+.sg-pip{width:13px;height:4px;border-radius:2px;transition:background 0.3s;}
+.sg-upg-btn{border:1px solid rgba(0,229,255,0.3);background:rgba(0,229,255,0.08);color:#00e5ff;border-radius:6px;padding:5px 7px;font-family:'Orbitron',monospace;font-size:8px;cursor:pointer;transition:all 0.12s;width:100%;}
+.sg-upg-btn:hover:not(:disabled){background:rgba(0,229,255,0.18);}
+.sg-daily-card{background:rgba(255,170,0,0.04);border:1px solid rgba(255,170,0,0.14);border-radius:16px;padding:22px 18px;text-align:center;margin-bottom:12px;}
+.sg-spec-row{display:flex;gap:7px;justify-content:center;margin-bottom:14px;}
+.sg-spec-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 13px;font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:rgba(255,255,255,0.8);}
+.sg-daily-done{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.14);border-radius:12px;padding:14px;margin-top:6px;}
+.sg-campaign-card{border:1px solid;border-radius:13px;padding:12px;margin-bottom:7px;transition:all 0.3s;}
+.sg-brush-btn{padding:5px 11px;border-radius:7px;border:1px solid;font-size:10px;font-weight:600;cursor:pointer;font-family:'Rajdhani',sans-serif;transition:all 0.12s;letter-spacing:0.05em;}
+.sg-editor-panel{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px;}
+.sg-setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.sg-setting-row>label{font-size:12px;color:rgba(255,255,255,0.44);min-width:72px;}
+.sg-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:#fff;padding:5px 10px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;outline:none;flex:1;}
+.sg-input:focus{border-color:rgba(0,229,255,0.4);}
+.sg-nav{display:flex;width:100%;max-width:440px;background:rgba(6,6,15,0.96);border-top:1px solid rgba(255,255,255,0.06);padding:7px 0 4px;position:sticky;bottom:0;z-index:100;backdrop-filter:blur(12px);}
+.sg-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 4px;background:none;border:none;color:rgba(255,255,255,0.28);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.12em;transition:color 0.15s;}
+.sg-nav-btn.active{color:#00e5ff;text-shadow:0 0 10px rgba(0,229,255,0.4);}
+.sg-nav-btn:hover:not(.active){color:rgba(255,255,255,0.55);}
+.sg-pill-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:rgba(255,255,255,0.55);padding:6px 11px;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.12s;letter-spacing:0.05em;}
+.sg-pill-btn:hover{background:rgba(255,255,255,0.09);color:#fff;}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React 18 + Babel CDN — no build step needed -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+
+/* ─── CONSTANTS ─────────────────────────────────────────────────── */
+const ROWS = 5, COLS = 5;
+const COLORS = ["cyan", "magenta", "amber", "green"];
+const HEX = { cyan: "#00e5ff", magenta: "#ff2d95", amber: "#ffaa00", green: "#00ff88" };
+const LABEL = { cyan: "CYAN", magenta: "MAG", amber: "AMB", green: "GRN" };
+
+const BLDG_DEFS = [
+  { id: "apt",     label: "Apartments", color: "cyan",    cap: 12, icon: "🏢" },
+  { id: "factory", label: "Factory",    color: "amber",   cap: 12, icon: "🏭" },
+  { id: "lab",     label: "Neon Lab",   color: "green",   cap: 10, icon: "🔬" },
+  { id: "power",   label: "Power Core", color: "magenta", cap: 14, icon: "⚡" },
+];
+
+const UPGRADE_DEFS = [
+  { id: "comboBoost",  label: "Combo Amp",     icon: "⚡", desc: "+30% chain bonus",         cost: [80, 200, 500] },
+  { id: "hazardSlow",  label: "Hazard Shield", icon: "🛡", desc: "Corruption spreads slower", cost: [100, 250, 600] },
+  { id: "extraMoves",  label: "Move Extender", icon: "🎯", desc: "15% free move chance",      cost: [120, 300, 700] },
+  { id: "idleBoost",   label: "Idle Generator",icon: "⏰", desc: "Coins/hr while away",        cost: [60, 150, 400] },
+  { id: "capReduce",   label: "Power Saver",   icon: "🔋", desc: "-2 charge per building",    cost: [150, 350, 800] },
+  { id: "specialRate", label: "Node Enhancer", icon: "🌀", desc: "More shape combos",          cost: [90, 220, 550] },
+];
+
+const CAMPAIGN_LEVELS = [
+  { id: 0, name: "BLACKOUT BLOCK",   moves: 25, bids: ["apt","factory"],               hazards: 0, hint: "Slide rows & columns — board wraps! Line up 3+ same-color nodes to score." },
+  { id: 1, name: "INDUSTRIAL ROW",   moves: 22, bids: ["apt","factory","lab"],          hazards: 2, hint: "Corrupted tiles block matches. Adjacent combos clear the rot!" },
+  { id: 2, name: "SKYLINE SECTOR",   moves: 20, bids: ["apt","factory","lab","power"],  hazards: 3, hint: "Shape combos: 2x2=Battery  Plus=Pulse Blast  Line-5=Wild Core" },
+  { id: 3, name: "UNDERGROUND GRID", moves: 18, bids: ["apt","lab","power"],            hazards: 5, hint: "Heavy corruption. Contain it fast or lose the board." },
+];
+
+const IDLE_RATES = [0, 5, 12, 25];
+const STORE_KEY = "sg_v2_meta";
+const DEF_META = {
+  coins: 0, parts: 0,
+  upgrades: { comboBoost: 0, hazardSlow: 0, extraMoves: 0, idleBoost: 0, capReduce: 0, specialRate: 0 },
+  levelsCleared: [], lastCollect: Date.now(), dailyDate: "", dailyScore: 0, customLevels: [],
+};
+
+/* ─── META ──────────────────────────────────────────────────────── */
+function loadMeta() {
+  try { const s = localStorage.getItem(STORE_KEY); return s ? { ...DEF_META, ...JSON.parse(s) } : { ...DEF_META }; }
+  catch { return { ...DEF_META }; }
+}
+function saveMeta(m) { try { localStorage.setItem(STORE_KEY, JSON.stringify(m)); } catch {} }
+function calcIdle(meta) {
+  const lvl = meta.upgrades && meta.upgrades.idleBoost ? meta.upgrades.idleBoost : 0;
+  if (!lvl) return 0;
+  const hrs = Math.min(8, (Date.now() - (meta.lastCollect || Date.now())) / 3600000);
+  return Math.floor(hrs * IDLE_RATES[lvl]);
+}
+
+/* ─── GRID UTILS ────────────────────────────────────────────────── */
+let _uid = 0;
+function nextId() { return ++_uid; }
+function rndColor() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
+function makeTile(color, corrupted) {
+  return { id: nextId(), color: color || rndColor(), corrupted: corrupted === true };
+}
+
+function mkSeededRng(seed) {
+  let s = ((seed ^ 0x9e3779b9) >>> 0) || 1;
+  return function() {
+    s = ((s ^ (s << 13)) >>> 0);
+    s = ((s ^ (s >> 17)) >>> 0);
+    s = ((s ^ (s << 5)) >>> 0);
+    return s / 4294967296;
+  };
+}
+function todaySeed() {
+  const d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+
+function makeGrid(rng) {
+  const fn = rng || Math.random;
+  const rc = function() { return COLORS[Math.floor(fn() * COLORS.length)]; };
+  const g = [];
+  for (let r = 0; r < ROWS; r++) {
+    const row = [];
+    for (let c = 0; c < COLS; c++) {
+      let col, tries = 0;
+      do {
+        col = rc(); tries++;
+      } while (
+        tries < 10 &&
+        ((c >= 2 && row[c-1] && row[c-1].color === col && row[c-2] && row[c-2].color === col) ||
+         (r >= 2 && g[r-1] && g[r-1][c] && g[r-1][c].color === col && g[r-2] && g[r-2][c] && g[r-2][c].color === col))
+      );
+      row.push(makeTile(col));
+    }
+    g.push(row);
+  }
+  return g;
+}
+
+function addCorruption(grid, count, rng) {
+  const fn = rng || Math.random;
+  const g = grid.map(function(row) { return row.map(function(t) { return Object.assign({}, t); }); });
+  let n = 0, tries = 0;
+  while (n < count && tries < 100) {
+    tries++;
+    const r = Math.floor(fn() * ROWS), c = Math.floor(fn() * COLS);
+    if (!g[r][c].corrupted) { g[r][c].corrupted = true; n++; }
+  }
+  return g;
+}
+
+function doShift(grid, type, idx, dir) {
+  const g = grid.map(function(row) { return row.slice(); });
+  if (type === "row") {
+    if (dir === "left") {
+      g[idx] = grid[idx].slice(1).concat([grid[idx][0]]);
+    } else {
+      g[idx] = [grid[idx][COLS - 1]].concat(grid[idx].slice(0, -1));
+    }
+  } else {
+    const col = grid.map(function(row) { return row[idx]; });
+    const s = dir === "up" ? col.slice(1).concat([col[0]]) : [col[ROWS - 1]].concat(col.slice(0, -1));
+    s.forEach(function(t, r) { g[r][idx] = t; });
+  }
+  return g;
+}
+
+function findMatches(grid) {
+  const m = new Set();
+  for (let r = 0; r < ROWS; r++) {
+    let s = 0;
+    for (let c = 1; c <= COLS; c++) {
+      const ok = c < COLS && !grid[r][c].corrupted && !grid[r][c-1].corrupted && grid[r][c].color === grid[r][c-1].color;
+      if (!ok) { if (c - s >= 3) { for (let i = s; i < c; i++) m.add(r + "," + i); } s = c; }
+    }
+  }
+  for (let c = 0; c < COLS; c++) {
+    let s = 0;
+    for (let r = 1; r <= ROWS; r++) {
+      const ok = r < ROWS && !grid[r][c].corrupted && !grid[r-1][c].corrupted && grid[r][c].color === grid[r-1][c].color;
+      if (!ok) { if (r - s >= 3) { for (let i = s; i < r; i++) m.add(i + "," + c); } s = r; }
+    }
+  }
+  return m;
+}
+
+function detectShapes(grid, matched) {
+  const shapes = [];
+  for (let r = 0; r < ROWS - 1; r++) {
+    for (let c = 0; c < COLS - 1; c++) {
+      const cells = [r+","+c, r+","+(c+1), (r+1)+","+c, (r+1)+","+(c+1)];
+      if (cells.every(function(k) { return matched.has(k); })) {
+        const col = grid[r][c].color;
+        const allSame = cells.every(function(k) {
+          const p = k.split(","); return grid[+p[0]][+p[1]].color === col && !grid[+p[0]][+p[1]].corrupted;
+        });
+        if (allSame) shapes.push({ type: "battery", label: "BATTERY ACTIVATED", bonus: 2 });
+      }
+    }
+  }
+  for (let r = 1; r < ROWS - 1; r++) {
+    for (let c = 1; c < COLS - 1; c++) {
+      const cells = [r+","+c, (r-1)+","+c, (r+1)+","+c, r+","+(c-1), r+","+(c+1)];
+      if (cells.every(function(k) { return matched.has(k); })) {
+        const col = grid[r][c].color;
+        const allSame = cells.every(function(k) {
+          const p = k.split(","); return grid[+p[0]][+p[1]].color === col && !grid[+p[0]][+p[1]].corrupted;
+        });
+        if (allSame) shapes.push({ type: "pulse", pos: [r, c], label: "PULSE BLAST" });
+      }
+    }
+  }
+  let wildAdded = false;
+  for (let r = 0; r < ROWS && !wildAdded; r++) {
+    let allIn = true;
+    for (let c = 0; c < COLS; c++) { if (!matched.has(r+","+c) || grid[r][c].corrupted) { allIn = false; break; } }
+    if (allIn) { shapes.push({ type: "wild", label: "WILD CORE" }); wildAdded = true; }
+  }
+  for (let c = 0; c < COLS && !wildAdded; c++) {
+    let allIn = true;
+    for (let r = 0; r < ROWS; r++) { if (!matched.has(r+","+c) || grid[r][c].corrupted) { allIn = false; break; } }
+    if (allIn) { shapes.push({ type: "wild", label: "WILD CORE" }); wildAdded = true; }
+  }
+  return shapes;
+}
+
+function expandPulse(matched, pos) {
+  const m = new Set(matched);
+  const pr = pos[0], pc = pos[1];
+  for (let r = Math.max(0, pr-1); r <= Math.min(ROWS-1, pr+1); r++)
+    for (let c = Math.max(0, pc-1); c <= Math.min(COLS-1, pc+1); c++)
+      m.add(r + "," + c);
+  return m;
+}
+
+function clearNearCorruption(grid, matched) {
+  const x = new Set();
+  matched.forEach(function(k) {
+    const p = k.split(","); const r = +p[0], c = +p[1];
+    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    dirs.forEach(function(d) {
+      const nr = r + d[0], nc = c + d[1];
+      if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && grid[nr][nc] && grid[nr][nc].corrupted) x.add(nr+","+nc);
+    });
+  });
+  return x;
+}
+
+function applyGravity(grid, matched) {
+  const g = grid.map(function(row) { return row.slice(); });
+  const cleared = {};
+  matched.forEach(function(k) {
+    const p = k.split(","); const r = +p[0], c = +p[1];
+    const t = g[r][c];
+    if (t && !t.corrupted) cleared[t.color] = (cleared[t.color] || 0) + 1;
+    g[r][c] = null;
+  });
+  for (let c = 0; c < COLS; c++) {
+    const col = [];
+    for (let r = 0; r < ROWS; r++) { if (g[r][c]) col.push(g[r][c]); }
+    while (col.length < ROWS) col.unshift(makeTile());
+    for (let r = 0; r < ROWS; r++) g[r][c] = col[r];
+  }
+  return { g: g, cleared: cleared };
+}
+
+function spreadCorruption(grid, slow) {
+  if (slow && Math.random() < slow * 0.25) return grid;
+  const g = grid.map(function(row) { return row.map(function(t) { return Object.assign({}, t); }); });
+  const sources = [];
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (g[r][c] && g[r][c].corrupted) sources.push([r, c]);
+  if (!sources.length) return g;
+  const src = sources[Math.floor(Math.random() * sources.length)];
+  const sr = src[0], sc = src[1];
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  const nbrs = dirs.map(function(d) { return [sr+d[0], sc+d[1]]; }).filter(function(pos) {
+    return pos[0] >= 0 && pos[0] < ROWS && pos[1] >= 0 && pos[1] < COLS && g[pos[0]][pos[1]] && !g[pos[0]][pos[1]].corrupted;
+  });
+  if (nbrs.length) {
+    const pick = nbrs[Math.floor(Math.random() * nbrs.length)];
+    g[pick[0]][pick[1]] = Object.assign({}, g[pick[0]][pick[1]], { corrupted: true });
+  }
+  return g;
+}
+
+function countCorruption(grid) {
+  let n = 0;
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (grid[r][c] && grid[r][c].corrupted) n++;
+  return n;
+}
+
+/* ─── TILE ──────────────────────────────────────────────────────── */
+function Tile(props) {
+  const tile = props.tile, isHi = props.isHi, size = props.size;
+  const isCr = tile && tile.corrupted;
+  const color = (!isCr && tile && tile.color) ? tile.color : null;
+  const hex = color ? HEX[color] : null;
+
+  const borderColor = isCr ? "rgba(160,0,240,0.45)" : (hex ? (isHi ? hex : hex + "66") : "rgba(255,255,255,0.07)");
+  const bg = isCr ? "rgba(38,0,55,0.92)" : (hex ? (isHi ? hex + "55" : hex + "1c") : "rgba(255,255,255,0.03)");
+  const shadow = (isHi && hex) ? ("0 0 16px " + hex + ",0 0 32px " + hex + "55") : (isCr ? "inset 0 0 18px rgba(150,0,220,0.3)" : (hex ? ("0 0 5px " + hex + "22") : "none"));
+
+  const cls = "sg-tile" + (isHi ? " hi" : "") + (isCr ? " sg-corrupt" : "");
+
+  return (
+    <div className={cls} style={{ width: size, height: size, background: bg, borderColor: borderColor, boxShadow: shadow }}>
+      {isCr && <span style={{ fontSize: 17, filter: "saturate(0.5) brightness(0.7)" }}>☠</span>}
+      {!isCr && hex && <div className="sg-diamond" style={{ background: isHi ? hex : (hex + "99"), boxShadow: isHi ? ("0 0 10px " + hex) : "none" }} />}
+      {!isCr && hex && isHi && <div className="sg-glow" style={{ background: "radial-gradient(circle," + hex + "44 0%,transparent 70%)" }} />}
+    </div>
+  );
+}
+
+/* ─── GAME BOARD ────────────────────────────────────────────────── */
+function GameBoard(props) {
+  const levelDef = props.levelDef, meta = props.meta, onComplete = props.onComplete, onBack = props.onBack;
+  const upg = (meta && meta.upgrades) ? meta.upgrades : DEF_META.upgrades;
+  const capBonus = (upg.capReduce || 0) * 2;
+  const hazardSlow = upg.hazardSlow || 0;
+  const comboAmp = 1 + (upg.comboBoost || 0) * 0.3;
+  const freeChance = (upg.extraMoves || 0) * 0.15;
+  const spreadEvery = 3 + hazardSlow;
+
+  const buildInitGrid = useCallback(function() {
+    if (levelDef.boardData) {
+      return levelDef.boardData.map(function(row) { return row.map(function(t) { return Object.assign({}, t, { id: nextId() }); }); });
+    }
+    const rng = levelDef.rngSeed ? mkSeededRng(levelDef.rngSeed) : null;
+    const g = makeGrid(rng);
+    return (levelDef.hazards || 0) > 0 ? addCorruption(g, levelDef.hazards, rng) : g;
+  }, [levelDef]);
+
+  const [grid, setGrid] = useState(buildInitGrid);
+  const [moves, setMoves] = useState(levelDef.moves);
+  const [bldgs, setBldgs] = useState(function() {
+    return BLDG_DEFS.filter(function(b) { return levelDef.bids.includes(b.id); }).map(function(b) {
+      return Object.assign({}, b, { max: Math.max(4, b.cap - capBonus), ch: 0, on: false });
+    });
+  });
+  const [score, setScore] = useState(0);
+  const [hi, setHi] = useState(new Set());
+  const [phase, setPhase] = useState("idle");
+  const [toasts, setToasts] = useState([]);
+  const [btnFlash, setBtnFlash] = useState(null);
+  const [moveCount, setMoveCount] = useState(0);
+  const timers = useRef([]);
+
+  useEffect(function() { return function() { timers.current.forEach(clearTimeout); }; }, []);
+
+  function later(fn, ms) { const t = setTimeout(fn, ms); timers.current.push(t); }
+  function addToast(text, color) {
+    const id = nextId();
+    setToasts(function(prev) { return prev.filter(function(x) { return x.text !== text; }).concat([{ id: id, text: text, color: color || "#ffaa00" }]); });
+    setTimeout(function() { setToasts(function(prev) { return prev.filter(function(x) { return x.id !== id; }); }); }, 2200);
+  }
+
+  const handleShift = useCallback(function(type, idx, dir) {
+    if (phase !== "idle") return;
+    timers.current.forEach(clearTimeout); timers.current = [];
+    setBtnFlash({ type: type, idx: idx, dir: dir });
+    setTimeout(function() { setBtnFlash(null); }, 280);
+
+    let g = doShift(grid, type, idx, dir);
+    const frames = [], totCleared = {};
+    let pts = 0, cascades = 0, chargeBoost = 1;
+    const toastQueue = [];
+
+    while (true) {
+      let m = findMatches(g);
+      if (!m.size) break;
+      const shapes = detectShapes(g, m);
+      shapes.forEach(function(sh) {
+        if (!toastQueue.find(function(x) { return x.text === sh.label; })) toastQueue.push({ text: sh.label, color: "#ffaa00" });
+        if (sh.type === "battery") chargeBoost = 2;
+        if (sh.type === "pulse" && sh.pos) m = expandPulse(m, sh.pos);
+      });
+      clearNearCorruption(g, m).forEach(function(k) { m.add(k); });
+      frames.push({ g: g, m: new Set(m) });
+      const res = applyGravity(g, m);
+      Object.keys(res.cleared).forEach(function(col) { totCleared[col] = (totCleared[col] || 0) + res.cleared[col]; });
+      pts += m.size * 10 * (1 + cascades * 0.5) * comboAmp;
+      cascades++;
+      frames.push({ g: res.g, m: new Set() });
+      g = res.g;
+    }
+
+    const newMC = moveCount + 1;
+    let finalG = g;
+    if ((levelDef.hazards || 0) > 0 && newMC % spreadEvery === 0) finalG = spreadCorruption(g, hazardSlow);
+
+    const free = Math.random() < freeChance;
+    const newMoves = free ? moves : moves - 1;
+    if (free) addToast("FREE MOVE!", "#00ff88");
+
+    const newBldgs = bldgs.map(function(b) {
+      const add = (totCleared[b.color] || 0) * chargeBoost;
+      const ch = Math.min(b.max, b.ch + add);
+      return Object.assign({}, b, { ch: ch, on: ch >= b.max });
+    });
+
+    setMoveCount(newMC); setMoves(newMoves); setPhase("busy");
+
+    function finish() {
+      setGrid(finalG); setHi(new Set()); setBldgs(newBldgs); setScore(function(s) { return s + Math.round(pts); });
+      toastQueue.forEach(function(t, i) { setTimeout(function() { addToast(t.text, t.color); }, i * 340); });
+      if (cascades > 1) setTimeout(function() { addToast("CHAIN x" + cascades, "#ffaa00"); }, toastQueue.length * 340);
+      if (newBldgs.every(function(b) { return b.on; })) { setPhase("win"); return; }
+      if (newMoves <= 0) { setPhase("lose"); return; }
+      setPhase("idle");
+    }
+
+    if (!frames.length) { setGrid(finalG); if (newMoves <= 0) setPhase("lose"); else setPhase("idle"); return; }
+    let fi = 0;
+    function step() {
+      if (fi >= frames.length) { finish(); return; }
+      const fr = frames[fi++]; setGrid(fr.g); setHi(fr.m);
+      later(step, fr.m.size > 0 ? 420 : 180);
+    }
+    setGrid(frames[0].g); setHi(frames[0].m); fi = 1; later(step, 420);
+  }, [grid, phase, moves, bldgs, moveCount, hazardSlow, comboAmp, freeChance, spreadEvery, levelDef]);
+
+  const SZ = 52, BW = 32;
+  const corr = countCorruption(grid);
+  const spreadWarn = (levelDef.hazards || 0) > 0 && ((moveCount + 1) % spreadEvery === 0);
+  const winCoins = Math.floor(score / 10) + 25;
+  const winParts = Math.floor(score / 60) + 3;
+
+  function retry() {
+    setGrid(buildInitGrid()); setMoves(levelDef.moves);
+    setBldgs(function(b) { return b.map(function(x) { return Object.assign({}, x, { ch: 0, on: false }); }); });
+    setScore(0); setHi(new Set()); setPhase("idle"); setMoveCount(0);
+  }
+
+  function ShiftBtn(p) {
+    const fl = btnFlash && btnFlash.type === p.type && btnFlash.idx === p.idx && btnFlash.dir === p.dir;
+    return (
+      <button className={"sg-btn" + (fl ? " flashed" : "")} style={{ width: p.type === "row" ? BW : SZ, height: p.type === "row" ? SZ : BW }}
+        onClick={function() { handleShift(p.type, p.idx, p.dir); }} disabled={phase !== "idle"}>
+        {p.label}
+      </button>
+    );
+  }
+
+  return (
+    <div className="sg-screen">
+      <div className="sg-play-header">
+        <button className="sg-pill-btn" onClick={onBack}>Back</button>
+        <div style={{ textAlign: "center" }}>
+          {levelDef.isDaily && <div style={{ fontSize: 8, color: "#ffaa00", letterSpacing: "0.2em", marginBottom: 2 }}>DAILY</div>}
+          <div className="sg-level-name">{levelDef.name}</div>
+        </div>
+        <div className="sg-score-disp">{score.toLocaleString()}</div>
+      </div>
+
+      <div className="sg-hud">
+        <div className="sg-hud-box">
+          <div className="sg-hud-label">MOVES</div>
+          <div className="sg-hud-val" style={{ color: moves <= 5 ? "#ff2d95" : "#00e5ff", textShadow: moves <= 5 ? "0 0 14px #ff2d95" : "none" }}>{moves}</div>
+        </div>
+        <div className="sg-hud-box">
+          <div className="sg-hud-label">POWERED</div>
+          <div className="sg-hud-val" style={{ color: "#00ff88" }}>
+            {bldgs.filter(function(b) { return b.on; }).length}
+            <span style={{ fontSize: 14, opacity: 0.4 }}>/{bldgs.length}</span>
+          </div>
+        </div>
+        {(levelDef.hazards || 0) > 0 && (
+          <div className="sg-hud-box" style={{ borderColor: corr > 0 ? "rgba(255,45,149,0.35)" : "rgba(255,255,255,0.08)" }}>
+            <div className="sg-hud-label">CORRUPT</div>
+            <div className="sg-hud-val" style={{ color: corr > 4 ? "#ff2d95" : corr > 0 ? "#ffaa00" : "rgba(255,255,255,0.2)", fontSize: 20 }}>{corr}</div>
+          </div>
+        )}
+      </div>
+
+      {spreadWarn && (levelDef.hazards || 0) > 0 && (
+        <div className="sg-warn-banner">CORRUPTION SPREADS THIS MOVE</div>
+      )}
+
+      <div style={{ minHeight: 30, display: "flex", gap: 8, alignItems: "center", justifyContent: "center", flexWrap: "wrap", margin: "2px 0" }}>
+        {toasts.map(function(t) {
+          return <div key={t.id} className="sg-toast" style={{ color: t.color, textShadow: "0 0 12px " + t.color }}>{t.text}</div>;
+        })}
+      </div>
+
+      <div className="sg-grid-wrap">
+        <div className="sg-col-btns">
+          {[0,1,2,3,4].map(function(c) { return <ShiftBtn key={c} type="col" idx={c} dir="up" label="▲" />; })}
+        </div>
+        {grid.map(function(row, r) {
+          return (
+            <div key={r} className="sg-row">
+              <ShiftBtn type="row" idx={r} dir="left" label="◀" />
+              {row.map(function(tile, c) {
+                return <Tile key={tile ? tile.id : (r+"-"+c)} tile={tile} isHi={hi.has(r+","+c)} size={SZ} />;
+              })}
+              <ShiftBtn type="row" idx={r} dir="right" label="▶" />
+            </div>
+          );
+        })}
+        <div className="sg-col-btns">
+          {[0,1,2,3,4].map(function(c) { return <ShiftBtn key={c} type="col" idx={c} dir="down" label="▼" />; })}
+        </div>
+      </div>
+
+      <div className="sg-bldg-list">
+        <div className="sg-section-label">BUILDINGS</div>
+        {bldgs.map(function(b) {
+          const hex = HEX[b.color];
+          return (
+            <div key={b.id} className="sg-bldg" style={{ borderColor: b.on ? hex : "rgba(255,255,255,0.07)", background: b.on ? hex + "10" : "rgba(255,255,255,0.025)", boxShadow: b.on ? "0 0 18px " + hex + "33" : "none" }}>
+              <div style={{ fontSize: 18, filter: b.on ? "none" : "grayscale(0.6) brightness(0.55)" }}>{b.icon}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: b.on ? hex : "rgba(255,255,255,0.55)" }}>{b.label}</span>
+                  <span style={{ fontFamily: "'Orbitron',monospace", fontSize: 10, color: hex }}>{b.on ? "ONLINE" : (b.ch + "/" + b.max)}</span>
+                </div>
+                <div className="sg-bar-track">
+                  <div className="sg-bar-fill" style={{ width: Math.min(100, (b.ch / b.max) * 100) + "%", background: b.on ? ("linear-gradient(90deg," + hex + ",#fff)") : ("linear-gradient(90deg," + hex + "66," + hex + ")"), boxShadow: b.on ? ("0 0 8px " + hex) : "none" }} />
+                </div>
+                <div style={{ fontSize: 9, marginTop: 3, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em" }}>{"MATCH " + LABEL[b.color]}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="sg-hint-text">{levelDef.hint}</div>
+
+      {phase === "win" && (
+        <div className="sg-overlay">
+          <div className="sg-modal">
+            <div style={{ fontSize: 50 }}>⚡</div>
+            <div className="sg-modal-title" style={{ background: "linear-gradient(90deg,#ffaa00,#00ff88)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>DISTRICT POWERED!</div>
+            <div className="sg-modal-sub">{levelDef.name}</div>
+            <div className="sg-modal-rewards">
+              <div className="sg-reward-chip">{"+" + winCoins} <span style={{ color: "#ffaa00" }}>coins</span></div>
+              <div className="sg-reward-chip">{"+" + winParts} <span style={{ color: "#00e5ff" }}>parts</span></div>
+            </div>
+            <button className="sg-modal-btn" style={{ background: "linear-gradient(90deg,#00e5ff,#00ff88)" }} onClick={function() { onComplete({ score: score, coins: winCoins, parts: winParts }); }}>COLLECT</button>
+          </div>
+        </div>
+      )}
+
+      {phase === "lose" && (
+        <div className="sg-overlay">
+          <div className="sg-modal">
+            <div style={{ fontSize: 50 }}>💀</div>
+            <div className="sg-modal-title" style={{ color: "#ff2d95", textShadow: "0 0 20px #ff2d9555" }}>BLACKOUT</div>
+            <div className="sg-modal-sub">Out of moves</div>
+            <div style={{ display: "flex", gap: 10, marginTop: 18, justifyContent: "center" }}>
+              <button className="sg-modal-btn sg-modal-outline" onClick={onBack}>EXIT</button>
+              <button className="sg-modal-btn" style={{ background: "linear-gradient(90deg,#ff2d95,#ffaa00)" }} onClick={retry}>RETRY</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── CITY TAB ──────────────────────────────────────────────────── */
+function CityTab(props) {
+  const meta = props.meta, setMeta = props.setMeta;
+  const idle = calcIdle(meta);
+
+  function collect() {
+    setMeta(function(m) { const n = Object.assign({}, m, { coins: m.coins + calcIdle(m), lastCollect: Date.now() }); saveMeta(n); return n; });
+  }
+
+  function buyUpgrade(id, curLvl, cost) {
+    if (meta.coins < cost) return;
+    setMeta(function(m) {
+      const newUpg = Object.assign({}, m.upgrades, { [id]: curLvl + 1 });
+      const n = Object.assign({}, m, { coins: m.coins - cost, upgrades: newUpg });
+      saveMeta(n); return n;
+    });
+  }
+
+  return (
+    <div className="sg-tab-content">
+      <div className="sg-tab-heading">CITY COMMAND</div>
+      <div className="sg-section-label">DISTRICT MAP</div>
+      <div className="sg-district-grid">
+        {CAMPAIGN_LEVELS.map(function(lvl, i) {
+          const done = (meta.levelsCleared || []).includes(lvl.id);
+          const locked = i > 0 && !(meta.levelsCleared || []).includes(CAMPAIGN_LEVELS[i-1].id);
+          return (
+            <div key={lvl.id} className="sg-district-node" style={{ borderColor: done ? "#00ff88" : (locked ? "rgba(255,255,255,0.05)" : "rgba(0,229,255,0.25)"), background: done ? "rgba(0,255,136,0.07)" : (locked ? "rgba(255,255,255,0.01)" : "rgba(0,229,255,0.04)"), opacity: locked ? 0.5 : 1 }}>
+              <div style={{ fontSize: 24, marginBottom: 4 }}>{done ? "🏙️" : (locked ? "🔒" : "🌑")}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: done ? "#00ff88" : (locked ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.7)") }}>{lvl.name}</div>
+              {done && <div style={{ fontSize: 8, color: "#00ff8866", marginTop: 3 }}>POWERED</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="sg-section-label" style={{ marginTop: 16 }}>IDLE INCOME</div>
+      <div className="sg-idle-card">
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.65)" }}>Accumulated</div>
+          <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 22, color: "#ffaa00", marginTop: 4 }}>{idle}<span style={{ fontSize: 12, color: "rgba(255,255,255,0.28)", marginLeft: 6 }}>coins</span></div>
+          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.22)", marginTop: 3 }}>{(meta.upgrades && meta.upgrades.idleBoost) ? "Collecting since last visit" : "Upgrade Idle Generator to earn"}</div>
+        </div>
+        <button className="sg-collect-btn" onClick={collect} disabled={idle === 0} style={{ opacity: idle === 0 ? 0.35 : 1 }}>COLLECT</button>
+      </div>
+
+      <div className="sg-wallet-row" style={{ margin: "8px 0" }}>
+        <div className="sg-wallet-chip"><span style={{ color: "#ffaa00" }}>Coins</span> {meta.coins}</div>
+        <div className="sg-wallet-chip"><span style={{ color: "#00e5ff" }}>Parts</span> {meta.parts}</div>
+      </div>
+
+      <div className="sg-section-label" style={{ marginTop: 14 }}>UPGRADES</div>
+      <div className="sg-upg-grid">
+        {UPGRADE_DEFS.map(function(upg) {
+          const cur = (meta.upgrades && meta.upgrades[upg.id]) ? meta.upgrades[upg.id] : 0;
+          const maxed = cur >= upg.cost.length;
+          const cost = maxed ? 0 : upg.cost[cur];
+          const can = !maxed && meta.coins >= cost;
+          return (
+            <div key={upg.id} className="sg-upg-card">
+              <div style={{ fontSize: 20, marginBottom: 5 }}>{upg.icon}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.85)", marginBottom: 3 }}>{upg.label}</div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.32)", marginBottom: 8, lineHeight: 1.4 }}>{upg.desc}</div>
+              <div className="sg-pips">
+                {upg.cost.map(function(_, i) { return <div key={i} className="sg-pip" style={{ background: i < cur ? "#00e5ff" : "rgba(255,255,255,0.1)" }} />; })}
+              </div>
+              {maxed
+                ? <div style={{ fontSize: 8, color: "#00ff88", letterSpacing: "0.12em", marginTop: 6 }}>MAX</div>
+                : <button className="sg-upg-btn" disabled={!can} style={{ opacity: can ? 1 : 0.35 }} onClick={function() { buyUpgrade(upg.id, cur, cost); }}>{cost} coins</button>
+              }
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── DAILY TAB ─────────────────────────────────────────────────── */
+function DailyTab(props) {
+  const meta = props.meta, setMeta = props.setMeta, onPlay = props.onPlay;
+  const seed = todaySeed();
+  const today = String(seed);
+  const played = meta.dailyDate === today;
+
+  const dailyDef = {
+    id: "daily", name: "DAILY POWER CRISIS", moves: 18,
+    bids: ["apt","factory","lab","power"], hazards: 3, rngSeed: seed, isDaily: true,
+    hint: "Same board for everyone today — score big, use fewer moves!",
+  };
+
+  function handleComplete(rewards) {
+    setMeta(function(m) {
+      const n = Object.assign({}, m, { dailyDate: today, dailyScore: rewards.score, coins: m.coins + rewards.coins + 20, parts: m.parts + rewards.parts + 2 });
+      saveMeta(n); return n;
+    });
+  }
+
+  return (
+    <div className="sg-tab-content">
+      <div className="sg-tab-heading">DAILY CHALLENGE</div>
+      <div className="sg-daily-card">
+        <div style={{ fontSize: 44, marginBottom: 8 }}>🌆</div>
+        <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6 }}>{"CRISIS #" + (seed % 1000)}</div>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", marginBottom: 14, lineHeight: 1.5 }}>Same board for everyone today. Score big and use fewer moves to climb the board.</div>
+        <div className="sg-spec-row">
+          <div className="sg-spec-box"><span style={{ color: "#00e5ff", display: "block", fontSize: 8, letterSpacing: "0.14em", marginBottom: 3 }}>MOVES</span>{dailyDef.moves}</div>
+          <div className="sg-spec-box"><span style={{ color: "#ff2d95", display: "block", fontSize: 8, letterSpacing: "0.14em", marginBottom: 3 }}>HAZARDS</span>{dailyDef.hazards}</div>
+          <div className="sg-spec-box"><span style={{ color: "#ffaa00", display: "block", fontSize: 8, letterSpacing: "0.14em", marginBottom: 3 }}>BUILDINGS</span>{dailyDef.bids.length}</div>
+        </div>
+        {played
+          ? (
+            <div className="sg-daily-done">
+              <div style={{ fontSize: 26, marginBottom: 4 }}>✅</div>
+              <div style={{ fontSize: 12, color: "#00ff88", fontWeight: 600 }}>Complete!</div>
+              <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 20, color: "#ffaa00", margin: "6px 0 4px" }}>{(meta.dailyScore || 0).toLocaleString()}</div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.28)" }}>New board tomorrow</div>
+            </div>
+          )
+          : (
+            <button className="sg-modal-btn" style={{ background: "linear-gradient(90deg,#ff2d95,#ffaa00)", marginTop: 4 }} onClick={function() { onPlay(dailyDef, handleComplete); }}>
+              PLAY TODAY
+            </button>
+          )
+        }
+      </div>
+      <div className="sg-section-label" style={{ marginTop: 14 }}>BONUS ON COMPLETE</div>
+      <div style={{ display: "flex", gap: 8 }}>
+        {[{ icon: "⬡", val: "+20 coins", col: "#ffaa00" }, { icon: "◈", val: "+2 parts", col: "#00e5ff" }, { icon: "⭐", val: "District Star", col: "#00ff88" }].map(function(r, i) {
+          return (
+            <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "10px 6px", textAlign: "center" }}>
+              <div style={{ fontSize: 18, marginBottom: 4 }}>{r.icon}</div>
+              <div style={{ fontSize: 9, color: r.col }}>{r.val}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── EDITOR TAB ────────────────────────────────────────────────── */
+function EditorTab(props) {
+  const meta = props.meta, setMeta = props.setMeta, onPlay = props.onPlay;
+  const [brushColor, setBrushColor] = useState("cyan");
+  const [brushMode, setBrushMode] = useState("color");
+  const [board, setBoard] = useState(function() { return makeGrid(); });
+  const [levelName, setLevelName] = useState("MY LEVEL");
+  const [levelMoves, setLevelMoves] = useState(20);
+  const [levelBids, setLevelBids] = useState(["apt", "factory"]);
+  const [saved, setSaved] = useState(false);
+
+  function paint(r, c) {
+    setBoard(function(prev) {
+      const g = prev.map(function(row) { return row.slice(); });
+      if (brushMode === "corrupt") {
+        g[r][c] = Object.assign({}, g[r][c], { corrupted: true });
+      } else if (brushMode === "erase") {
+        g[r][c] = Object.assign({}, g[r][c], { corrupted: false });
+      } else {
+        g[r][c] = Object.assign({}, g[r][c], { color: brushColor, corrupted: false });
+      }
+      return g;
+    });
+  }
+
+  function buildTestDef() {
+    return {
+      id: "test", name: levelName || "MY LEVEL", moves: levelMoves, hazards: 0,
+      bids: levelBids.length > 0 ? levelBids : ["apt"],
+      boardData: board.map(function(row) { return row.map(function(t) { return Object.assign({}, t); }); }),
+      hint: "Your custom level!",
+    };
+  }
+
+  function saveLevel() {
+    const lvl = Object.assign({}, buildTestDef(), { id: "custom_" + Date.now(), isCustom: true });
+    setMeta(function(m) { const n = Object.assign({}, m, { customLevels: (m.customLevels || []).concat([lvl]) }); saveMeta(n); return n; });
+    setSaved(true); setTimeout(function() { setSaved(false); }, 2000);
+  }
+
+  const SZ = 44;
+
+  return (
+    <div className="sg-tab-content">
+      <div className="sg-tab-heading">LEVEL EDITOR</div>
+      <div className="sg-section-label">PAINT BRUSH</div>
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+        {COLORS.map(function(col) {
+          const active = brushMode === "color" && brushColor === col;
+          return (
+            <button key={col} className="sg-brush-btn"
+              style={{ background: active ? HEX[col] : HEX[col]+"25", borderColor: HEX[col], color: active ? "#06060f" : HEX[col] }}
+              onClick={function() { setBrushColor(col); setBrushMode("color"); }}>
+              {LABEL[col]}
+            </button>
+          );
+        })}
+        <button className="sg-brush-btn"
+          style={{ background: brushMode === "corrupt" ? "rgba(160,0,240,0.3)" : "rgba(160,0,240,0.1)", borderColor: "#cc44ff", color: brushMode === "corrupt" ? "#fff" : "#cc44ff" }}
+          onClick={function() { setBrushMode("corrupt"); }}>
+          CORRUPT
+        </button>
+        <button className="sg-brush-btn"
+          style={{ background: brushMode === "erase" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.7)" }}
+          onClick={function() { setBrushMode("erase"); }}>
+          CLEAR
+        </button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center", marginBottom: 12 }}>
+        {board.map(function(row, r) {
+          return (
+            <div key={r} style={{ display: "flex", gap: 3 }}>
+              {row.map(function(tile, c) {
+                const isCr = tile && tile.corrupted;
+                const hex = isCr ? null : (tile && tile.color ? HEX[tile.color] : null);
+                return (
+                  <div key={tile ? tile.id : (r+"-"+c)} onClick={function() { paint(r, c); }}
+                    style={{ width: SZ, height: SZ, borderRadius: 8, cursor: "pointer", border: "2px solid " + (isCr ? "rgba(160,0,240,0.5)" : (hex ? hex+"77" : "rgba(255,255,255,0.1)")), background: isCr ? "rgba(38,0,55,0.9)" : (hex ? hex+"2e" : "rgba(255,255,255,0.04)"), display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.1s" }}>
+                    {isCr
+                      ? <span style={{ fontSize: 16 }}>☠</span>
+                      : <div style={{ width: 18, height: 18, borderRadius: 3, transform: "rotate(45deg)", background: hex || "transparent" }} />
+                    }
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="sg-section-label">SETTINGS</div>
+      <div className="sg-editor-panel">
+        <div className="sg-setting-row">
+          <label>Name</label>
+          <input className="sg-input" value={levelName} onChange={function(e) { setLevelName(e.target.value); }} maxLength={24} />
+        </div>
+        <div className="sg-setting-row">
+          <label>Moves</label>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button className="sg-pill-btn" onClick={function() { setLevelMoves(function(m) { return Math.max(10, m - 2); }); }}>−</button>
+            <span style={{ fontFamily: "'Orbitron',monospace", fontSize: 16, color: "#00e5ff", minWidth: 32, textAlign: "center" }}>{levelMoves}</span>
+            <button className="sg-pill-btn" onClick={function() { setLevelMoves(function(m) { return Math.min(40, m + 2); }); }}>+</button>
+          </div>
+        </div>
+        <div className="sg-setting-row" style={{ alignItems: "flex-start" }}>
+          <label>Buildings</label>
+          <div style={{ display: "flex", gap: 5, flexWrap: "wrap", flex: 1 }}>
+            {BLDG_DEFS.map(function(b) {
+              const on = levelBids.includes(b.id);
+              return (
+                <button key={b.id}
+                  style={{ fontSize: 10, padding: "4px 8px", borderRadius: 6, border: "1px solid " + (on ? HEX[b.color] : "rgba(255,255,255,0.13)"), background: on ? HEX[b.color]+"22" : "rgba(255,255,255,0.04)", color: on ? HEX[b.color] : "rgba(255,255,255,0.38)", cursor: "pointer" }}
+                  onClick={function() { setLevelBids(function(prev) { return on ? prev.filter(function(x) { return x !== b.id; }) : prev.concat([b.id]); }); }}>
+                  {b.icon} {b.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+        <button className="sg-pill-btn" style={{ flex: 1 }} onClick={function() { setBoard(makeGrid()); }}>RESET</button>
+        <button className="sg-pill-btn" style={{ flex: 1, borderColor: "#ffaa00", color: "#ffaa00" }} onClick={function() { onPlay(buildTestDef(), function() {}); }}>TEST</button>
+        <button className="sg-pill-btn" style={{ flex: 1, borderColor: saved ? "#00ff88" : "#00e5ff", color: saved ? "#00ff88" : "#00e5ff", background: saved ? "rgba(0,255,136,0.1)" : "rgba(0,229,255,0.08)" }} onClick={saveLevel}>{saved ? "SAVED" : "SAVE"}</button>
+      </div>
+
+      {(meta.customLevels || []).length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <div className="sg-section-label">SAVED LEVELS</div>
+          {(meta.customLevels || []).map(function(lvl, i) {
+            return (
+              <div key={lvl.id} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "10px 12px", marginBottom: 6 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{lvl.name}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.28)" }}>{lvl.moves} moves</div>
+                </div>
+                <button className="sg-pill-btn" style={{ fontSize: 10 }} onClick={function() { onPlay(lvl, function() {}); }}>PLAY</button>
+                <button className="sg-pill-btn" style={{ fontSize: 10, borderColor: "#ff2d95", color: "#ff2d95" }} onClick={function() { setMeta(function(m) { const n = Object.assign({}, m, { customLevels: m.customLevels.filter(function(_, j) { return j !== i; }) }); saveMeta(n); return n; }); }}>X</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── CAMPAIGN TAB ──────────────────────────────────────────────── */
+function CampaignTab(props) {
+  const meta = props.meta, onPlay = props.onPlay;
+  return (
+    <div className="sg-tab-content">
+      <div className="sg-tab-heading">CAMPAIGN</div>
+      <div className="sg-section-label">{(meta.levelsCleared || []).length + "/" + CAMPAIGN_LEVELS.length + " DISTRICTS POWERED"}</div>
+      {CAMPAIGN_LEVELS.map(function(lvl, i) {
+        const done = (meta.levelsCleared || []).includes(lvl.id);
+        const locked = i > 0 && !(meta.levelsCleared || []).includes(CAMPAIGN_LEVELS[i-1].id);
+        return (
+          <div key={lvl.id} className="sg-campaign-card" style={{ borderColor: done ? "#00ff8855" : (locked ? "rgba(255,255,255,0.04)" : "rgba(0,229,255,0.22)"), background: done ? "rgba(0,255,136,0.05)" : (locked ? "rgba(255,255,255,0.01)" : "rgba(0,229,255,0.03)"), opacity: locked ? 0.45 : 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 28 }}>{done ? "🏙️" : (locked ? "🔒" : "🌑")}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: done ? "#00ff88" : (locked ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.85)"), marginBottom: 3 }}>{"0" + (i+1) + " · " + lvl.name}</div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.33)" }}>{lvl.moves + " moves"}</span>
+                  {lvl.hazards > 0 && <span style={{ fontSize: 10, color: "#ff2d9577" }}>{"☠ " + lvl.hazards}</span>}
+                </div>
+              </div>
+              {!locked && (
+                <button className="sg-modal-btn"
+                  style={{ background: done ? "rgba(0,255,136,0.18)" : "linear-gradient(90deg,#00e5ff,#00ff88)", color: done ? "#00ff88" : "#06060f", border: done ? "1px solid #00ff8844" : "none", fontSize: 10, padding: "8px 14px" }}
+                  onClick={function() { onPlay(lvl, null); }}>
+                  {done ? "REPLAY" : "PLAY"}
+                </button>
+              )}
+            </div>
+            {!locked && (
+              <div style={{ marginTop: 8, display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {lvl.bids.map(function(bid) {
+                  const b = BLDG_DEFS.find(function(x) { return x.id === bid; });
+                  return <span key={bid} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 4, background: HEX[b.color]+"20", color: HEX[b.color], border: "1px solid " + HEX[b.color]+"40" }}>{b.icon + " " + b.label}</span>;
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── ROOT APP ──────────────────────────────────────────────────── */
+function Shiftgrid() {
+  const [meta, setMeta] = useState(loadMeta);
+  const [tab, setTab] = useState("campaign");
+  const [playing, setPlaying] = useState(null);
+
+  function handlePlay(levelDef, cb) { setPlaying({ levelDef: levelDef, cb: cb || function() {} }); }
+
+  function handleComplete(rewards) {
+    const lvl = playing.levelDef;
+    if (playing.cb) playing.cb(rewards);
+    setMeta(function(m) {
+      const cleared = Array.from(new Set((m.levelsCleared || []).concat([lvl.id])));
+      const n = Object.assign({}, m, { coins: m.coins + (rewards.coins || 0), parts: m.parts + (rewards.parts || 0), levelsCleared: cleared });
+      saveMeta(n); return n;
+    });
+    setPlaying(null);
+  }
+
+  const TABS = [
+    { id: "campaign", icon: "🗺", label: "PLAY" },
+    { id: "city",     icon: "🌆", label: "CITY" },
+    { id: "daily",    icon: "📅", label: "DAILY" },
+    { id: "editor",   icon: "🛠", label: "EDITOR" },
+  ];
+
+  if (playing) {
+    return (
+      <div className="sg-root">
+        <GameBoard levelDef={playing.levelDef} meta={meta} onComplete={handleComplete} onBack={function() { setPlaying(null); }} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="sg-root">
+      <header style={{ textAlign: "center", marginBottom: 12, position: "relative", zIndex: 1, flexShrink: 0 }}>
+        <h1 className="sg-title">SHIFTGRID</h1>
+        <div className="sg-subtitle">NEON CITY RESTORATION ENGINE</div>
+      </header>
+      <div className="sg-wallet-row" style={{ marginBottom: 10, flexShrink: 0 }}>
+        <div className="sg-wallet-chip"><span style={{ color: "#ffaa00" }}>Coins</span> {meta.coins}</div>
+        <div className="sg-wallet-chip"><span style={{ color: "#00e5ff" }}>Parts</span> {meta.parts}</div>
+        <div className="sg-wallet-chip"><span style={{ color: "#00ff88" }}>Districts</span> {(meta.levelsCleared || []).length + "/" + CAMPAIGN_LEVELS.length}</div>
+      </div>
+      <div style={{ flex: 1, width: "100%", maxWidth: 440, overflowY: "auto", position: "relative", zIndex: 1 }}>
+        {tab === "campaign" && <CampaignTab meta={meta} onPlay={handlePlay} />}
+        {tab === "city"     && <CityTab meta={meta} setMeta={setMeta} />}
+        {tab === "daily"    && <DailyTab meta={meta} setMeta={setMeta} onPlay={handlePlay} />}
+        {tab === "editor"   && <EditorTab meta={meta} setMeta={setMeta} onPlay={handlePlay} />}
+      </div>
+      <nav className="sg-nav" style={{ flexShrink: 0 }}>
+        {TABS.map(function(t) {
+          return (
+            <button key={t.id} className={"sg-nav-btn" + (tab === t.id ? " active" : "")} onClick={function() { setTab(t.id); }}>
+              <span style={{ fontSize: 16 }}>{t.icon}</span>
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Shiftgrid />);
+  </script>
+
+</body>
+</html>
