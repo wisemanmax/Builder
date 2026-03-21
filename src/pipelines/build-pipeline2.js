@@ -1,67 +1,21 @@
-import { ST, persist } from '../lib/state.js'
-import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
-import { ghPageUrl } from '../lib/utils.js'
-import { MAX_FIX_PASSES } from '../config/constants.js'
-import { SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_PLAN, SYS_SPEC_COMPLIANCE } from '../config/prompts.js'
-import { getTemplateSkeleton } from '../lib/template-loader.js'
-import { injectProfileContext, mergeRulesWithProfile, formatBriefWithConversation } from '../lib/profile-context.js'
-import { callClaude, callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callClaudeAudit, resetCostAccum } from '../lib/ai.js'
-import { calculateBuildCost } from '../lib/cost.js'
-import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
-import { runLocalChecks } from '../lib/checks.js'
-import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
-import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
-import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
-import { showFeedbackCard } from '../components/feedback-card.js'
-import { renderGrid } from '../components/app-icon.js'
-import { pushToSupabase } from '../lib/storage.js'
-import { openProjectSheet } from '../screens/project.js'
-import { createStreamingPreview } from '../lib/streaming-preview.js'
-import { autoInjectSupabase } from '../lib/supabase-setup.js'
-
-// Check IDs that are advisory-only and should not count as critical failures
-var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
-
-// Retry wrapper for pipeline steps — retries on network/timeout errors
-function retryStep(fn, maxRetries, label) {
-  maxRetries = maxRetries || 2
-  function attempt(n) {
-    return fn().catch(function (e) {
-      var msg = String(e && e.message || e || '').toLowerCase()
-      var isRetryable = msg.indexOf('timed out') >= 0 || msg.indexOf('network') >= 0
-        || msg.indexOf('failed to fetch') >= 0 || msg.indexOf('load failed') >= 0
-        || msg.indexOf('aborted') >= 0
-      if (isRetryable && n < maxRetries) {
-        var delay = Math.min(3000 * Math.pow(2, n), 30000)
-        console.warn('[Pipeline2] ' + (label || 'Step') + ' failed (attempt ' + (n + 1) + '), retrying in ' + (delay / 1000) + 's:', e.message)
-        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
-          if (document.visibilityState !== 'visible') {
-            return new Promise(function (resolve) {
-              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
-              document.addEventListener('visibilitychange', onVis)
-            })
-          }
-        }).then(function () { return attempt(n + 1) })
-      }
-      throw e
-    })
-  }
-  return attempt(0)
-}
-
-function notifyUser(title, body) {
-  try {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
-      var n = new Notification(title, {
-        body: body,
-        icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%233D5AFE%22/%3E%3Ctext x=%2250%22 y=%2268%22 font-size=%2256%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E',
-        tag: 'builder2-pipeline',
-        renotify: true,
-      })
-      n.onclick = function () { window.focus(); n.close() }
-    }
-  } catch (e) { /* notifications not available */ }
-}
+import {
+  retryStep, notifyUser, setupPipelineGuards, resolveThoughtContext, resolveTemplateWithDesign,
+  buildEffectiveSys, buildUserMessage, saveAppLocally, saveChatSession, ADVISORY_CHECK_IDS,
+  renderComplianceCard, formatTemplateInjection,
+  ST, persist, persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel,
+  $, esc, toast, grad, uniqueSlug, autoName, scrubKeys, ghPageUrl,
+  MAX_FIX_PASSES,
+  SYS_BUILD, SYS_UPDATE, SYS_FIX, SYS_PLAN, SYS_SPEC_COMPLIANCE,
+  callClaudeMultiTurn, callClaudeRaw, callClaudeWithThinkingStream, callClaudeAudit, resetCostAccum,
+  calculateBuildCost,
+  ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest,
+  runLocalChecks,
+  addMsg, updatePS, scrollBot, registerPipeType, getPipelineSteps, clearPipelineSteps,
+  setPreview, clearPreview, waitForApproval, waitForRetryDecision,
+  createStreamingPreview, autoInjectSupabase,
+  showFeedbackCard, renderGrid, openProjectSheet,
+  injectProfileContext
+} from './pipeline-shared.js'
 
 /**
  * Builder2 — Claude-only pipeline (9 steps)
@@ -85,21 +39,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
   // Request notification permission early
   try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission() } catch (e) {}
 
-  var _wakeLock = null
-  function acquireWakeLock() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (wl) { _wakeLock = wl }).catch(function () {}) } catch (e) {} }
-  acquireWakeLock()
-  function _onVisChange() { if (document.visibilityState === 'visible' && ST._building) acquireWakeLock() }
-  document.addEventListener('visibilitychange', _onVisChange)
-  var _keepAlive = setInterval(function () { try { localStorage.setItem('bldr_ping', Date.now()) } catch (e) {} }, 15000)
-
-  var _lockRelease = null
-  try {
-    if (navigator.locks) {
-      navigator.locks.request('builder2-pipeline-' + pid, { mode: 'exclusive' }, function () {
-        return new Promise(function (resolve) { _lockRelease = resolve })
-      })
-    }
-  } catch (e) {}
+  var guards = setupPipelineGuards(pid)
 
   var appName = existingApp ? existingApp.name : ((customName && customName.trim()) || autoName(prompt))
   var appIcon = ST.pendingIcon
@@ -154,56 +94,16 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     // Step 1 — Build
     checkPipelineCancel()
     updatePS(pid, 1, 'active', 'Claude is writing your app\u2026')
-    var userMsg
-    if (existingApp) {
-      var currentCode = existingApp.code || ''
-      var prevPrompts = (existingApp.prompts || []).map(function (p2) { return p2.text }).join('\n\u2192 ')
-      var codeSection = currentCode ? '\n\nCURRENT APP CODE:\n' + currentCode.slice(0, 120000) : ''
-      var historySection = prevPrompts ? '\n\nBUILD HISTORY (for context):\n' + prevPrompts : ''
-      userMsg = 'CHANGE REQUEST: ' + prompt + historySection + codeSection + '\n\nApply the requested change to the existing code above. Return the complete modified HTML.'
-    } else {
-      userMsg = 'BUILD REQUEST: ' + prompt
-        + '\n\nCONTEXT: Single-file HTML app in sandboxed iframe. Offline-only, localStorage for persistence.'
-    }
+    var thoughtCtx = resolveThoughtContext()
+    specText = thoughtCtx.specText
+    rulesText = thoughtCtx.rulesText
+    var userMsg = buildUserMessage(prompt, existingApp, customName, thoughtCtx)
 
-    // Resolve template skeleton (may need async fetch if not yet loaded)
-    var tplPromise = Promise.resolve()
-    if (!existingApp && ST._pendingTemplate) {
-      var pending = ST._pendingTemplate
-      ST._pendingTemplate = null
-      tplPromise = (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
-        .then(function (skeleton) {
-          userMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture \u2014 expand, customize, and fill in all features):\n'
-            + skeleton
-            + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
-        })
-    }
+    // Resolve template skeleton with design customization
+    var tplPromise = existingApp ? Promise.resolve() : resolveTemplateWithDesign(userMsg, thoughtCtx.thoughtDesign).then(function (msg) { userMsg = msg })
 
     return tplPromise.then(function () {
-    var effectiveSys = existingApp ? SYS_UPDATE : SYS_BUILD
-    specText = 'No specification provided'
-    rulesText = 'No specific rules'
-    var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
-    if (activeThought) {
-      var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
-      var merged = mergeRulesWithProfile(linkedRules)
-      if (merged.mustRules.length || merged.mustNotRules.length) {
-        rulesText = 'MUST DO:\n' + merged.mustRules.map(function (r) { return '- ' + r }).join('\n')
-          + '\nMUST NOT DO:\n' + merged.mustNotRules.map(function (r) { return '- ' + r }).join('\n')
-        if (merged.niceToHave.length) {
-          rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
-        }
-        effectiveSys += '\n\nUSER RULES (follow these constraints strictly):\n' + rulesText
-      }
-      if (activeThought.brief) {
-        specText = formatBriefWithConversation(activeThought)
-        effectiveSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
-      }
-      if (!existingApp && activeThought.brief) {
-        userMsg = 'Build this app based on the specification above.\n\nApp Name: ' + (activeThought.brief.name || customName || 'My App') + '\n\nAdditional notes from user: ' + prompt
-      }
-    }
-    effectiveSys = injectProfileContext(effectiveSys)
+    var effectiveSys = buildEffectiveSys(existingApp ? SYS_UPDATE : SYS_BUILD, thoughtCtx)
 
     if (planJSON) { userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON }
     if (images && images.length) { userMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached \u2014 study them carefully and replicate the design, layout, colors, and style as closely as possible]' }
@@ -227,7 +127,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     if (_streamPreview) { _streamPreview.finalize(v1); _streamPreview.destroy() }
     updatePS(pid, 1, 'done', 'Build complete \u2713'); _persistProgress(1)
     // Save app locally early so code survives a crash
-    _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
+    saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
     if (thinkingText.trim()) {
       addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
     }
@@ -322,12 +222,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
       return retryStep(function () { return callClaudeRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000) }, 1, 'Compliance').then(function (raw) {
         try {
           var compliance = JSON.parse(raw)
-          addMsg({ role: 'asst', type: 'text', html: '<div style="padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:11px">'
-            + '<div style="font-weight:700;color:rgba(255,255,255,.9);margin-bottom:6px">Spec Compliance: ' + (compliance.score || 0) + '/100</div>'
-            + (compliance.matched && compliance.matched.length ? '<div style="color:rgba(255,255,255,.5);margin-bottom:2px">Matched:</div>' + compliance.matched.map(function (m) { return '<div style="color:rgba(76,175,80,.8);padding-left:8px">\u2713 ' + esc(m) + '</div>' }).join('') : '')
-            + (compliance.missing && compliance.missing.length ? '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Missing:</div>' + compliance.missing.map(function (m) { return '<div style="color:rgba(255,214,0,.7);padding-left:8px">\u26A0 ' + esc(m) + '</div>' }).join('') : '')
-            + (compliance.violations && compliance.violations.length ? '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Violations:</div>' + compliance.violations.map(function (m) { return '<div style="color:rgba(255,82,82,.7);padding-left:8px">\u2717 ' + esc(m) + '</div>' }).join('') : '')
-            + '</div>' })
+          addMsg({ role: 'asst', type: 'text', html: renderComplianceCard(compliance) })
           if (compliance.score < 50) {
             addMsg({ role: 'asst', type: 'text', text: 'Low spec compliance (' + compliance.score + '/100). The built app may not match your ideation brief. Consider re-running the think engine or providing more specific requirements.' })
           }
@@ -386,7 +281,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
         updatePS(pid, 8, 'done', 'Merged & deploying \u2713')
         var mc = $(mergeStatusId)
         if (mc) { var card = mc.querySelector('.merge-card'); if (card) card.innerHTML = '<div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">Merged to main \u2713</span><a class="merge-url" href="' + liveUrl + '" target="_blank">' + liveUrl + '</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>' }
-        _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, true)
+        saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, true)
         clearPreview(appId)
         toast('\uD83D\uDE80 ' + appName + ' is deploying!', 3500)
         return 'github'
@@ -394,13 +289,13 @@ export function runPipeline2(prompt, existingApp, customName, images) {
         var safeE = scrubKeys(e.message || String(e))
         updatePS(pid, 8, 'error', safeE)
         clearPreview(appId)
-        _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
+        saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
         addMsg({ role: 'asst', type: 'text', html: 'Merge failed: <strong>' + esc(safeE) + '</strong>. App saved locally.' })
         return 'local'
       })
     } else {
       updatePS(pid, 8, 'done', 'Saved locally \u2713')
-      _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
       clearPreview(appId)
       toast('\u2705 ' + appName + ' saved!', 2800)
       return 'local'
@@ -437,7 +332,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
   }).catch(function (err) {
     if (err.message === 'PIPELINE_CANCELLED') {
       clearPreview(appId)
-      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
       addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
       toast('Pipeline stopped', 3000)
@@ -447,7 +342,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     }
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
-      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
       renderGrid()
       return
@@ -456,7 +351,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
       updatePS(pid, 7, 'error', 'Changes requested')
       clearPreview(appId)
       addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
-      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
       $('bs-proj-btn').style.display = 'flex'
       renderGrid()
@@ -468,60 +363,12 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     notifyUser('Build Failed', safeMsg)
     toast('Error: ' + safeMsg, 5000)
   }).finally(function () {
-    _saveChatSession(appId, prompt)
+    saveChatSession(appId, prompt)
     persist()
     clearBuildSession()
     clearPipelineSteps()
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
-    clearInterval(_keepAlive)
-    document.removeEventListener('visibilitychange', _onVisChange)
-    if (_wakeLock) { try { _wakeLock.release() } catch (e) {} _wakeLock = null }
-    if (_lockRelease) { try { _lockRelease() } catch (e) {} _lockRelease = null }
-    try { localStorage.removeItem('bldr_ping') } catch (e) {}
+    guards.cleanup()
   })
-}
-
-function _saveChatSession(appId, prompt) {
-  var session = getCurrentSession()
-  if (!session.length) return
-  var app = null; for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === appId) { app = ST.apps[i]; break } }
-  if (!app) return
-  if (!app.chatHistory) app.chatHistory = []
-  app.chatHistory.unshift({ id: 's' + Date.now(), ts: new Date().toISOString(), prompt: (prompt || '').slice(0, 200), messages: session })
-  if (app.chatHistory.length > 10) app.chatHistory = app.chatHistory.slice(0, 10)
-  clearCurrentSession()
-}
-
-function _saveAppLocally(id, name, icon, ci, code, prompt, existingApp, ghPushed) {
-  if (existingApp) {
-    var idx = -1
-    for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === id) { idx = i; break } }
-    if (idx !== -1) {
-      ST.apps[idx].versions = [{ code: ST.apps[idx].code, ts: ST.apps[idx].updatedAt }].concat((ST.apps[idx].versions || []).slice(0, 9))
-      ST.apps[idx].prompts = (ST.apps[idx].prompts || []).concat([{ text: prompt, ts: new Date().toISOString(), type: 'update' }])
-      ST.apps[idx].code = code
-      ST.apps[idx].updatedAt = new Date().toISOString()
-      ST.apps[idx].ghPushed = ghPushed || ST.apps[idx].ghPushed || false
-    } else {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: code, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'update' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  } else {
-    var exists = false; for (var j = 0; j < ST.apps.length; j++) { if (ST.apps[j].id === id) { exists = true; break } }
-    if (!exists) {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: code, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'initial' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  }
-  if (ST.activeThoughtId) {
-    for (var ti = 0; ti < ST.thoughts.length; ti++) {
-      if (ST.thoughts[ti].id === ST.activeThoughtId) {
-        ST.thoughts[ti].linkedAppId = id
-        ST.thoughts[ti].status = 'built'
-        break
-      }
-    }
-  }
-  persist()
-  var app = null; for (var k = 0; k < ST.apps.length; k++) { if (ST.apps[k].id === id) { app = ST.apps[k]; break } }
-  if (app) pushToSupabase(app)
 }

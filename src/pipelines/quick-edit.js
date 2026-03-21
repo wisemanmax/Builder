@@ -1,20 +1,19 @@
 // Quick Edit Pipeline — 3-step fast pipeline for small changes (5-15 seconds)
 // Bypasses GPT audit, enhancement review, GitHub push, and approval gate
 
-import { ST, persist, checkPipelineCancel, clearPipelineCancel, persistBuildSession, clearBuildSession } from '../lib/state.js'
-import { $, esc, toast, scrubKeys } from '../lib/utils.js'
-import { SYS_UPDATE } from '../config/prompts.js'
-import { injectProfileContext } from '../lib/profile-context.js'
-import { callClaudeWithThinkingStream, resetCostAccum } from '../lib/ai.js'
-import { calculateBuildCost } from '../lib/cost.js'
-import { runLocalChecks } from '../lib/checks.js'
-import { addMsg, updatePS, scrollBot, clearPipelineSteps } from '../components/message.js'
-import { pushToSupabase } from '../lib/storage.js'
-import { renderGrid } from '../components/app-icon.js'
-import { createStreamingPreview } from '../lib/streaming-preview.js'
-import { autoInjectSupabase } from '../lib/supabase-setup.js'
-
-var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
+import {
+  ADVISORY_CHECK_IDS,
+  ST, persist, checkPipelineCancel, clearPipelineCancel,
+  $, esc, toast, scrubKeys,
+  SYS_UPDATE,
+  callClaudeWithThinkingStream, resetCostAccum,
+  calculateBuildCost,
+  runLocalChecks,
+  addMsg, updatePS, clearPipelineSteps,
+  createStreamingPreview, autoInjectSupabase,
+  renderGrid, pushToSupabase,
+  injectProfileContext
+} from './pipeline-shared.js'
 
 export var QUICK_EDIT_NAMES = ['Claude \u00B7 Edit', 'Automated Checks', 'Save']
 export var QUICK_EDIT_ICONS = ['\u270F\uFE0F', '\uD83D\uDCCB', '\u2705']

@@ -1,4 +1,5 @@
 import { getActiveProfile } from './state.js'
+import { resolveThemeVars, resolveAccentColor } from './design-tokens.js'
 
 /**
  * Build the profile context string to inject into any pipeline's system prompt.
@@ -144,6 +145,36 @@ export function formatBriefWithConversation(thought) {
 }
 
 /**
+ * Extract design overrides from a thought, with org brand identity as fallback.
+ * Returns { theme, accent, layout } or null if no design info is available.
+ */
+export function getThoughtDesignOverrides(thought) {
+  var design = (thought && thought.brief && thought.brief.design) || null
+  var profile = getActiveProfile()
+  var brand = (profile && profile.orgProfile && profile.orgProfile.brandIdentity) || null
+
+  // If thought has design, use it (with brand fallbacks for missing fields)
+  if (design) {
+    return {
+      theme: design.theme || (brand && brand.theme) || null,
+      accent: design.accent || (brand && brand.accentColor) || null,
+      layout: design.layout || null
+    }
+  }
+
+  // Fall back to org brand identity if no thought design
+  if (brand && (brand.theme || brand.accentColor)) {
+    return {
+      theme: brand.theme || null,
+      accent: brand.accentColor || null,
+      layout: null
+    }
+  }
+
+  return null
+}
+
+/**
  * Merge profile global rules with per-thought project rules.
  * Returns { mustRules, mustNotRules, niceToHave } merged arrays.
  */
@@ -156,4 +187,35 @@ export function mergeRulesWithProfile(linkedRules) {
     mustNotRules: (gr.mustNotRules || []).concat(lr.mustNotRules || []),
     niceToHave: (gr.niceToHave || []).concat(lr.niceToHave || [])
   }
+}
+
+/**
+ * Format thought design preferences into explicit CSS variable instructions.
+ * These instructions are injected alongside the template skeleton to ensure
+ * the LLM maintains the design tokens even if it rewrites the CSS.
+ *
+ * @param {object} design - { theme, accent, layout } from thought brief
+ * @returns {string} Instruction block or '' if no design prefs
+ */
+export function formatDesignAsCSS(design) {
+  if (!design) return ''
+  var lines = ['### CSS DESIGN VARIABLES (apply these to the :root block)']
+  if (design.theme) {
+    var themeVars = resolveThemeVars(design.theme)
+    if (themeVars) {
+      lines.push('--bg: ' + themeVars.bg + ';')
+      lines.push('--surface: ' + themeVars.surface + ';')
+      lines.push('--text: ' + themeVars.text + ';')
+      lines.push('--text2: ' + themeVars.text2 + ';')
+      lines.push('--border: ' + themeVars.border + ';')
+    }
+  }
+  if (design.accent) {
+    var hex = resolveAccentColor(design.accent)
+    if (hex) lines.push('--accent: ' + hex + ';')
+  }
+  if (design.layout) {
+    lines.push('Layout approach: ' + design.layout)
+  }
+  return lines.length > 1 ? lines.join('\n') : ''
 }

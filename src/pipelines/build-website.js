@@ -1,65 +1,24 @@
-import { ST, persist } from '../lib/state.js'
-import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
-import { ghPageUrl } from '../lib/utils.js'
-import { callClaudeRaw, resetCostAccum } from '../lib/ai.js'
-import { calculateBuildCost } from '../lib/cost.js'
-import { injectProfileContext, formatBriefWithConversation, mergeRulesWithProfile } from '../lib/profile-context.js'
-import { ghCreateBranch, ghPushTree, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
-import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
-import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
-import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
-import { showFeedbackCard } from '../components/feedback-card.js'
-import { renderGrid } from '../components/app-icon.js'
-import { pushToSupabase } from '../lib/storage.js'
-import { openProjectSheet } from '../screens/project.js'
-import { autoInjectSupabase } from '../lib/supabase-setup.js'
-import { getTemplateSkeleton } from '../lib/template-loader.js'
+import {
+  retryStep, notifyUser, setupPipelineGuards, resolveThoughtContext,
+  saveWebsiteApp, saveChatSession, formatTemplateInjection,
+  ST, persist, persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel,
+  $, esc, toast, grad, uniqueSlug, autoName, scrubKeys, ghPageUrl,
+  callClaudeRaw, resetCostAccum,
+  calculateBuildCost,
+  ghCreateBranch, ghMergeBranch, ghDeleteBranch, ghPushManifest,
+  addMsg, updatePS, scrollBot, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps,
+  setPreview, clearPreview, waitForApproval,
+  autoInjectSupabase,
+  showFeedbackCard, renderGrid, openProjectSheet,
+  injectProfileContext, getThoughtDesignOverrides, getTemplateSkeleton
+} from './pipeline-shared.js'
+import { ghPushTree } from '../lib/github.js'
 import {
   SYS_WEB_DECOMPOSE, SYS_WEB_SCAFFOLD, SYS_WEB_TOKENS, SYS_WEB_DATA,
   SYS_WEB_SHARED, SYS_WEB_FEATURES, SYS_WEB_LAYOUT, SYS_WEB_PAGES,
   SYS_WEB_ROUTING, SYS_WEB_DOCS, SYS_WEB_PREVIEW
 } from '../config/prompts-website.js'
 
-// Retry wrapper for pipeline steps
-function retryStep(fn, maxRetries, label) {
-  maxRetries = maxRetries || 2
-  function attempt(n) {
-    return fn().catch(function (e) {
-      var msg = String(e && e.message || e || '').toLowerCase()
-      var isRetryable = msg.indexOf('timed out') >= 0 || msg.indexOf('network') >= 0
-        || msg.indexOf('failed to fetch') >= 0 || msg.indexOf('load failed') >= 0
-        || msg.indexOf('aborted') >= 0
-      if (isRetryable && n < maxRetries) {
-        var delay = Math.min(3000 * Math.pow(2, n), 30000)
-        console.warn('[Website] ' + (label || 'Step') + ' failed (attempt ' + (n + 1) + '), retrying in ' + (delay / 1000) + 's:', e.message)
-        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
-          if (document.visibilityState !== 'visible') {
-            return new Promise(function (resolve) {
-              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
-              document.addEventListener('visibilitychange', onVis)
-            })
-          }
-        }).then(function () { return attempt(n + 1) })
-      }
-      throw e
-    })
-  }
-  return attempt(0)
-}
-
-function notifyUser(title, body) {
-  try {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
-      var n = new Notification(title, {
-        body: body,
-        icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%233D5AFE%22/%3E%3Ctext x=%2250%22 y=%2268%22 font-size=%2256%22 text-anchor=%22middle%22%3E%F0%9F%8C%90%3C/text%3E%3C/svg%3E',
-        tag: 'website-pipeline',
-        renotify: true,
-      })
-      n.onclick = function () { window.focus(); n.close() }
-    }
-  } catch (e) {}
-}
 
 // Parse JSON from Claude response, with fallback extraction
 function parseJSON(raw) {
@@ -115,23 +74,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     addMsg({ role: 'asst', type: 'pipeline', id: pid, pipelineType: 'website' })
   }, 0)
 
-  try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission() } catch (e) {}
-
-  var _wakeLock = null
-  function acquireWakeLock() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (wl) { _wakeLock = wl }).catch(function () {}) } catch (e) {} }
-  acquireWakeLock()
-  function _onVisChange() { if (document.visibilityState === 'visible' && ST._building) acquireWakeLock() }
-  document.addEventListener('visibilitychange', _onVisChange)
-  var _keepAlive = setInterval(function () { try { localStorage.setItem('bldr_ping', Date.now()) } catch (e) {} }, 15000)
-
-  var _lockRelease = null
-  try {
-    if (navigator.locks) {
-      navigator.locks.request('website-pipeline-' + pid, { mode: 'exclusive' }, function () {
-        return new Promise(function (resolve) { _lockRelease = resolve })
-      })
-    }
-  } catch (e) {}
+  var guards = setupPipelineGuards(pid)
 
   var appName = existingApp ? existingApp.name : ((customName && customName.trim()) || autoName(prompt))
   var appIcon = ST.pendingIcon
@@ -186,11 +129,13 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     })
   }
 
-  // Resolve template skeleton before pipeline starts (same pattern as thought engine)
   var _templateSkeleton = null
+  var _thoughtDesign = null
   if (!existingApp && ST._pendingTemplate) {
     var pending = ST._pendingTemplate
     ST._pendingTemplate = null
+    var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
+    _thoughtDesign = getThoughtDesignOverrides(activeThought)
     p = p.then(function () {
       return (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
         .then(function (skeleton) { _templateSkeleton = skeleton })
@@ -205,31 +150,21 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     if (images && images.length) decomposeMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached]'
     var effectiveDecomposeSys = injectProfileContext(SYS_WEB_DECOMPOSE)
 
-    // Inject think engine spec and rules into decompose step
-    var activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
-    if (activeThought) {
-      if (activeThought.brief) {
-        var specText = formatBriefWithConversation(activeThought)
-        effectiveDecomposeSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
+    var thoughtCtx = resolveThoughtContext()
+    if (thoughtCtx.activeThought) {
+      if (thoughtCtx.specText !== 'No specification provided') {
+        effectiveDecomposeSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + thoughtCtx.specText
       }
-      var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
-      var merged = mergeRulesWithProfile(linkedRules)
-      if (merged.mustRules.length || merged.mustNotRules.length) {
-        var rulesText = 'MUST DO:\n' + merged.mustRules.map(function (r) { return '- ' + r }).join('\n')
-          + '\nMUST NOT DO:\n' + merged.mustNotRules.map(function (r) { return '- ' + r }).join('\n')
-        if (merged.niceToHave.length) rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
-        effectiveDecomposeSys += '\n\nUSER RULES (follow these constraints strictly):\n' + rulesText
+      if (thoughtCtx.rulesText !== 'No specific rules') {
+        effectiveDecomposeSys += '\n\nUSER RULES (follow these constraints strictly):\n' + thoughtCtx.rulesText
       }
-      if (!existingApp && activeThought.brief) {
-        decomposeMsg = 'Build a website based on the specification above.\n\nSite Name: ' + (activeThought.brief.name || customName || 'My Site') + '\n\nAdditional notes: ' + prompt
+      if (!existingApp && thoughtCtx.activeThought.brief) {
+        decomposeMsg = 'Build a website based on the specification above.\n\nSite Name: ' + (thoughtCtx.activeThought.brief.name || customName || 'My Site') + '\n\nAdditional notes: ' + prompt
         if (images && images.length) decomposeMsg += '\n\n[' + images.length + ' reference image' + (images.length > 1 ? 's' : '') + ' attached]'
       }
     }
-    // Inject template skeleton into decompose context (same as thought engine pattern)
     if (_templateSkeleton) {
-      decomposeMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture — expand, customize, and fill in all features):\n'
-        + _templateSkeleton
-        + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
+      decomposeMsg += formatTemplateInjection(_templateSkeleton, _thoughtDesign)
     }
     return retryStep(function () { return callClaudeRaw(effectiveDecomposeSys, decomposeMsg, 4000, images) }, 2, 'Decompose').then(function (raw) {
       decomposition = raw
@@ -407,7 +342,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
         updatePS(pid, 13, 'done', 'Merged & deploying \u2713')
         var mc = $(mergeStatusId)
         if (mc) { var card = mc.querySelector('.merge-card'); if (card) card.innerHTML = '<div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">Merged to main \u2713</span><span class="merge-meta">Website source in sites/' + appId + '/</span></div>' }
-        _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, true)
+        saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, true)
         clearPreview(appId)
         toast('\uD83C\uDF10 ' + appName + ' merged!', 3500)
         return 'github'
@@ -415,13 +350,13 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
         var safeE = scrubKeys(e.message || String(e))
         updatePS(pid, 13, 'error', safeE)
         clearPreview(appId)
-        _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
+        saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
         addMsg({ role: 'asst', type: 'text', html: 'Merge failed: <strong>' + esc(safeE) + '</strong>. Website saved locally.' })
         return 'local'
       })
     } else {
       updatePS(pid, 13, 'done', 'Saved locally \u2713')
-      _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
+      saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
       clearPreview(appId)
       toast('\u2705 ' + appName + ' saved!', 2800)
       return 'local'
@@ -460,7 +395,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
   }).catch(function (err) {
     if (err.message === 'PIPELINE_CANCELLED') {
       clearPreview(appId)
-      if (Object.keys(files).length) _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
+      if (Object.keys(files).length) saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
       ST.activeAppId = appId
       addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
       toast('Pipeline stopped', 3000)
@@ -470,7 +405,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     }
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
-      if (Object.keys(files).length) _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
+      if (Object.keys(files).length) saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
       ST.activeAppId = appId
       renderGrid()
       return
@@ -479,7 +414,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
       updatePS(pid, 12, 'error', 'Changes requested')
       clearPreview(appId)
       addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
-      if (Object.keys(files).length) _saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
+      if (Object.keys(files).length) saveWebsiteApp(appId, appName, appIcon, appCi, files, previewHtml, prompt, existingApp, false)
       ST.activeAppId = appId
       $('bs-proj-btn').style.display = 'flex'
       renderGrid()
@@ -491,62 +426,12 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     notifyUser('Website Build Failed', safeMsg)
     toast('Error: ' + safeMsg, 5000)
   }).finally(function () {
-    _saveChatSession(appId, prompt)
+    saveChatSession(appId, prompt)
     persist()
     clearBuildSession()
     clearPipelineSteps()
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
-    clearInterval(_keepAlive)
-    document.removeEventListener('visibilitychange', _onVisChange)
-    if (_wakeLock) { try { _wakeLock.release() } catch (e) {} _wakeLock = null }
-    if (_lockRelease) { try { _lockRelease() } catch (e) {} _lockRelease = null }
-    try { localStorage.removeItem('bldr_ping') } catch (e) {}
+    guards.cleanup()
   })
-}
-
-function _saveChatSession(appId, prompt) {
-  var session = getCurrentSession()
-  if (!session.length) return
-  var app = null; for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === appId) { app = ST.apps[i]; break } }
-  if (!app) return
-  if (!app.chatHistory) app.chatHistory = []
-  app.chatHistory.unshift({ id: 's' + Date.now(), ts: new Date().toISOString(), prompt: (prompt || '').slice(0, 200), messages: session })
-  if (app.chatHistory.length > 10) app.chatHistory = app.chatHistory.slice(0, 10)
-  clearCurrentSession()
-}
-
-function _saveWebsiteApp(id, name, icon, ci, siteFiles, preview, prompt, existingApp, ghPushed) {
-  if (existingApp) {
-    var idx = -1
-    for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === id) { idx = i; break } }
-    if (idx !== -1) {
-      ST.apps[idx].versions = [{ code: ST.apps[idx].code, ts: ST.apps[idx].updatedAt }].concat((ST.apps[idx].versions || []).slice(0, 9))
-      ST.apps[idx].prompts = (ST.apps[idx].prompts || []).concat([{ text: prompt, ts: new Date().toISOString(), type: 'update' }])
-      ST.apps[idx].code = preview
-      ST.apps[idx].type = 'website'
-      ST.apps[idx].files = siteFiles
-      ST.apps[idx].updatedAt = new Date().toISOString()
-      ST.apps[idx].ghPushed = ghPushed || ST.apps[idx].ghPushed || false
-    } else {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: preview, type: 'website', files: siteFiles, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'update' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  } else {
-    var exists = false; for (var j = 0; j < ST.apps.length; j++) { if (ST.apps[j].id === id) { exists = true; break } }
-    if (!exists) {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: preview, type: 'website', files: siteFiles, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'initial' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  }
-  if (ST.activeThoughtId) {
-    for (var ti = 0; ti < ST.thoughts.length; ti++) {
-      if (ST.thoughts[ti].id === ST.activeThoughtId) {
-        ST.thoughts[ti].linkedAppId = id
-        ST.thoughts[ti].status = 'built'
-        break
-      }
-    }
-  }
-  persist()
-  var app = null; for (var k = 0; k < ST.apps.length; k++) { if (ST.apps[k].id === id) { app = ST.apps[k]; break } }
-  if (app) pushToSupabase(app)
 }
