@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2048 - Fullscreen Puzzle Game</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Source+Sans+Pro:wght@400;600;700&display=swap');
 
         :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
+            --bg-primary: #1E3A8A;
+            --bg-secondary: #3B82F6;
             --bg-tertiary: #334155;
             --text-primary: #f8fafc;
             --text-secondary: #cbd5e1;
@@ -18,7 +18,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --border-radius: 12px;
+            --border-radius: 8px;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             --transition: all 150ms ease;
@@ -31,7 +31,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow-x: hidden;
@@ -71,6 +71,7 @@
         }
 
         .game-title {
+            font-family: 'Merriweather', serif;
             font-size: clamp(2rem, 6vw, 3rem);
             font-weight: 700;
             background: linear-gradient(135deg, var(--accent), var(--success));
@@ -388,6 +389,7 @@
         </main>
 
         <div class="game-instructions">
+            <h2>Instructions</h2>
             <p><strong>HOW TO PLAY:</strong> Use arrow keys or swipe to move tiles. When two tiles with the same number touch, they merge into one!</p>
         </div>
     </div>
@@ -403,7 +405,7 @@
         </div>
     </div>
 
-    <div class="error-message" id="errorMessage"></div>
+    <div class="error-message" id="errorMessage" role="alert"></div>
 
     <script>
         const state = {
@@ -586,7 +588,7 @@
                 for (let i = 0; i < newRow.length - 1; i++) {
                     if (newRow[i] === newRow[i + 1]) {
                         newRow[i] *= 2;
-                        scoreGain += newRow[i];
+                        scoreGain += newRow[i] * getMultiplier(newRow[i]);
                         if (newRow[i] === 2048 && !state.hasWon) {
                             state.hasWon = true;
                             showModal('You Win!', true);
@@ -627,7 +629,7 @@
                 for (let i = newRow.length - 1; i > 0; i--) {
                     if (newRow[i] === newRow[i - 1]) {
                         newRow[i] *= 2;
-                        scoreGain += newRow[i];
+                        scoreGain += newRow[i] * getMultiplier(newRow[i]);
                         if (newRow[i] === 2048 && !state.hasWon) {
                             state.hasWon = true;
                             showModal('You Win!', true);
@@ -676,7 +678,7 @@
                 for (let i = 0; i < newCol.length - 1; i++) {
                     if (newCol[i] === newCol[i + 1]) {
                         newCol[i] *= 2;
-                        scoreGain += newCol[i];
+                        scoreGain += newCol[i] * getMultiplier(newCol[i]);
                         if (newCol[i] === 2048 && !state.hasWon) {
                             state.hasWon = true;
                             showModal('You Win!', true);
@@ -724,7 +726,7 @@
                 for (let i = newCol.length - 1; i > 0; i--) {
                     if (newCol[i] === newCol[i - 1]) {
                         newCol[i] *= 2;
-                        scoreGain += newCol[i];
+                        scoreGain += newCol[i] * getMultiplier(newCol[i]);
                         if (newCol[i] === 2048 && !state.hasWon) {
                             state.hasWon = true;
                             showModal('You Win!', true);
@@ -753,6 +755,13 @@
             }
             
             return moved;
+        }
+
+        function getMultiplier(value) {
+            if (value >= 1024) return 4;
+            if (value >= 512) return 3;
+            if (value >= 256) return 2;
+            return 1;
         }
 
         function canMove() {
