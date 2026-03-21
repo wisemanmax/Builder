@@ -205,6 +205,7 @@ export function buildUserMessage(prompt, existingApp, customName, thoughtCtx) {
   } else {
     userMsg = 'BUILD REQUEST: ' + prompt
       + '\n\nCONTEXT: Single-file HTML app in sandboxed iframe. Offline-only, localStorage for persistence.'
+      + '\n\nREQUIREMENTS: Build a complete, fully-functional app. Every button must work. Every feature mentioned above must be implemented — no placeholders or TODO comments. Include 5-8 realistic demo data items on first load. Handle all UI states (empty, loading, populated, error).'
     // Override with thought-based message if active
     if (thoughtCtx && thoughtCtx.activeThought && thoughtCtx.activeThought.brief) {
       userMsg = 'Build this app based on the specification above.\n\nApp Name: ' + (thoughtCtx.activeThought.brief.name || customName || 'My App') + '\n\nAdditional notes from user: ' + prompt
