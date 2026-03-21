@@ -1,26 +1,26 @@
-import { ST, persist } from '../lib/state.js'
-import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
-import { ghPageUrl } from '../lib/utils.js'
-import { MAX_FIX_PASSES } from '../config/constants.js'
-import { callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit, callGPTRaw2, callGPTMultiTurn2, callGPTWithStream, callGPTAudit2, resetCostAccum } from '../lib/ai.js'
-import { calculateBuildCost } from '../lib/cost.js'
-import { injectProfileContext, formatBriefWithConversation, mergeRulesWithProfile } from '../lib/profile-context.js'
-import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
-import { runLocalChecks } from '../lib/checks.js'
-import { addMsg, updatePS, scrollBot, getCurrentSession, clearCurrentSession, registerPipeType, getPipelineSteps, clearPipelineSteps } from '../components/message.js'
-import { persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel } from '../lib/state.js'
-import { setPreview, clearPreview, waitForApproval } from '../components/approval-card.js'
-import { showFeedbackCard } from '../components/feedback-card.js'
-import { renderGrid } from '../components/app-icon.js'
-import { pushToSupabase } from '../lib/storage.js'
-import { openProjectSheet } from '../screens/project.js'
+import {
+  retryStep, notifyUser, setupPipelineGuards, resolveThoughtContext,
+  saveAppLocally, saveChatSession, formatTemplateInjection,
+  ADVISORY_CHECK_IDS,
+  ST, persist, persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel,
+  $, esc, toast, grad, uniqueSlug, autoName, scrubKeys, ghPageUrl,
+  MAX_FIX_PASSES,
+  callClaudeRaw, callClaudeMultiTurn, callClaudeWithThinkingStream, callClaudeAudit,
+  callGPTRaw2, callGPTMultiTurn2, callGPTWithStream, callGPTAudit2,
+  resetCostAccum,
+  calculateBuildCost,
+  ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest,
+  runLocalChecks,
+  addMsg, updatePS, scrollBot, registerPipeType, getPipelineSteps, clearPipelineSteps,
+  setPreview, clearPreview, waitForApproval,
+  createStreamingPreview, autoInjectSupabase,
+  showFeedbackCard, renderGrid, openProjectSheet,
+  injectProfileContext, getThoughtDesignOverrides, getTemplateSkeleton
+} from './pipeline-shared.js'
 import {
   SYS_WEB2_RECON, SYS_WEB2_BRAND, SYS_WEB2_STRUCTURE, SYS_WEB2_DESIGN, SYS_WEB2_BUILD, SYS_WEB2_UPDATE, SYS_WEB2_FIX, SYS_WEB2_AUDIT
 } from '../config/prompts-website2.js'
 import { SYS_AUDIT } from '../config/prompts.js'
-import { createStreamingPreview } from '../lib/streaming-preview.js'
-import { autoInjectSupabase } from '../lib/supabase-setup.js'
-import { getTemplateSkeleton } from '../lib/template-loader.js'
 
 // Provider-aware wrappers — route to Claude or GPT based on user toggle
 function _raw(sys, msg, maxTokens, images) {
@@ -37,50 +37,6 @@ function _audit(code, customSysPrompt) {
   return ST.website2Provider === 'chatgpt' ? callGPTAudit2(code, customSysPrompt) : callClaudeAudit(code, customSysPrompt)
 }
 function _providerName() { return ST.website2Provider === 'chatgpt' ? 'ChatGPT' : 'Claude' }
-
-// Check IDs that are advisory-only
-var ADVISORY_CHECK_IDS = ['no-innerhtml-risk', 'fetch-calls', 'inline-styles', 'no-div-onclick', 'no-innerhtml-xss', 'has-css-vars', 'has-main', 'responsive-typography', 'touch-friendly-inputs']
-
-// Retry wrapper for pipeline steps
-function retryStep(fn, maxRetries, label) {
-  maxRetries = maxRetries || 2
-  function attempt(n) {
-    return fn().catch(function (e) {
-      var msg = String(e && e.message || e || '').toLowerCase()
-      var isRetryable = msg.indexOf('timed out') >= 0 || msg.indexOf('network') >= 0
-        || msg.indexOf('failed to fetch') >= 0 || msg.indexOf('load failed') >= 0
-        || msg.indexOf('aborted') >= 0
-      if (isRetryable && n < maxRetries) {
-        var delay = Math.min(3000 * Math.pow(2, n), 30000)
-        console.warn('[Website2] ' + (label || 'Step') + ' failed (attempt ' + (n + 1) + '), retrying in ' + (delay / 1000) + 's:', e.message)
-        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
-          if (document.visibilityState !== 'visible') {
-            return new Promise(function (resolve) {
-              function onVis() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); resolve() } }
-              document.addEventListener('visibilitychange', onVis)
-            })
-          }
-        }).then(function () { return attempt(n + 1) })
-      }
-      throw e
-    })
-  }
-  return attempt(0)
-}
-
-function notifyUser(title, body) {
-  try {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
-      var n = new Notification(title, {
-        body: body,
-        icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%233D5AFE%22/%3E%3Ctext x=%2250%22 y=%2268%22 font-size=%2256%22 text-anchor=%22middle%22%3E%F0%9F%8C%90%3C/text%3E%3C/svg%3E',
-        tag: 'website2-pipeline',
-        renotify: true,
-      })
-      n.onclick = function () { window.focus(); n.close() }
-    }
-  } catch (e) {}
-}
 
 /**
  * Website Builder 2 — Claude-Only Single-File Pipeline (Revised, 12 steps)
@@ -113,21 +69,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
   try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission() } catch (e) {}
 
-  var _wakeLock = null
-  function acquireWakeLock() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (wl) { _wakeLock = wl }).catch(function () {}) } catch (e) {} }
-  acquireWakeLock()
-  function _onVisChange() { if (document.visibilityState === 'visible' && ST._building) acquireWakeLock() }
-  document.addEventListener('visibilitychange', _onVisChange)
-  var _keepAlive = setInterval(function () { try { localStorage.setItem('bldr_ping', Date.now()) } catch (e) {} }, 15000)
-
-  var _lockRelease = null
-  try {
-    if (navigator.locks) {
-      navigator.locks.request('website2-pipeline-' + pid, { mode: 'exclusive' }, function () {
-        return new Promise(function (resolve) { _lockRelease = resolve })
-      })
-    }
-  } catch (e) {}
+  var guards = setupPipelineGuards(pid)
 
   var appName = existingApp ? existingApp.name : ((customName && customName.trim()) || autoName(prompt))
   var appIcon = ST.pendingIcon
@@ -159,11 +101,13 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     })
   }
 
-  // Resolve template skeleton before pipeline starts (same pattern as thought engine)
   var _templateSkeleton = null
+  var _thoughtDesign = null
   if (!existingApp && ST._pendingTemplate) {
     var pending = ST._pendingTemplate
     ST._pendingTemplate = null
+    var activeThoughtTpl = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
+    _thoughtDesign = getThoughtDesignOverrides(activeThoughtTpl)
     p = p.then(function () {
       return (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
         .then(function (skeleton) { _templateSkeleton = skeleton })
@@ -176,30 +120,15 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     var reconMsg = 'Analyze this website/site description and extract all content, navigation, branding, and structure. Build a CONTENT_MANIFEST of every stat, name, number, and claim found:\n\n' + prompt
     if (images && images.length) reconMsg += '\n\n[' + images.length + ' screenshot' + (images.length > 1 ? 's' : '') + ' attached \u2014 analyze the visual design, layout, colors, typography, and content from these images]'
 
-    // Inject think engine spec and rules into recon
-    activeThought = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
-    _specText = ''
-    _rulesText = ''
+    var thoughtCtx = resolveThoughtContext()
+    activeThought = thoughtCtx.activeThought
+    _specText = thoughtCtx.specText !== 'No specification provided' ? thoughtCtx.specText : ''
+    _rulesText = thoughtCtx.rulesText !== 'No specific rules' ? thoughtCtx.rulesText : ''
     var effectiveReconSys = SYS_WEB2_RECON
-    if (activeThought) {
-      if (activeThought.brief) {
-        _specText = formatBriefWithConversation(activeThought)
-        effectiveReconSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + _specText
-      }
-      var linkedRules = activeThought.linkedRulesId ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId }) : null
-      var merged = mergeRulesWithProfile(linkedRules)
-      if (merged.mustRules.length || merged.mustNotRules.length) {
-        _rulesText = 'MUST DO:\n' + merged.mustRules.map(function (r) { return '- ' + r }).join('\n')
-          + '\nMUST NOT DO:\n' + merged.mustNotRules.map(function (r) { return '- ' + r }).join('\n')
-        if (merged.niceToHave.length) _rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
-        effectiveReconSys += '\n\nUSER RULES (follow these constraints strictly):\n' + _rulesText
-      }
-    }
-    // Inject template skeleton into recon context (same as thought engine pattern)
+    if (_specText) effectiveReconSys += '\n\nAPP SPECIFICATION (from user ideation session):\n' + _specText
+    if (_rulesText) effectiveReconSys += '\n\nUSER RULES (follow these constraints strictly):\n' + _rulesText
     if (_templateSkeleton) {
-      reconMsg += '\n\nTEMPLATE SKELETON (use as your starting architecture — expand, customize, and fill in all features):\n'
-        + _templateSkeleton
-        + '\n\nUse the skeleton above as your base structure. Keep its layout pattern, state shape, and responsive strategy. Replace all placeholder content with fully implemented features.'
+      reconMsg += formatTemplateInjection(_templateSkeleton, _thoughtDesign)
     }
     return retryStep(function () { return _raw(effectiveReconSys, reconMsg, 6000, images) }, 2, 'Recon').then(function (raw) {
       reconJSON = raw
@@ -304,7 +233,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     v1 = code
     if (_streamPreview) { _streamPreview.finalize(v1); _streamPreview.destroy() }
     updatePS(pid, 4, 'done', 'Build complete \u2713'); _persistProgress(4)
-    _saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
+    saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
     if (thinkingText.trim()) {
       addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
     }
@@ -442,7 +371,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         updatePS(pid, 11, 'done', 'Merged & deploying \u2713')
         var mc = $(mergeStatusId)
         if (mc) { var card = mc.querySelector('.merge-card'); if (card) card.innerHTML = '<div class="merge-ico">\uD83D\uDC19</div><div class="merge-info"><span class="merge-title">Merged to main \u2713</span><a class="merge-url" href="' + liveUrl + '" target="_blank">' + liveUrl + '</a><span class="merge-meta">GitHub Pages deploys in ~60s</span></div>' }
-        _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, true)
+        saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, true)
         clearPreview(appId)
         toast('\uD83C\uDF10 ' + appName + ' is deploying!', 3500)
         return 'github'
@@ -450,13 +379,13 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         var safeE = scrubKeys(e.message || String(e))
         updatePS(pid, 11, 'error', safeE)
         clearPreview(appId)
-        _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
+        saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
         addMsg({ role: 'asst', type: 'text', html: 'Merge failed: <strong>' + esc(safeE) + '</strong>. Website saved locally.' })
         return 'local'
       })
     } else {
       updatePS(pid, 11, 'done', 'Saved locally \u2713')
-      _saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2, prompt, existingApp, false)
       clearPreview(appId)
       toast('\u2705 ' + appName + ' saved!', 2800)
       return 'local'
@@ -493,7 +422,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
   }).catch(function (err) {
     if (err.message === 'PIPELINE_CANCELLED') {
       clearPreview(appId)
-      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
       addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
       toast('Pipeline stopped', 3000)
@@ -503,7 +432,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     }
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
-      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
       renderGrid()
       return
@@ -512,7 +441,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
       updatePS(pid, 10, 'error', 'Changes requested')
       clearPreview(appId)
       addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
-      _saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, v2 || v1 || '', prompt, existingApp, false)
       ST.activeAppId = appId
       $('bs-proj-btn').style.display = 'flex'
       renderGrid()
@@ -524,60 +453,13 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     notifyUser('Website Build Failed', safeMsg)
     toast('Error: ' + safeMsg, 5000)
   }).finally(function () {
-    _saveChatSession(appId, prompt)
+    saveChatSession(appId, prompt)
     persist()
     clearBuildSession()
     clearPipelineSteps()
     ST._building = false
     var sb = $('send-btn'); if (sb) sb.disabled = false
-    clearInterval(_keepAlive)
-    document.removeEventListener('visibilitychange', _onVisChange)
-    if (_wakeLock) { try { _wakeLock.release() } catch (e) {} _wakeLock = null }
-    if (_lockRelease) { try { _lockRelease() } catch (e) {} _lockRelease = null }
-    try { localStorage.removeItem('bldr_ping') } catch (e) {}
+    guards.cleanup()
   })
 }
 
-function _saveChatSession(appId, prompt) {
-  var session = getCurrentSession()
-  if (!session.length) return
-  var app = null; for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === appId) { app = ST.apps[i]; break } }
-  if (!app) return
-  if (!app.chatHistory) app.chatHistory = []
-  app.chatHistory.unshift({ id: 's' + Date.now(), ts: new Date().toISOString(), prompt: (prompt || '').slice(0, 200), messages: session })
-  if (app.chatHistory.length > 10) app.chatHistory = app.chatHistory.slice(0, 10)
-  clearCurrentSession()
-}
-
-function _saveAppLocally(id, name, icon, ci, code, prompt, existingApp, ghPushed) {
-  if (existingApp) {
-    var idx = -1
-    for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === id) { idx = i; break } }
-    if (idx !== -1) {
-      ST.apps[idx].versions = [{ code: ST.apps[idx].code, ts: ST.apps[idx].updatedAt }].concat((ST.apps[idx].versions || []).slice(0, 9))
-      ST.apps[idx].prompts = (ST.apps[idx].prompts || []).concat([{ text: prompt, ts: new Date().toISOString(), type: 'update' }])
-      ST.apps[idx].code = code
-      ST.apps[idx].updatedAt = new Date().toISOString()
-      ST.apps[idx].ghPushed = ghPushed || ST.apps[idx].ghPushed || false
-    } else {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: code, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'update' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  } else {
-    var exists = false; for (var j = 0; j < ST.apps.length; j++) { if (ST.apps[j].id === id) { exists = true; break } }
-    if (!exists) {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: code, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'initial' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  }
-  if (ST.activeThoughtId) {
-    for (var ti = 0; ti < ST.thoughts.length; ti++) {
-      if (ST.thoughts[ti].id === ST.activeThoughtId) {
-        ST.thoughts[ti].linkedAppId = id
-        ST.thoughts[ti].status = 'built'
-        break
-      }
-    }
-  }
-  persist()
-  var app = null; for (var k = 0; k < ST.apps.length; k++) { if (ST.apps[k].id === id) { app = ST.apps[k]; break } }
-  if (app) pushToSupabase(app)
-}

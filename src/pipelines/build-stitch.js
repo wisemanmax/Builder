@@ -1,24 +1,22 @@
-import { ST, persist, checkPipelineCancel } from '../lib/state.js'
-import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
-import { ghPageUrl } from '../lib/utils.js'
+import {
+  retryStep, resolveThoughtContext, saveAppLocally, notifyUser, formatTemplateInjection,
+  ST, persist, persistBuildSession, clearBuildSession, checkPipelineCancel, clearPipelineCancel,
+  $, esc, toast, grad, uniqueSlug, autoName, scrubKeys, ghPageUrl,
+  callClaudeRaw, callClaude, callClaudeWithThinkingStream, callGPTRaw2, resetCostAccum,
+  calculateBuildCost,
+  ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest,
+  runLocalChecks,
+  addMsg, updatePS,
+  setPreview, clearPreview, waitForApproval,
+  createStreamingPreview, autoInjectSupabase,
+  showFeedbackCard, renderGrid, openProjectSheet,
+  injectProfileContext, getThoughtDesignOverrides, getTemplateSkeleton
+} from './pipeline-shared.js'
+import { waitForBlueprintApproval } from '../components/approval-card.js'
 import { SYS_STITCH_ENHANCE, SYS_STITCH_VERIFY, GPT4O_STITCH_REVIEW, SYS_STITCH_FIX1, SYS_STITCH_FIX2 } from '../config/prompts-stitch.js'
 import { PIPE5_STATUS, GRADS } from '../config/constants.js'
-import { callClaudeRaw, callClaude, callClaudeWithThinkingStream, callGPTRaw2, fetchWithRetry, resetCostAccum } from '../lib/ai.js'
-import { calculateBuildCost } from '../lib/cost.js'
-import { injectProfileContext, mergeRulesWithProfile, formatBriefWithConversation } from '../lib/profile-context.js'
-import { runLocalChecks } from '../lib/checks.js'
+import { fetchWithRetry } from '../lib/ai.js'
 import { updateStitchStage, updateStitchEstimate, updateStitchTime } from '../components/stitch-tracker.js'
-import { addMsg, updatePS } from '../components/message.js'
-import { ghCreateBranch, ghPushFile, ghGetFileSha, ghMergeBranch, ghDeleteBranch, ghPushManifest } from '../lib/github.js'
-import { setPreview, clearPreview, waitForApproval, waitForBlueprintApproval } from '../components/approval-card.js'
-import { showFeedbackCard } from '../components/feedback-card.js'
-import { renderGrid } from '../components/app-icon.js'
-import { pushToSupabase } from '../lib/storage.js'
-import { openProjectSheet } from '../screens/project.js'
-import { persistBuildSession, clearBuildSession, clearPipelineCancel } from '../lib/state.js'
-import { createStreamingPreview } from '../lib/streaming-preview.js'
-import { autoInjectSupabase } from '../lib/supabase-setup.js'
-import { getTemplateSkeleton } from '../lib/template-loader.js'
 
 // --- Stitch API helpers ---
 
@@ -174,50 +172,7 @@ function storeInProgressiveLearner(runId, stageKey, data) {
 // --- Retry logic with exponential backoff & rate limit handling ---
 
 function retryStage(fn, stageName, maxRetries, statusCallback) {
-  maxRetries = maxRetries || 2
-  function attempt(n) {
-    return fn().catch(function (e) {
-      var msg = String(e && e.message || e || '').toLowerCase()
-      var isRateLimit = msg.indexOf('rate') >= 0 || msg.indexOf('429') >= 0 || msg.indexOf('too many') >= 0
-      var isRetryable = isRateLimit
-        || msg.indexOf('timed out') >= 0
-        || msg.indexOf('network') >= 0
-        || msg.indexOf('failed to fetch') >= 0
-        || msg.indexOf('load failed') >= 0
-        || msg.indexOf('aborted') >= 0
-        || msg.indexOf('overloaded') >= 0
-        || msg.indexOf('529') >= 0
-
-      if (isRetryable && n < maxRetries) {
-        var delay = isRateLimit
-          ? Math.min(5000 * Math.pow(2, n), 60000)
-          : Math.min(3000 * Math.pow(2, n), 30000)
-
-        console.warn('[Stitch] ' + stageName + ' failed (attempt ' + (n + 1) + '/' + (maxRetries + 1) + '), retrying in ' + (delay / 1000) + 's:', e.message)
-
-        if (isRateLimit && statusCallback) {
-          statusCallback('Waiting for API (' + Math.round(delay / 1000) + 's)…')
-        }
-
-        return new Promise(function (resolve) { setTimeout(resolve, delay) }).then(function () {
-          // Wait for visibility if tab is backgrounded
-          if (document.visibilityState !== 'visible') {
-            return new Promise(function (resolve) {
-              function onVis() {
-                if (document.visibilityState === 'visible') {
-                  document.removeEventListener('visibilitychange', onVis)
-                  resolve()
-                }
-              }
-              document.addEventListener('visibilitychange', onVis)
-            })
-          }
-        }).then(function () { return attempt(n + 1) })
-      }
-      throw e
-    })
-  }
-  return attempt(0)
+  return retryStep(fn, maxRetries, stageName, { statusCallback: statusCallback, retryRateLimits: true })
 }
 
 // --- Stage implementations ---
@@ -228,32 +183,14 @@ function retryStage(fn, stageName, maxRetries, statusCallback) {
  * NEW: Generate a Data Mapping Schema to prevent Claude from guessing where data goes.
  */
 function runIntake(context) {
-  var activeThought = context.activeThought || null
-  var specText = 'No specification provided'
-  var rulesText = 'No specific rules'
+  var thoughtCtx = resolveThoughtContext()
+  var specText = thoughtCtx.specText
+  var rulesText = thoughtCtx.rulesText
+  var activeThought = thoughtCtx.activeThought
   var dataMapping = []
 
-  if (activeThought) {
-    // Extract specification from thought brief using structured formatter
-    if (activeThought.brief) {
-      specText = formatBriefWithConversation(activeThought)
-
-      // Generate Data Mapping Schema from features and brief
-      dataMapping = _generateDataMapping(activeThought.brief)
-    }
-
-    // Extract linked rules merged with profile global rules
-    var linkedRules = activeThought.linkedRulesId
-      ? ST.rules.find(function (r) { return r.id === activeThought.linkedRulesId })
-      : null
-    var merged = mergeRulesWithProfile(linkedRules)
-    if (merged.mustRules.length || merged.mustNotRules.length) {
-      rulesText = 'MUST DO:\n' + merged.mustRules.map(function (r) { return '- ' + r }).join('\n')
-        + '\nMUST NOT DO:\n' + merged.mustNotRules.map(function (r) { return '- ' + r }).join('\n')
-      if (merged.niceToHave.length) {
-        rulesText += '\nNICE TO HAVE:\n' + merged.niceToHave.map(function (r) { return '- ' + r }).join('\n')
-      }
-    }
+  if (activeThought && activeThought.brief) {
+    dataMapping = _generateDataMapping(activeThought.brief)
   }
 
   return {
@@ -705,56 +642,6 @@ function runPolish(assembledHTML, reviewFindings, cleanCopy) {
   })
 }
 
-/**
- * Save stitch app locally (mirrors _saveAppLocally from build-pipeline.js).
- */
-function _saveStitchApp(id, name, icon, ci, code, prompt, existingApp, ghPushed) {
-  if (existingApp) {
-    var idx = -1
-    for (var i = 0; i < ST.apps.length; i++) { if (ST.apps[i].id === id) { idx = i; break } }
-    if (idx !== -1) {
-      ST.apps[idx].versions = [{ code: ST.apps[idx].code, ts: ST.apps[idx].updatedAt }].concat((ST.apps[idx].versions || []).slice(0, 9))
-      ST.apps[idx].prompts = (ST.apps[idx].prompts || []).concat([{ text: prompt, ts: new Date().toISOString(), type: 'update' }])
-      ST.apps[idx].code = code
-      ST.apps[idx].updatedAt = new Date().toISOString()
-      ST.apps[idx].ghPushed = ghPushed || ST.apps[idx].ghPushed || false
-    } else {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: code, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'update' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  } else {
-    var exists = false; for (var j = 0; j < ST.apps.length; j++) { if (ST.apps[j].id === id) { exists = true; break } }
-    if (!exists) {
-      ST.apps.unshift({ id: id, name: name, icon: icon, ci: ci, desc: prompt.slice(0, 90), code: code, versions: [], prompts: [{ text: prompt, ts: new Date().toISOString(), type: 'initial' }], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ghPushed: ghPushed })
-    }
-  }
-  if (ST.activeThoughtId) {
-    for (var ti = 0; ti < ST.thoughts.length; ti++) {
-      if (ST.thoughts[ti].id === ST.activeThoughtId) {
-        ST.thoughts[ti].linkedAppId = id
-        ST.thoughts[ti].status = 'built'
-        break
-      }
-    }
-  }
-  persist()
-  var app = null; for (var k = 0; k < ST.apps.length; k++) { if (ST.apps[k].id === id) { app = ST.apps[k]; break } }
-  if (app) pushToSupabase(app)
-}
-
-// Send a notification if the Notification API is available
-function notifyUser(title, body) {
-  try {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
-      var n = new Notification(title, {
-        body: body,
-        icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%238b5cf6%22/%3E%3Ctext x=%2250%22 y=%2268%22 font-size=%2256%22 text-anchor=%22middle%22%3E%F0%9F%A7%B5%3C/text%3E%3C/svg%3E',
-        tag: 'stitch-pipeline',
-        renotify: true,
-      })
-      n.onclick = function () { window.focus(); n.close() }
-    }
-  } catch (e) { /* notifications not available */ }
-}
 
 /**
  * Generate a Build Manifest summarizing which requirements were met,
@@ -903,6 +790,8 @@ export function runStitchPipeline(context, callbacks) {
   if (!existingApp && ST._pendingTemplate) {
     var pending = ST._pendingTemplate
     ST._pendingTemplate = null
+    var activeThoughtTpl = ST.activeThoughtId ? ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId }) : null
+    var _thoughtDesign = getThoughtDesignOverrides(activeThoughtTpl)
     tplPromise = (pending.skeleton ? Promise.resolve(pending.skeleton) : getTemplateSkeleton(pending.id))
       .then(function (skeleton) {
         context._templateSkeleton = skeleton
@@ -1199,7 +1088,7 @@ export function runStitchPipeline(context, callbacks) {
     if (finalHTML && ST.backendEnabled && ST.sbUrl) { finalHTML = autoInjectSupabase(finalHTML) }
 
     // Save locally before deliver stage
-    _saveStitchApp(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, false)
+    saveAppLocally(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, false)
 
     // ── Stage 7: Deliver ──
     checkPipelineCancel()
@@ -1262,7 +1151,7 @@ export function runStitchPipeline(context, callbacks) {
       }).then(function () {
         ghDeleteBranch(branchName)
         var liveUrl = ghPageUrl(appId)
-        _saveStitchApp(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, true)
+        saveAppLocally(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, true)
         clearPreview(appId)
 
         var mc = $(mergeStatusId)
@@ -1274,13 +1163,13 @@ export function runStitchPipeline(context, callbacks) {
         return 'github'
       }).catch(function (e) {
         var safeE = scrubKeys(e.message || String(e))
-        _saveStitchApp(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, false)
+        saveAppLocally(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, false)
         clearPreview(appId)
         addMsg({ role: 'asst', type: 'text', html: 'Merge failed: <strong>' + esc(safeE) + '</strong>. App saved locally.' })
         return 'local'
       })
     } else {
-      _saveStitchApp(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, finalHTML, prompt, existingApp, false)
       clearPreview(appId)
       toast('\u2705 ' + appName + ' saved!', 2800)
       return 'local'
@@ -1381,7 +1270,7 @@ export function runStitchPipeline(context, callbacks) {
 
     if (err.message === 'PIPELINE_CANCELLED') {
       clearPreview(appId)
-      _saveStitchApp(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)
       ST.activeAppId = appId
       addMsg({ role: 'asst', type: 'text', text: 'Pipeline stopped by user. Progress saved.' })
       toast('Pipeline stopped', 3000)
@@ -1392,7 +1281,7 @@ export function runStitchPipeline(context, callbacks) {
 
     if (err.message === 'BUILDER_CLOSED') {
       clearPreview(appId)
-      _saveStitchApp(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)
       ST.activeAppId = appId
       renderGrid()
       return
@@ -1400,7 +1289,7 @@ export function runStitchPipeline(context, callbacks) {
 
     if (err.message === 'CHANGES_REQUESTED') {
       clearPreview(appId)
-      _saveStitchApp(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)
+      saveAppLocally(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)
       ST.activeAppId = appId
       addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
       $('bs-proj-btn').style.display = 'flex'
