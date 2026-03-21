@@ -32,7 +32,7 @@ export function renderThoughtSelector() {
       '<div class="thought-chip">\uD83D\uDCDD ' +
       esc(activeThought.name) +
       (rulesCount ? '<span class="tc-rules">\u00B7 ' + rulesCount + ' rules</span>' : '') +
-      '<button class="tc-x" onclick="detachThought()" title="Detach">\u2715</button></div>'
+      '<button class="tc-x" onclick="B.detachThought()" title="Detach">\u2715</button></div>'
     sel.style.display = 'flex'
   } else {
     var hasComplete = false
@@ -43,7 +43,7 @@ export function renderThoughtSelector() {
       }
     }
     if (hasComplete) {
-      sel.innerHTML = '<div class="tc-attach" onclick="showThoughtPicker()">+ Attach Thought</div>'
+      sel.innerHTML = '<div class="tc-attach" onclick="B.showThoughtPicker()">+ Attach Thought</div>'
       sel.style.display = 'flex'
     } else {
       sel.style.display = 'none'
@@ -70,7 +70,7 @@ export function showThoughtPicker() {
     var t = ST.thoughts[i]
     if (t.status === 'complete') {
       html +=
-        '<div class="thought-picker-item" onclick="pickThought(\'' +
+        '<div class="thought-picker-item" onclick="B.pickThought(\'' +
         esc(t.id) +
         '\')">' +
         '<div class="tpi-icon">\uD83D\uDCDD</div>' +

@@ -117,23 +117,23 @@ export function resetChat() {
     '<div class="cw-title">What should we build?</div>' +
     '<div class="cw-sub">Describe any app \u2014 it will be built, audited, fixed, pushed to GitHub, and dropped on your home screen.</div>' +
     '<div class="chips">' +
-    '<div class="chip" onclick="chipSend(\'A habit tracker with daily streaks and a monthly calendar heatmap\')">\uD83D\uDD25 Habit tracker</div>' +
-    '<div class="chip" onclick="chipSend(\'A pomodoro timer with customizable intervals and session history\')">\u23F1 Pomodoro</div>' +
-    '<div class="chip" onclick="chipSend(\'A personal budget tracker with expense categories and charts\')">\uD83D\uDCB0 Budget tracker</div>' +
-    '<div class="chip" onclick="chipSend(\'A daily mood journal with emoji ratings and a calendar view\')">\uD83C\uDF19 Mood journal</div>' +
+    '<div class="chip" onclick="B.chipSend(\'A habit tracker with daily streaks and a monthly calendar heatmap\')">\uD83D\uDD25 Habit tracker</div>' +
+    '<div class="chip" onclick="B.chipSend(\'A pomodoro timer with customizable intervals and session history\')">\u23F1 Pomodoro</div>' +
+    '<div class="chip" onclick="B.chipSend(\'A personal budget tracker with expense categories and charts\')">\uD83D\uDCB0 Budget tracker</div>' +
+    '<div class="chip" onclick="B.chipSend(\'A daily mood journal with emoji ratings and a calendar view\')">\uD83C\uDF19 Mood journal</div>' +
     '</div>' +
     _renderTemplateGallery() +
     '</div>'
 }
 
 function _renderTemplateGallery() {
-  var cats = '<div class="tpl-cat active" data-cat="all" onclick="_tplFilter(\'all\')">All</div>'
+  var cats = '<div class="tpl-cat active" data-cat="all" onclick="B._tplFilter(\'all\')">All</div>'
   for (var c = 0; c < TEMPLATE_CATEGORIES.length; c++) {
     var cat = TEMPLATE_CATEGORIES[c]
     cats +=
       '<div class="tpl-cat" data-cat="' +
       cat.id +
-      '" onclick="_tplFilter(\'' +
+      '" onclick="B._tplFilter(\'' +
       cat.id +
       '\')">' +
       cat.icon +
@@ -147,13 +147,13 @@ function _renderTemplateGallery() {
     cards +=
       '<div class="tpl-card" data-cat="' +
       t.category +
-      '" onclick="templateSend(\'' +
+      '" onclick="B.templateSend(\'' +
       t.id +
       '\')">' +
       '<div class="tpl-card-top"><div class="tpl-card-icon">' +
       t.icon +
       '</div>' +
-      '<button class="tpl-card-preview" onclick="event.stopPropagation();_tplPreview(\'' +
+      '<button class="tpl-card-preview" onclick="event.stopPropagation();B._tplPreview(\'' +
       t.id +
       '\')" title="Preview">\uD83D\uDD0D</button></div>' +
       '<div class="tpl-card-name">' +
@@ -166,7 +166,7 @@ function _renderTemplateGallery() {
   }
   return (
     '<div class="tpl-section">' +
-    '<div class="tpl-hdr" onclick="_tplToggle()"><span>\uD83D\uDCC2 Start from a template</span><span class="tpl-arrow" id="tpl-arrow">\u25B6</span></div>' +
+    '<div class="tpl-hdr" onclick="B._tplToggle()"><span>\uD83D\uDCC2 Start from a template</span><span class="tpl-arrow" id="tpl-arrow">\u25B6</span></div>' +
     '<div class="tpl-gallery" id="tpl-gallery" style="display:none">' +
     '<div class="tpl-cats" id="tpl-cats">' +
     cats +
@@ -175,9 +175,9 @@ function _renderTemplateGallery() {
     cards +
     '</div>' +
     '</div></div>' +
-    '<div class="tpl-preview-overlay" id="tpl-preview-overlay" onclick="if(event.target===this)_tplPreviewClose()">' +
+    '<div class="tpl-preview-overlay" id="tpl-preview-overlay" onclick="if(event.target===this)B._tplPreviewClose()">' +
     '<div class="tpl-preview-modal">' +
-    '<div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-preview-name"></span><div class="tpl-preview-hdr-right"><button class="tpl-preview-fullscreen" onclick="_tplPreviewFullscreen()" id="tpl-preview-fs" title="Toggle fullscreen">\u26F6</button><button class="tpl-preview-close" onclick="_tplPreviewClose()">\u2715</button></div></div>' +
+    '<div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-preview-name"></span><div class="tpl-preview-hdr-right"><button class="tpl-preview-fullscreen" onclick="B._tplPreviewFullscreen()" id="tpl-preview-fs" title="Toggle fullscreen">\u26F6</button><button class="tpl-preview-close" onclick="B._tplPreviewClose()">\u2715</button></div></div>' +
     '<div class="tpl-preview-frame" id="tpl-preview-frame"></div>' +
     '<div class="tpl-preview-info">Structural preview \u2014 AI fills in full content when built</div>' +
     '<div class="tpl-preview-actions"><button class="tpl-preview-use" id="tpl-preview-use">Use This Template</button></div>' +
@@ -185,74 +185,76 @@ function _renderTemplateGallery() {
   )
 }
 
-// Toggle gallery open/closed
-window._tplToggle = function () {
-  var g = $('tpl-gallery'),
-    a = $('tpl-arrow')
-  if (!g) return
-  var open = g.style.display === 'none'
-  g.style.display = open ? '' : 'none'
-  if (a) a.textContent = open ? '\u25BC' : '\u25B6'
-}
-
-// Filter templates by category
-window._tplFilter = function (cat) {
-  var tabs = document.querySelectorAll('#tpl-cats .tpl-cat')
-  for (var i = 0; i < tabs.length; i++) {
-    tabs[i].classList.toggle('active', tabs[i].dataset.cat === cat)
+export function initMessageHandlers() {
+  // Toggle gallery open/closed
+  window.B._tplToggle = function () {
+    var g = $('tpl-gallery'),
+      a = $('tpl-arrow')
+    if (!g) return
+    var open = g.style.display === 'none'
+    g.style.display = open ? '' : 'none'
+    if (a) a.textContent = open ? '\u25BC' : '\u25B6'
   }
-  var cards = document.querySelectorAll('#tpl-grid .tpl-card')
-  for (var j = 0; j < cards.length; j++) {
-    cards[j].style.display = cat === 'all' || cards[j].dataset.cat === cat ? '' : 'none'
-  }
-}
 
-// Open template preview modal with iframe
-window._tplPreview = function (templateId) {
-  var tpl = TEMPLATES.find(function (t) {
-    return t.id === templateId
-  })
-  if (!tpl) return
-  var overlay = $('tpl-preview-overlay')
-  var nameEl = $('tpl-preview-name')
-  var frame = $('tpl-preview-frame')
-  var useBtn = $('tpl-preview-use')
-  if (!overlay || !frame) return
-  nameEl.textContent = tpl.icon + ' ' + tpl.name
-  frame.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#888">Loading preview\u2026</div>'
-  getTemplateSkeleton(templateId)
-    .then(function (skeleton) {
-      frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(skeleton) + '"></iframe>'
+  // Filter templates by category
+  window.B._tplFilter = function (cat) {
+    var tabs = document.querySelectorAll('#tpl-cats .tpl-cat')
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('active', tabs[i].dataset.cat === cat)
+    }
+    var cards = document.querySelectorAll('#tpl-grid .tpl-card')
+    for (var j = 0; j < cards.length; j++) {
+      cards[j].style.display = cat === 'all' || cards[j].dataset.cat === cat ? '' : 'none'
+    }
+  }
+
+  // Open template preview modal with iframe
+  window.B._tplPreview = function (templateId) {
+    var tpl = TEMPLATES.find(function (t) {
+      return t.id === templateId
     })
-    .catch(function () {
-      frame.innerHTML =
-        '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#f66">Failed to load preview</div>'
-    })
-  useBtn.onclick = function () {
-    window.templateSend(templateId)
-    window._tplPreviewClose()
+    if (!tpl) return
+    var overlay = $('tpl-preview-overlay')
+    var nameEl = $('tpl-preview-name')
+    var frame = $('tpl-preview-frame')
+    var useBtn = $('tpl-preview-use')
+    if (!overlay || !frame) return
+    nameEl.textContent = tpl.icon + ' ' + tpl.name
+    frame.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#888">Loading preview\u2026</div>'
+    getTemplateSkeleton(templateId)
+      .then(function (skeleton) {
+        frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(skeleton) + '"></iframe>'
+      })
+      .catch(function () {
+        frame.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#f66">Failed to load preview</div>'
+      })
+    useBtn.onclick = function () {
+      B.templateSend(templateId)
+      B._tplPreviewClose()
+    }
+    overlay.classList.add('on')
   }
-  overlay.classList.add('on')
-}
 
-// Close template preview modal and destroy iframe
-window._tplPreviewClose = function () {
-  var overlay = $('tpl-preview-overlay')
-  if (!overlay) return
-  overlay.classList.remove('on')
-  var modal = overlay.querySelector('.tpl-preview-modal')
-  if (modal) modal.classList.remove('fullscreen')
-  var frame = $('tpl-preview-frame')
-  if (frame) frame.innerHTML = ''
-}
+  // Close template preview modal and destroy iframe
+  window.B._tplPreviewClose = function () {
+    var overlay = $('tpl-preview-overlay')
+    if (!overlay) return
+    overlay.classList.remove('on')
+    var modal = overlay.querySelector('.tpl-preview-modal')
+    if (modal) modal.classList.remove('fullscreen')
+    var frame = $('tpl-preview-frame')
+    if (frame) frame.innerHTML = ''
+  }
 
-// Toggle fullscreen on template preview modal
-window._tplPreviewFullscreen = function () {
-  var overlay = $('tpl-preview-overlay')
-  if (!overlay) return
-  var modal = overlay.querySelector('.tpl-preview-modal')
-  if (modal) modal.classList.toggle('fullscreen')
+  // Toggle fullscreen on template preview modal
+  window.B._tplPreviewFullscreen = function () {
+    var overlay = $('tpl-preview-overlay')
+    if (!overlay) return
+    var modal = overlay.querySelector('.tpl-preview-modal')
+    if (modal) modal.classList.toggle('fullscreen')
+  }
 }
 
 export function addMsg(cfg) {
@@ -439,7 +441,7 @@ export function addMsg(cfg) {
         esc(cfg.branch || 'local') +
         '</span></div><div class="pcc-frame"><iframe sandbox="allow-scripts allow-forms allow-modals" srcdoc="' +
         escAttr(cfg.code || '') +
-        '"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="openPreview(\'' +
+        '"></iframe><div class="pcc-frame-overlay"><button class="pcc-expand-btn" onclick="B.openPreview(\'' +
         escAttr(cfg.appId || '') +
         "','" +
         escAttr(cfg.pid || '') +
@@ -533,7 +535,7 @@ export function addMsg(cfg) {
         ' Table' +
         (tables.length !== 1 ? 's' : '') +
         ' Generated</div>' +
-        '<button class="schema-copy" onclick="copyToClipboard(this.dataset.sql,\'SQL\');" data-sql="' +
+        '<button class="schema-copy" onclick="B.copyToClipboard(this.dataset.sql,\'SQL\');" data-sql="' +
         escAttr(sqlText) +
         '">Copy SQL</button></div>' +
         '<div class="schema-sql">' +

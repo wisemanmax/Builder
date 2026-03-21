@@ -10,7 +10,7 @@ export function pickEmoji(e) {
 
 export function initEmojiPicker() {
   $('emoji-grid').innerHTML = EMOJIS.map(function (e) {
-    return '<button class="egi" onclick="pickEmoji(\'' + e + '\')">' + e + '</button>'
+    return '<button class="egi" onclick="B.pickEmoji(\'' + e + '\')">' + e + '</button>'
   }).join('')
   $('emoji-pick-btn').addEventListener('click', function () {
     $('emoji-overlay').classList.add('on')

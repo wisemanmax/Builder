@@ -928,12 +928,12 @@ export function runPipeline(prompt, existingApp, customName, images) {
           (mode === 'github' ? 'is live on GitHub Pages' : 'has been saved') +
           ' \uD83C\uDF89<br><br>' +
           '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px">' +
-          '<button onclick="openApp(\'' +
+          '<button onclick="B.openApp(\'' +
           appId +
           '\')" style="padding:8px 16px;border-radius:9px;background:' +
           g +
           ';border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDE80 Open in Studio</button>' +
-          '<button onclick="openProjectSheet(\'' +
+          '<button onclick="B.openProjectSheet(\'' +
           appId +
           '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>' +
           '</div>',

@@ -223,10 +223,10 @@ export function openCustomizeBuilder() {
       '<div class="cw-title">Customize The Builder</div>' +
       '<div class="cw-sub">Describe any improvement and Claude will rewrite The Builder itself, push to GitHub, and reload.</div>' +
       '<div class="chips">' +
-      '<div class="chip" onclick="chipSend(\'Add a dark/light theme toggle to the home screen\')">\uD83C\uDF19 Dark mode</div>' +
-      '<div class="chip" onclick="chipSend(\'Improve the app grid layout and animations\')">\u2728 Better grid</div>' +
-      '<div class="chip" onclick="chipSend(\'Add app search/filter on the home screen\')">\uD83D\uDD0D Search</div>' +
-      '<div class="chip" onclick="chipSend(\'Add app categories and folders on the home screen\')">\uD83D\uDCC2 Folders</div>' +
+      '<div class="chip" onclick="B.chipSend(\'Add a dark/light theme toggle to the home screen\')">\uD83C\uDF19 Dark mode</div>' +
+      '<div class="chip" onclick="B.chipSend(\'Improve the app grid layout and animations\')">\u2728 Better grid</div>' +
+      '<div class="chip" onclick="B.chipSend(\'Add app search/filter on the home screen\')">\uD83D\uDD0D Search</div>' +
+      '<div class="chip" onclick="B.chipSend(\'Add app categories and folders on the home screen\')">\uD83D\uDCC2 Folders</div>' +
       '</div>'
     w.style.display = ''
   }
@@ -315,18 +315,17 @@ export function sendMsg() {
   })
 }
 
+var PIPELINE_MAP = {
+  stitch: _runStitchBuild,
+  website2: runWebsite2Pipeline,
+  website: runWebsitePipeline,
+  builder2: runPipeline2,
+  standard: runPipeline,
+}
+
 function _runBuild(text, existing, customName, images) {
-  if (ST.pipelineMode === 'stitch') {
-    _runStitchBuild(text, existing, customName, images)
-  } else if (ST.pipelineMode === 'website2') {
-    runWebsite2Pipeline(text, existing, customName, images)
-  } else if (ST.pipelineMode === 'website') {
-    runWebsitePipeline(text, existing, customName, images)
-  } else if (ST.pipelineMode === 'builder2') {
-    runPipeline2(text, existing, customName, images)
-  } else {
-    runPipeline(text, existing, customName, images)
-  }
+  var runner = PIPELINE_MAP[ST.pipelineMode] || PIPELINE_MAP.standard
+  runner(text, existing, customName, images)
   syncStopButton()
   _startStopBtnSync()
 }
@@ -437,7 +436,7 @@ function _runStitchBuild(text, existing, customName, images) {
               '</strong>: ' +
               esc(safeMsg) +
               '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">' +
-              '<button class="chip" onclick="chipSend(\'Retry from ' +
+              '<button class="chip" onclick="B.chipSend(\'Retry from ' +
               esc(err.stageName || '') +
               '\')">🔄 (a) Retry</button>' +
               '<button class="chip" onclick="document.querySelector(\'[data-mode=standard]\').click()">↩ (b) Standard pipeline</button>' +
@@ -630,15 +629,15 @@ export function recoverInterruptedBuild(session) {
   var actionHtml = '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:4px">'
   if (hasCode && app) {
     actionHtml +=
-      '<button onclick="openApp(\'' +
+      '<button onclick="B.openApp(\'' +
       esc(session.appId) +
       '\')" style="padding:8px 16px;border-radius:9px;background:var(--g1);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDE80 Open Saved Version</button>'
   }
   actionHtml +=
-    '<button onclick="dismissRecovery()" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u2713 Dismiss</button>'
+    '<button onclick="B.dismissRecovery()" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u2713 Dismiss</button>'
   if (app) {
     actionHtml +=
-      '<button onclick="openBuilder(\'' +
+      '<button onclick="B.openBuilder(\'' +
       esc(session.appId) +
       '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u270F\uFE0F Retry Build</button>'
   }

@@ -12,13 +12,13 @@ export function initTemplateSheet() {
 
 export function openTemplates() {
   // Render category tabs
-  var cats = '<div class="tpl-cat active" data-cat="all" onclick="_tplSheetFilter(\'all\')">All</div>'
+  var cats = '<div class="tpl-cat active" data-cat="all" onclick="B._tplSheetFilter(\'all\')">All</div>'
   for (var c = 0; c < TEMPLATE_CATEGORIES.length; c++) {
     var cat = TEMPLATE_CATEGORIES[c]
     cats +=
       '<div class="tpl-cat" data-cat="' +
       cat.id +
-      '" onclick="_tplSheetFilter(\'' +
+      '" onclick="B._tplSheetFilter(\'' +
       cat.id +
       '\')">' +
       cat.icon +
@@ -35,13 +35,13 @@ export function openTemplates() {
     cards +=
       '<div class="tpl-card" data-cat="' +
       t.category +
-      '" onclick="selectTemplate(\'' +
+      '" onclick="B.selectTemplate(\'' +
       t.id +
       '\')">' +
       '<div class="tpl-card-top"><div class="tpl-card-icon">' +
       t.icon +
       '</div>' +
-      '<button class="tpl-card-preview" onclick="event.stopPropagation();openTplSheetPreview(\'' +
+      '<button class="tpl-card-preview" onclick="event.stopPropagation();B.openTplSheetPreview(\'' +
       t.id +
       '\')" title="Preview">\uD83D\uDD0D</button></div>' +
       '<div class="tpl-card-name">' +
@@ -139,9 +139,11 @@ function filterTemplates(cat) {
   }
 }
 
-// Expose to window for inline onclick handlers
-window.selectTemplate = selectTemplate
-window.openTplSheetPreview = openTplSheetPreview
-window.closeTplSheetPreview = closeTplSheetPreview
-window.toggleTplSheetPreviewFullscreen = toggleTplSheetPreviewFullscreen
-window._tplSheetFilter = filterTemplates
+// Expose to B namespace for dynamic onclick handlers
+export function initTemplateHandlers() {
+  window.B.selectTemplate = selectTemplate
+  window.B.openTplSheetPreview = openTplSheetPreview
+  window.B.closeTplSheetPreview = closeTplSheetPreview
+  window.B.toggleTplSheetPreviewFullscreen = toggleTplSheetPreviewFullscreen
+  window.B._tplSheetFilter = filterTemplates
+}

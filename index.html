@@ -108,7 +108,7 @@
   <div class="home-hdr">
     <div class="home-title-row">
       <div class="home-title">The Builder</div>
-      <div id="profile-chip" class="profile-chip" onclick="showProfilePicker()">No Profile</div>
+      <div id="profile-chip" class="profile-chip" data-action="showProfilePicker">No Profile</div>
     </div>
     <div class="home-sub" id="home-sub">Tap to open &middot; Hold for options &middot; &#x2726; to build</div>
   </div>
@@ -116,23 +116,23 @@
   <div class="app-grid" id="app-grid"></div>
   <div class="dock">
     <div class="dock-inner">
-      <div class="di" onclick="openThink()" role="button" tabindex="0" aria-label="Think">
+      <div class="di" data-action="openThink" role="button" tabindex="0" aria-label="Think">
         <div class="di-img" style="background:var(--g4)">&#x1F4AD;</div>
         <div class="di-lbl">Think</div>
       </div>
-      <div class="di di-build" onclick="openBuilder()" role="button" tabindex="0" aria-label="Build">
+      <div class="di di-build" data-action="openBuilder" role="button" tabindex="0" aria-label="Build">
         <div class="di-img">&#x2726;</div>
         <div class="di-lbl">Build</div>
       </div>
-      <div class="di" onclick="openCustomizeBuilder()" role="button" tabindex="0" aria-label="Builder+">
+      <div class="di" data-action="openCustomizeBuilder" role="button" tabindex="0" aria-label="Builder+">
         <div class="di-img" style="background:linear-gradient(135deg,#B44FFF,#3D5AFE)">&#x1F527;</div>
         <div class="di-lbl">Builder+</div>
       </div>
-      <div class="di" onclick="openTemplates()" role="button" tabindex="0" aria-label="Templates">
+      <div class="di" data-action="openTemplates" role="button" tabindex="0" aria-label="Templates">
         <div class="di-img" style="background:linear-gradient(135deg,#FF3CAC,#784BA0)">&#x1F4C2;</div>
         <div class="di-lbl">Templates</div>
       </div>
-      <div class="di" onclick="openSettings()" role="button" tabindex="0" aria-label="Settings">
+      <div class="di" data-action="openSettings" role="button" tabindex="0" aria-label="Settings">
         <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
         <div class="di-lbl">Settings</div>
       </div>
@@ -277,13 +277,13 @@
         <div class="psh-icon" id="psh-icon">&#x1F3AF;</div>
         <div>
           <div class="psh-name" id="psh-name">App Name</div>
-          <div class="psh-url-line" id="psh-url-line" onclick="copyUrl()">...</div>
+          <div class="psh-url-line" id="psh-url-line" data-action="copyUrl">...</div>
         </div>
       </div>
       <div class="psh-top-btns">
-        <button class="psh-btn" onclick="openCurrentInViewer()">&#x1F680; Open</button>
-        <button class="psh-btn primary" onclick="editCurrentApp()">&#x270F;&#xFE0F; Edit</button>
-        <button class="psh-btn" onclick="closeProject()">&#x2715;</button>
+        <button class="psh-btn" data-action="openCurrentInViewer">&#x1F680; Open</button>
+        <button class="psh-btn primary" data-action="editCurrentApp">&#x270F;&#xFE0F; Edit</button>
+        <button class="psh-btn" data-action="closeProject">&#x2715;</button>
       </div>
     </div>
     <div class="psh-body">
@@ -291,7 +291,7 @@
         <div class="psec-title">Live URL</div>
         <div class="url-box">
           <div class="url-text" id="proj-url-display">&mdash;</div>
-          <button class="url-copy" onclick="copyUrl()">Copy</button>
+          <button class="url-copy" data-action="copyUrl">Copy</button>
         </div>
       </div>
       <div class="psec">
@@ -315,7 +315,7 @@
         <div class="chat-history" id="chat-history"></div>
       </div>
       <div style="margin-top:8px">
-        <button class="btn-full" onclick="editCurrentApp()">&#x270F;&#xFE0F; Update This App</button>
+        <button class="btn-full" data-action="editCurrentApp">&#x270F;&#xFE0F; Update This App</button>
       </div>
     </div>
   </div>
@@ -327,7 +327,7 @@
     <button class="vback" id="vback">&larr;</button>
     <div class="vbar-center">
       <div class="vbar-name" id="vbar-name">App</div>
-      <div class="vbar-url" id="vbar-url" onclick="copyViewerUrl()">&mdash;</div>
+      <div class="vbar-url" id="vbar-url" data-action="copyViewerUrl">&mdash;</div>
     </div>
     <div class="vbar-btns" id="vbar-btns">
       <button class="vbar-btn" id="vbar-proj">&#x1F4CB;</button>
@@ -428,9 +428,9 @@
       <div class="tpl-grid" id="tpl-sheet-grid"></div>
     </div>
   </div>
-  <div class="tpl-preview-overlay" id="tpl-sheet-preview" onclick="if(event.target===this)closeTplSheetPreview()">
+  <div class="tpl-preview-overlay" id="tpl-sheet-preview" data-action-self="closeTplSheetPreview">
     <div class="tpl-preview-modal">
-      <div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-sheet-preview-name"></span><div class="tpl-preview-hdr-right"><button class="tpl-preview-fullscreen" onclick="toggleTplSheetPreviewFullscreen()" id="tpl-sheet-preview-fs" title="Toggle fullscreen">&#x26F6;</button><button class="tpl-preview-close" onclick="closeTplSheetPreview()">&#x2715;</button></div></div>
+      <div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-sheet-preview-name"></span><div class="tpl-preview-hdr-right"><button class="tpl-preview-fullscreen" data-action="toggleTplSheetPreviewFullscreen" id="tpl-sheet-preview-fs" title="Toggle fullscreen">&#x26F6;</button><button class="tpl-preview-close" data-action="closeTplSheetPreview">&#x2715;</button></div></div>
       <div class="tpl-preview-frame" id="tpl-sheet-preview-frame"></div>
       <div class="tpl-preview-info">Structural preview &mdash; AI fills in full content when built</div>
       <div class="tpl-preview-actions"><button class="tpl-preview-use" id="tpl-sheet-preview-use">Use This Template</button></div>

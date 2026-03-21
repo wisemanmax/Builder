@@ -127,7 +127,7 @@ export function addThinkMsg(cfg) {
     row.className = 'think-options'
     var ohtml = ''
     for (var i = 0; i < cfg.options.length; i++) {
-      ohtml += '<div class="think-opt" onclick="thinkOptionSelect(this)">' + esc(cfg.options[i]) + '</div>'
+      ohtml += '<div class="think-opt" onclick="B.thinkOptionSelect(this)">' + esc(cfg.options[i]) + '</div>'
     }
     row.innerHTML = ohtml
   } else if (cfg.type === 'summary') {
@@ -230,8 +230,8 @@ export function sendThinkMsg() {
           var actRow = document.createElement('div')
           actRow.className = 'think-actions'
           actRow.innerHTML =
-            '<button class="ta-save" onclick="confirmThinkBrief()">\u2705 Looks good, lock it in</button>' +
-            '<button class="ta-refine" onclick="editThinkBrief()">\u270F\uFE0F I want to change something</button>'
+            '<button class="ta-save" onclick="B.confirmThinkBrief()">\u2705 Looks good, lock it in</button>' +
+            '<button class="ta-refine" onclick="B.editThinkBrief()">\u270F\uFE0F I want to change something</button>'
           $('think-scroll').appendChild(actRow)
         } else {
           renderThinkSummary(parsed.brief, parsed.rules)
@@ -305,8 +305,8 @@ export function renderThinkSummary(brief, rules) {
   var actRow = document.createElement('div')
   actRow.className = 'think-actions'
   actRow.innerHTML =
-    '<button class="ta-save" onclick="finishThink()">\uD83D\uDCBE Save & Go to Build</button>' +
-    '<button class="ta-refine" onclick="refineThink()">\u270F\uFE0F Keep Refining</button>'
+    '<button class="ta-save" onclick="B.finishThink()">\uD83D\uDCBE Save & Go to Build</button>' +
+    '<button class="ta-refine" onclick="B.refineThink()">\u270F\uFE0F Keep Refining</button>'
   $('think-scroll').appendChild(actRow)
   scrollThinkBot()
 }

@@ -64,7 +64,7 @@ export function renderGrid() {
   var html = ''
   if (!ST.apps.length) {
     html +=
-      '<div class="aicon new-tile" onclick="openBuilder()"><div class="aicon-img">\u2726</div><div class="aicon-label">Build App</div></div>' +
+      '<div class="aicon new-tile" onclick="B.openBuilder()"><div class="aicon-img">\u2726</div><div class="aicon-label">Build App</div></div>' +
       '<div class="home-empty" style="grid-column:1/-1;margin-top:12px">' +
       '<div class="he-icon">\uD83D\uDE80</div>' +
       '<div class="he-title">Canvas is empty</div>' +
@@ -85,9 +85,9 @@ export function renderGrid() {
         i * 0.04 +
         's" data-id="' +
         app.id +
-        '" onclick="handleTap(\'' +
+        '" onclick="B.handleTap(\'' +
         app.id +
-        '\')" oncontextmenu="showCtx(event,\'' +
+        '\')" oncontextmenu="B.showCtx(event,\'' +
         app.id +
         '\');return false">' +
         '<div class="aicon-img" style="background:' +
@@ -96,7 +96,7 @@ export function renderGrid() {
         app.icon +
         (hasLinkedThought ? '<span class="aicon-thought-badge">\uD83D\uDCAD</span>' : '') +
         '</div>' +
-        '<button class="aicon-del" onclick="delApp(\'' +
+        '<button class="aicon-del" onclick="B.delApp(\'' +
         app.id +
         '\');event.stopPropagation()">\u2715</button>' +
         '<div class="aicon-label">' +
@@ -105,12 +105,12 @@ export function renderGrid() {
     }
     if (ST.thoughts.length > 0) {
       html +=
-        '<div class="aicon tf-tile" onclick="openThoughtsFolder()">' +
+        '<div class="aicon tf-tile" onclick="B.openThoughtsFolder()">' +
         '<div class="aicon-img" style="background:var(--g4)">\uD83D\uDCAD</div>' +
         '<div class="aicon-label">Thoughts</div></div>'
     }
     html +=
-      '<div class="aicon new-tile" onclick="openBuilder()"><div class="aicon-img">\u2726</div><div class="aicon-label">New App</div></div>'
+      '<div class="aicon new-tile" onclick="B.openBuilder()"><div class="aicon-img">\u2726</div><div class="aicon-label">New App</div></div>'
   }
   grid.innerHTML = html
 

@@ -99,7 +99,7 @@ function addOrgMsg(cfg) {
     var ohtml = ''
     for (var i = 0; i < cfg.options.length; i++) {
       ohtml +=
-        '<div class="think-opt" style="border-color:rgba(61,90,254,.3);background:rgba(61,90,254,.08)" onclick="orgOptionSelect(this)">' +
+        '<div class="think-opt" style="border-color:rgba(61,90,254,.3);background:rgba(61,90,254,.08)" onclick="B.orgOptionSelect(this)">' +
         esc(cfg.options[i]) +
         '</div>'
     }
@@ -281,8 +281,8 @@ function renderOrgSummary(profileData, rulesData) {
   var actRow = document.createElement('div')
   actRow.className = 'think-actions'
   actRow.innerHTML =
-    '<button class="ta-save" style="background:var(--g2)" onclick="finishOrgThink()">\uD83C\uDFE2 Save Profile</button>' +
-    '<button class="ta-refine" onclick="refineOrgThink()">\u270F\uFE0F Keep Refining</button>'
+    '<button class="ta-save" style="background:var(--g2)" onclick="B.finishOrgThink()">\uD83C\uDFE2 Save Profile</button>' +
+    '<button class="ta-refine" onclick="B.refineOrgThink()">\u270F\uFE0F Keep Refining</button>'
   $('org-think-scroll').appendChild(actRow)
   scrollOrgBot()
 }

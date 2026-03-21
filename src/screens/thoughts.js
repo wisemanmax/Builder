@@ -76,7 +76,7 @@ function renderThoughtCards(sortBy) {
       (t.originalPrompt || '').length > 80 ? t.originalPrompt.slice(0, 80) + '\u2026' : t.originalPrompt || ''
     var date = t.updatedAt ? fmtDate(t.updatedAt) : t.createdAt ? fmtDate(t.createdAt) : ''
     html +=
-      '<div class="tf-card" onclick="openThoughtDetail(\'' +
+      '<div class="tf-card" onclick="B.openThoughtDetail(\'' +
       esc(t.id) +
       '\')">' +
       '<div class="tf-card-top">' +
