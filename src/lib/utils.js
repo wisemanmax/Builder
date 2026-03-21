@@ -7,7 +7,26 @@ export function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '
 
 export function escAttr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
 
-export function uid() { return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8) }
+export function uid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+}
+
+export function validateKey(type, value) {
+  if (!value || !value.trim()) return { valid: false, msg: 'Key is empty' }
+  var v = value.trim()
+  var patterns = {
+    anthropic: { prefix: 'sk-ant-', minLen: 20 },
+    openai: { prefix: 'sk-', minLen: 20 },
+    github: { prefixes: ['ghp_', 'github_pat_'], minLen: 20 }
+  }
+  var p = patterns[type]
+  if (!p) return { valid: true }
+  if (v.length < p.minLen) return { valid: false, msg: 'Key looks too short' }
+  if (p.prefix && v.indexOf(p.prefix) !== 0) return { valid: false, msg: 'Expected prefix: ' + p.prefix }
+  if (p.prefixes && !p.prefixes.some(function (px) { return v.indexOf(px) === 0 })) return { valid: false, msg: 'Expected prefix: ' + p.prefixes.join(' or ') }
+  return { valid: true }
+}
 
 export function slugify(str) { return String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'app' }
 

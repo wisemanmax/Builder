@@ -117,23 +117,23 @@
   <div class="app-grid" id="app-grid"></div>
   <div class="dock">
     <div class="dock-inner">
-      <div class="di" onclick="openThink()">
+      <div class="di" onclick="openThink()" role="button" tabindex="0" aria-label="Think">
         <div class="di-img" style="background:var(--g4)">&#x1F4AD;</div>
         <div class="di-lbl">Think</div>
       </div>
-      <div class="di di-build" onclick="openBuilder()">
+      <div class="di di-build" onclick="openBuilder()" role="button" tabindex="0" aria-label="Build">
         <div class="di-img">&#x2726;</div>
         <div class="di-lbl">Build</div>
       </div>
-      <div class="di" onclick="openCustomizeBuilder()">
+      <div class="di" onclick="openCustomizeBuilder()" role="button" tabindex="0" aria-label="Builder+">
         <div class="di-img" style="background:linear-gradient(135deg,#B44FFF,#3D5AFE)">&#x1F527;</div>
         <div class="di-lbl">Builder+</div>
       </div>
-      <div class="di" onclick="openTemplates()">
+      <div class="di" onclick="openTemplates()" role="button" tabindex="0" aria-label="Templates">
         <div class="di-img" style="background:linear-gradient(135deg,#FF3CAC,#784BA0)">&#x1F4C2;</div>
         <div class="di-lbl">Templates</div>
       </div>
-      <div class="di" onclick="openSettings()">
+      <div class="di" onclick="openSettings()" role="button" tabindex="0" aria-label="Settings">
         <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
         <div class="di-lbl">Settings</div>
       </div>
@@ -164,7 +164,7 @@
       <div class="bs-actions">
         <button class="bs-btn bs-stop" id="bs-stop-btn" title="Stop pipeline" style="display:none">&#x23F9; Stop</button>
         <button class="bs-btn" id="bs-proj-btn" title="View project" style="display:none">&#x1F4CB;</button>
-        <button class="bs-btn bs-close" id="bs-close">&#x2715;</button>
+        <button class="bs-btn bs-close" id="bs-close" aria-label="Close">&#x2715;</button>
       </div>
     </div>
     <div class="thought-selector" id="thought-selector" style="display:none"></div>
@@ -198,7 +198,7 @@
         <div class="bs-sub" id="ts-sub">Round 1 of 5 &middot; What to Build</div>
       </div>
       <div class="bs-actions">
-        <button class="bs-btn bs-close" id="ts-close">&#x2715;</button>
+        <button class="bs-btn bs-close" id="ts-close" aria-label="Close">&#x2715;</button>
       </div>
     </div>
     <div class="ts-progress" id="ts-progress"></div>
@@ -225,7 +225,7 @@
         <div class="bs-sub" id="org-ts-sub">Round 1 of 4 &middot; Vision &amp; Mission</div>
       </div>
       <div class="bs-actions">
-        <button class="bs-btn bs-close" id="org-ts-close">&#x2715;</button>
+        <button class="bs-btn bs-close" id="org-ts-close" aria-label="Close">&#x2715;</button>
       </div>
     </div>
     <div class="ts-progress" id="org-ts-progress"></div>
@@ -243,7 +243,7 @@
 </div>
 
 <!-- FEEDBACK OVERLAY -->
-<div id="feedback-overlay">
+<div id="feedback-overlay" role="dialog" aria-label="Rate this build">
   <div class="fb-card">
     <div class="fb-title">&#x2B50; Rate this build</div>
     <div class="fb-app-name" id="fb-app-name">App</div>
@@ -364,12 +364,12 @@
 </div>
 
 <!-- SETTINGS -->
-<div id="settings-overlay">
+<div id="settings-overlay" role="dialog" aria-label="Settings">
   <div class="ssheet">
     <div class="ssh"></div>
     <div class="sshead">
       <span class="sshead-title">&#x2699;&#xFE0F; Settings</span>
-      <button class="ssclose" id="ssclose">&#x2715;</button>
+      <button class="ssclose" id="ssclose" aria-label="Close">&#x2715;</button>
     </div>
     <div class="ssbody">
       <span class="ssec">AI Keys</span>
@@ -417,12 +417,12 @@
 </div>
 
 <!-- TEMPLATE GALLERY -->
-<div id="template-overlay">
+<div id="template-overlay" role="dialog" aria-label="Templates">
   <div class="ssheet">
     <div class="ssh"></div>
     <div class="sshead">
       <span class="sshead-title">&#x1F4C2; Templates</span>
-      <button class="ssclose" id="tpl-sheet-close">&#x2715;</button>
+      <button class="ssclose" id="tpl-sheet-close" aria-label="Close">&#x2715;</button>
     </div>
     <div class="tpl-sheet-body">
       <div class="tpl-cats" id="tpl-sheet-cats"></div>
@@ -455,7 +455,7 @@
 </div>
 
 <!-- EMOJI PICKER -->
-<div id="emoji-overlay">
+<div id="emoji-overlay" role="dialog" aria-label="Pick an Icon">
   <div class="ebox">
     <div class="ebox-title">Pick an Icon</div>
     <div class="egrid" id="emoji-grid"></div>
@@ -463,7 +463,7 @@
 </div>
 
 <!-- BUILD HISTORY OVERLAY -->
-<div id="build-history-overlay">
+<div id="build-history-overlay" role="dialog" aria-label="Build History">
   <div class="bh-sheet">
     <div class="bh-handle"></div>
     <div class="bh-top">
@@ -474,20 +474,20 @@
           <div class="bh-sub" id="bh-sub">Build History</div>
         </div>
       </div>
-      <button class="bh-close" id="bh-close">&#x2715;</button>
+      <button class="bh-close" id="bh-close" aria-label="Close">&#x2715;</button>
     </div>
     <div class="bh-body" id="bh-body"></div>
   </div>
 </div>
 
 <!-- CONTEXT MENU -->
-<div id="ctx-menu">
-  <div class="cmi" id="ctx-open">&#x1F680; Open App</div>
-  <div class="cmi" id="ctx-proj">&#x1F4CB; Project Details</div>
-  <div class="cmi" id="ctx-history">&#x1F4DA; Build History</div>
-  <div class="cmi" id="ctx-edit">&#x270F;&#xFE0F; Edit / Update</div>
-  <div class="cmsep"></div>
-  <div class="cmi danger" id="ctx-del">&#x1F5D1;&#xFE0F; Delete</div>
+<div id="ctx-menu" role="menu" aria-label="App actions">
+  <div class="cmi" id="ctx-open" role="menuitem" tabindex="0">&#x1F680; Open App</div>
+  <div class="cmi" id="ctx-proj" role="menuitem" tabindex="0">&#x1F4CB; Project Details</div>
+  <div class="cmi" id="ctx-history" role="menuitem" tabindex="0">&#x1F4DA; Build History</div>
+  <div class="cmi" id="ctx-edit" role="menuitem" tabindex="0">&#x270F;&#xFE0F; Edit / Update</div>
+  <div class="cmsep" role="separator"></div>
+  <div class="cmi danger" id="ctx-del" role="menuitem" tabindex="0">&#x1F5D1;&#xFE0F; Delete</div>
 </div>
 
 <!-- INSTALL BANNER -->
@@ -499,7 +499,7 @@
 </div>
 
 <!-- STITCH KEY MODAL -->
-<div id="stitch-key-modal" class="stitch-modal-overlay">
+<div id="stitch-key-modal" class="stitch-modal-overlay" role="alertdialog" aria-label="Stitch API Key Required">
   <div class="stitch-modal">
     <div class="stitch-modal-icon">&#x1F512;</div>
     <div class="stitch-modal-title">Stitch API Key Required</div>

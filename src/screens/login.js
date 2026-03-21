@@ -1,5 +1,5 @@
 import { ST } from '../lib/state.js'
-import { $, toast, showScreen } from '../lib/utils.js'
+import { $, toast, showScreen, validateKey } from '../lib/utils.js'
 import { saveKeys } from '../lib/state.js'
 import { testGitHub } from '../lib/github.js'
 import { renderGrid } from '../components/app-icon.js'
@@ -38,6 +38,8 @@ export function initOnboarding() {
     clearTimeout(ghTimer); _obSubmitted = true
     var k = $('ob-anth').value.trim()
     if (!k) { toast('Anthropic API key is required!'); return }
+    var anthCheck = validateKey('anthropic', k)
+    if (!anthCheck.valid) { toast('Anthropic key: ' + anthCheck.msg); return }
     var ghT = $('ob-gh-token').value.trim(), ghU = $('ob-gh-user').value.trim(), ghR = $('ob-gh-repo').value.trim()
     var hasGh = ghT && ghU && ghR
     if ((ghT || ghU || ghR) && !hasGh) { toast('Enter all three GitHub fields, or leave all blank'); return }

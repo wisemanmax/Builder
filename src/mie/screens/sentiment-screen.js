@@ -93,6 +93,9 @@ export function renderSentiment(container, signal) {
 }
 
 function renderReviews(compFilter) {
+  var SAMPLE_REVIEWS = getSampleReviews()
+  var COMPETITORS = getCompetitors()
+  var SENTIMENT_LABELS = getSentimentLabels()
   var html = ''
   var allReviews = []
   var compIds = compFilter === 'all' ? Object.keys(SAMPLE_REVIEWS) : [compFilter]

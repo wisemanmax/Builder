@@ -2,6 +2,7 @@ import { ST } from './state.js'
 import { slugify, ghHeaders, ghApiUrl, ghPageUrl, scrubKeys, toast } from './utils.js'
 import { fetchWithRetry } from './ai.js'
 import { persist } from './state.js'
+import { logWarn } from './errors.js'
 
 export function safeBase64(str) {
   try {
@@ -149,7 +150,7 @@ export function ghPushRulesManifest() {
 export function ghSyncThoughtAndRules(thought, rules) {
   var promises = [ghPushThought(thought), ghPushThoughtsManifest()]
   if (rules) { promises.push(ghPushRuleSet(rules)); promises.push(ghPushRulesManifest()) }
-  return Promise.all(promises).catch(function (e) { console.warn('GitHub thought/rules sync:', e) })
+  return Promise.all(promises).catch(function (e) { logWarn('GitHub', 'thought/rules sync: ' + e) })
 }
 
 export function ghPushTree(files, message, branch) {
@@ -287,7 +288,7 @@ export function pullFromGitHub() {
       if (added > 0) {
         persist()
         // Update manifest on GitHub to include all apps
-        ghPushManifest('main').catch(function (e) { console.warn('Manifest update after sync:', e) })
+        ghPushManifest('main').catch(function (e) { logWarn('GitHub', 'manifest update after sync: ' + e) })
       }
       toast('Synced ' + added + ' app' + (added === 1 ? '' : 's') + ' from GitHub (' + htmlFiles.length + ' total) \uD83D\uDD04', 3000)
     })

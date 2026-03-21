@@ -1,5 +1,6 @@
 import { ST } from './state.js'
 import { scrubKeys } from './utils.js'
+import { logWarn } from './errors.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
 import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CHAT } from '../config/prompts.js'
 import { CLAUDE_MODEL, GPT_MODEL, GPT_MINI_MODEL, GPT_THINK_MODEL, ANTHROPIC_API_URL, OPENAI_API_URL } from '../config/constants.js'
@@ -504,7 +505,7 @@ export function callGPTWithStream(sys, msg, onChunk, images) {
               fullText += chunk
               if (onChunk) onChunk('text', chunk)
             }
-          } catch (parseErr) {}
+          } catch (parseErr) { logWarn('GPT-SSE', parseErr.message) }
         }
         return processChunks()
       })
