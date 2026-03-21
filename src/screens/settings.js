@@ -1,5 +1,5 @@
 import { ST, saveKeys, keyStatusHTML } from '../lib/state.js'
-import { $, toast } from '../lib/utils.js'
+import { $, toast, validateKey } from '../lib/utils.js'
 import { persist } from '../lib/state.js'
 import { testGitHub, pullFromGitHub } from '../lib/github.js'
 import { pullFromSupabase } from '../lib/storage.js'
@@ -33,7 +33,11 @@ export function initSettings() {
     })
   }
   $('s-save-ai').addEventListener('click', function () {
-    ST.key = $('s-anth').value.trim(); ST.gptKey = $('s-gpt').value.trim(); ST.stitchKey = $('s-stitch').value.trim(); saveKeys()
+    var anthVal = $('s-anth').value.trim()
+    if (anthVal) { var ac = validateKey('anthropic', anthVal); if (!ac.valid) { toast('Anthropic key: ' + ac.msg); return } }
+    var gptVal = $('s-gpt').value.trim()
+    if (gptVal) { var gc = validateKey('openai', gptVal); if (!gc.valid) { toast('OpenAI key: ' + gc.msg); return } }
+    ST.key = anthVal; ST.gptKey = gptVal; ST.stitchKey = $('s-stitch').value.trim(); saveKeys()
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
     // Test Stitch key if provided
     if (ST.stitchKey) {
@@ -46,6 +50,7 @@ export function initSettings() {
   $('s-save-gh').addEventListener('click', function () {
     var ghT = $('s-gh-token').value.trim(), ghU = $('s-gh-user').value.trim(), ghR = $('s-gh-repo').value.trim(), ghD = $('s-gh-domain').value.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '')
     if (!ghT || !ghU || !ghR) { toast('Fill in all three GitHub fields'); return }
+    var ghc = validateKey('github', ghT); if (!ghc.valid) { toast('GitHub token: ' + ghc.msg); return }
     ST.ghToken = ghT; ST.ghUser = ghU; ST.ghRepo = ghR; ST.ghCustomDomain = ghD; saveKeys()
     var ksc = $('key-safety-card'); if (ksc) ksc.innerHTML = keyStatusHTML()
     toast('Testing GitHub connection\u2026')

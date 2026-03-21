@@ -144,7 +144,7 @@ window._tplPreview = function (templateId) {
   }).catch(function () {
     frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#f66">Failed to load preview</div>'
   })
-  useBtn.onclick = function () { window.templateSend(templateId); _tplPreviewClose() }
+  useBtn.onclick = function () { window.templateSend(templateId); window._tplPreviewClose() }
   overlay.classList.add('on')
 }
 
