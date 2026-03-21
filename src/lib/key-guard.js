@@ -6,7 +6,7 @@ export var _nativeFetch = window.fetch
 
 export function _validateKeyedRequest(url, opts) {
   var headersObj = (opts && opts.headers) || {}
-  var sensitiveValues = [ST.key, ST.gptKey, ST.stitchKey, ST.ghToken, ST.sbAnon].filter(function (v) {
+  var sensitiveValues = [ST.key, ST.gptKey, ST.stitchKey, ST.ghToken, ST.sbAnon, ST.sbApiKey].filter(function (v) {
     return v && v.length > 8
   })
   var hasKeyInHeaders = sensitiveValues.some(function (v) {

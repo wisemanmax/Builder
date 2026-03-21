@@ -170,7 +170,7 @@ export function redactKey(k) {
 
 export function scrubKeys(str) {
   var s = String(str)
-  ;[ST.key, ST.gptKey, ST.ghToken, ST.sbAnon].forEach(function (k) {
+  ;[ST.key, ST.gptKey, ST.stitchKey, ST.ghToken, ST.sbAnon, ST.sbApiKey].forEach(function (k) {
     if (k && k.length > 8) s = s.split(k).join('[REDACTED]')
   })
   return s
