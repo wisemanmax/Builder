@@ -1,5 +1,13 @@
 // Borrower Match Tool — Multi-step form + results
-import { CREDIT_RANGES, ENROLLMENT_TYPES, SCHOOL_TYPES, DEGREE_LEVELS, CITIZENSHIP_TYPES, LOAN_RANGES, US_STATES } from '../data/thresholds.js'
+import {
+  CREDIT_RANGES,
+  ENROLLMENT_TYPES,
+  SCHOOL_TYPES,
+  DEGREE_LEVELS,
+  CITIZENSHIP_TYPES,
+  LOAN_RANGES,
+  US_STATES,
+} from '../data/thresholds.js'
 import { runMatch } from '../lib/match-engine.js'
 import { tierLabel, tierColor, confidenceLabel } from '../lib/scoring.js'
 import { scoreBar, tierBadge } from '../components/score-bar.js'
@@ -31,7 +39,8 @@ export function renderMatchTool(container, signal) {
   // Intro
   html += '<div class="mie-match-intro">'
   html += '<h2>Find Your Best Student Loan Match</h2>'
-  html += '<p>Answer a few questions and we\'ll show you which lenders you likely qualify for — no hard credit pull, no impact to your score.</p>'
+  html +=
+    "<p>Answer a few questions and we'll show you which lenders you likely qualify for — no hard credit pull, no impact to your score.</p>"
   html += '<div class="mie-match-trust">'
   html += '<span class="mie-match-trust-item">No hard credit pull</span>'
   html += '<span class="mie-match-trust-item">100% transparent</span>'
@@ -77,7 +86,14 @@ function renderStep1() {
   for (var i = 0; i < ranges.length; i++) {
     var r = ranges[i]
     var sel = formState.creditRange === r ? ' selected' : ''
-    html += '<button class="mie-radio-btn' + sel + '" data-field="creditRange" data-value="' + r + '">' + CREDIT_RANGES[r].label + '</button>'
+    html +=
+      '<button class="mie-radio-btn' +
+      sel +
+      '" data-field="creditRange" data-value="' +
+      r +
+      '">' +
+      CREDIT_RANGES[r].label +
+      '</button>'
   }
   html += '</div>'
   html += '<div class="mie-field-hint">Don\'t know? Most people 18-25 fall in the Fair to Good range.</div>'
@@ -86,7 +102,8 @@ function renderStep1() {
   // Cosigner
   html += '<div class="mie-field">'
   html += '<div class="mie-field-label">Do you have a cosigner available?</div>'
-  html += '<button class="mie-toggle-btn' + (formState.cosignerAvailable ? ' active' : '') + '" id="mie-cosigner-toggle">'
+  html +=
+    '<button class="mie-toggle-btn' + (formState.cosignerAvailable ? ' active' : '') + '" id="mie-cosigner-toggle">'
   html += '<div class="mie-toggle-dot"></div>'
   html += '<span>' + (formState.cosignerAvailable ? 'Yes, I have a cosigner' : 'No cosigner available') + '</span>'
   html += '</button>'
@@ -106,7 +123,14 @@ function renderStep2() {
   for (var i = 0; i < ENROLLMENT_TYPES.length; i++) {
     var e = ENROLLMENT_TYPES[i]
     var sel = formState.enrollmentStatus === e.value ? ' selected' : ''
-    html += '<button class="mie-radio-btn' + sel + '" data-field="enrollmentStatus" data-value="' + e.value + '">' + e.label + '</button>'
+    html +=
+      '<button class="mie-radio-btn' +
+      sel +
+      '" data-field="enrollmentStatus" data-value="' +
+      e.value +
+      '">' +
+      e.label +
+      '</button>'
   }
   html += '</div></div>'
 
@@ -117,7 +141,14 @@ function renderStep2() {
   for (var j = 0; j < SCHOOL_TYPES.length; j++) {
     var s = SCHOOL_TYPES[j]
     var sel2 = formState.schoolType === s.value ? ' selected' : ''
-    html += '<button class="mie-radio-btn' + sel2 + '" data-field="schoolType" data-value="' + s.value + '">' + s.label + '</button>'
+    html +=
+      '<button class="mie-radio-btn' +
+      sel2 +
+      '" data-field="schoolType" data-value="' +
+      s.value +
+      '">' +
+      s.label +
+      '</button>'
   }
   html += '</div></div>'
 
@@ -128,7 +159,14 @@ function renderStep2() {
   for (var k = 0; k < DEGREE_LEVELS.length; k++) {
     var d = DEGREE_LEVELS[k]
     var sel3 = formState.degreeLevel === d.value ? ' selected' : ''
-    html += '<button class="mie-radio-btn' + sel3 + '" data-field="degreeLevel" data-value="' + d.value + '">' + d.label + '</button>'
+    html +=
+      '<button class="mie-radio-btn' +
+      sel3 +
+      '" data-field="degreeLevel" data-value="' +
+      d.value +
+      '">' +
+      d.label +
+      '</button>'
   }
   html += '</div></div>'
 
@@ -145,7 +183,14 @@ function renderStep3() {
   for (var i = 0; i < LOAN_RANGES.length; i++) {
     var lr = LOAN_RANGES[i]
     var sel = formState.loanAmount === lr.value ? ' selected' : ''
-    html += '<button class="mie-radio-btn' + sel + '" data-field="loanAmount" data-value="' + lr.value + '">' + lr.label + '</button>'
+    html +=
+      '<button class="mie-radio-btn' +
+      sel +
+      '" data-field="loanAmount" data-value="' +
+      lr.value +
+      '">' +
+      lr.label +
+      '</button>'
   }
   html += '</div></div>'
 
@@ -177,75 +222,118 @@ function renderStep3() {
 
 function attachFormHandlers(container, signal) {
   // Radio buttons — use delegated click, update UI in place instead of full re-render
-  container.addEventListener('click', function (e) {
-    var btn = e.target.closest('.mie-radio-btn')
-    if (btn && btn.dataset.field) {
-      formState[btn.dataset.field] = btn.dataset.value
-      // Update selection state in DOM instead of full re-render
-      var siblings = btn.parentNode.querySelectorAll('.mie-radio-btn')
-      for (var s = 0; s < siblings.length; s++) siblings[s].classList.remove('selected')
-      btn.classList.add('selected')
-      return
-    }
-  }, { signal: signal })
+  container.addEventListener(
+    'click',
+    function (e) {
+      var btn = e.target.closest('.mie-radio-btn')
+      if (btn && btn.dataset.field) {
+        formState[btn.dataset.field] = btn.dataset.value
+        // Update selection state in DOM instead of full re-render
+        var siblings = btn.parentNode.querySelectorAll('.mie-radio-btn')
+        for (var s = 0; s < siblings.length; s++) siblings[s].classList.remove('selected')
+        btn.classList.add('selected')
+        return
+      }
+    },
+    { signal: signal }
+  )
 
   // Cosigner toggle
   var tog = document.getElementById('mie-cosigner-toggle')
-  if (tog) tog.addEventListener('click', function () {
-    formState.cosignerAvailable = !formState.cosignerAvailable
-    tog.classList.toggle('active', formState.cosignerAvailable)
-    tog.querySelector('span').textContent = formState.cosignerAvailable ? 'Yes, I have a cosigner' : 'No cosigner available'
-  }, { signal: signal })
+  if (tog)
+    tog.addEventListener(
+      'click',
+      function () {
+        formState.cosignerAvailable = !formState.cosignerAvailable
+        tog.classList.toggle('active', formState.cosignerAvailable)
+        tog.querySelector('span').textContent = formState.cosignerAvailable
+          ? 'Yes, I have a cosigner'
+          : 'No cosigner available'
+      },
+      { signal: signal }
+    )
 
   // Dropdowns
   var cit = document.getElementById('mie-citizenship')
-  if (cit) cit.addEventListener('change', function () { formState.citizenshipStatus = this.value }, { signal: signal })
+  if (cit)
+    cit.addEventListener(
+      'change',
+      function () {
+        formState.citizenshipStatus = this.value
+      },
+      { signal: signal }
+    )
   var st = document.getElementById('mie-state')
-  if (st) st.addEventListener('change', function () { formState.state = this.value }, { signal: signal })
+  if (st)
+    st.addEventListener(
+      'change',
+      function () {
+        formState.state = this.value
+      },
+      { signal: signal }
+    )
 
   // Navigation
   var prev = document.getElementById('mie-match-prev')
-  if (prev) prev.addEventListener('click', function () {
-    formState.step = Math.max(1, formState.step - 1)
-    renderMatchTool(container)
-  }, { signal: signal })
+  if (prev)
+    prev.addEventListener(
+      'click',
+      function () {
+        formState.step = Math.max(1, formState.step - 1)
+        renderMatchTool(container)
+      },
+      { signal: signal }
+    )
 
   var next = document.getElementById('mie-match-next')
-  if (next) next.addEventListener('click', function () {
-    formState.step = Math.min(3, formState.step + 1)
-    renderMatchTool(container)
-  }, { signal: signal })
+  if (next)
+    next.addEventListener(
+      'click',
+      function () {
+        formState.step = Math.min(3, formState.step + 1)
+        renderMatchTool(container)
+      },
+      { signal: signal }
+    )
 
   var submit = document.getElementById('mie-match-submit')
-  if (submit) submit.addEventListener('click', function () {
-    // Save dropdown values before submitting
-    var citEl = document.getElementById('mie-citizenship')
-    if (citEl) formState.citizenshipStatus = citEl.value
-    var stEl = document.getElementById('mie-state')
-    if (stEl) formState.state = stEl.value
+  if (submit)
+    submit.addEventListener(
+      'click',
+      function () {
+        // Save dropdown values before submitting
+        var citEl = document.getElementById('mie-citizenship')
+        if (citEl) formState.citizenshipStatus = citEl.value
+        var stEl = document.getElementById('mie-state')
+        if (stEl) formState.state = stEl.value
 
-    // Get loan midpoint
-    var loanRange = LOAN_RANGES.find(function (lr) { return lr.value === formState.loanAmount })
-    var profile = {
-      creditRange: formState.creditRange,
-      cosignerAvailable: formState.cosignerAvailable,
-      enrollmentStatus: formState.enrollmentStatus,
-      schoolType: formState.schoolType,
-      degreeLevel: formState.degreeLevel,
-      loanAmount: formState.loanAmount,
-      loanMid: loanRange ? (loanRange.min + loanRange.max) / 2 : 15000,
-      citizenshipStatus: formState.citizenshipStatus,
-      state: formState.state,
-    }
+        // Get loan midpoint
+        var loanRange = LOAN_RANGES.find(function (lr) {
+          return lr.value === formState.loanAmount
+        })
+        var profile = {
+          creditRange: formState.creditRange,
+          cosignerAvailable: formState.cosignerAvailable,
+          enrollmentStatus: formState.enrollmentStatus,
+          schoolType: formState.schoolType,
+          degreeLevel: formState.degreeLevel,
+          loanAmount: formState.loanAmount,
+          loanMid: loanRange ? (loanRange.min + loanRange.max) / 2 : 15000,
+          citizenshipStatus: formState.citizenshipStatus,
+          state: formState.state,
+        }
 
-    // Show loading, then results
-    container.innerHTML = '<div class="mie-match-wrap"><div class="mie-loading"><div class="mie-loading-dots"><div class="mie-loading-dot"></div><div class="mie-loading-dot"></div><div class="mie-loading-dot"></div></div><div class="mie-loading-text">Checking your profile against lenders...</div></div></div>'
+        // Show loading, then results
+        container.innerHTML =
+          '<div class="mie-match-wrap"><div class="mie-loading"><div class="mie-loading-dots"><div class="mie-loading-dot"></div><div class="mie-loading-dot"></div><div class="mie-loading-dot"></div></div><div class="mie-loading-text">Checking your profile against lenders...</div></div></div>'
 
-    setTimeout(function () {
-      matchResults = runMatch(profile)
-      renderResults(container)
-    }, 1500)
-  }, { signal: signal })
+        setTimeout(function () {
+          matchResults = runMatch(profile)
+          renderResults(container)
+        }, 1500)
+      },
+      { signal: signal }
+    )
 }
 
 function renderResults(container) {
@@ -256,16 +344,20 @@ function renderResults(container) {
   html += '<div class="mie-result-state">'
   html += '<h3>' + res.state.label + '</h3>'
   var stateMessages = {
-    gb_best: 'Based on your profile, GradBridge is your strongest option. You\'re likely to be rejected by most other lenders.',
-    gb_and_one: 'You have strong options. Here\'s how they compare on what matters most.',
+    gb_best:
+      "Based on your profile, GradBridge is your strongest option. You're likely to be rejected by most other lenders.",
+    gb_and_one: "You have strong options. Here's how they compare on what matters most.",
     multiple_match: 'Good news — several lenders match your profile. Compare the details below.',
-    competitor_wins: 'A competitor may offer better rates, but there\'s more to consider than rate alone.',
-    rejected_widely: 'Your options are limited with most traditional lenders. Let\'s explore your best path forward.',
-    borderline: 'Your profile is on the edge for several lenders. Here\'s what you should know.',
+    competitor_wins: "A competitor may offer better rates, but there's more to consider than rate alone.",
+    rejected_widely: "Your options are limited with most traditional lenders. Let's explore your best path forward.",
+    borderline: "Your profile is on the edge for several lenders. Here's what you should know.",
   }
   html += '<p>' + (stateMessages[res.state.key] || '') + '</p>'
   if (res.gbAdvantage > 10) {
-    html += '<div style="margin-top:8px;font-size:12px;color:var(--mie-accent);font-weight:600">GradBridge Advantage Score: +' + res.gbAdvantage + '</div>'
+    html +=
+      '<div style="margin-top:8px;font-size:12px;color:var(--mie-accent);font-weight:600">GradBridge Advantage Score: +' +
+      res.gbAdvantage +
+      '</div>'
   }
   html += '</div>'
 
@@ -315,7 +407,8 @@ function renderResults(container) {
   // Confidence note
   html += '<div class="mie-confidence-note">'
   html += confidenceLabel(res.confidence)
-  html += '<br><span style="margin-top:4px;display:inline-block">This tool does not perform a hard credit check. Results are estimates based on publicly available lender criteria.</span>'
+  html +=
+    '<br><span style="margin-top:4px;display:inline-block">This tool does not perform a hard credit check. Results are estimates based on publicly available lender criteria.</span>'
   html += '</div>'
 
   // Reset button
@@ -328,17 +421,22 @@ function renderResults(container) {
 
   // Reset handler
   var resetBtn = document.getElementById('mie-match-reset')
-  if (resetBtn) resetBtn.addEventListener('click', function () {
-    matchResults = null
-    formState.step = 1
-    formState.creditRange = ''
-    formState.cosignerAvailable = false
-    formState.enrollmentStatus = ''
-    formState.schoolType = ''
-    formState.degreeLevel = ''
-    formState.loanAmount = ''
-    formState.citizenshipStatus = ''
-    formState.state = ''
-    renderMatchTool(container)
-  }, { signal: _signal })
+  if (resetBtn)
+    resetBtn.addEventListener(
+      'click',
+      function () {
+        matchResults = null
+        formState.step = 1
+        formState.creditRange = ''
+        formState.cosignerAvailable = false
+        formState.enrollmentStatus = ''
+        formState.schoolType = ''
+        formState.degreeLevel = ''
+        formState.loanAmount = ''
+        formState.citizenshipStatus = ''
+        formState.state = ''
+        renderMatchTool(container)
+      },
+      { signal: _signal }
+    )
 }

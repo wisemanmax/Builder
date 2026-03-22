@@ -8,12 +8,66 @@ export const GRADS = [
 ]
 
 export const EMOJIS = [
-  '🎯','📊','💰','🏋️','📝','⏰','🎵','🎨','📚','🌱',
-  '🚀','💡','🔥','⭐','🎮','🍎','🧠','💪','🌙','🌞',
-  '📅','🎭','🧪','🔑','💎','🏆','🎲','🌍','🎤','🎸',
-  '🐉','🦋','🌺','🍕','☕','🎪','🔮','🧩','🪄','💻',
-  '📱','🔧','🏠','🚗','✈️','🛸','🌈','🦁','🐋','🎃',
-  '👑','🍭','🌊','⚡','🎁','🧲','🪐','🎬','🖌️','🧬',
+  '🎯',
+  '📊',
+  '💰',
+  '🏋️',
+  '📝',
+  '⏰',
+  '🎵',
+  '🎨',
+  '📚',
+  '🌱',
+  '🚀',
+  '💡',
+  '🔥',
+  '⭐',
+  '🎮',
+  '🍎',
+  '🧠',
+  '💪',
+  '🌙',
+  '🌞',
+  '📅',
+  '🎭',
+  '🧪',
+  '🔑',
+  '💎',
+  '🏆',
+  '🎲',
+  '🌍',
+  '🎤',
+  '🎸',
+  '🐉',
+  '🦋',
+  '🌺',
+  '🍕',
+  '☕',
+  '🎪',
+  '🔮',
+  '🧩',
+  '🪄',
+  '💻',
+  '📱',
+  '🔧',
+  '🏠',
+  '🚗',
+  '✈️',
+  '🛸',
+  '🌈',
+  '🦁',
+  '🐋',
+  '🎃',
+  '👑',
+  '🍭',
+  '🌊',
+  '⚡',
+  '🎁',
+  '🧲',
+  '🪐',
+  '🎬',
+  '🖌️',
+  '🧬',
 ]
 
 export const PIPE_NAMES = [
@@ -34,15 +88,23 @@ export const PIPE_NAMES = [
 ]
 
 export const PIPE_ICONS = [
-  '\uD83C\uDF3F', '\uD83D\uDCDD', '\uD83D\uDD28', '\uD83D\uDCCB', '\uD83D\uDD0D',
-  '\uD83D\uDEE0', '\uD83D\uDCA1', '\u2728', '\uD83D\uDD0E',
-  '\uD83D\uDDC4\uFE0F', '\u2B06\uFE0F', '\uD83D\uDC41',
-  '\u2705', '\uD83D\uDD00',
+  '\uD83C\uDF3F',
+  '\uD83D\uDCDD',
+  '\uD83D\uDD28',
+  '\uD83D\uDCCB',
+  '\uD83D\uDD0D',
+  '\uD83D\uDEE0',
+  '\uD83D\uDCA1',
+  '\u2728',
+  '\uD83D\uDD0E',
+  '\uD83D\uDDC4\uFE0F',
+  '\u2B06\uFE0F',
+  '\uD83D\uDC41',
+  '\u2705',
+  '\uD83D\uDD00',
 ]
 
-export const THINK_ROUND_LABELS = [
-  'What to Build', 'Who & How', 'Differentiators', 'Boundaries', 'Confirm & Lock',
-]
+export const THINK_ROUND_LABELS = ['What to Build', 'Who & How', 'Differentiators', 'Boundaries', 'Confirm & Lock']
 
 export const MAX_FIX_PASSES = 3
 
@@ -77,9 +139,15 @@ export const PIPE2_NAMES = [
 ]
 
 export const PIPE2_ICONS = [
-  '\uD83D\uDCDD', '\uD83D\uDD28', '\uD83D\uDCCB', '\uD83D\uDD0D',
-  '\uD83D\uDEE0', '\u2B06\uFE0F', '\uD83D\uDC41',
-  '\u2705', '\uD83D\uDD00',
+  '\uD83D\uDCDD',
+  '\uD83D\uDD28',
+  '\uD83D\uDCCB',
+  '\uD83D\uDD0D',
+  '\uD83D\uDEE0',
+  '\u2B06\uFE0F',
+  '\uD83D\uDC41',
+  '\u2705',
+  '\uD83D\uDD00',
 ]
 
 export const PIPE3_NAMES = [
@@ -100,11 +168,20 @@ export const PIPE3_NAMES = [
 ]
 
 export const PIPE3_ICONS = [
-  '\uD83E\uDDE9', '\uD83C\uDFD7', '\uD83C\uDFA8', '\uD83D\uDDC3',
-  '\uD83E\uDDF1', '\u2699\uFE0F', '\uD83D\uDDBC', '\uD83D\uDCC4',
-  '\uD83D\uDEA6', '\uD83D\uDCDD',
-  '\u2B06\uFE0F', '\uD83D\uDC41',
-  '\u2705', '\uD83D\uDD00',
+  '\uD83E\uDDE9',
+  '\uD83C\uDFD7',
+  '\uD83C\uDFA8',
+  '\uD83D\uDDC3',
+  '\uD83E\uDDF1',
+  '\u2699\uFE0F',
+  '\uD83D\uDDBC',
+  '\uD83D\uDCC4',
+  '\uD83D\uDEA6',
+  '\uD83D\uDCDD',
+  '\u2B06\uFE0F',
+  '\uD83D\uDC41',
+  '\u2705',
+  '\uD83D\uDD00',
 ]
 
 export const PIPE4_NAMES = [
@@ -123,9 +200,18 @@ export const PIPE4_NAMES = [
 ]
 
 export const PIPE4_ICONS = [
-  '\uD83D\uDD0D', '\uD83C\uDFA8', '\uD83D\uDDFA', '\uD83C\uDFA8', '\uD83D\uDD28', '\uD83D\uDCCB',
-  '\uD83D\uDD0E', '\uD83D\uDEE0', '\u2B06\uFE0F', '\uD83D\uDC41',
-  '\u2705', '\uD83D\uDD00',
+  '\uD83D\uDD0D',
+  '\uD83C\uDFA8',
+  '\uD83D\uDDFA',
+  '\uD83C\uDFA8',
+  '\uD83D\uDD28',
+  '\uD83D\uDCCB',
+  '\uD83D\uDD0E',
+  '\uD83D\uDEE0',
+  '\u2B06\uFE0F',
+  '\uD83D\uDC41',
+  '\u2705',
+  '\uD83D\uDD00',
 ]
 
 export const PIPE5_NAMES = [
@@ -140,8 +226,14 @@ export const PIPE5_NAMES = [
 ]
 
 export const PIPE5_ICONS = [
-  '\uD83D\uDCE5', '\uD83D\uDCDD', '\uD83D\uDC41', '\uD83E\uDDF5', '\u2705',
-  '\uD83D\uDD0D', '\u2728', '\uD83D\uDE80',
+  '\uD83D\uDCE5',
+  '\uD83D\uDCDD',
+  '\uD83D\uDC41',
+  '\uD83E\uDDF5',
+  '\u2705',
+  '\uD83D\uDD0D',
+  '\u2728',
+  '\uD83D\uDE80',
 ]
 
 export const PIPE5_STATUS = {
@@ -156,10 +248,10 @@ export const SELFUPDATE_ICONS = ['\uD83D\uDCE5', '\uD83D\uDD28', '\u2B06\uFE0F',
 
 // Cost analyzer pricing — per 1M tokens (USD)
 export var COST_RATES = {
-  'claude-sonnet-4-20250514': { input: 3.00, output: 15.00, cacheRead: 0.30, cacheWrite: 3.75 },
-  'gpt-4o': { input: 2.50, output: 10.00 },
-  'gpt-4o-mini': { input: 0.15, output: 0.60 },
-  'gpt-5.4': { input: 5.00, output: 20.00 },
+  'claude-sonnet-4-20250514': { input: 3.0, output: 15.0, cacheRead: 0.3, cacheWrite: 3.75 },
+  'gpt-4o': { input: 2.5, output: 10.0 },
+  'gpt-4o-mini': { input: 0.15, output: 0.6 },
+  'gpt-5.4': { input: 5.0, output: 20.0 },
 }
 export var COST_MARKUP = 7
 

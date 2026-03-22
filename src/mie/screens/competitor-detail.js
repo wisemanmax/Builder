@@ -23,7 +23,11 @@ export function renderCompetitorDetail(container, competitor, navigate, signal) 
   html += '<div class="mie-detail-header">'
   html += '<div class="mie-detail-logo" style="background:' + c.color + '">' + c.name.charAt(0) + '</div>'
   html += '<div class="mie-detail-info">'
-  html += '<div class="mie-detail-name">' + c.name + (c.isSelf ? ' <span style="font-size:12px;color:var(--mie-accent)">(Your Company)</span>' : '') + '</div>'
+  html +=
+    '<div class="mie-detail-name">' +
+    c.name +
+    (c.isSelf ? ' <span style="font-size:12px;color:var(--mie-accent)">(Your Company)</span>' : '') +
+    '</div>'
   html += '<div class="mie-detail-meta">'
   html += '<span class="mie-segment-tag">' + c.segment + '</span>'
   html += scoreBadge(c.scores.composite)
@@ -64,16 +68,37 @@ export function renderCompetitorDetail(container, competitor, navigate, signal) 
   html += '<div class="mie-card">'
   html += '<div class="mie-card-title">Loan Products</div>'
   html += '<table class="mie-table mie-product-table"><thead><tr>'
-  html += '<th>Product</th><th>Fixed APR</th><th>Variable APR</th><th>Loan Range</th><th>Terms</th><th>Cosigner Release</th><th>Forbearance</th>'
+  html +=
+    '<th>Product</th><th>Fixed APR</th><th>Variable APR</th><th>Loan Range</th><th>Terms</th><th>Cosigner Release</th><th>Forbearance</th>'
   html += '</tr></thead><tbody>'
   for (var p = 0; p < c.products.length; p++) {
     var prod = c.products[p]
     html += '<tr>'
     html += '<td data-label="Product" style="font-weight:600">' + prod.name + '</td>'
-    html += '<td data-label="Fixed APR" class="mie-product-val">' + prod.fixedAprMin.toFixed(2) + '% &ndash; ' + prod.fixedAprMax.toFixed(2) + '%</td>'
-    html += '<td data-label="Variable APR" class="mie-product-val">' + prod.variableAprMin.toFixed(2) + '% &ndash; ' + prod.variableAprMax.toFixed(2) + '%</td>'
-    html += '<td data-label="Loan Range" class="mie-product-val">$' + prod.loanMin.toLocaleString() + ' &ndash; ' + (prod.loanMax ? '$' + prod.loanMax.toLocaleString() : 'COA') + '</td>'
-    html += '<td data-label="Terms" class="mie-product-val">' + prod.repaymentTermsMin + '&ndash;' + prod.repaymentTermsMax + ' yr</td>'
+    html +=
+      '<td data-label="Fixed APR" class="mie-product-val">' +
+      prod.fixedAprMin.toFixed(2) +
+      '% &ndash; ' +
+      prod.fixedAprMax.toFixed(2) +
+      '%</td>'
+    html +=
+      '<td data-label="Variable APR" class="mie-product-val">' +
+      prod.variableAprMin.toFixed(2) +
+      '% &ndash; ' +
+      prod.variableAprMax.toFixed(2) +
+      '%</td>'
+    html +=
+      '<td data-label="Loan Range" class="mie-product-val">$' +
+      prod.loanMin.toLocaleString() +
+      ' &ndash; ' +
+      (prod.loanMax ? '$' + prod.loanMax.toLocaleString() : 'COA') +
+      '</td>'
+    html +=
+      '<td data-label="Terms" class="mie-product-val">' +
+      prod.repaymentTermsMin +
+      '&ndash;' +
+      prod.repaymentTermsMax +
+      ' yr</td>'
     html += '<td data-label="Cosigner Release" class="mie-product-val">' + prod.cosignerReleaseMonths + ' mo</td>'
     html += '<td data-label="Forbearance" class="mie-product-val">' + prod.hardshipForbearanceMonths + ' mo</td>'
     html += '</tr>'
@@ -86,7 +111,16 @@ export function renderCompetitorDetail(container, competitor, navigate, signal) 
   if (sentScores) {
     html += '<div class="mie-grid mie-grid-2">'
     html += '<div class="mie-card">'
-    html += '<div class="mie-card-title">Sentiment Scores <span class="mie-trend-' + sentScores.trend + '" style="font-size:11px;font-weight:400">' + (sentScores.trend === 'up' ? '&#x2191; Improving' : sentScores.trend === 'down' ? '&#x2193; Declining' : '&#x2192; Stable') + '</span></div>'
+    html +=
+      '<div class="mie-card-title">Sentiment Scores <span class="mie-trend-' +
+      sentScores.trend +
+      '" style="font-size:11px;font-weight:400">' +
+      (sentScores.trend === 'up'
+        ? '&#x2191; Improving'
+        : sentScores.trend === 'down'
+          ? '&#x2193; Declining'
+          : '&#x2192; Stable') +
+      '</span></div>'
     var cats = Object.keys(SENTIMENT_LABELS)
     for (var s = 0; s < cats.length; s++) {
       var cat = cats[s]
@@ -96,7 +130,12 @@ export function renderCompetitorDetail(container, competitor, navigate, signal) 
       html += '<div class="mie-sent-row">'
       html += '<span class="mie-sent-cat">' + SENTIMENT_LABELS[cat] + '</span>'
       html += '<div style="flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">'
-      html += '<div style="width:' + pct + '%;height:100%;background:' + barColor + ';border-radius:4px;transition:width 0.5s"></div>'
+      html +=
+        '<div style="width:' +
+        pct +
+        '%;height:100%;background:' +
+        barColor +
+        ';border-radius:4px;transition:width 0.5s"></div>'
       html += '</div>'
       html += '<span class="mie-sent-val">' + val.toFixed(1) + '</span>'
       html += '</div>'
@@ -111,10 +150,12 @@ export function renderCompetitorDetail(container, competitor, navigate, signal) 
       html += '<div class="mie-review-header">'
       html += '<span class="mie-review-source">' + review.source + '</span>'
       html += '<span class="mie-review-polarity ' + review.polarity + '">' + review.polarity + '</span>'
-      if (review.rating) html += '<span style="font-size:11px;color:var(--mie-text-muted)">&#x2605; ' + review.rating + '/5</span>'
+      if (review.rating)
+        html += '<span style="font-size:11px;color:var(--mie-text-muted)">&#x2605; ' + review.rating + '/5</span>'
       html += '</div>'
       html += '<div class="mie-review-text">"' + review.text + '"</div>'
-      html += '<div class="mie-review-date">' + review.date + ' &middot; ' + SENTIMENT_LABELS[review.category] + '</div>'
+      html +=
+        '<div class="mie-review-date">' + review.date + ' &middot; ' + SENTIMENT_LABELS[review.category] + '</div>'
       html += '</div>'
     }
     html += '</div></div>'
@@ -123,7 +164,11 @@ export function renderCompetitorDetail(container, competitor, navigate, signal) 
   container.innerHTML = html
 
   // Back button handler
-  document.getElementById('mie-detail-back').addEventListener('click', function () {
-    navigate('overview')
-  }, { signal: signal })
+  document.getElementById('mie-detail-back').addEventListener(
+    'click',
+    function () {
+      navigate('overview')
+    },
+    { signal: signal }
+  )
 }

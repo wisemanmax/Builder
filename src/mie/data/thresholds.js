@@ -13,7 +13,7 @@ export const THRESHOLDS = {
     minIncome: 0, // no stated minimum
     gpaRequired: false,
   },
-  'discover': {
+  discover: {
     minCredit: 680,
     cosignerRequired: 'often',
     cosignerCreditFloor: 700,
@@ -26,7 +26,7 @@ export const THRESHOLDS = {
     minIncome: 0,
     gpaRequired: false,
   },
-  'sofi': {
+  sofi: {
     minCredit: 700,
     cosignerRequired: 'sometimes',
     cosignerCreditFloor: 720,
@@ -52,7 +52,7 @@ export const THRESHOLDS = {
     minIncome: 0,
     gpaRequired: false,
   },
-  'gradbridge': {
+  gradbridge: {
     minCredit: 600,
     cosignerRequired: 'sometimes',
     cosignerCreditFloor: 620,
@@ -69,11 +69,11 @@ export const THRESHOLDS = {
 
 // Credit score range midpoints for scoring
 export const CREDIT_RANGES = {
-  'poor':       { label: 'Poor (300-579)', min: 300, max: 579, mid: 520 },
-  'fair':       { label: 'Fair (580-619)', min: 580, max: 619, mid: 600 },
-  'good':       { label: 'Good (620-679)', min: 620, max: 679, mid: 650 },
-  'very-good':  { label: 'Very Good (680-739)', min: 680, max: 739, mid: 710 },
-  'excellent':  { label: 'Excellent (740+)', min: 740, max: 850, mid: 790 },
+  poor: { label: 'Poor (300-579)', min: 300, max: 579, mid: 520 },
+  fair: { label: 'Fair (580-619)', min: 580, max: 619, mid: 600 },
+  good: { label: 'Good (620-679)', min: 620, max: 679, mid: 650 },
+  'very-good': { label: 'Very Good (680-739)', min: 680, max: 739, mid: 710 },
+  excellent: { label: 'Excellent (740+)', min: 740, max: 850, mid: 790 },
 }
 
 export const ENROLLMENT_TYPES = [
@@ -121,8 +121,56 @@ export const INCOME_RANGES = [
 ]
 
 export const US_STATES = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
-  'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
-  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
-  'VA','WA','WV','WI','WY','DC','PR',
+  'AL',
+  'AK',
+  'AZ',
+  'AR',
+  'CA',
+  'CO',
+  'CT',
+  'DE',
+  'FL',
+  'GA',
+  'HI',
+  'ID',
+  'IL',
+  'IN',
+  'IA',
+  'KS',
+  'KY',
+  'LA',
+  'ME',
+  'MD',
+  'MA',
+  'MI',
+  'MN',
+  'MS',
+  'MO',
+  'MT',
+  'NE',
+  'NV',
+  'NH',
+  'NJ',
+  'NM',
+  'NY',
+  'NC',
+  'ND',
+  'OH',
+  'OK',
+  'OR',
+  'PA',
+  'RI',
+  'SC',
+  'SD',
+  'TN',
+  'TX',
+  'UT',
+  'VT',
+  'VA',
+  'WA',
+  'WV',
+  'WI',
+  'WY',
+  'DC',
+  'PR',
 ]

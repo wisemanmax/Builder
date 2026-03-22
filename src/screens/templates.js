@@ -12,10 +12,19 @@ export function initTemplateSheet() {
 
 export function openTemplates() {
   // Render category tabs
-  var cats = '<div class="tpl-cat active" data-cat="all" onclick="_tplSheetFilter(\'all\')">All</div>'
+  var cats = '<div class="tpl-cat active" data-cat="all" onclick="B._tplSheetFilter(\'all\')">All</div>'
   for (var c = 0; c < TEMPLATE_CATEGORIES.length; c++) {
     var cat = TEMPLATE_CATEGORIES[c]
-    cats += '<div class="tpl-cat" data-cat="' + cat.id + '" onclick="_tplSheetFilter(\'' + cat.id + '\')">' + cat.icon + ' ' + esc(cat.name) + '</div>'
+    cats +=
+      '<div class="tpl-cat" data-cat="' +
+      cat.id +
+      '" onclick="B._tplSheetFilter(\'' +
+      cat.id +
+      '\')">' +
+      cat.icon +
+      ' ' +
+      esc(cat.name) +
+      '</div>'
   }
   $('tpl-sheet-cats').innerHTML = cats
 
@@ -23,12 +32,25 @@ export function openTemplates() {
   var cards = ''
   for (var i = 0; i < TEMPLATES.length; i++) {
     var t = TEMPLATES[i]
-    cards += '<div class="tpl-card" data-cat="' + t.category + '" onclick="selectTemplate(\'' + t.id + '\')">'
-      + '<div class="tpl-card-top"><div class="tpl-card-icon">' + t.icon + '</div>'
-      + '<button class="tpl-card-preview" onclick="event.stopPropagation();openTplSheetPreview(\'' + t.id + '\')" title="Preview">\uD83D\uDD0D</button></div>'
-      + '<div class="tpl-card-name">' + esc(t.name) + '</div>'
-      + '<div class="tpl-card-desc">' + esc(t.desc) + '</div>'
-      + '</div>'
+    cards +=
+      '<div class="tpl-card" data-cat="' +
+      t.category +
+      '" onclick="B.selectTemplate(\'' +
+      t.id +
+      '\')">' +
+      '<div class="tpl-card-top"><div class="tpl-card-icon">' +
+      t.icon +
+      '</div>' +
+      '<button class="tpl-card-preview" onclick="event.stopPropagation();B.openTplSheetPreview(\'' +
+      t.id +
+      '\')" title="Preview">\uD83D\uDD0D</button></div>' +
+      '<div class="tpl-card-name">' +
+      esc(t.name) +
+      '</div>' +
+      '<div class="tpl-card-desc">' +
+      esc(t.desc) +
+      '</div>' +
+      '</div>'
   }
   $('tpl-sheet-grid').innerHTML = cards
 
@@ -47,7 +69,9 @@ function selectTemplate(templateId) {
 }
 
 function openTplSheetPreview(templateId) {
-  var tpl = TEMPLATES.find(function (t) { return t.id === templateId })
+  var tpl = TEMPLATES.find(function (t) {
+    return t.id === templateId
+  })
   if (!tpl) return
   var overlay = $('tpl-sheet-preview')
   var nameEl = $('tpl-sheet-preview-name')
@@ -55,13 +79,19 @@ function openTplSheetPreview(templateId) {
   var useBtn = $('tpl-sheet-preview-use')
   if (!overlay || !frame) return
   nameEl.textContent = tpl.icon + ' ' + tpl.name
-  frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#888">Loading preview\u2026</div>'
-  getTemplateSkeleton(templateId).then(function (skeleton) {
-    frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(skeleton) + '"></iframe>'
-  }).catch(function () {
-    frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#f66">Failed to load preview</div>'
-  })
-  useBtn.onclick = function () { selectTemplate(templateId) }
+  frame.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#888">Loading preview\u2026</div>'
+  getTemplateSkeleton(templateId)
+    .then(function (skeleton) {
+      frame.innerHTML = '<iframe sandbox="allow-scripts" srcdoc="' + escAttr(skeleton) + '"></iframe>'
+    })
+    .catch(function () {
+      frame.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#f66">Failed to load preview</div>'
+    })
+  useBtn.onclick = function () {
+    selectTemplate(templateId)
+  }
   overlay.classList.add('on')
   // Auto-fullscreen on mobile for better UX
   var modal = overlay.querySelector('.tpl-preview-modal')
@@ -105,13 +135,15 @@ function filterTemplates(cat) {
   }
   var cards = document.querySelectorAll('#tpl-sheet-grid .tpl-card')
   for (var j = 0; j < cards.length; j++) {
-    cards[j].style.display = (cat === 'all' || cards[j].dataset.cat === cat) ? '' : 'none'
+    cards[j].style.display = cat === 'all' || cards[j].dataset.cat === cat ? '' : 'none'
   }
 }
 
-// Expose to window for inline onclick handlers
-window.selectTemplate = selectTemplate
-window.openTplSheetPreview = openTplSheetPreview
-window.closeTplSheetPreview = closeTplSheetPreview
-window.toggleTplSheetPreviewFullscreen = toggleTplSheetPreviewFullscreen
-window._tplSheetFilter = filterTemplates
+// Expose to B namespace for dynamic onclick handlers
+export function initTemplateHandlers() {
+  window.B.selectTemplate = selectTemplate
+  window.B.openTplSheetPreview = openTplSheetPreview
+  window.B.closeTplSheetPreview = closeTplSheetPreview
+  window.B.toggleTplSheetPreviewFullscreen = toggleTplSheetPreviewFullscreen
+  window.B._tplSheetFilter = filterTemplates
+}

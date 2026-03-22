@@ -44,7 +44,10 @@ export function createStreamingPreview(iframeId) {
 
     finalize: function (fullCode) {
       finalized = true
-      if (renderTimer) { clearTimeout(renderTimer); renderTimer = null }
+      if (renderTimer) {
+        clearTimeout(renderTimer)
+        renderTimer = null
+      }
       var el = getIframe()
       if (!el) return
       el.srcdoc = fullCode
@@ -56,9 +59,12 @@ export function createStreamingPreview(iframeId) {
 
     destroy: function () {
       finalized = true
-      if (renderTimer) { clearTimeout(renderTimer); renderTimer = null }
+      if (renderTimer) {
+        clearTimeout(renderTimer)
+        renderTimer = null
+      }
       delete _controllers[iframeId]
-    }
+    },
   }
 
   _controllers[iframeId] = controller

@@ -124,6 +124,6 @@ export const SEGMENTS = [
     },
     competitorGap: 'Thin credit file rejected across the board despite strong income history.',
     messagingAngle: 'trust',
-    recommendedHeadline: "Taking the next step? Your experience matters more than your credit length.",
+    recommendedHeadline: 'Taking the next step? Your experience matters more than your credit length.',
   },
 ]

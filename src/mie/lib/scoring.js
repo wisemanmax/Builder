@@ -2,7 +2,7 @@
 
 // Composite score: weighted average of all dimensions
 export function compositeScore(scores) {
-  var w = { accessibility: 0.20, value: 0.25, pricing: 0.25, ux: 0.15, trust: 0.15 }
+  var w = { accessibility: 0.2, value: 0.25, pricing: 0.25, ux: 0.15, trust: 0.15 }
   var total = 0
   for (var k in w) {
     total += (scores[k] || 0) * w[k]
@@ -20,7 +20,13 @@ export function matchTier(score) {
 }
 
 export function tierLabel(tier) {
-  var labels = { strong: 'Strong Match', likely: 'Likely Match', possible: 'Possible', unlikely: 'Likely Rejected', rejected: 'Almost Certainly Rejected' }
+  var labels = {
+    strong: 'Strong Match',
+    likely: 'Likely Match',
+    possible: 'Possible',
+    unlikely: 'Likely Rejected',
+    rejected: 'Almost Certainly Rejected',
+  }
   return labels[tier] || tier
 }
 
@@ -57,12 +63,21 @@ export function confidenceLabel(level) {
 }
 
 // GradBridge Advantage Score
-export function advantageScore(gbMatchScore, bestCompetitorScore, gbAccessibility, compAccessibility, gbPricing, compPricing, gbSentiment, compSentiment) {
+export function advantageScore(
+  gbMatchScore,
+  bestCompetitorScore,
+  gbAccessibility,
+  compAccessibility,
+  gbPricing,
+  compPricing,
+  gbSentiment,
+  compSentiment
+) {
   return Math.round(
-    (gbMatchScore - bestCompetitorScore) * 0.50
-    + ((gbAccessibility - compAccessibility) / 100 * 50) * 0.25
-    + ((gbPricing - compPricing) / 100 * 50) * 0.15
-    + ((gbSentiment - compSentiment) / 5 * 50) * 0.10
+    (gbMatchScore - bestCompetitorScore) * 0.5 +
+      ((gbAccessibility - compAccessibility) / 100) * 50 * 0.25 +
+      ((gbPricing - compPricing) / 100) * 50 * 0.15 +
+      ((gbSentiment - compSentiment) / 5) * 50 * 0.1
   )
 }
 

@@ -9,7 +9,10 @@ import { SYS_LEARN } from '../config/prompts.js'
 export function analyzeFeedback(profileId) {
   var profile = null
   for (var i = 0; i < ST.profiles.length; i++) {
-    if (ST.profiles[i].id === profileId) { profile = ST.profiles[i]; break }
+    if (ST.profiles[i].id === profileId) {
+      profile = ST.profiles[i]
+      break
+    }
   }
   if (!profile) return Promise.reject(new Error('Profile not found'))
   var feedback = profile.feedback || []
@@ -22,16 +25,23 @@ export function analyzeFeedback(profileId) {
       rating: fb.rating,
       liked: fb.liked || '',
       disliked: fb.disliked || '',
-      tags: fb.tags || []
+      tags: fb.tags || [],
     }
   })
 
-  var msg = 'Analyze this feedback from ' + feedback.length + ' app builds for the organization "' + (profile.name || 'unnamed') + '":\n\n'
-    + JSON.stringify(feedbackSummary, null, 2)
+  var msg =
+    'Analyze this feedback from ' +
+    feedback.length +
+    ' app builds for the organization "' +
+    (profile.name || 'unnamed') +
+    '":\n\n' +
+    JSON.stringify(feedbackSummary, null, 2)
 
   return callClaudeRaw(SYS_LEARN, msg, 2000).then(function (raw) {
     var parsed
-    try { parsed = JSON.parse(raw) } catch (e) {
+    try {
+      parsed = JSON.parse(raw)
+    } catch (e) {
       parsed = { positivePatterns: [], negativePatterns: [], designPrefs: [], functionalPrefs: [] }
     }
     profile.learnedPreferences = {
@@ -40,7 +50,7 @@ export function analyzeFeedback(profileId) {
       designPrefs: Array.isArray(parsed.designPrefs) ? parsed.designPrefs : [],
       functionalPrefs: Array.isArray(parsed.functionalPrefs) ? parsed.functionalPrefs : [],
       lastAnalyzedAt: new Date().toISOString(),
-      feedbackCount: feedback.length
+      feedbackCount: feedback.length,
     }
     persist()
     return profile.learnedPreferences
@@ -54,16 +64,21 @@ export function analyzeFeedback(profileId) {
 export function maybeAutoAnalyze(profileId) {
   var profile = null
   for (var i = 0; i < ST.profiles.length; i++) {
-    if (ST.profiles[i].id === profileId) { profile = ST.profiles[i]; break }
+    if (ST.profiles[i].id === profileId) {
+      profile = ST.profiles[i]
+      break
+    }
   }
   if (!profile) return
   var feedback = profile.feedback || []
   var lastCount = (profile.learnedPreferences && profile.learnedPreferences.feedbackCount) || 0
   if (feedback.length >= 5 && feedback.length - lastCount >= 5) {
-    analyzeFeedback(profileId).then(function () {
-      console.log('[Learning] Auto-analyzed ' + feedback.length + ' feedback entries for ' + profile.name)
-    }).catch(function (e) {
-      console.warn('[Learning] Auto-analysis failed:', e.message)
-    })
+    analyzeFeedback(profileId)
+      .then(function () {
+        console.log('[Learning] Auto-analyzed ' + feedback.length + ' feedback entries for ' + profile.name)
+      })
+      .catch(function (e) {
+        console.warn('[Learning] Auto-analysis failed:', e.message)
+      })
   }
 }

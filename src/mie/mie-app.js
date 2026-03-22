@@ -30,12 +30,12 @@ function resetListeners() {
 }
 
 var SCREEN_TITLES = {
-  'overview': 'Overview',
-  'competitors': 'Competitors',
+  overview: 'Overview',
+  competitors: 'Competitors',
   'market-map': 'Market Map',
-  'gaps': 'Segment Gaps',
-  'messaging': 'Messaging Lab',
-  'sentiment': 'Sentiment Feed',
+  gaps: 'Segment Gaps',
+  messaging: 'Messaging Lab',
+  sentiment: 'Sentiment Feed',
   'match-tool': 'Borrower Match Tool',
   'competitor-detail': 'Competitor Detail',
   'page-creator': 'Page Creator',
@@ -51,9 +51,7 @@ var BOTTOM_TABS_INTERNAL = [
   { id: 'more', icon: '&#x2630;', label: 'More' },
 ]
 
-var BOTTOM_TABS_BORROWER = [
-  { id: 'match-tool', icon: '&#x1F50D;', label: 'Match Tool' },
-]
+var BOTTOM_TABS_BORROWER = [{ id: 'match-tool', icon: '&#x1F50D;', label: 'Match Tool' }]
 
 function navigate(screen, data) {
   state.screen = screen
@@ -83,14 +81,24 @@ function renderShell() {
   // Update nav
   var customPages = getCustomPages()
   var signal = _screenController ? _screenController.signal : null
-  renderNav(nav, state.screen, state.mode, function (screenId, data) {
-    navigate(screenId, data)
-    closeSidebar()
-  }, customPages, state.selectedPageId, signal)
+  renderNav(
+    nav,
+    state.screen,
+    state.mode,
+    function (screenId, data) {
+      navigate(screenId, data)
+      closeSidebar()
+    },
+    customPages,
+    state.selectedPageId,
+    signal
+  )
 
   // Update title
   if (state.screen === 'custom-page' && state.selectedPageId) {
-    var page = customPages.find(function (p) { return p.id === state.selectedPageId })
+    var page = customPages.find(function (p) {
+      return p.id === state.selectedPageId
+    })
     title.textContent = page ? page.prompt.substring(0, 40) + (page.prompt.length > 40 ? '...' : '') : 'Custom Page'
   } else {
     title.textContent = SCREEN_TITLES[state.screen] || 'Overview'
@@ -106,7 +114,13 @@ function renderShell() {
   }
 
   // Render refresh bar
-  renderRefreshBar(refreshBarEl, function () { render() }, signal)
+  renderRefreshBar(
+    refreshBarEl,
+    function () {
+      render()
+    },
+    signal
+  )
 
   // Render bottom tab bar
   renderBottomBar()
@@ -170,7 +184,9 @@ function renderBottomBar() {
     // "More" tab is active when current screen isn't in the tab list
     var isActive = false
     if (tab.id === 'more') {
-      var tabIds = tabs.map(function (t) { return t.id })
+      var tabIds = tabs.map(function (t) {
+        return t.id
+      })
       isActive = tabIds.indexOf(state.screen) === -1
     } else {
       isActive = state.screen === tab.id
@@ -207,7 +223,11 @@ function init() {
 
   // Mobile menu button (desktop fallback)
   document.getElementById('mie-menu-btn').addEventListener('click', function () {
-    if (state.sidebarOpen) { closeSidebar() } else { openSidebar() }
+    if (state.sidebarOpen) {
+      closeSidebar()
+    } else {
+      openSidebar()
+    }
   })
 
   // Close sidebar on overlay click
@@ -226,7 +246,11 @@ function init() {
     if (!btn) return
     var tabId = btn.dataset.tab
     if (tabId === 'more') {
-      if (state.sidebarOpen) { closeSidebar() } else { openSidebar() }
+      if (state.sidebarOpen) {
+        closeSidebar()
+      } else {
+        openSidebar()
+      }
     } else {
       closeSidebar()
       navigate(tabId)
