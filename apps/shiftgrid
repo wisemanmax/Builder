@@ -4,11 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="screen-orientation" content="portrait"/>
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#06060f" />
   <title>SHIFTGRID</title>
+  <meta name="application-name" content="SHIFTGRID"/>
+  <meta name="apple-mobile-web-app-title" content="SHIFTGRID"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;SHIFTGRID&quot;,&quot;short_name&quot;:&quot;SHIFTGRID&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%2307070f&quot;,&quot;theme_color&quot;:&quot;%2307070f&quot;,&quot;orientation&quot;:&quot;portrait&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%2307070f'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}"/>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -123,10 +128,10 @@
 }
 .sg-nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 7px 4px 5px;
+  padding: 10px 4px 6px; min-height: 52px;
   background: none; border: none; border-radius: 10px;
   color: rgba(255,255,255,0.25); cursor: pointer;
-  font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700;
+  font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700;
   letter-spacing: 0.12em; transition: color 0.2s, background 0.2s;
   position: relative;
 }
@@ -350,6 +355,66 @@
 }
 .sg-trophy-label.done { color: #ffaa00; }
 
+/* ── PORTRAIT LOCK ── */
+#sg-landscape-block {
+  display: none;
+  position: fixed; inset: 0; z-index: 99999;
+  background: #07070f;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  #sg-landscape-block { display: flex; }
+}
+.sg-rotate-icon {
+  font-size: 52px; margin-bottom: 16px;
+  animation: rotate-hint 2s ease infinite;
+}
+@keyframes rotate-hint {
+  0%,100% { transform: rotate(0deg); }
+  40%      { transform: rotate(-90deg); }
+  60%      { transform: rotate(-90deg); }
+}
+
+/* ── SPLASH ── */
+#sg-splash {
+  position: fixed; inset: 0; z-index: 10000;
+  background: #07070f;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  animation: splash-out 0.5s ease 1.6s forwards;
+  pointer-events: none;
+}
+@keyframes splash-out { to { opacity:0; visibility:hidden; } }
+.sg-splash-logo {
+  font-family: 'Orbitron', monospace; font-weight: 900;
+  font-size: 32px; letter-spacing: 0.28em;
+  background: linear-gradient(135deg, #00e5ff 0%, #ff2d95 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(0,229,255,0.5));
+  animation: splash-logo 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+}
+@keyframes splash-logo {
+  from { opacity:0; transform:scale(0.6) translateY(20px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.sg-splash-sub {
+  font-family: 'Share Tech Mono', monospace; font-size: 10px;
+  letter-spacing: 0.3em; color: rgba(255,255,255,0.3);
+  margin-top: 12px;
+  animation: splash-logo 0.5s ease 0.7s both;
+}
+.sg-splash-bar {
+  width: 120px; height: 2px; background: rgba(255,255,255,0.08);
+  border-radius: 2px; margin-top: 24px; overflow: hidden;
+  animation: splash-logo 0.5s ease 0.8s both;
+}
+.sg-splash-bar-fill {
+  height: 100%; background: linear-gradient(90deg,#00e5ff,#ff2d95);
+  border-radius: 2px;
+  animation: splash-fill 1s ease 0.9s both;
+}
+@keyframes splash-fill { from{width:0} to{width:100%} }
+
 /* ── SCREEN NUDGE ── */
 .sg-nudge-left  { animation: nudge-left  0.16s ease-out both; }
 .sg-nudge-right { animation: nudge-right 0.16s ease-out both; }
@@ -439,6 +504,156 @@
   transform: rotate(45deg);
 }
 
+/* ── SETTINGS SHEET ── */
+.sg-settings-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(7,7,15,0.85);
+  display: flex; align-items: flex-end; justify-content: center;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  animation: overlay-in 0.2s ease;
+}
+.sg-settings-sheet {
+  width: 100%; max-width: 460px;
+  background: rgba(13,13,26,0.99);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom,0px));
+  animation: sheet-up 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sg-settings-handle {
+  width: 36px; height: 4px; background: rgba(255,255,255,0.15);
+  border-radius: 2px; margin: 0 auto 20px;
+}
+.sg-settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sg-settings-row:last-child { border-bottom: none; }
+.sg-settings-label { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.75); }
+.sg-settings-sub   { font-size: 10px; color: rgba(255,255,255,0.28); margin-top:2px; letter-spacing:0.04em; }
+.sg-toggle {
+  width: 48px; height: 26px; border-radius: 13px; border: none; cursor: pointer;
+  position: relative; transition: background 0.25s;
+  flex-shrink: 0;
+}
+.sg-toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; transition: transform 0.25s;
+}
+.sg-toggle.on { background: #00e5ff; }
+.sg-toggle.off{ background: rgba(255,255,255,0.15); }
+.sg-toggle.on::after { transform: translateX(22px); }
+.sg-vol-slider {
+  width: 120px; accent-color: #00e5ff;
+  cursor: pointer; height: 4px;
+}
+.sg-settings-danger {
+  background: rgba(255,45,149,0.08); border: 1px solid rgba(255,45,149,0.25);
+  border-radius: 10px; padding: 10px 14px; cursor: pointer;
+  font-size: 12px; font-weight: 700; color: #ff2d95; letter-spacing: 0.06em;
+  transition: background 0.15s; width: 100%; text-align: center; margin-top: 8px;
+}
+.sg-settings-danger:hover { background: rgba(255,45,149,0.15); }
+.sg-iap-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;
+}
+.sg-iap-btn {
+  flex: 1; min-width: 80px; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 11px;
+  padding: 10px 8px; text-align: center; cursor: pointer;
+  transition: all 0.15s;
+}
+.sg-iap-btn:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+.sg-iap-icon  { font-size: 20px; margin-bottom: 4px; }
+.sg-iap-name  { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.75); margin-bottom: 2px; }
+.sg-iap-price { font-size: 10px; color: rgba(255,255,255,0.35); }
+
+/* ── STATS PAGE ── */
+.sg-stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+}
+.sg-stat-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 13px; padding: 12px 10px; text-align: center;
+}
+.sg-stat-card-val {
+  font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700;
+  margin-bottom: 4px;
+}
+.sg-stat-card-lbl { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; }
+
+/* ── WIN SCREEN UPGRADE ── */
+.sg-win-stars { display: flex; justify-content: center; gap: 10px; margin: 10px 0; }
+.sg-win-star  {
+  font-size: 32px; transition: transform 0.3s, filter 0.3s;
+  filter: grayscale(1) brightness(0.3);
+}
+.sg-win-star.lit {
+  filter: none; animation: star-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes star-pop {
+  0%  { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100%{ transform: scale(1); }
+}
+.sg-win-eff-bar {
+  height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px;
+  margin: 8px 0 4px; overflow: hidden;
+}
+.sg-win-eff-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg,#00e5ff,#00ff88);
+  animation: eff-grow 0.8s ease 0.5s both;
+}
+@keyframes eff-grow { from{width:0} }
+.sg-best-badge {
+  display: inline-block; background: linear-gradient(135deg,rgba(255,170,0,0.2),rgba(255,100,0,0.1));
+  border: 1px solid rgba(255,170,0,0.4); border-radius: 8px;
+  padding: 4px 10px; font-size: 9px; font-weight: 700;
+  color: #ffaa00; letter-spacing: 0.12em; margin-bottom: 8px;
+}
+
+/* ── DISTRICT UNLOCK CEREMONY ── */
+.sg-district-unlock {
+  position: fixed; inset: 0; z-index: 750;
+  background: rgba(7,7,15,0.9);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  animation: overlay-in 0.3s ease;
+}
+.sg-du-modal {
+  text-align: center; padding: 32px 28px;
+  animation: modal-in 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+.sg-du-icon  { font-size: 72px; display: block; margin-bottom: 12px;
+  animation: du-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
+@keyframes du-bounce {
+  0%{transform:scale(0) rotate(-20deg)} 70%{transform:scale(1.2) rotate(5deg)} 100%{transform:scale(1) rotate(0)}
+}
+.sg-du-eyebrow { font-size: 10px; letter-spacing: 0.24em; color:rgba(255,255,255,0.35); margin-bottom:6px; }
+.sg-du-title   { font-family:'Orbitron',monospace; font-size:22px; font-weight:900; letter-spacing:0.1em; margin-bottom:6px; }
+.sg-du-sub     { font-size:12px; color:rgba(255,255,255,0.38); margin-bottom:22px; line-height:1.6; }
+
+/* ── END GAME ── */
+.sg-endgame {
+  position: fixed; inset: 0; z-index: 760;
+  background: rgba(7,7,15,0.96);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  overflow-y: auto; padding: 24px 20px;
+}
+.sg-endgame-logo {
+  font-family:'Orbitron',monospace; font-weight:900; font-size:28px;
+  letter-spacing:0.2em;
+  background:linear-gradient(135deg,#ffaa00 0%,#ff2d95 50%,#00e5ff 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 20px rgba(255,170,0,0.5));
+  margin-bottom:8px;
+}
+.sg-endgame-crown { font-size:64px; margin-bottom:12px; animation:du-bounce 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both; }
+
 /* ── NEAR-WIN TENSION ── */
 .sg-app.near-win-state::before {
   content: '';
@@ -489,6 +704,33 @@
 .sg-fail-line:last-child { margin-bottom: 0; }
 .sg-fail-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
+/* ── SPREAD TENSION BAR ── */
+.sg-spread-bar-wrap {
+  margin: 0 14px 4px; flex-shrink: 0;
+}
+.sg-spread-bar-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9px; letter-spacing: 0.12em; margin-bottom: 3px;
+}
+.sg-spread-bar-lbl-text { color: rgba(255,45,149,0.8); font-weight: 700; }
+.sg-spread-bar-lbl-moves { color: rgba(255,255,255,0.35); }
+.sg-spread-bar-track {
+  height: 5px; background: rgba(255,45,149,0.1);
+  border-radius: 3px; overflow: hidden;
+  border: 1px solid rgba(255,45,149,0.2);
+}
+.sg-spread-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.3s ease, background 0.3s;
+}
+.sg-spread-bar-wrap.imminent .sg-spread-bar-fill {
+  animation: spread-pulse 0.4s ease infinite alternate;
+}
+@keyframes spread-pulse {
+  from { box-shadow: none; }
+  to   { box-shadow: 0 0 8px rgba(255,45,149,0.8); }
+}
+
 /* ── CORRUPTION WARN ── */
 .sg-crpt-warn {
   margin: 0 14px 4px;
@@ -526,7 +768,7 @@
 
 /* Arrow shift buttons */
 .sg-shift-btn {
-  width: var(--bw); height: var(--sz);
+  width: 38px; height: var(--sz);
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 8px;
@@ -535,7 +777,7 @@
   transition: all 0.12s; flex-shrink: 0;
   font-family: inherit;
 }
-.sg-shift-btn.col-btn { width: var(--sz); height: var(--bw); }
+.sg-shift-btn.col-btn { width: var(--sz); height: 38px; }
 .sg-shift-btn:hover:not(:disabled) {
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
   border-color: rgba(255,255,255,0.18);
@@ -979,6 +1221,37 @@
 .sg-play-btn:hover { opacity: 0.85; transform: scale(1.06); }
 .sg-camp-bids { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
 .sg-bid-chip { font-size: 9px; padding: 2px 8px; border-radius: 5px; border: 1px solid; }
+
+/* ── OFFLINE BANNER ── */
+#sg-offline-banner {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 99998;
+  background: rgba(255,45,149,0.95);
+  padding: 8px 16px;
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  color: #fff; letter-spacing: 0.1em;
+  animation: slide-down 0.3s ease;
+}
+@keyframes slide-down {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ── COIN FLY ANIMATION ── */
+.sg-coin-fly {
+  position: fixed; z-index: 8000; pointer-events: none;
+  font-family: 'Share Tech Mono', monospace; font-size: 13px;
+  font-weight: 700; color: #ffaa00;
+  text-shadow: 0 0 8px rgba(255,170,0,0.7);
+  animation: coin-fly 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes coin-fly {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  30%  { opacity: 1; transform: translate(var(--fly-x), calc(var(--fly-y) * 0.3)) scale(1.2); }
+  100% { opacity: 0; transform: translate(var(--fly-x), var(--fly-y)) scale(0.5); }
+}
 
 /* ── SESSION GOALS STRIP ── */
 .sg-goals-strip {
@@ -1586,9 +1859,68 @@ window.sgMusic = {
 document.addEventListener('DOMContentLoaded', function() {
   window.sgMusic.init();
 });
+
+/* ── OFFLINE INDICATOR ── */
+(function(){
+  var banner = null;
+  function getBanner(){ if(!banner) banner=document.getElementById('sg-offline-banner'); return banner; }
+  window.addEventListener('offline', function(){
+    var b=getBanner(); if(b) b.style.display='block';
+  });
+  window.addEventListener('online', function(){
+    var b=getBanner(); if(b){
+      b.style.background='rgba(0,255,136,0.95)';
+      b.textContent='✓ CONNECTION RESTORED';
+      setTimeout(function(){ b.style.display='none'; b.style.background='rgba(255,45,149,0.95)'; b.textContent='📡 NO CONNECTION — YOUR PROGRESS IS SAVED LOCALLY'; }, 2500);
+    }
+  });
+  /* Check on load */
+  if(!navigator.onLine){
+    document.addEventListener('DOMContentLoaded',function(){ var b=getBanner(); if(b) b.style.display='block'; });
+  }
+})();
+
+/* ── COIN FLY UTILITY ── */
+window.sgCoinFly = function(amount, fromEl) {
+  if (!fromEl || !amount) return;
+  var coinEl = document.querySelector('.sg-coin');
+  if (!coinEl) return;
+  var from = fromEl.getBoundingClientRect();
+  var to   = coinEl.getBoundingClientRect();
+  var flyX = (to.left + to.width/2) - (from.left + from.width/2);
+  var flyY = (to.top  + to.height/2) - (from.top  + from.height/2);
+  var el = document.createElement('div');
+  el.className = 'sg-coin-fly';
+  el.textContent = '+' + amount + '⬡';
+  el.style.left = (from.left + from.width/2 - 20) + 'px';
+  el.style.top  = (from.top  + from.height/2 - 10) + 'px';
+  el.style.setProperty('--fly-x', flyX + 'px');
+  el.style.setProperty('--fly-y', flyY + 'px');
+  document.body.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 950);
+};
+
+/* PWA Install prompt */
+var _deferredInstall = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _deferredInstall = e;
+  if (!localStorage.getItem('sg_install_dismissed')) {
+    setTimeout(function() {
+      var banner = document.getElementById('sg-install-banner');
+      if (banner) banner.style.display = 'flex';
+    }, 3000);
+  }
+});
 </script>
 
 <div id="root"></div>
+<div id="sg-install-banner" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9990;background:rgba(13,13,26,0.96);border:1px solid rgba(0,229,255,0.3);border-radius:14px;padding:12px 16px;align-items:center;gap:12px;max-width:320px;width:90%;backdrop-filter:blur(8px);box-shadow:0 0 20px rgba(0,229,255,0.15);">
+  <span style="font-size:20px">📲</span>
+  <div style="flex:1;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);">Add SHIFTGRID to home screen for the best experience</div>
+  <button onclick="if(_deferredInstall){_deferredInstall.prompt();document.getElementById('sg-install-banner').style.display='none';localStorage.setItem('sg_install_dismissed','1');}" style="background:linear-gradient(135deg,#00e5ff,#00ff88);border:none;border-radius:8px;padding:7px 12px;color:#06060f;font-family:'Orbitron',monospace;font-size:8px;font-weight:700;cursor:pointer;white-space:nowrap;">INSTALL</button>
+  <button onclick="document.getElementById('sg-install-banner').style.display='none';localStorage.setItem('sg_install_dismissed','1');" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 
@@ -1607,6 +1939,9 @@ const COLORS = ["cyan","magenta","amber","green"];
 const HEX = { cyan:"#00e5ff", magenta:"#ff2d95", amber:"#ffaa00", green:"#00ff88" };
 const LABEL   = { cyan:"CYAN",  magenta:"MAG",   amber:"AMB",   green:"GRN"  };
 const NODENAME= { cyan:"VOLT",  magenta:"FLUX",  amber:"CORE",  green:"GRID" };
+/* Colorblind mode — distinct shapes per color */
+const CB_SHAPE = { cyan:"▲", magenta:"■", amber:"⬟", green:"●" };
+const CB_LABEL = { cyan:"▲V", magenta:"■F", amber:"⬟C", green:"●G" };
 /* ─── GRID SKINS ────────────────────────────────────────────────── */
 const SKINS_KEY = "sg_skin_v1";
 const SKIN_DEFS = [
@@ -1722,7 +2057,7 @@ const DEF_META = {
   upgrades:{comboBoost:0,hazardSlow:0,extraMoves:0,idleBoost:0,capReduce:0,specialRate:0},
   levelsCleared:[], stars:{}, lastCollect:Date.now(),
   dailyDate:"", dailyScore:0, dailyFinalScore:0, dailyMovesLeft:0, dailyStars:0,
-  customLevels:[], starterPackShown:false,
+  customLevels:[], starterPackShown:false, shiftWarsBest:0,
   chests:{ bronze:0, silver:0, gold:0, royal:0 },
   trophyClaimed:[],
 };
@@ -1734,6 +2069,48 @@ function loadMeta(){
   catch{ return Object.assign({},DEF_META); }
 }
 function saveMeta(m){ try{ localStorage.setItem(STORE_KEY,JSON.stringify(m)); }catch{} }
+
+/* ─── localStorage MIGRATION GUARD ──────────────────────────────── */
+const SAVE_VERSION = 5;
+const VERSION_KEY  = "sg_save_ver";
+function runMigrations(){
+  try{
+    var v=parseInt(localStorage.getItem(VERSION_KEY)||"0");
+    if(v<1){ localStorage.removeItem("sg_v1_meta"); }
+    if(v<2){ localStorage.removeItem("sg_v2_meta"); }
+    if(v<3){ localStorage.removeItem("sg_tuto_v1"); localStorage.removeItem("sg_tuto_v2"); }
+    if(v<4){ /* v4: chests added — handled by DEF_META merge */ }
+    if(v<5){ /* v5: shiftWarsBest added — handled by DEF_META merge */ }
+    localStorage.setItem(VERSION_KEY, String(SAVE_VERSION));
+  }catch{}
+}
+runMigrations();
+
+/* ─── SETTINGS ───────────────────────────────────────────────────── */
+const SETTINGS_KEY = "sg_settings_v1";
+const DEF_SETTINGS = { sfxOn:true, musicOn:true, volume:60, hapticsOn:true, noAds:false, colorblind:false };
+function loadSettings(){ try{ var s=localStorage.getItem(SETTINGS_KEY); return s?Object.assign({},DEF_SETTINGS,JSON.parse(s)):Object.assign({},DEF_SETTINGS); }catch{ return Object.assign({},DEF_SETTINGS); } }
+function saveSettings(s){ try{ localStorage.setItem(SETTINGS_KEY,JSON.stringify(s)); }catch{} }
+
+/* ─── HAPTICS ────────────────────────────────────────────────────── */
+const Haptics = {
+  light:  function(){ try{ if(loadSettings().hapticsOn) navigator.vibrate&&navigator.vibrate(12); }catch{} },
+  medium: function(){ try{ if(loadSettings().hapticsOn) navigator.vibrate&&navigator.vibrate(28); }catch{} },
+  heavy:  function(){ try{ if(loadSettings().hapticsOn) navigator.vibrate&&navigator.vibrate([40,20,40]); }catch{} },
+  win:    function(){ try{ if(loadSettings().hapticsOn) navigator.vibrate&&navigator.vibrate([30,15,30,15,60]); }catch{} },
+  lose:   function(){ try{ if(loadSettings().hapticsOn) navigator.vibrate&&navigator.vibrate([80,30,80]); }catch{} },
+};
+
+/* ─── LIFETIME STATS ─────────────────────────────────────────────── */
+const STATS_KEY = "sg_stats_v1";
+const DEF_STATS = { totalShifts:0, totalMatches:0, totalCascades:0, longestCascade:0, totalBatteries:0, totalCorruptCleared:0, totalWins:0, totalLosses:0, totalCoinsEarned:0 };
+function loadStats(){ try{ var s=localStorage.getItem(STATS_KEY); return s?Object.assign({},DEF_STATS,JSON.parse(s)):Object.assign({},DEF_STATS); }catch{ return Object.assign({},DEF_STATS); } }
+function saveStats(s){ try{ localStorage.setItem(STATS_KEY,JSON.stringify(s)); }catch{} }
+function bumpStats(patch){
+  var s=loadStats();
+  Object.keys(patch).forEach(function(k){ s[k]=(s[k]||0)+patch[k]; });
+  saveStats(s);
+}
 
 /* ─── KINGDOM RANK ──────────────────────────────────────────────── */
 const KINGDOM_RANKS = [
@@ -1830,6 +2207,7 @@ const Audio = (function(){
   function getCtx(){ if(!ctx){ try{ ctx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return ctx; }
   function tone(freq,type,dur,gain,delay){
     var c=getCtx(); if(!c) return;
+    try{ if(!loadSettings().sfxOn) return; }catch{}
     try{
       var osc=c.createOscillator(), g=c.createGain();
       osc.connect(g); g.connect(c.destination);
@@ -1844,6 +2222,17 @@ const Audio = (function(){
   return {
     shift:   function(){ tone(160,"sine",0.07,0.15); },
     match:   function(){ tone(520,"sine",0.1,0.2); tone(660,"sine",0.15,0.15,0.05); },
+    /* Per-node-color match sounds — called with color string */
+    nodeMatch: function(color){
+      var profiles={
+        cyan:    function(){ tone(880,"sine",0.08,0.18); tone(1100,"sine",0.06,0.14,0.04); },   /* VOLT — sharp electric crack */
+        magenta: function(){ tone(320,"sawtooth",0.07,0.16); tone(420,"sawtooth",0.05,0.12,0.03); }, /* FLUX — glitchy stutter */
+        amber:   function(){ tone(220,"triangle",0.12,0.22); tone(180,"triangle",0.08,0.16,0.05); }, /* CORE — deep thud */
+        green:   function(){ tone(660,"sine",0.08,0.16); tone(880,"sine",0.06,0.13,0.06); tone(1100,"sine",0.04,0.1,0.12); }, /* GRID — structured chime */
+      };
+      if(profiles[color]) profiles[color]();
+      else tone(520,"sine",0.08,0.18);
+    },
     cascade: function(n){ tone(100*(1+n*0.8),"sawtooth",0.22,0.25); tone(200*(1+n*0.5),"sine",0.18,0.16,0.04); },
     powerOn: function(){ [262,330,392,523].forEach(function(f,i){ tone(f,"sine",0.4,0.28,i*0.06); }); },
     chain:   function(n){ for(var i=0;i<Math.min(n,5);i++){ (function(j){ tone(280+j*110,"sine",0.1,0.18,j*0.055); })(i); } },
@@ -2307,10 +2696,17 @@ function makeGrid(rng) {
   }
   return g;
 }
-function addCorruption(grid,count,rng){
+function addCorruption(grid,count,rng,withPatrol){
   const fn=rng||Math.random, g=grid.map(function(row){ return row.map(function(t){ return Object.assign({},t); }); });
   let n=0,tries=0;
-  while(n<count&&tries<100){ tries++; const r=Math.floor(fn()*ROWS),c=Math.floor(fn()*COLS); if(!g[r][c].corrupted){g[r][c].corrupted=true;n++;} }
+  while(n<count&&tries<100){
+    tries++; const r=Math.floor(fn()*ROWS),c=Math.floor(fn()*COLS);
+    if(!g[r][c].corrupted){
+      var isPatrol = withPatrol && n===0; /* first corrupt tile is a patroller */
+      g[r][c]=Object.assign({},g[r][c],{corrupted:true, patrol:isPatrol||false, patrolDir:isPatrol?0:undefined});
+      n++;
+    }
+  }
   return g;
 }
 function doShift(grid,type,idx,dir){
@@ -2403,6 +2799,7 @@ function Tile(props) {
   const tile = props.tile, isHi = props.isHi, size = props.size;
   const slideClass = props.slideClass || "", adjacentCorrupt = props.adjacentCorrupt;
   const skinColors = props.skinColors || HEX;
+  const colorblind = props.colorblind || false;
   const isCr = tile && tile.corrupted;
   const isPatrol = isCr && tile && tile.patrol;
   const nodeType = tile && tile.nodeType;
@@ -2454,6 +2851,12 @@ function Tile(props) {
       {!isCr && hex && !nodeType && (
         <div className="sg-node" style={{background: isHi ? hex : hex+"88", boxShadow: isHi ? "0 0 12px "+hex+",0 0 24px "+hex+"55" : "none"}}>
           {isHi && <div className="sg-node-ring" style={{borderColor: hex}}/>}
+          {colorblind && color && (
+            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",
+              fontSize:13,fontWeight:900,color:"#06060f",transform:"rotate(-45deg)",lineHeight:1,zIndex:3}}>
+              {CB_SHAPE[color]}
+            </div>
+          )}
         </div>
       )}
       {!isCr && hex && nodeType && (
@@ -2489,11 +2892,21 @@ function GameBoard(props) {
   const comboAmp=1+(upg.comboBoost||0)*0.3, freeChance=(upg.extraMoves||0)*0.15;
   const spreadEvery=3+hazardSlow;
 
+  const activeSkin   = React.useMemo(function(){ return loadSkin(); },[]);
+  const colorblind   = React.useMemo(function(){ return loadSettings().colorblind||false; },[]);
+  const skinColors  = React.useMemo(function(){
+    var s=SKIN_DEFS.find(function(s){ return s.id===activeSkin; });
+    return s ? s.colors : SKIN_DEFS[0].colors;
+  },[activeSkin]);
+
   const buildInitGrid=useCallback(function(){
     if(levelDef.boardData) return levelDef.boardData.map(function(row){ return row.map(function(t){ return Object.assign({},t,{id:nextId()}); }); });
     const rng=levelDef.rngSeed?mkSeededRng(levelDef.rngSeed):null;
-    const g=makeGrid(rng);
-    return(levelDef.hazards||0)>0?addCorruption(g,levelDef.hazards,rng):g;
+    var g=makeGrid(rng);
+    if((levelDef.hazards||0)>0) g=addCorruption(g,levelDef.hazards,rng,(levelDef.id||0)>=30);
+    /* Inject special node types starting district 2 (level 10+) */
+    if((levelDef.id||0)>=10) g=injectSpecialNodes(g,levelDef.id,rng);
+    return g;
   },[levelDef]);
 
   const [grid,setGrid]=useState(buildInitGrid);
@@ -2540,7 +2953,7 @@ function GameBoard(props) {
 
     setSlideAnim({type:type,idx:idx,dir:dir});
     setPhase("busy");
-    Audio.shift();
+    Audio.shift(); Haptics.light();
     /* Screen nudge in shift direction */
     setShiftNudge(dir); setTimeout(function(){ setShiftNudge(null); }, 160);
     /* Record move for Grid Memory */
@@ -2566,9 +2979,35 @@ function GameBoard(props) {
         var nearCorrupt=clearNearCorruption(g,m);
         nearCorrupt.forEach(function(k){ m.add(k); });
         sessionStatsRef.current.corruptCleared+=nearCorrupt.size;
+        /* Remove locked nodes from match set (they require adjacent clearing) */
+        var lockedCleared=new Set();
+        m.forEach(function(k){
+          var p=k.split(","); var t=g[+p[0]][+p[1]];
+          if(t&&t.nodeType==="locked"){ m.delete(k); lockedCleared.add(k); }
+        });
+        /* Clear locked nodes adjacent to any match */
+        m.forEach(function(k){ var p=k.split(","); var r=+p[0],c=+p[1];
+          [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){
+            var nr=r+d[0],nc=c+d[1];
+            if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS){
+              var t=g[nr][nc]; if(t&&t.nodeType==="locked") m.add(nr+","+nc);
+            }
+          });
+        });
         frames.push({g:g,m:new Set(m)});
         const res=applyGravity(g,m);
         Object.keys(res.cleared).forEach(function(col){ totCleared[col]=(totCleared[col]||0)+res.cleared[col]; });
+        /* Charged node: double the charge for its color */
+        m.forEach(function(k){ var p=k.split(","); var t=g[+p[0]][+p[1]];
+          if(t&&t.nodeType==="charged"&&t.color) totCleared[t.color]=(totCleared[t.color]||0)+1; /* +1 extra */
+        });
+        /* Mirror node: also credit the opposite-color building */
+        m.forEach(function(k){ var p=k.split(","); var t=g[+p[0]][+p[1]];
+          if(t&&t.nodeType==="mirror"&&t.color){
+            var opp={cyan:"magenta",magenta:"cyan",amber:"green",green:"amber"}[t.color];
+            if(opp) totCleared[opp]=(totCleared[opp]||0)+1;
+          }
+        });
         pts+=m.size*10*(1+cascades*0.5)*comboAmp;
         cascades++;
         if(cascades>sessionStatsRef.current.maxCascade) sessionStatsRef.current.maxCascade=cascades;
@@ -2579,6 +3018,8 @@ function GameBoard(props) {
       const newMC=moveCount+1;
       let finalG=g;
       if((levelDef.hazards||0)>0&&newMC%spreadEvery===0) finalG=spreadCorruption(g,hazardSlow);
+      /* Move patrollers on district 4+ levels */
+      if((levelDef.id||0)>=30&&newMC%2===0) finalG=movePatrollers(finalG);
       const free=Math.random()<freeChance;
       const newMoves=free?moves:moves-1;
       if(free) addToast("FREE MOVE!","#00ff88");
@@ -2606,8 +3047,15 @@ function GameBoard(props) {
       function finish(){
         setGrid(finalG); setHi(new Set()); setBldgs(newBldgs); setScore(function(s){ return s+Math.round(pts); });
         toastQueue.forEach(function(t,i){ setTimeout(function(){ addToast(t.text,t.color); },i*320); });
+        /* Bump lifetime stats */
+        bumpStats({totalShifts:1, totalMatches:pts>0?1:0, totalCascades:Math.max(0,cascades-1), longestCascade:cascades>1?cascades-1:0, totalBatteries:sessionStatsRef.current.batteries>0?1:0, totalCorruptCleared:sessionStatsRef.current.corruptCleared, totalCoinsEarned:Math.round(pts/10)+25});
         if(cascades>1){ setTimeout(function(){ addToast("CHAIN x"+cascades,"#ffaa00"); },toastQueue.length*320); Audio.chain(cascades); }
         if(cascades>=1) Audio.cascade(cascades-1);
+        /* Play node-color sound for dominant matched color */
+        if(Object.keys(totCleared).length>0){
+          var dominantColor=Object.keys(totCleared).reduce(function(a,b){ return totCleared[a]>totCleared[b]?a:b; });
+          Audio.nodeMatch(dominantColor);
+        }
         /* Big cascade flash at 3+ */
         if(cascades>=3){ setCascadeFlash(true); setTimeout(function(){ setCascadeFlash(false); },400); }
         /* Wrap-chain detection: check if any cleared tile is at edge col/row */
@@ -2649,7 +3097,7 @@ function GameBoard(props) {
             return {label:b.label,icon:b.icon,color:b.color,ch:b.ch,max:b.max,need:Math.ceil(b.max-b.ch)};
           });
           setNearWinData(failBreakdown);
-          setPhase("lose"); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
+          setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
         }
         setPhase("idle");
       }
@@ -2791,8 +3239,40 @@ function GameBoard(props) {
       </div>
 
       {isLastMove&&<div className="sg-last-move-banner">⚡ LAST MOVE — MAKE IT COUNT</div>}
+      {/* Node type introduction banner for first time seeing a node type */}
+      {(levelDef.id||0)===10&&<div style={{margin:"0 14px 4px",background:"rgba(0,229,255,0.08)",border:"1px solid rgba(0,229,255,0.25)",borderRadius:8,padding:"5px 12px",fontSize:10,color:"#00e5ff",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>🔒 NEW: LOCKED NODES appear — match adjacent tiles to free them</div>}
+      {(levelDef.id||0)===20&&<div style={{margin:"0 14px 4px",background:"rgba(255,170,0,0.08)",border:"1px solid rgba(255,170,0,0.25)",borderRadius:8,padding:"5px 12px",fontSize:10,color:"#ffaa00",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>⚡ NEW: CHARGED NODES give double charge when matched</div>}
+      {(levelDef.id||0)===30&&<div style={{margin:"0 14px 4px",background:"rgba(0,229,255,0.08)",border:"1px solid rgba(0,229,255,0.25)",borderRadius:8,padding:"5px 12px",fontSize:10,color:"#00e5ff",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>🪞 NEW: MIRROR NODES also charge the opposite color building</div>}
+      {(levelDef.id||0)===40&&<div style={{margin:"0 14px 4px",background:"rgba(168,85,247,0.08)",border:"1px solid rgba(168,85,247,0.3)",borderRadius:8,padding:"5px 12px",fontSize:10,color:"#a855f7",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>🌑 NEW: VOID NODES — clear them fast or they corrupt neighbors</div>}
+      {(levelDef.id||0)>=30&&<div style={{margin:"0 14px 2px",background:"rgba(255,45,149,0.06)",border:"1px solid rgba(255,45,149,0.2)",borderRadius:8,padding:"4px 12px",fontSize:9,color:"#ff2d95",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>👾 PATROL active — corrupted tiles move every 2 shifts</div>}
 
-      {spreadWarn&&(levelDef.hazards||0)>0&&<div className="sg-crpt-warn">⚠ CORRUPTION SPREADS THIS MOVE</div>}
+      {/* ── SPREAD TENSION BAR ── */}
+      {(levelDef.hazards||0)>0&&(function(){
+        var movesToSpread = spreadEvery - (moveCount % spreadEvery);
+        var pct = Math.round(((spreadEvery - movesToSpread) / spreadEvery) * 100);
+        var imminent = movesToSpread === 1;
+        var barColor = imminent
+          ? "#ff2d95"
+          : pct > 60 ? "#ff7700" : "#ffaa00";
+        return (
+          <div className={"sg-spread-bar-wrap"+(imminent?" imminent":"")}>
+            <div className="sg-spread-bar-label">
+              <span className="sg-spread-bar-lbl-text">
+                {imminent ? "⚠ SPREADING NOW" : "☠ CORRUPTION PRESSURE"}
+              </span>
+              <span className="sg-spread-bar-lbl-moves">
+                {imminent ? "!" : movesToSpread+" move"+(movesToSpread!==1?"s":"")}
+              </span>
+            </div>
+            <div className="sg-spread-bar-track">
+              <div className="sg-spread-bar-fill" style={{
+                width: pct+"%",
+                background: "linear-gradient(90deg,"+barColor+"88,"+barColor+")",
+              }}/>
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="sg-toasts">
         {toasts.map(function(t){ return <span key={t.id} className="sg-toast" style={{color:t.color,textShadow:"0 0 10px "+t.color}}>{t.text}</span>; })}
@@ -2823,7 +3303,7 @@ function GameBoard(props) {
                   const slideClass = rowSlide || colSlide;
                   var isAdjacentCorrupt=false;
                   if(tile&&!tile.corrupted){ [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){ var nr=r+d[0],nc=c+d[1]; if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&grid[nr][nc]&&grid[nr][nc].corrupted) isAdjacentCorrupt=true; }); }
-                  return <Tile key={tile?tile.id:(r+"-"+c)} tile={tile} isHi={hi.has(r+","+c)} size={SZ} slideClass={slideClass} adjacentCorrupt={isAdjacentCorrupt}/>;
+                  return <Tile key={tile?tile.id:(r+"-"+c)} tile={tile} isHi={hi.has(r+","+c)} size={SZ} slideClass={slideClass} adjacentCorrupt={isAdjacentCorrupt} skinColors={skinColors} colorblind={colorblind}/>;
                 })}
               </div>
               <ShiftBtn type="row" idx={r} dir="right" label="▶"/>
@@ -2861,7 +3341,11 @@ function GameBoard(props) {
                 <div className="sg-bldg-track">
                   <div className="sg-bldg-fill" style={{width:Math.min(100,(b.ch/b.max)*100)+"%",background:b.on?"linear-gradient(90deg,"+hex+",#fff)":"linear-gradient(90deg,"+hex+"55,"+hex+")",boxShadow:b.on?"0 0 8px "+hex:"none"}}/>
                 </div>
-                <div className="sg-bldg-sub">{"MATCH "+NODENAME[b.color]+" ("+LABEL[b.color]+") NODES"}</div>
+                <div className="sg-bldg-sub">
+                  {colorblind && <span style={{marginRight:4,fontSize:12}}>{CB_SHAPE[b.color]}</span>}
+                  <span style={{color:"rgba(255,255,255,0.45)",fontWeight:700}}>{NODENAME[b.color]}</span>
+                  <span style={{color:"rgba(255,255,255,0.2)"}}>{" ("+LABEL[b.color]+")"}</span>
+                </div>
               </div>
             </div>
           );
@@ -2870,25 +3354,36 @@ function GameBoard(props) {
 
       <div className="sg-hint">{levelDef.hint}</div>
 
-      {/* WIN */}
-      {phase==="win"&&(
-        <div className="sg-overlay">
-          <div className="sg-modal">
-            <span className="sg-modal-icon">⚡</span>
-            <div className="sg-modal-title" style={{background:"linear-gradient(135deg,#ffaa00,#00ff88)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>DISTRICT POWERED!</div>
-            <div className="sg-modal-sub">{displayName}</div>
-            <div style={{fontSize:22,color:"#ffaa00",letterSpacing:"0.12em",margin:"6px 0"}}>{renderStars(stars)}</div>
-            <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginBottom:12}}>
-              {movesUsed + " of " + levelDef.moves + " moves used · " + (levelDef.moves-movesUsed) + " remaining"}
+      {/* WIN — upgraded with animated stars, efficiency bar, best badge */}
+      {phase==="win"&&(function(){
+        var prevBest=0;
+        try{ var gr=JSON.parse(localStorage.getItem("sg_ghost_"+levelDef.id)||"{}"); prevBest=gr.moves?gr.moves.length:0; }catch{}
+        var isNewBest = prevBest>0 && moveHistoryRef.current.length < prevBest;
+        var effPct = Math.round((moves/levelDef.moves)*100);
+        return (
+          <div className="sg-overlay">
+            <div className="sg-modal">
+              <span className="sg-modal-icon">⚡</span>
+              <div className="sg-modal-title" style={{background:"linear-gradient(135deg,#ffaa00,#00ff88)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>DISTRICT POWERED!</div>
+              <div className="sg-modal-sub">{displayName}</div>
+              {isNewBest && <div className="sg-best-badge">🏅 NEW BEST — {moveHistoryRef.current.length} MOVES</div>}
+              <div className="sg-win-stars">
+                {[1,2,3].map(function(i){
+                  return <span key={i} className={"sg-win-star"+(i<=stars?" lit":"")} style={{animationDelay:(i*0.12)+"s"}}>★</span>;
+                })}
+              </div>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginBottom:3,textAlign:"left"}}>EFFICIENCY — {effPct}% MOVES REMAINING</div>
+              <div className="sg-win-eff-bar"><div className="sg-win-eff-fill" style={{width:effPct+"%"}}/></div>
+              <div style={{fontSize:10,color:"rgba(255,255,255,0.28)",marginBottom:10}}>{movesUsed+" of "+levelDef.moves+" moves used"}</div>
+              <div className="sg-modal-rewards">
+                <div className="sg-reward-chip">{"+" + winCoins} <span style={{color:"#ffaa00"}}>coins</span></div>
+                <div className="sg-reward-chip">{"+" + winParts} <span style={{color:"#00e5ff"}}>parts</span></div>
+              </div>
+              <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)"}} onClick={function(e){ window.sgCoinFly&&window.sgCoinFly(winCoins,e.target); onComplete({score:score,coins:winCoins,parts:winParts,movesLeft:moves,batteries:sessionStatsRef.current.batteries,pulses:sessionStatsRef.current.pulses,maxCascade:sessionStatsRef.current.maxCascade,corruptCleared:sessionStatsRef.current.corruptCleared,wasNearWin:lastChanceRef.current}); }}>COLLECT</button>
             </div>
-            <div className="sg-modal-rewards">
-              <div className="sg-reward-chip">{"+" + winCoins} <span style={{color:"#ffaa00"}}>coins</span></div>
-              <div className="sg-reward-chip">{"+" + winParts} <span style={{color:"#00e5ff"}}>parts</span></div>
-            </div>
-            <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)"}} onClick={function(){ onComplete({score:score,coins:winCoins,parts:winParts,movesLeft:moves,batteries:sessionStatsRef.current.batteries,pulses:sessionStatsRef.current.pulses,maxCascade:sessionStatsRef.current.maxCascade,corruptCleared:sessionStatsRef.current.corruptCleared,wasNearWin:lastChanceRef.current}); }}>COLLECT</button>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* NEAR-WIN — SO CLOSE interception */}
       {phase==="nearwin"&&(
@@ -3012,21 +3507,30 @@ function CityOverview(props) {
   ];
 
   var pctCleared = levelsCleared.length / totalLevels;
-  var litCount = Math.floor(pctCleared * buildings.length);
+  /* Each building lights up when corresponding levels are cleared */
+  /* Building 0-1: district 1, 2-3: dist2, 4-5: dist3, 6: dist4, 7: dist5 */
+  var distProgress = [0,10,20,30,40].map(function(start,di){
+    var ids=Array.from({length:10},function(_,i){ return start+i; });
+    return ids.filter(function(id){ return levelsCleared.includes(id); }).length / 10;
+  });
+  var buildingDistMap = [0,0,1,1,2,2,3,4]; /* which district each building represents */
 
   return (
     <div className="sg-city-overview">
       <div className="sg-city-skyline">
         {buildings.map(function(b, i) {
-          var lit = i < litCount;
+          var distIdx = buildingDistMap[i];
+          var lit = distProgress[distIdx] >= 0.5; /* lights up when district half cleared */
+          var partial = distProgress[distIdx] > 0 && !lit;
           return (
             <div key={i} className={"sg-city-building" + (lit ? " lit" : "")}
               style={{height: b.h + "px", width: b.w + "px",
-                background: lit ? b.color + "22" : "rgba(255,255,255,0.04)",
-                borderTop: "2px solid " + (lit ? b.color : "rgba(255,255,255,0.1)"),
-                borderLeft: "1px solid " + (lit ? b.color + "55" : "rgba(255,255,255,0.06)"),
-                borderRight: "1px solid " + (lit ? b.color + "55" : "rgba(255,255,255,0.06)"),
-                boxShadow: lit ? ("0 0 20px " + b.color + "33, 0 -4px 12px " + b.color + "44") : "none",
+                background: lit ? b.color+"22" : (partial ? b.color+"0a" : "rgba(255,255,255,0.04)"),
+                borderTop: "2px solid "+(lit?b.color:(partial?b.color+"44":"rgba(255,255,255,0.1)")),
+                borderLeft: "1px solid "+(lit?b.color+"55":(partial?b.color+"22":"rgba(255,255,255,0.06)")),
+                borderRight: "1px solid "+(lit?b.color+"55":(partial?b.color+"22":"rgba(255,255,255,0.06)")),
+                boxShadow: lit?("0 0 20px "+b.color+"33, 0 -4px 12px "+b.color+"44"):(partial?"0 0 8px "+b.color+"22":"none"),
+                transition: "all 0.8s ease",
               }}>
               <div className="sg-building-windows" style={{gridTemplateColumns: "repeat(" + b.windows[0] + ", 1fr)", gap: "2px", padding: "4px 3px"}}>
                 {b.windows.map(function(rowCount, ri) {
@@ -3236,6 +3740,113 @@ function ChallengesTab(props) {
   );
 }
 
+/* ─── SHIFT WARS ────────────────────────────────────────────────── */
+const SHIFT_WARS_KEY = "sg_shift_wars_v1";
+function loadShiftWars(){
+  try{ var s=localStorage.getItem(SHIFT_WARS_KEY); return s?JSON.parse(s):{challenges:[],wins:0,losses:0}; }
+  catch{ return {challenges:[],wins:0,losses:0}; }
+}
+function saveShiftWars(d){ try{ localStorage.setItem(SHIFT_WARS_KEY,JSON.stringify(d)); }catch{} }
+
+/* Fake opponent pool */
+var SW_OPPONENTS = [
+  {name:"GridKing",   avatar:"👑", rating:1420, seed:112233},
+  {name:"NeonRider",  avatar:"⚡", rating:1280, seed:445566},
+  {name:"VoltMaster", avatar:"🔋", rating:1350, seed:778899},
+  {name:"ByteHunter", avatar:"🎯", rating:1190, seed:334455},
+  {name:"SlimeBy",    avatar:"🌀", rating:1500, seed:667788},
+];
+
+function ShiftWarsTab(props){
+  var meta=props.meta, onPlay=props.onPlay, setMeta=props.setMeta;
+  var swData=loadShiftWars();
+  var todaySeedVal=todaySeed();
+  /* Daily challenge board — same for all opponents, seeded from today */
+  var warsBoard={id:"wars_"+todaySeedVal,name:"SHIFT WARS",moves:14,bids:["apt","factory","lab","power"],hazards:4,rngSeed:todaySeedVal,isDaily:true,hint:"Same board as your opponents — fewest moves wins."};
+
+  var playerBest = meta.shiftWarsBest || 0;
+  var _showResult=React.useState(null); var showResult=_showResult[0]; var setShowResult=_showResult[1];
+
+  function handleWarComplete(r){
+    var finalScore = r.score + (r.movesLeft||0)*80;
+    var opp = SW_OPPONENTS[todaySeedVal % SW_OPPONENTS.length];
+    var oppRng = mkSeededRng(opp.seed + todaySeedVal);
+    var oppScore = Math.round(800 + oppRng()*1200);
+    var won = finalScore > oppScore;
+    setMeta(function(m){
+      var n=Object.assign({},m,{
+        shiftWarsBest: Math.max(m.shiftWarsBest||0, finalScore),
+        coins: m.coins + (won?120:40),
+        parts: m.parts + (won?6:2),
+      });
+      saveMeta(n); return n;
+    });
+    setShowResult({won:won, yourScore:finalScore, oppScore:oppScore, opp:opp, coins:won?120:40});
+  }
+
+  return (
+    <div style={{paddingBottom:16}}>
+      <div style={{background:"linear-gradient(135deg,rgba(255,45,149,0.12),rgba(168,85,247,0.08))",border:"1px solid rgba(255,45,149,0.3)",borderRadius:18,padding:"20px 16px",marginBottom:12,textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#ff2d95,#a855f7)"}}/>
+        <div style={{fontSize:32,marginBottom:6}}>⚔️</div>
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:16,fontWeight:900,letterSpacing:"0.12em",color:"#ff2d95",textShadow:"0 0 14px rgba(255,45,149,0.4)",marginBottom:4}}>SHIFT WARS</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:14,lineHeight:1.6}}>Same board. Same rules. Different player. Submit your run — opponent has 24h to beat it. Fewest moves wins.</div>
+        <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:16}}>
+          <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 16px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:700,color:"#00ff88"}}>{swData.wins||0}</div>
+            <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginTop:2}}>WINS</div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 16px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:700,color:"#ff2d95"}}>{swData.losses||0}</div>
+            <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginTop:2}}>LOSSES</div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 16px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:700,color:"#ffaa00"}}>{meta.shiftWarsBest||0}</div>
+            <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginTop:2}}>BEST</div>
+          </div>
+        </div>
+        {/* Today's opponent */}
+        {(function(){
+          var opp = SW_OPPONENTS[todaySeedVal % SW_OPPONENTS.length];
+          return (
+            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:12,padding:"12px 14px",marginBottom:14,display:"flex",alignItems:"center",gap:12,textAlign:"left"}}>
+              <div style={{fontSize:28,flexShrink:0}}>{opp.avatar}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:700,color:"rgba(255,255,255,0.85)",marginBottom:2}}>{"Today's Rival: "+opp.name}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>{"Rating: "+opp.rating+" · Same board · 14 moves"}</div>
+              </div>
+              <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:11,color:"#ff2d95"}}>VS</div>
+            </div>
+          );
+        })()}
+        <button onClick={function(){ onPlay(warsBoard, handleWarComplete); }}
+          style={{background:"linear-gradient(135deg,#ff2d95,#a855f7)",border:"none",borderRadius:14,padding:"14px 32px",color:"#fff",fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",boxShadow:"0 0 20px rgba(255,45,149,0.3)"}}>
+          ⚔️ ENTER BATTLE
+        </button>
+      </div>
+
+      {/* Result display */}
+      {showResult&&(
+        <div style={{background:showResult.won?"rgba(0,255,136,0.08)":"rgba(255,45,149,0.08)",border:"1px solid "+(showResult.won?"rgba(0,255,136,0.35)":"rgba(255,45,149,0.3)"),borderRadius:14,padding:"14px 16px",marginBottom:12,textAlign:"center"}}>
+          <div style={{fontSize:28,marginBottom:4}}>{showResult.won?"🏆":"💀"}</div>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,color:showResult.won?"#00ff88":"#ff2d95",marginBottom:8}}>{showResult.won?"VICTORY!":"DEFEATED"}</div>
+          <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:10}}>
+            <div style={{flex:1,background:"rgba(0,229,255,0.08)",border:"1px solid rgba(0,229,255,0.2)",borderRadius:10,padding:"8px"}}>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.35)",marginBottom:3}}>YOUR SCORE</div>
+              <div style={{fontFamily:"'Orbitron',monospace",fontSize:16,fontWeight:700,color:"#00e5ff"}}>{showResult.yourScore.toLocaleString()}</div>
+            </div>
+            <div style={{flex:1,background:"rgba(255,45,149,0.08)",border:"1px solid rgba(255,45,149,0.2)",borderRadius:10,padding:"8px"}}>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.35)",marginBottom:3}}>{showResult.opp.name}</div>
+              <div style={{fontFamily:"'Orbitron',monospace",fontSize:16,fontWeight:700,color:"#ff2d95"}}>{showResult.oppScore.toLocaleString()}</div>
+            </div>
+          </div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.45)"}}>{"Reward: +"+showResult.coins+" coins earned"}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── WEEKLY EVENT TAB ───────────────────────────────────────────── */
 function WeeklyTab(props) {
   var meta = props.meta, setMeta = props.setMeta, onPlay = props.onPlay;
@@ -3424,7 +4035,10 @@ function ChestInventory(props) {
           parts: m.parts + rewards.parts,
           chests: newChests,
         });
-        saveMeta(n); return n;
+        saveMeta(n);
+        /* Coin fly from chest card */
+        if(rewards.coins>0 && chestEl && window.sgCoinFly) window.sgCoinFly(rewards.coins, chestEl);
+        return n;
       });
       if (rewards.lives > 0) {
         var fresh = loadLives();
@@ -3542,6 +4156,240 @@ function TrophyRoad(props) {
   );
 }
 
+/* ─── SETTINGS SCREEN ──────────────────────────────────────────── */
+function SettingsSheet(props){
+  var onClose=props.onClose, meta=props.meta, setMeta=props.setMeta, lives=props.lives, setLives=props.setLives;
+  var _s=React.useState(loadSettings()); var settings=_s[0]; var setSettings=_s[1];
+
+  function toggle(key){
+    var n=Object.assign({},settings,{[key]:!settings[key]});
+    saveSettings(n); setSettings(n);
+    if(key==="musicOn"){
+      if(n.musicOn && window.sgMusic){ window.sgMusic.toggle(); }
+      else if(!n.musicOn && window.sgMusic && window.sgMusic.playing){ window.sgMusic.toggle(); }
+    }
+    Audio.tap();
+  }
+  function setVol(v){
+    var n=Object.assign({},settings,{volume:v});
+    saveSettings(n); setSettings(n);
+    if(window.sgMusic) window.sgMusic.setVolume(v/100);
+  }
+  function resetGame(){
+    if(!window.confirm("Reset ALL save data? This cannot be undone.")) return;
+    [STORE_KEY,LIVES_KEY,XP_KEY,STREAK_KEY,CHALLENGES_KEY,WEEKLY_KEY,TUTO_KEY,LOGIN_KEY,SETTINGS_KEY,STATS_KEY,SESSION_GOALS_KEY,SHIFT_WARS_KEY,"sg_skin_v1"].forEach(function(k){ try{localStorage.removeItem(k);}catch{} });
+    window.location.reload();
+  }
+  var stats = loadStats();
+
+  return (
+    <div className="sg-settings-overlay" onClick={function(e){ if(e.target===e.currentTarget)onClose(); }}>
+      <div className="sg-settings-sheet">
+        <div className="sg-settings-handle"/>
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:13,fontWeight:900,letterSpacing:"0.12em",marginBottom:16,color:"rgba(255,255,255,0.7)"}}>SETTINGS</div>
+
+        <div className="sg-settings-row">
+          <div><div className="sg-settings-label">Sound Effects</div><div className="sg-settings-sub">Match, cascade, win sounds</div></div>
+          <button className={"sg-toggle"+(settings.sfxOn?" on":" off")} onClick={function(){toggle("sfxOn");}}/>
+        </div>
+        <div className="sg-settings-row">
+          <div><div className="sg-settings-label">Music</div><div className="sg-settings-sub">Background track</div></div>
+          <button className={"sg-toggle"+(settings.musicOn?" on":" off")} onClick={function(){toggle("musicOn");}}/>
+        </div>
+        <div className="sg-settings-row">
+          <div><div className="sg-settings-label">Volume</div></div>
+          <input type="range" min="0" max="100" value={settings.volume} className="sg-vol-slider"
+            onChange={function(e){ setVol(parseInt(e.target.value)); }}/>
+        </div>
+        <div className="sg-settings-row">
+          <div><div className="sg-settings-label">Haptics</div><div className="sg-settings-sub">Vibration on mobile</div></div>
+          <button className={"sg-toggle"+(settings.hapticsOn?" on":" off")} onClick={function(){toggle("hapticsOn");}}/>
+        </div>
+        <div className="sg-settings-row">
+          <div>
+            <div className="sg-settings-label">Color Blind Mode</div>
+            <div className="sg-settings-sub">Adds shapes: ▲ VOLT  ■ FLUX  ⬟ CORE  ● GRID</div>
+          </div>
+          <button className={"sg-toggle"+(settings.colorblind?" on":" off")} onClick={function(){toggle("colorblind");}}/>
+        </div>
+
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:900,letterSpacing:"0.12em",margin:"16px 0 8px",color:"rgba(255,255,255,0.5)"}}>PURCHASES</div>
+        <div className="sg-iap-row">
+          {[
+            {icon:"🚫",name:"Remove Ads",price:"$1.99"},
+            {icon:"⬡",name:"500 Coins",price:"$0.99"},
+            {icon:"💎",name:"2000 Coins",price:"$2.99"},
+            {icon:"👑",name:"Event Pass",price:"$2.99"},
+          ].map(function(p,i){
+            return (
+              <div key={i} className="sg-iap-btn" onClick={function(){ alert("Coming soon — payments not yet enabled."); }}>
+                <div className="sg-iap-icon">{p.icon}</div>
+                <div className="sg-iap-name">{p.name}</div>
+                <div className="sg-iap-price">{p.price}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button className="sg-settings-danger" onClick={resetGame}>⚠ RESET ALL SAVE DATA</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── STATS PAGE ────────────────────────────────────────────────── */
+function StatsPage(props){
+  var meta=props.meta, xpData=props.xpData;
+  var s=loadStats();
+  var cleared=(meta.levelsCleared||[]).length;
+  var totalStars=Object.values(meta.stars||{}).reduce(function(a,b){return a+b;},0);
+  var winRate=s.totalWins+s.totalLosses>0?Math.round((s.totalWins/(s.totalWins+s.totalLosses))*100):0;
+  var cards=[
+    {val:cleared,           lbl:"LEVELS CLEARED",  color:"#00e5ff"},
+    {val:totalStars,         lbl:"TOTAL STARS",     color:"#ffaa00"},
+    {val:s.totalShifts,      lbl:"TOTAL SHIFTS",    color:"#00ff88"},
+    {val:s.longestCascade,   lbl:"BEST CASCADE",    color:"#ff2d95"},
+    {val:s.totalBatteries,   lbl:"BATTERIES",       color:"#ffaa00"},
+    {val:s.totalCorruptCleared,lbl:"ROT CLEARED",   color:"#a855f7"},
+    {val:s.totalWins,        lbl:"WINS",            color:"#00ff88"},
+    {val:winRate+"%",        lbl:"WIN RATE",        color:"#00e5ff"},
+    {val:s.totalCoinsEarned, lbl:"COINS EARNED",    color:"#ffaa00"},
+    {val:xpData?xpData.level:1,lbl:"PLAYER LEVEL", color:"#a855f7"},
+  ];
+  return (
+    <div style={{paddingBottom:16}}>
+      <div className="sg-label" style={{marginTop:8}}>LIFETIME STATS</div>
+      <div className="sg-stats-grid">
+        {cards.map(function(c,i){
+          return (
+            <div key={i} className="sg-stat-card">
+              <div className="sg-stat-card-val" style={{color:c.color}}>{typeof c.val==="number"?c.val.toLocaleString():c.val}</div>
+              <div className="sg-stat-card-lbl">{c.lbl}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── DISTRICT UNLOCK CEREMONY ─────────────────────────────────── */
+function DistrictUnlock(props){
+  var dist=props.dist, onContinue=props.onContinue;
+  return (
+    <div className="sg-district-unlock">
+      <div className="sg-du-modal">
+        <span className="sg-du-icon">{dist.icon||"⚡"}</span>
+        <div className="sg-du-eyebrow">DISTRICT CLEARED</div>
+        <div className="sg-du-title" style={{color:dist.theme}}>{dist.num}</div>
+        <div style={{fontSize:14,fontWeight:700,color:"rgba(255,255,255,0.6)",marginBottom:8}}>{dist.label}</div>
+        <div className="sg-du-sub">City power restored to this sector.<br/>The next district awaits.</div>
+        <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:20}}>
+          {[{v:"⬡",c:"#ffaa00",t:"COINS"},{v:"◈",c:"#00e5ff",t:"PARTS"},{v:"📦",c:"#cd7f32",t:"CHEST"}].map(function(r,i){
+            return (
+              <div key={i} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 14px",textAlign:"center"}}>
+                <div style={{fontSize:18,marginBottom:4}}>{r.v}</div>
+                <div style={{fontFamily:"'Orbitron',monospace",fontSize:13,fontWeight:700,color:r.c}}>+{i===0?150:i===1?8:"1"}</div>
+                <div style={{fontSize:8,color:"rgba(255,255,255,0.3)",marginTop:2}}>{r.t}</div>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={onContinue}
+          style={{background:"linear-gradient(135deg,"+dist.theme+","+dist.theme+"88)",border:"none",borderRadius:14,padding:"14px 36px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",boxShadow:"0 0 20px "+dist.theme+"44"}}>
+          CONTINUE ▶
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── END GAME SCREEN ───────────────────────────────────────────── */
+function EndGame(props){
+  var meta=props.meta, xpData=props.xpData, onNewGame=props.onNewGame, onClose=props.onClose;
+  var s=loadStats();
+  var totalStars=Object.values(meta.stars||{}).reduce(function(a,b){return a+b;},0);
+  return (
+    <div className="sg-endgame">
+      <span className="sg-endgame-crown">👑</span>
+      <div className="sg-endgame-logo">SHIFTGRID</div>
+      <div style={{fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#ffaa00",marginBottom:4}}>CITY FULLY RESTORED</div>
+      <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:24,textAlign:"center",lineHeight:1.7}}>All 50 districts powered. You are a LEGEND.<br/>The city stands because of you.</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",maxWidth:320,marginBottom:24}}>
+        {[
+          {v:50,        lbl:"LEVELS",    c:"#00e5ff"},
+          {v:totalStars,lbl:"STARS",     c:"#ffaa00"},
+          {v:xpData?xpData.level:1,lbl:"PLAYER LVL",c:"#a855f7"},
+          {v:s.totalShifts,lbl:"SHIFTS",c:"#00ff88"},
+        ].map(function(c,i){
+          return (
+            <div key={i} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"12px",textAlign:"center"}}>
+              <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:700,color:c.c,marginBottom:4}}>{c.v.toLocaleString()}</div>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em"}}>{c.lbl}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginBottom:20,textAlign:"center"}}>NG+ Mode active — corruption now starts in District 1.</div>
+      <div style={{display:"flex",gap:10}}>
+        <button onClick={onNewGame}
+          style={{background:"linear-gradient(135deg,#ffaa00,#ff7700)",border:"none",borderRadius:14,padding:"14px 24px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>
+          NG+ MODE
+        </button>
+        <button onClick={onClose}
+          style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:14,padding:"14px 24px",color:"rgba(255,255,255,0.6)",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em"}}>
+          KEEP PLAYING
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SKIN PICKER ──────────────────────────────────────────────── */
+function SkinPicker(props) {
+  var meta = props.meta;
+  var _active = React.useState(loadSkin()); var active=_active[0]; var setActive=_active[1];
+  var clearedCount = (meta.levelsCleared||[]).length;
+
+  function pickSkin(id) {
+    var s = SKIN_DEFS.find(function(s){ return s.id===id; });
+    if (!s || (s.unlockLvl > 0 && !s.free && clearedCount < s.unlockLvl)) return;
+    saveSkin(id); setActive(id);
+  }
+
+  return (
+    <div>
+      <div className="sg-skin-row">
+        {SKIN_DEFS.map(function(s) {
+          var unlocked = s.free || clearedCount >= s.unlockLvl;
+          var isActive = active === s.id;
+          return (
+            <div key={s.id}
+              className={"sg-skin-btn"+(isActive?" active":"")+(unlocked?"":" locked")}
+              style={{
+                borderColor: isActive ? s.colors.cyan : (unlocked?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.06)"),
+                background: isActive ? s.colors.cyan+"18" : "rgba(255,255,255,0.03)",
+                color: unlocked ? (isActive?s.colors.cyan:"rgba(255,255,255,0.6)") : "rgba(255,255,255,0.2)",
+              }}
+              onClick={function(){ pickSkin(s.id); }}>
+              <div className="sg-skin-swatch" style={{
+                background: "linear-gradient(135deg,"+s.colors.cyan+","+s.colors.magenta+")",
+                boxShadow: isActive ? "0 0 8px "+s.colors.cyan : "none",
+              }}/>
+              <div>{s.label}</div>
+              {!unlocked && <div style={{fontSize:8,color:"rgba(255,255,255,0.25)",marginTop:2}}>LVL {s.unlockLvl}</div>}
+              {unlocked && isActive && <div style={{fontSize:8,color:s.colors.green,marginTop:2}}>ACTIVE</div>}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{fontSize:9,color:"rgba(255,255,255,0.2)",letterSpacing:"0.06em",marginBottom:8}}>
+        Skins change node colors only — no gameplay effect. Reload after switching.
+      </div>
+    </div>
+  );
+}
+
 /* ─── CITY TAB ──────────────────────────────────────────────────── */
 function CityTab(props) {
   var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData, lives=props.lives, setLives=props.setLives;
@@ -3561,6 +4409,9 @@ function CityTab(props) {
 
       <div className="sg-label" style={{marginTop:14}}>CHESTS</div>
       <ChestInventory meta={meta} setMeta={setMeta} lives={lives} setLives={setLives}/>
+
+      <div className="sg-label" style={{marginTop:14}}>GRID SKINS</div>
+      <SkinPicker meta={meta}/>
 
       <div className="sg-label">IDLE INCOME</div>
       <div className="sg-idle-card">
@@ -3847,6 +4698,10 @@ function EditorTab(props) {
         <button className="sg-action-btn" style={{borderColor:"#ffaa00",color:"#ffaa00"}} onClick={function(){ onPlay(buildTestDef(),function(){}); }}>▶ TEST</button>
         <button className="sg-action-btn" style={{borderColor:saved?"#00ff88":"#00e5ff",color:saved?"#00ff88":"#00e5ff",background:saved?"rgba(0,255,136,0.08)":"rgba(0,229,255,0.06)"}} onClick={saveLevel}>{saved?"✓ SAVED":"💾 SAVE"}</button>
       </div>
+      <button onClick={function(){ onPlay({id:"sandbox",name:"CORRUPTION SANDBOX",moves:999,bids:["apt"],hazards:6,hint:"Watch corruption spread. No win condition — pure survival mode.",isSandbox:true},function(){}); }}
+        style={{width:"100%",marginTop:4,padding:"10px",background:"rgba(170,0,255,0.08)",border:"1px solid rgba(170,0,255,0.3)",borderRadius:10,color:"#cc44ff",fontFamily:"'Rajdhani',sans-serif",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",marginBottom:6}}>
+        ☠ CORRUPTION SANDBOX — Watch It Spread
+      </button>
 
       {(meta.customLevels||[]).length>0&&(
         <div style={{marginTop:14}}>
@@ -4029,6 +4884,10 @@ function Shiftgrid() {
   var _su=React.useState(false); var showXPUp=_su[0]; var setShowXPUp=_su[1];
   var _sg=React.useState(loadSessionGoals); var sessionGoals=_sg[0]; var setSessionGoals=_sg[1];
   var _lc=React.useState(shouldShowLoginChest); var showLoginChest=_lc[0]; var setShowLoginChest=_lc[1];
+  var _ss=React.useState(false); var showSettings=_ss[0]; var setShowSettings=_ss[1];
+  var _du=React.useState(null); var distUnlock=_du[0]; var setDistUnlock=_du[1];
+  var _eg=React.useState(false); var showEndGame=_eg[0]; var setShowEndGame=_eg[1];
+  var _scrollPos=React.useRef({}); /* level scroll memory */
 
   React.useEffect(function(){
     var t=setInterval(function(){ setLives(loadLives()); },30000);
@@ -4049,7 +4908,7 @@ function Shiftgrid() {
   }
 
   function startPending(){ if(pendingLevel){ setPlaying(pendingLevel); setPendingLevel(null); } }
-  function handleTutoNext(){ Audio.tap(); if(tutoStep>=2){ markTutoDone(); setShowTuto(false); startPending(); } else setTutoStep(tutoStep+1); }
+  function handleTutoNext(){ Audio.tap(); if(tutoStep>=3){ markTutoDone(); setShowTuto(false); startPending(); } else setTutoStep(tutoStep+1); }
   function handleTutoSkip(){ markTutoDone(); setShowTuto(false); startPending(); }
 
   function handleComplete(rewards){
@@ -4123,6 +4982,23 @@ function Shiftgrid() {
       saveSessionGoals(updated);
       return updated;
     });
+    /* District unlock ceremony */
+    var bossIds=[9,19,29,39,49];
+    if(bossIds.includes(lvl.id)){
+      var distIdx=Math.floor(lvl.id/10);
+      var dist=DISTRICTS[distIdx];
+      if(dist){
+        /* Give district clear rewards */
+        setMeta(function(m){
+          var newChests=Object.assign({},m.chests||{});
+          newChests.silver=(newChests.silver||0)+1;
+          var n=Object.assign({},m,{coins:m.coins+150,parts:m.parts+8,chests:newChests});
+          saveMeta(n); return n;
+        });
+        if(lvl.id===49){ setTimeout(function(){ setShowEndGame(true); },400); }
+        else { setTimeout(function(){ setDistUnlock(Object.assign({},dist,{icon:distIdx===0?"🏙️":distIdx===1?"🏭":distIdx===2?"🌆":distIdx===3?"🌑":"🏆"})); },400); }
+      }
+    }
     setPlaying(null);
     if(lvl.id>=4&&!meta.starterPackShown&&Math.random()<0.25){
       setMeta(function(m){ var n=Object.assign({},m,{starterPackShown:true}); saveMeta(n); return n; });
@@ -4168,7 +5044,9 @@ function Shiftgrid() {
     {id:"campaign",  icon:"🗺", label:"PLAY"},
     {id:"challenges",icon:"🎯", label:"QUESTS"},
     {id:"event",     icon:"⚡", label:"EVENT"},
+    {id:"wars",      icon:"⚔️", label:"WARS"},
     {id:"city",      icon:"🌆", label:"CITY"},
+    {id:"stats",     icon:"📊", label:"STATS"},
     {id:"editor",    icon:"🛠", label:"BUILD"},
   ];
 
@@ -4203,6 +5081,9 @@ function Shiftgrid() {
       {livesGate&&<LivesGate lives={lives} onBack={function(){ setLivesGate(false); setPendingLevel(null); }} onWatchAd={watchAdForLife}/>}
       {showStarterPack&&<StarterPack onClose={function(){ setShowStarterPack(false); }} onBuy={function(){ setShowStarterPack(false); }}/>}
       {showLoginChest&&<LoginChestPopup streak={streak} onClaim={handleLoginClaim}/>}
+      {showSettings&&<SettingsSheet onClose={function(){ setShowSettings(false); }} meta={meta} setMeta={setMeta} lives={lives} setLives={setLives}/>}
+      {distUnlock&&<DistrictUnlock dist={distUnlock} onContinue={function(){ setDistUnlock(null); }}/>}
+      {showEndGame&&<EndGame meta={meta} xpData={xpData} onNewGame={function(){ setShowEndGame(false); }} onClose={function(){ setShowEndGame(false); }}/>}
 
       {/* XP Level Up toast */}
       {showXPUp&&(
@@ -4227,14 +5108,24 @@ function Shiftgrid() {
             <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:12,color:"rgba(255,255,255,0.6)"}}>{meta.coins}</span>
           </div>
           <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:"rgba(168,85,247,0.8)",letterSpacing:"0.06em"}}>{"LV"+xpData.level}</div>
+          <button onClick={function(){ Audio.tap(); setShowSettings(true); }}
+            style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:18,cursor:"pointer",padding:"2px 4px",lineHeight:1}}>⚙️</button>
         </div>
       </div>
       <XPBar xpData={xpData}/>
-      <div className="sg-content">
+      <div className="sg-content" ref={function(el){
+        if(el){
+          el.scrollTop=_scrollPos.current[tab]||0;
+          el._tab=tab;
+          el.onscroll=function(){ _scrollPos.current[el._tab]=el.scrollTop; };
+        }
+      }}>
         {tab==="campaign"   &&<CampaignTab meta={meta} onPlay={handlePlay} setMeta={setMeta} sessionGoals={sessionGoals} setSessionGoals={setSessionGoals}/>}
         {tab==="challenges" &&<ChallengesTab meta={meta} setMeta={setMeta} challengeData={challengeData} setChallengeData={setChallengeData} streak={streak} onStreakUpdate={setStreak} onPlay={handlePlay}/>}
         {tab==="event"      &&<WeeklyTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
+        {tab==="wars"       &&<ShiftWarsTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
         {tab==="city"       &&<CityTab meta={meta} setMeta={setMeta} xpData={xpData} lives={lives} setLives={setLives}/>}
+        {tab==="stats"      &&<StatsPage meta={meta} xpData={xpData}/>}
         {tab==="editor"     &&<EditorTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
       </div>
       <nav className="sg-nav">
@@ -4254,8 +5145,31 @@ function Shiftgrid() {
   );
 }
 
+class ErrorBoundary extends React.Component {
+  constructor(props){ super(props); this.state={hasError:false,error:null}; }
+  static getDerivedStateFromError(e){ return {hasError:true,error:e}; }
+  componentDidCatch(e,info){ console.error("SHIFTGRID ERROR:",e,info); }
+  render(){
+    if(this.state.hasError){
+      return (
+        <div style={{position:"fixed",inset:0,background:"#07070f",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:16}}>⚡</div>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:16,fontWeight:900,color:"#ff2d95",marginBottom:8,letterSpacing:"0.1em"}}>GRID ERROR</div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,0.4)",marginBottom:24,lineHeight:1.6}}>Something went wrong.<br/>Your progress is safe.</div>
+          <button onClick={function(){ window.location.reload(); }}
+            style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)",border:"none",borderRadius:12,padding:"14px 28px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>
+            RELOAD GAME
+          </button>
+          <div style={{fontSize:9,color:"rgba(255,255,255,0.2)",marginTop:16}}>Error: {this.state.error&&this.state.error.message}</div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<Shiftgrid/>);
+root.render(<ErrorBoundary><Shiftgrid/></ErrorBoundary>);
 </script>
 
 </body>
