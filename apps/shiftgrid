@@ -141,6 +141,12 @@
       height: 100%; display: flex; flex-direction: column;
       position: relative; z-index: 10;
     }
+    .sg-play.near-win-state::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 999; pointer-events: none;
+      border: 3px solid #ff2d95;
+      animation: nw-border-pulse 0.55s ease infinite alternate;
+    }
 
     .sg-play-top {
       display: flex; align-items: center; justify-content: space-between;
@@ -179,6 +185,56 @@
       transition: color 0.3s, text-shadow 0.3s;
     }
     .sg-stat.danger { border-color: rgba(255,45,149,0.35); background: rgba(255,45,149,0.06); }
+
+    /* ── NEAR-WIN TENSION ── */
+    .sg-app.near-win-state::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 999; pointer-events: none;
+      border: 3px solid #ff2d95;
+      border-radius: 0;
+      animation: nw-border-pulse 0.55s ease infinite alternate;
+    }
+    @keyframes nw-border-pulse {
+      from { box-shadow: inset 0 0 30px rgba(255,45,149,0.25), 0 0 30px rgba(255,45,149,0.15); border-color: rgba(255,45,149,0.6); }
+      to   { box-shadow: inset 0 0 60px rgba(255,45,149,0.5), 0 0 60px rgba(255,45,149,0.35); border-color: #ff2d95; }
+    }
+
+    /* Last move banner */
+    .sg-last-move-banner {
+      margin: 0 14px 4px; padding: 6px 14px;
+      background: linear-gradient(90deg, rgba(255,45,149,0.18), rgba(255,170,0,0.12));
+      border: 1px solid rgba(255,45,149,0.5);
+      border-radius: 10px; text-align: center; flex-shrink: 0;
+      font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 900;
+      letter-spacing: 0.14em; color: #ff2d95;
+      animation: last-move-flash 0.4s ease infinite alternate;
+    }
+    @keyframes last-move-flash {
+      from { opacity: 0.75; } to { opacity: 1; }
+    }
+
+    /* Near-win modal extras */
+    .sg-nw-bldg-row {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 9px 12px; margin-bottom: 6px; text-align: left;
+    }
+    .sg-nw-bldg-icon { font-size: 20px; flex-shrink: 0; }
+    .sg-nw-bldg-info { flex: 1; }
+    .sg-nw-bldg-name { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .sg-nw-bldg-need { font-size: 10px; color: rgba(255,255,255,0.4); }
+    .sg-nw-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+    .sg-nw-fill  { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+
+    /* Fail breakdown in lose modal */
+    .sg-fail-reason {
+      background: rgba(255,45,149,0.06); border: 1px solid rgba(255,45,149,0.18);
+      border-radius: 10px; padding: 10px 14px; margin: 10px 0;
+      font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.6; text-align: left;
+    }
+    .sg-fail-line { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
+    .sg-fail-line:last-child { margin-bottom: 0; }
+    .sg-fail-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
     /* ── CORRUPTION WARN ── */
     .sg-crpt-warn {
@@ -450,6 +506,107 @@
     .sg-upg-cost-btn:disabled { opacity: 0.3; }
     .sg-upg-max { font-size: 9px; color: var(--green); letter-spacing: 0.12em; margin-top: 4px; }
 
+    /* ── DAILY CHALLENGE SCORING ── */
+    .sg-daily-rank-card {
+      border-radius: 16px; padding: 18px 16px; margin-bottom: 10px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .sg-daily-rank-badge {
+      display: inline-block; font-family: 'Orbitron', monospace;
+      font-size: 9px; font-weight: 900; letter-spacing: 0.14em;
+      padding: 4px 10px; border-radius: 6px; margin-bottom: 8px;
+    }
+    .sg-daily-rank-pos {
+      font-family: 'Orbitron', monospace; font-size: 32px; font-weight: 900;
+      margin-bottom: 2px;
+    }
+    .sg-daily-rank-lbl { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.12em; margin-bottom: 12px; }
+    .sg-daily-score-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
+    .sg-daily-score-chip {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9px; padding: 8px 12px; text-align: center;
+    }
+    .sg-daily-score-val { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; }
+    .sg-daily-score-lbl { font-size: 8px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-top: 2px; }
+    .sg-perfect-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: linear-gradient(135deg,rgba(255,170,0,0.2),rgba(255,120,0,0.1));
+      border: 1px solid rgba(255,170,0,0.4); border-radius: 8px;
+      padding: 5px 12px; font-size: 10px; font-weight: 700; color: #ffaa00;
+      letter-spacing: 0.1em; margin-bottom: 10px;
+    }
+    .sg-share-btn {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 10px; padding: 10px 20px;
+      font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.6); cursor: pointer; letter-spacing: 0.08em;
+      transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .sg-share-btn:hover { background: rgba(255,255,255,0.11); color: #fff; }
+    .sg-share-btn.copied { border-color: rgba(0,255,136,0.4); color: #00ff88; }
+
+    /* Daily leaderboard */
+    .sg-daily-lb {
+      background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; overflow: hidden; margin-bottom: 10px;
+    }
+    .sg-daily-lb-hdr {
+      padding: 10px 14px; font-size: 9px; letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.25); border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sg-daily-lb-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .sg-daily-lb-row:last-child { border-bottom: none; }
+    .sg-daily-lb-row.you-row { background: rgba(0,229,255,0.05); }
+    .sg-daily-lb-rank { font-family: 'Orbitron', monospace; font-size: 11px; min-width: 24px; }
+    .sg-daily-lb-name { flex: 1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.65); }
+    .sg-daily-lb-score { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.45); }
+    .sg-daily-lb-moves { font-size: 9px; color: rgba(255,255,255,0.25); margin-left: 4px; }
+
+    /* ── STREAK PROTECTION ── */
+    .sg-streak-protect {
+      background: linear-gradient(90deg,rgba(168,85,247,0.12),rgba(0,229,255,0.06));
+      border: 1px solid rgba(168,85,247,0.3); border-radius: 14px;
+      padding: 14px 16px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sg-protect-icon { font-size: 28px; flex-shrink: 0; }
+    .sg-protect-info { flex: 1; }
+    .sg-protect-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 2px; }
+    .sg-protect-sub { font-size: 10px; color: rgba(255,255,255,0.35); line-height: 1.4; }
+    .sg-protect-btns { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+    .sg-protect-ad {
+      background: linear-gradient(135deg,#a855f7,#6366f1);
+      border: none; border-radius: 8px; padding: 7px 12px;
+      font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
+      color: #fff; cursor: pointer; letter-spacing: 0.08em; white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .sg-protect-ad:hover { opacity: 0.88; }
+    .sg-protect-coins {
+      background: rgba(255,170,0,0.12); border: 1px solid rgba(255,170,0,0.3);
+      border-radius: 8px; padding: 6px 12px;
+      font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
+      color: #ffaa00; cursor: pointer; letter-spacing: 0.08em; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .sg-protect-coins:hover { background: rgba(255,170,0,0.2); }
+    .sg-protect-coins:disabled { opacity: 0.3; cursor: default; }
+    .sg-streak-shield {
+      display: inline-block; font-size: 11px; margin-left: 6px;
+      animation: shield-pulse 1.5s ease infinite;
+    }
+    @keyframes shield-pulse {
+      0%,100% { filter: drop-shadow(0 0 2px #a855f7); }
+      50%      { filter: drop-shadow(0 0 8px #a855f7); }
+    }
+    .sg-streak-protected-badge {
+      font-size: 9px; color: #a855f7; letter-spacing: 0.12em;
+      font-weight: 700; margin-top: 3px;
+    }
+
     /* ── DAILY TAB ── */
     .sg-daily-hero {
       background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.14);
@@ -558,6 +715,165 @@
     .sg-play-btn:hover { opacity: 0.85; transform: scale(1.06); }
     .sg-camp-bids { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
     .sg-bid-chip { font-size: 9px; padding: 2px 8px; border-radius: 5px; border: 1px solid; }
+
+    /* ── SESSION GOALS STRIP ── */
+    .sg-goals-strip {
+      margin-bottom: 12px;
+    }
+    .sg-goals-row {
+      display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .sg-goals-row::-webkit-scrollbar { display: none; }
+    .sg-goal-card {
+      flex-shrink: 0; width: 148px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 13px; padding: 11px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+      transition: border-color 0.3s, background 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .sg-goal-card.complete {
+      border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.06);
+    }
+    .sg-goal-card.claimable {
+      border-color: rgba(255,170,0,0.5); background: rgba(255,170,0,0.07);
+      animation: goal-ready 1.4s ease infinite;
+    }
+    @keyframes goal-ready {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,170,0,0); }
+      50%      { box-shadow: 0 0 12px 2px rgba(255,170,0,0.25); }
+    }
+    .sg-goal-icon  { font-size: 20px; line-height: 1; }
+    .sg-goal-name  { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85); line-height: 1.3; }
+    .sg-goal-prog  { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
+    .sg-goal-bar-track { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+    .sg-goal-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+    .sg-goal-claim {
+      background: linear-gradient(135deg,#ffaa00,#ff7700);
+      border: none; border-radius: 7px; padding: 5px 10px;
+      font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
+      color: #06060f; cursor: pointer; letter-spacing: 0.08em;
+      transition: transform 0.12s; width: 100%;
+    }
+    .sg-goal-claim:hover { transform: scale(1.04); }
+    .sg-goal-done-badge {
+      font-size: 9px; color: var(--green); letter-spacing: 0.1em; font-weight: 700; text-align: center;
+    }
+
+    /* ── SOCIAL PROOF on level cards ── */
+    .sg-social-row {
+      display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap;
+    }
+    .sg-social-chip {
+      font-size: 9px; color: rgba(255,255,255,0.28); letter-spacing: 0.04em;
+      display: flex; align-items: center; gap: 3px;
+    }
+    .sg-social-chip b { color: rgba(255,255,255,0.5); }
+    .sg-social-chip.you b { color: var(--cyan); }
+
+    /* ── STREAK PROTECTION UI ── */
+    .sg-streak-shield { font-size: 12px; margin-left: 4px; vertical-align: middle; }
+    .sg-streak-protected-badge {
+      font-size: 8px; letter-spacing: 0.14em; color: #00ff88;
+      margin-top: 2px; font-weight: 700;
+    }
+    .sg-streak-protect {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: linear-gradient(135deg, rgba(255,45,149,0.1), rgba(255,170,0,0.06));
+      border: 1px solid rgba(255,45,149,0.35);
+      border-radius: 14px; padding: 14px; margin-bottom: 10px;
+      animation: nw-border-pulse 1.2s ease infinite alternate;
+    }
+    .sg-protect-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+    .sg-protect-info { flex: 1; }
+    .sg-protect-title { font-size: 13px; font-weight: 700; color: #ff2d95; margin-bottom: 3px; }
+    .sg-protect-sub { font-size: 10px; color: rgba(255,255,255,0.38); line-height: 1.5; }
+    .sg-protect-btns { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+    .sg-protect-ad {
+      background: linear-gradient(135deg,#ff2d95,#ffaa00);
+      border: none; border-radius: 9px; padding: 8px 12px;
+      font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
+      color: #06060f; cursor: pointer; letter-spacing: 0.08em; white-space: nowrap;
+    }
+    .sg-protect-coins {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 9px; padding: 7px 12px;
+      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      color: rgba(255,255,255,0.55); cursor: pointer; white-space: nowrap;
+      transition: all 0.12s;
+    }
+    .sg-protect-coins:hover:not(:disabled) { background: rgba(255,255,255,0.12); color: #fff; }
+    .sg-protect-coins:disabled { opacity: 0.28; cursor: default; }
+
+    /* ── DAILY RANK CARD ── */
+    .sg-daily-rank-card {
+      border-radius: 18px; padding: 20px 16px; margin-bottom: 12px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .sg-daily-rank-badge {
+      display: inline-block; border-radius: 8px; padding: 4px 12px;
+      font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 900;
+      letter-spacing: 0.18em; margin-bottom: 10px;
+    }
+    .sg-perfect-badge {
+      font-size: 10px; color: #ffaa00; letter-spacing: 0.12em;
+      font-weight: 700; margin-bottom: 8px;
+      text-shadow: 0 0 10px rgba(255,170,0,0.4);
+    }
+    .sg-daily-rank-pos {
+      font-family: 'Orbitron', monospace; font-size: 48px; font-weight: 900;
+      line-height: 1; margin-bottom: 4px;
+      text-shadow: 0 0 24px currentColor;
+    }
+    .sg-daily-rank-lbl {
+      font-size: 9px; letter-spacing: 0.16em; color: rgba(255,255,255,0.3);
+      margin-bottom: 16px;
+    }
+    .sg-daily-score-row {
+      display: flex; gap: 8px; margin-bottom: 16px; justify-content: center;
+    }
+    .sg-daily-score-chip {
+      flex: 1; max-width: 100px;
+      background: rgba(7,7,15,0.5); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 10px 6px; text-align: center;
+    }
+    .sg-daily-score-val {
+      font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700;
+      margin-bottom: 3px;
+    }
+    .sg-daily-score-lbl {
+      font-size: 8px; letter-spacing: 0.12em; color: rgba(255,255,255,0.3);
+    }
+    .sg-share-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 11px; padding: 11px 24px;
+      font-family: 'Rajdhani', monospace; font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.7); cursor: pointer; letter-spacing: 0.08em;
+      transition: all 0.2s; width: 100%;
+    }
+    .sg-share-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+    .sg-share-btn.copied { background: rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.4); color: #00ff88; }
+
+    /* ── DAILY LEADERBOARD ── */
+    .sg-daily-lb {
+      background: rgba(13,13,26,0.9); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; overflow: hidden; margin-bottom: 8px;
+    }
+    .sg-daily-lb-hdr {
+      font-size: 9px; letter-spacing: 0.2em; color: rgba(255,255,255,0.25);
+      padding: 12px 14px 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sg-daily-lb-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+    .sg-daily-lb-row:last-child { border-bottom: none; }
+    .sg-daily-lb-row.you-row { background: rgba(0,229,255,0.06); }
+    .sg-daily-lb-rank { font-family:'Orbitron',monospace; font-size:11px; font-weight:700; min-width:26px; }
+    .sg-daily-lb-name { flex:1; font-size:12px; font-weight:600; color:rgba(255,255,255,0.65); }
+    .sg-daily-lb-score { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45); }
+    .sg-daily-lb-moves { font-size:9px; color:rgba(255,255,255,0.22); margin-left:4px; }
 
     /* ── PILL BTN ── */
     .sg-pill {
@@ -802,6 +1118,83 @@
     .sg-lb-score { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.55); }
     .sg-lb-row.you .sg-lb-name { color: #00e5ff; }
     .sg-lb-row.you .sg-lb-score { color: #00e5ff; }
+
+    /* ── NEAR-WIN STATE — pulsing danger border on the play screen ── */
+    .sg-play.near-win-state::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 200;
+      border: 3px solid rgba(255,45,149,0.0);
+      box-shadow: inset 0 0 0 3px rgba(255,45,149,0.55);
+      animation: nw-border-pulse 0.65s ease infinite alternate;
+      border-radius: 0;
+    }
+    @keyframes nw-border-pulse {
+      from { box-shadow: inset 0 0 0 2px rgba(255,45,149,0.3), inset 0 0 40px rgba(255,45,149,0.05); }
+      to   { box-shadow: inset 0 0 0 3px rgba(255,45,149,0.85), inset 0 0 60px rgba(255,45,149,0.18); }
+    }
+
+    /* ── LAST MOVE BANNER ── */
+    .sg-last-move-banner {
+      margin: 0 14px 4px;
+      background: linear-gradient(90deg, rgba(255,45,149,0.18), rgba(255,100,0,0.12));
+      border: 1px solid rgba(255,45,149,0.55);
+      border-radius: 10px; padding: 7px 14px;
+      font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 900;
+      color: #ff2d95; text-align: center; letter-spacing: 0.14em;
+      flex-shrink: 0;
+      text-shadow: 0 0 10px rgba(255,45,149,0.6);
+      animation: last-move-flash 0.5s ease infinite alternate;
+    }
+    @keyframes last-move-flash {
+      from { opacity: 0.75; transform: scaleX(0.99); }
+      to   { opacity: 1;    transform: scaleX(1); }
+    }
+
+    /* ── BUILDINGS "ALMOST DONE" HIGHLIGHT ── */
+    .sg-bldg.almost-done {
+      border-color: rgba(255,170,0,0.55) !important;
+      background: rgba(255,170,0,0.07) !important;
+      animation: almost-pulse 0.9s ease infinite alternate;
+    }
+    @keyframes almost-pulse {
+      from { box-shadow: 0 0 8px rgba(255,170,0,0.2);  border-color: rgba(255,170,0,0.4) !important; }
+      to   { box-shadow: 0 0 18px rgba(255,170,0,0.45); border-color: rgba(255,170,0,0.8) !important; }
+    }
+
+    /* ── NEAR-WIN MODAL — building breakdown rows ── */
+    .sg-nw-bldg-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 10px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 6px;
+    }
+    .sg-nw-bldg-icon { font-size: 20px; flex-shrink: 0; }
+    .sg-nw-bldg-info { flex: 1; }
+    .sg-nw-bldg-name { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .sg-nw-bldg-need { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 5px; }
+    .sg-nw-track {
+      height: 5px; background: rgba(255,255,255,0.07);
+      border-radius: 3px; overflow: hidden;
+    }
+    .sg-nw-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+
+    /* ── LOSE MODAL — failure breakdown ── */
+    .sg-fail-reason {
+      background: rgba(255,45,149,0.05); border: 1px solid rgba(255,45,149,0.18);
+      border-radius: 12px; padding: 10px 12px;
+      margin-bottom: 12px; text-align: left;
+    }
+    .sg-fail-line {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 11px; color: rgba(255,255,255,0.55);
+      line-height: 1.45; padding: 3px 0;
+    }
+    .sg-fail-line + .sg-fail-line { border-top: 1px solid rgba(255,255,255,0.05); }
+    .sg-fail-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 3px;
+      box-shadow: 0 0 6px currentColor;
+    }
   </style>
 </head>
 <body>
@@ -909,7 +1302,8 @@ const DEF_META = {
   coins:0, parts:0,
   upgrades:{comboBoost:0,hazardSlow:0,extraMoves:0,idleBoost:0,capReduce:0,specialRate:0},
   levelsCleared:[], stars:{}, lastCollect:Date.now(),
-  dailyDate:"", dailyScore:0, customLevels:[], starterPackShown:false,
+  dailyDate:"", dailyScore:0, dailyFinalScore:0, dailyMovesLeft:0, dailyStars:0,
+  customLevels:[], starterPackShown:false,
 };
 
 
@@ -976,8 +1370,10 @@ const Audio = (function(){
     chain:   function(n){ for(var i=0;i<Math.min(n,5);i++){ (function(j){ tone(280+j*110,"sine",0.1,0.18,j*0.055); })(i); } },
     win:     function(){ [523,659,784,1047,1319].forEach(function(f,i){ tone(f,"sine",0.5,0.3,i*0.08); }); },
     bossWin: function(){ [262,330,392,523,659,784,1047].forEach(function(f,i){ tone(f,"sine",0.55,0.32,i*0.075); }); },
-    lose:    function(){ tone(200,"sawtooth",0.25,0.28); tone(150,"sawtooth",0.35,0.22,0.12); tone(100,"sawtooth",0.28,0.18,0.28); },
-    tap:     function(){ tone(800,"sine",0.04,0.08); },
+    lose:     function(){ tone(200,"sawtooth",0.25,0.28); tone(150,"sawtooth",0.35,0.22,0.12); tone(100,"sawtooth",0.28,0.18,0.28); },
+    tap:      function(){ tone(800,"sine",0.04,0.08); },
+    lastMove: function(){ tone(320,"sawtooth",0.12,0.22); tone(240,"sawtooth",0.18,0.18,0.1); },
+    nearWin:  function(){ [180,220,280].forEach(function(f,i){ tone(f,"sine",0.18,0.22,i*0.07); }); },
   };
 })();
 
@@ -1107,8 +1503,15 @@ function checkAndUpdateStreak(st) {
   if (st.lastDay === today) return st;
   var d = new Date(), prev = new Date(d); prev.setDate(prev.getDate()-1);
   var prevStr = prev.getFullYear() + "-" + String(prev.getMonth()+1).padStart(2,"0") + "-" + String(prev.getDate()).padStart(2,"0");
-  var newCount = (st.lastDay === prevStr) ? st.count + 1 : 1;
-  var newSt = { count: newCount, lastDay: today, claimed: st.claimed || [] };
+  var consecutive = st.lastDay === prevStr;
+  /* If not consecutive but protected, preserve streak and consume protection */
+  if (!consecutive && isStreakProtected(st)) {
+    var protStreak = Object.assign({}, st, { lastDay: today, protectedUntil: null });
+    saveStreak(protStreak);
+    return protStreak;
+  }
+  var newCount = consecutive ? st.count + 1 : 1;
+  var newSt = { count: newCount, lastDay: today, claimed: st.claimed || [], protectedUntil: st.protectedUntil || null };
   saveStreak(newSt);
   return newSt;
 }
@@ -1120,7 +1523,10 @@ function getStreakReward(day) {
   return { icon: "⬡",  label: "Coins",       coins: 10 + day * 3, special: null };
 }
 
-/* ─── DAILY CHALLENGES ──────────────────────────────────────────── */
+
+/* ─── STREAK PROTECTION ─────────────────────────────────────────── */
+/* defined later after saveWeekly — see below */
+
 const CHALLENGES_KEY = "sg_challenges_v1";
 const CHALLENGE_DEFS = [
   { id:"c1", icon:"⚡", name:"Chain Reaction",    desc:"Trigger a 3+ cascade",       goal:1,  type:"cascade",  reward:{coins:30} },
@@ -1208,6 +1614,144 @@ function loadWeekly() {
   catch { return {score:0,played:false}; }
 }
 function saveWeekly(d) { try { localStorage.setItem(WEEKLY_KEY, JSON.stringify(d)); } catch {} }
+
+/* ─── DAILY CHALLENGE SCORING ───────────────────────────────────── */
+const DAILY_NAMES = [
+  "GridKing","NeonRider","VoltMaster","ByteHunter","CipherX",
+  "StackZero","PulseCore","DarkNode","ChainLink","StaticWave",
+  "LoopBreak","HexDrift","ArcLight","VoidPulse","NullShift",
+  "CoreSlam","WireGhost","BitFlux","CellRush","OhmBreaker"
+];
+
+function calcDailyScore(rawScore, movesLeft, totalMoves, stars) {
+  /* Formula: raw score + moves efficiency bonus + star bonus */
+  var effBonus = Math.floor((movesLeft / totalMoves) * 500);
+  var starBonus = stars * 200;
+  return rawScore + effBonus + starBonus;
+}
+
+function genDailyLeaderboard(seed, playerScore) {
+  var rng = mkSeededRng(seed + 9999);
+  var entries = [];
+  /* Generate 19 fake players with scores spread around player score */
+  for (var i = 0; i < 19; i++) {
+    var name = DAILY_NAMES[i % DAILY_NAMES.length];
+    /* Score range: 400 – 3200, normally distributed around 1400 */
+    var s = Math.max(400, Math.round(1400 + (rng() - 0.5) * 2800));
+    var moves = Math.floor(rng() * 12) + 3;
+    entries.push({ name: name, score: s, moves: moves, you: false });
+  }
+  /* Insert player */
+  entries.push({ name: "You", score: playerScore, moves: 0, you: true });
+  /* Sort descending */
+  entries.sort(function(a,b){ return b.score - a.score; });
+  return entries;
+}
+
+function getDailyRank(lb) {
+  for (var i = 0; i < lb.length; i++) {
+    if (lb[i].you) return i + 1;
+  }
+  return lb.length;
+}
+
+function getDailyTier(rank, total) {
+  var pct = rank / total;
+  if (pct <= 0.10) return { label:"TOP 10%", color:"#ffaa00", bg:"rgba(255,170,0,0.12)", border:"rgba(255,170,0,0.4)" };
+  if (pct <= 0.50) return { label:"TOP 50%", color:"#00e5ff", bg:"rgba(0,229,255,0.08)", border:"rgba(0,229,255,0.3)" };
+  return { label:"PARTICIPANT", color:"rgba(255,255,255,0.5)", bg:"rgba(255,255,255,0.04)", border:"rgba(255,255,255,0.12)" };
+}
+
+function getDailyTierReward(tier) {
+  if (tier.label === "TOP 10%")     return { coins: 80, parts: 5 };
+  if (tier.label === "TOP 50%")     return { coins: 40, parts: 2 };
+  return { coins: 20, parts: 1 };
+}
+
+/* ─── STREAK PROTECTION ─────────────────────────────────────────── */
+const PROTECT_COST = 30;
+
+function isStreakProtected(streak) {
+  return streak.protectedUntil && Date.now() < streak.protectedUntil;
+}
+
+function applyStreakProtection(streak) {
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(4, 0, 0, 0); /* expires 4am next day */
+  var updated = Object.assign({}, streak, { protectedUntil: tomorrow.getTime() });
+  saveStreak(updated);
+  return updated;
+}
+const SESSION_GOALS_KEY = "sg_session_goals_v1";
+
+const SESSION_GOAL_POOL = [
+  { id:"sg_win3",     icon:"🏆", name:"Win 3 Levels",          desc:"Clear any 3 campaign levels",    goal:3,  type:"win",      reward:30 },
+  { id:"sg_star3",    icon:"⭐", name:"Triple Star",            desc:"Get a 3-star clear",             goal:1,  type:"stars3",   reward:40 },
+  { id:"sg_battery",  icon:"🔋", name:"Battery Pack",           desc:"Trigger 3 Battery combos",       goal:3,  type:"battery",  reward:35 },
+  { id:"sg_pulse",    icon:"💥", name:"Pulse Bringer",          desc:"Trigger a Pulse Blast",          goal:1,  type:"pulse",    reward:40 },
+  { id:"sg_chain",    icon:"⛓", name:"Chain Reaction",         desc:"Get a 4-chain cascade",          goal:1,  type:"cascade4", reward:45 },
+  { id:"sg_corrupt",  icon:"☠", name:"Rot Cleaner",            desc:"Clear 15 corrupted tiles",       goal:15, type:"corrupt",  reward:35 },
+  { id:"sg_noboost",  icon:"🎯", name:"Pure Skill",            desc:"Win a level without a near-win", goal:1,  type:"clean_win",reward:50 },
+  { id:"sg_back2back",icon:"🔥", name:"Back to Back",          desc:"Win 2 levels in a row",          goal:2,  type:"streak2",  reward:40 },
+];
+
+function seededShuffle(arr, seed) {
+  var rng = mkSeededRng(seed);
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(rng() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function loadSessionGoals() {
+  try {
+    var s = sessionStorage.getItem(SESSION_GOALS_KEY);
+    if (s) return JSON.parse(s);
+  } catch {}
+  /* Fresh session — pick 3 from pool using time-based seed */
+  var seed = Math.floor(Date.now() / 3600000); /* changes every hour */
+  var picked = seededShuffle(SESSION_GOAL_POOL, seed).slice(0, 3);
+  var goals = picked.map(function(g) {
+    return { id: g.id, progress: 0, claimed: false };
+  });
+  var d = { goals: goals, pickedIds: picked.map(function(g){ return g.id; }) };
+  try { sessionStorage.setItem(SESSION_GOALS_KEY, JSON.stringify(d)); } catch {}
+  return d;
+}
+function saveSessionGoals(d) {
+  try { sessionStorage.setItem(SESSION_GOALS_KEY, JSON.stringify(d)); } catch {}
+}
+function getSessionGoalDefs(pickedIds) {
+  return pickedIds.map(function(id) {
+    return SESSION_GOAL_POOL.find(function(g) { return g.id === id; });
+  }).filter(Boolean);
+}
+
+/* ─── SOCIAL PROOF ──────────────────────────────────────────────── */
+function getLevelSocialProof(levelId, meta) {
+  /* Deterministic per-level stats — seeded from level ID */
+  var rng = mkSeededRng(levelId * 137 + 42);
+  var difficulty = levelId / 49; /* 0 = easy, 1 = hard */
+
+  /* Clear rate: 96% → 32%, with small noise */
+  var baseClear = Math.round(96 - difficulty * 64 + (rng() - 0.5) * 8);
+  baseClear = Math.max(28, Math.min(97, baseClear));
+
+  /* Avg moves: 55-80% of move cap with noise */
+  var lvl = CAMPAIGN_LEVELS[levelId];
+  var movePct = 0.55 + rng() * 0.25;
+  var avgMoves = Math.max(2, Math.round(lvl.moves * movePct));
+
+  /* Player best */
+  var starsMap = meta.stars || {};
+  var cleared = (meta.levelsCleared || []).includes(levelId);
+  var bestStars = starsMap[levelId] || 0;
+
+  return { clearRate: baseClear, avgMoves: avgMoves, cleared: cleared, bestStars: bestStars };
+}
 
 function nextId() { return ++_uid; }
 function rndColor() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
@@ -1367,6 +1911,9 @@ function GameBoard(props) {
   const [slideAnim,setSlideAnim]=useState(null);
   const [moveCount,setMoveCount]=useState(0);
   const [showAd,setShowAd]=useState(false);
+  const lastChanceRef=useRef(false);
+  const [nearWinData,setNearWinData]=useState(null);
+  const sessionStatsRef=useRef({batteries:0,pulses:0,maxCascade:0,corruptCleared:0});
   const timers=useRef([]);
   const gridRef=useRef(null);
   const touchRef=useRef({startX:0,startY:0,startRow:-1,startCol:-1,moved:false});
@@ -1403,15 +1950,18 @@ function GameBoard(props) {
         const shapes=detectShapes(g,m);
         shapes.forEach(function(sh){
           if(!toastQueue.find(function(x){ return x.text===sh.label; })) toastQueue.push({text:sh.label,color:"#ffaa00"});
-          if(sh.type==="battery") chargeBoost=2;
-          if(sh.type==="pulse"&&sh.pos) m=expandPulse(m,sh.pos);
+          if(sh.type==="battery"){ chargeBoost=2; sessionStatsRef.current.batteries++; }
+          if(sh.type==="pulse"&&sh.pos){ m=expandPulse(m,sh.pos); sessionStatsRef.current.pulses++; }
         });
-        clearNearCorruption(g,m).forEach(function(k){ m.add(k); });
+        var nearCorrupt=clearNearCorruption(g,m);
+        nearCorrupt.forEach(function(k){ m.add(k); });
+        sessionStatsRef.current.corruptCleared+=nearCorrupt.size;
         frames.push({g:g,m:new Set(m)});
         const res=applyGravity(g,m);
         Object.keys(res.cleared).forEach(function(col){ totCleared[col]=(totCleared[col]||0)+res.cleared[col]; });
         pts+=m.size*10*(1+cascades*0.5)*comboAmp;
         cascades++;
+        if(cascades>sessionStatsRef.current.maxCascade) sessionStatsRef.current.maxCascade=cascades;
         frames.push({g:res.g,m:new Set()});
         g=res.g;
       }
@@ -1431,13 +1981,42 @@ function GameBoard(props) {
 
       setMoveCount(newMC); setMoves(newMoves);
 
+      /* ── LAST MOVE WARNING ── */
+      if(newMoves===1 && !newBldgs.every(function(b){ return b.on; })){
+        addToast("⚠ LAST MOVE","#ff2d95");
+        Audio.lastMove();
+      }
+
       function finish(){
         setGrid(finalG); setHi(new Set()); setBldgs(newBldgs); setScore(function(s){ return s+Math.round(pts); });
         toastQueue.forEach(function(t,i){ setTimeout(function(){ addToast(t.text,t.color); },i*320); });
         if(cascades>1){ setTimeout(function(){ addToast("CHAIN x"+cascades,"#ffaa00"); },toastQueue.length*320); Audio.chain(cascades); }
         if(cascades>=1) Audio.cascade(cascades-1);
         if(newBldgs.every(function(b){ return b.on; })){ setPhase("win"); setTimeout(function(){ if(levelDef.boss) Audio.bossWin(); else Audio.win(); },100); return; }
-        if(newMoves<=0){ setPhase("lose"); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return; }
+
+        if(newMoves<=0){
+          /* ── NEAR-WIN CHECK ── */
+          var offlineBldgs=newBldgs.filter(function(b){ return !b.on; });
+          var anyClose=offlineBldgs.some(function(b){ return b.ch/b.max>=0.4; });
+          if(!lastChanceRef.current && anyClose){
+            /* Build the breakdown for the modal */
+            var breakdown=offlineBldgs.map(function(b){
+              var need=b.max-b.ch;
+              return {label:b.label,icon:b.icon,color:b.color,ch:b.ch,max:b.max,need:Math.ceil(need)};
+            });
+            setNearWinData(breakdown);
+            setPhase("nearwin");
+            Audio.nearWin();
+            setTimeout(onLose,300);
+            return;
+          }
+          /* Normal lose */
+          var failBreakdown=offlineBldgs.map(function(b){
+            return {label:b.label,icon:b.icon,color:b.color,ch:b.ch,max:b.max,need:Math.ceil(b.max-b.ch)};
+          });
+          setNearWinData(failBreakdown);
+          setPhase("lose"); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
+        }
         setPhase("idle");
       }
 
@@ -1490,9 +2069,19 @@ function GameBoard(props) {
   }
 
   function retry(){
+    lastChanceRef.current=false;
+    sessionStatsRef.current={batteries:0,pulses:0,maxCascade:0,corruptCleared:0};
+    setNearWinData(null);
     setGrid(buildInitGrid()); setMoves(levelDef.moves);
     setBldgs(function(b){ return b.map(function(x){ return Object.assign({},x,{ch:0,on:false}); }); });
     setScore(0); setHi(new Set()); setPhase("idle"); setMoveCount(0); setSlideAnim(null);
+  }
+
+  function continueWithMoves(n){
+    lastChanceRef.current=true;
+    setNearWinData(null);
+    setMoves(n);
+    setPhase("idle");
   }
 
   function ShiftBtn(p){
@@ -1509,12 +2098,14 @@ function GameBoard(props) {
   const winCoins=Math.floor(score/10)+25, winParts=Math.floor(score/60)+3;
   const movesUsed=levelDef.moves-moves;
   const stars=calcStars(movesUsed,levelDef.moves);
+  const isLastMove=moves===1&&phase==="idle"&&!bldgs.every(function(b){ return b.on; });
+  const isNearWinState=phase==="nearwin";
 
   /* ─── FIX 3: safe level name for campaign levels ────────────────── */
   const displayName = levelDef.name || (levelDef.dist ? levelDef.dist + " · LVL " + ((levelDef.id||0)+1) : "CUSTOM LEVEL");
 
   return (
-    <div className="sg-play">
+    <div className={"sg-play"+(isNearWinState?" near-win-state":"")}>
       <div className="sg-play-top">
         <button className="sg-back" onClick={onBack}>←</button>
         <div style={{textAlign:"center"}}>
@@ -1543,6 +2134,8 @@ function GameBoard(props) {
           </div>
         )}
       </div>
+
+      {isLastMove&&<div className="sg-last-move-banner">⚡ LAST MOVE — MAKE IT COUNT</div>}
 
       {spreadWarn&&(levelDef.hazards||0)>0&&<div className="sg-crpt-warn">⚠ CORRUPTION SPREADS THIS MOVE</div>}
 
@@ -1596,8 +2189,9 @@ function GameBoard(props) {
         <div className="sg-bldg-lbl">BUILDINGS — RESTORATION STATUS</div>
         {bldgs.map(function(b){
           const hex=HEX[b.color];
+          const almostDone=!b.on&&(b.ch/b.max)>=0.65&&isLastMove;
           return (
-            <div key={b.id} className={"sg-bldg"+(b.on?" online":"")} style={{borderColor:b.on?hex:"rgba(255,255,255,0.07)",background:b.on?hex+"0e":"rgba(255,255,255,0.025)",boxShadow:b.on?"0 0 20px "+hex+"28":"none"}}>
+            <div key={b.id} className={"sg-bldg"+(b.on?" online":"")+(almostDone?" almost-done":"")} style={{borderColor:b.on?hex:"rgba(255,255,255,0.07)",background:b.on?hex+"0e":"rgba(255,255,255,0.025)",boxShadow:b.on?"0 0 20px "+hex+"28":"none"}}>
               <div className="sg-bldg-icon" style={{filter:b.on?"none":"grayscale(0.7) brightness(0.5)"}}>{b.icon}</div>
               <div className="sg-bldg-info">
                 <div className="sg-bldg-row">
@@ -1624,11 +2218,55 @@ function GameBoard(props) {
             <div className="sg-modal-title" style={{background:"linear-gradient(135deg,#ffaa00,#00ff88)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>DISTRICT POWERED!</div>
             <div className="sg-modal-sub">{displayName}</div>
             <div style={{fontSize:22,color:"#ffaa00",letterSpacing:"0.12em",margin:"6px 0"}}>{renderStars(stars)}</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginBottom:12}}>
+              {movesUsed + " of " + levelDef.moves + " moves used · " + (levelDef.moves-movesUsed) + " remaining"}
+            </div>
             <div className="sg-modal-rewards">
               <div className="sg-reward-chip">{"+" + winCoins} <span style={{color:"#ffaa00"}}>coins</span></div>
               <div className="sg-reward-chip">{"+" + winParts} <span style={{color:"#00e5ff"}}>parts</span></div>
             </div>
-            <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)"}} onClick={function(){ onComplete({score:score,coins:winCoins,parts:winParts,movesLeft:moves}); }}>COLLECT</button>
+            <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)"}} onClick={function(){ onComplete({score:score,coins:winCoins,parts:winParts,movesLeft:moves,batteries:sessionStatsRef.current.batteries,pulses:sessionStatsRef.current.pulses,maxCascade:sessionStatsRef.current.maxCascade,corruptCleared:sessionStatsRef.current.corruptCleared,wasNearWin:lastChanceRef.current}); }}>COLLECT</button>
+          </div>
+        </div>
+      )}
+
+      {/* NEAR-WIN — SO CLOSE interception */}
+      {phase==="nearwin"&&(
+        <div className="sg-overlay" style={{background:"rgba(7,7,15,0.92)"}}>
+          <div className="sg-modal" style={{border:"1px solid rgba(255,45,149,0.4)",boxShadow:"0 0 40px rgba(255,45,149,0.2)"}}>
+            <span className="sg-modal-icon" style={{animation:"tile-pop 0.5s ease"}}>😤</span>
+            <div className="sg-modal-title" style={{color:"#ff2d95",textShadow:"0 0 20px rgba(255,45,149,0.5)"}}>SO CLOSE!</div>
+            <div className="sg-modal-sub" style={{marginBottom:14}}>Out of moves — but your city isn't done yet</div>
+
+            {/* Building breakdown */}
+            <div style={{width:"100%",marginBottom:16}}>
+              {(nearWinData||[]).map(function(b,i){
+                var hex=HEX[b.color];
+                var pct=Math.min(100,(b.ch/b.max)*100);
+                return (
+                  <div key={i} className="sg-nw-bldg-row">
+                    <div className="sg-nw-bldg-icon">{b.icon}</div>
+                    <div className="sg-nw-bldg-info">
+                      <div className="sg-nw-bldg-name" style={{color:hex}}>{b.label}</div>
+                      <div className="sg-nw-bldg-need">Needs {b.need} more {LABEL[b.color]} match{b.need!==1?"es":""}</div>
+                      <div className="sg-nw-track">
+                        <div className="sg-nw-fill" style={{width:pct+"%",background:"linear-gradient(90deg,"+hex+"88,"+hex+")"}}/>
+                      </div>
+                    </div>
+                    <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:hex}}>{b.ch+"/"+b.max}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button onClick={function(){ continueWithMoves(2); }}
+              style={{display:"block",width:"100%",background:"linear-gradient(135deg,#ff2d95,#ffaa00)",border:"none",borderRadius:13,padding:"14px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",marginBottom:10,boxShadow:"0 0 20px rgba(255,45,149,0.35)"}}>
+              WATCH AD · GET +2 MOVES FREE
+            </button>
+            <div className="sg-modal-row">
+              <button className="sg-modal-btn sg-modal-ghost" onClick={function(){ setPhase("lose"); }}>GIVE UP</button>
+              <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)"}} onClick={retry}>RETRY</button>
+            </div>
           </div>
         </div>
       )}
@@ -1639,11 +2277,37 @@ function GameBoard(props) {
           <div className="sg-modal">
             <span className="sg-modal-icon">💀</span>
             <div className="sg-modal-title" style={{color:"#ff2d95",textShadow:"0 0 20px #ff2d9566"}}>BLACKOUT</div>
-            <div className="sg-modal-sub">Out of moves — district stays dark</div>
-            <button onClick={function(){ setShowAd(true); }} style={{display:"block",width:"100%",background:"linear-gradient(135deg,#ff2d95,#ffaa00)",border:"none",borderRadius:12,padding:"13px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",marginTop:16,marginBottom:8}}>WATCH AD · CONTINUE FREE</button>
-            <div className="sg-modal-row">
+            <div className="sg-modal-sub">District stays dark — here's what went wrong</div>
+
+            {/* Failure breakdown */}
+            {nearWinData&&nearWinData.length>0&&(
+              <div className="sg-fail-reason">
+                {nearWinData.map(function(b,i){
+                  var hex=HEX[b.color];
+                  return (
+                    <div key={i} className="sg-fail-line">
+                      <div className="sg-fail-dot" style={{background:hex}}/>
+                      <span>{b.icon} {b.label} — needed <strong style={{color:hex}}>{b.need} more {LABEL[b.color]}</strong> match{b.need!==1?"es":""}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="sg-modal-row" style={{marginTop:12}}>
               <button className="sg-modal-btn sg-modal-ghost" onClick={onBack}>EXIT</button>
               <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)"}} onClick={retry}>RETRY</button>
+            </div>
+            <div style={{fontSize:9,color:"rgba(255,255,255,0.2)",marginTop:12,textAlign:"center",letterSpacing:"0.06em",lineHeight:1.5}}>
+              {(function(){
+                if(!nearWinData||!nearWinData.length) return "Tip: match longer chains to charge multiple buildings at once";
+                var worst=nearWinData.slice().sort(function(a,b){return b.need-a.need;})[0];
+                var corruptHigh=corr>4;
+                if(corruptHigh) return "Tip: clear corruption tiles early — they blocked your "+worst.label+" chain";
+                if(worst.need<=2) return "Tip: "+worst.label+" was almost there — one more "+LABEL[worst.color]+" chain would have done it";
+                if(nearWinData.length>=3) return "Tip: with 4 buildings, commit to 2 colors first before switching";
+                return "Tip: "+worst.label+" needed "+worst.need+" more "+LABEL[worst.color]+" matches — chain longer";
+              })()}
             </div>
           </div>
         </div>
@@ -1746,8 +2410,16 @@ function CityOverview(props) {
 /* ─── STREAK CALENDAR ────────────────────────────────────────────── */
 function StreakCalendar(props) {
   var streak = props.streak, setMeta = props.setMeta, meta = props.meta;
+  var onStreakUpdate = props.onStreakUpdate;
   var today = todayStr();
   var todayClaimed = streak.claimed && streak.claimed.includes(today);
+  var isProtected = isStreakProtected(streak);
+
+  /* Check if streak is at risk — last played day was not yesterday or today */
+  var d = new Date(), prev = new Date(d); prev.setDate(prev.getDate()-1);
+  var prevStr = prev.getFullYear() + "-" + String(prev.getMonth()+1).padStart(2,"0") + "-" + String(prev.getDate()).padStart(2,"0");
+  var atRisk = streak.count >= 2 && streak.lastDay !== today && streak.lastDay !== prevStr && !isProtected;
+  var canAffordProtect = meta.coins >= PROTECT_COST;
 
   function claimToday() {
     if (todayClaimed) return;
@@ -1756,11 +2428,25 @@ function StreakCalendar(props) {
     var newClaimed = (streak.claimed || []).concat([today]);
     var newStreak = Object.assign({}, streak, {claimed: newClaimed});
     saveStreak(newStreak);
-    props.onStreakUpdate(newStreak);
+    onStreakUpdate(newStreak);
     if (reward.coins > 0) {
       setMeta(function(m) { var n = Object.assign({}, m, {coins: m.coins + reward.coins}); saveMeta(n); return n; });
     }
     Audio.win();
+  }
+
+  function protectWithAd() {
+    var updated = applyStreakProtection(streak);
+    onStreakUpdate(updated);
+    Audio.tap();
+  }
+
+  function protectWithCoins() {
+    if (!canAffordProtect) return;
+    var updated = applyStreakProtection(streak);
+    onStreakUpdate(updated);
+    setMeta(function(m) { var n = Object.assign({}, m, {coins: m.coins - PROTECT_COST}); saveMeta(n); return n; });
+    Audio.tap();
   }
 
   var days = [];
@@ -1770,26 +2456,45 @@ function StreakCalendar(props) {
     var r = getStreakReward(i);
     var cls = daysClaimed ? "done" : (isToday ? "today" : "pending");
     if (i === 7) cls += " milestone";
-    days.push({i: i, cls: cls, reward: r, daysClaimed: daysClaimed});
+    days.push({i: i, cls: cls, reward: r});
   }
 
   return (
     <div>
+      {/* STREAK BANNER */}
       <div className="sg-streak-banner">
         <div>
           <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",letterSpacing:"0.14em",marginBottom:4}}>DAILY STREAK</div>
           <div style={{display:"flex",alignItems:"baseline",gap:6}}>
             <div className="sg-streak-val">{streak.count}</div>
-            <div className="sg-streak-lbl">DAYS</div>
+            <div className="sg-streak-lbl">DAYS{isProtected && <span className="sg-streak-shield">🛡</span>}</div>
           </div>
+          {isProtected && <div className="sg-streak-protected-badge">PROTECTED TODAY</div>}
         </div>
         <div className="sg-streak-fire">🔥</div>
-        {!todayClaimed && streak.count > 0 && (
+        {!todayClaimed && streak.count > 0 && !atRisk && (
           <button onClick={claimToday} style={{background:"linear-gradient(135deg,#ffaa00,#ff7700)",border:"none",borderRadius:10,padding:"10px 14px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em"}}>
             CLAIM
           </button>
         )}
       </div>
+
+      {/* STREAK AT RISK — PROTECTION OFFER */}
+      {atRisk && (
+        <div className="sg-streak-protect">
+          <div className="sg-protect-icon">🛡</div>
+          <div className="sg-protect-info">
+            <div className="sg-protect-title">Streak at Risk!</div>
+            <div className="sg-protect-sub">You missed a day — protect your {streak.count}-day streak before it resets.</div>
+          </div>
+          <div className="sg-protect-btns">
+            <button className="sg-protect-ad" onClick={protectWithAd}>WATCH AD</button>
+            <button className="sg-protect-coins" onClick={protectWithCoins} disabled={!canAffordProtect}>{PROTECT_COST} coins</button>
+          </div>
+        </div>
+      )}
+
+      {/* 7-DAY CALENDAR */}
       <div className="sg-calendar">
         {days.map(function(d) {
           return (
@@ -1807,7 +2512,7 @@ function StreakCalendar(props) {
 
 /* ─── DAILY CHALLENGES TAB ───────────────────────────────────────── */
 function ChallengesTab(props) {
-  var meta = props.meta, setMeta = props.setMeta;
+  var meta = props.meta, setMeta = props.setMeta, onPlay = props.onPlay;
   var challengeData = props.challengeData, setChallengeData = props.setChallengeData;
   var streak = props.streak, onStreakUpdate = props.onStreakUpdate;
 
@@ -1827,7 +2532,11 @@ function ChallengesTab(props) {
 
   return (
     <div style={{paddingBottom:16}}>
-      <div className="sg-label" style={{marginTop:8}}>DAILY STREAK</div>
+      {/* ── DAILY CHALLENGE ── */}
+      <div className="sg-label" style={{marginTop:8}}>DAILY CHALLENGE</div>
+      <DailyTab meta={meta} setMeta={setMeta} onPlay={onPlay}/>
+
+      <div className="sg-label" style={{marginTop:6}}>DAILY STREAK</div>
       <StreakCalendar streak={streak} meta={meta} setMeta={setMeta} onStreakUpdate={onStreakUpdate}/>
 
       <div className="sg-label" style={{marginTop:14}}>TODAY'S CHALLENGES</div>
@@ -1996,8 +2705,53 @@ function CityTab(props) {
 function DailyTab(props) {
   const meta=props.meta, setMeta=props.setMeta, onPlay=props.onPlay;
   const seed=todaySeed(), today=String(seed), played=meta.dailyDate===today;
+  const _copied=React.useState(false); var copied=_copied[0]; var setCopied=_copied[1];
+
   const dailyDef={id:"daily",name:"DAILY POWER CRISIS",moves:16,bids:["apt","factory","lab","power"],hazards:5,rngSeed:seed,isDaily:true,hint:"Same board for everyone today — fewest moves wins!"};
-  function handleComplete(r){ setMeta(function(m){ const n=Object.assign({},m,{dailyDate:today,dailyScore:r.score,coins:m.coins+r.coins+20,parts:m.parts+r.parts+2}); saveMeta(n); return n; }); }
+
+  /* Scoring */
+  var dailyFinalScore = meta.dailyFinalScore || 0;
+  var dailyMovesLeft  = meta.dailyMovesLeft  || 0;
+  var dailyStars      = meta.dailyStars      || 0;
+
+  var lb = played ? genDailyLeaderboard(seed, dailyFinalScore) : [];
+  var rank = played ? getDailyRank(lb) : 0;
+  var tier = played ? getDailyTier(rank, lb.length) : null;
+  var isPerfect = played && dailyStars === 3;
+
+  function handleComplete(r){
+    var movesLeft = r.movesLeft || 0;
+    var stars = calcStars(dailyDef.moves - movesLeft, dailyDef.moves);
+    var finalScore = calcDailyScore(r.score || 0, movesLeft, dailyDef.moves, stars);
+    var tierReward = getDailyTierReward(getDailyTier(getDailyRank(genDailyLeaderboard(seed, finalScore)), 20));
+    setMeta(function(m){
+      var n=Object.assign({},m,{
+        dailyDate:today, dailyScore:r.score,
+        dailyFinalScore: finalScore,
+        dailyMovesLeft: movesLeft,
+        dailyStars: stars,
+        coins: m.coins + r.coins + tierReward.coins,
+        parts: m.parts + r.parts + tierReward.parts,
+      });
+      saveMeta(n); return n;
+    });
+  }
+
+  function shareResult() {
+    var tierLabel = tier ? tier.label : "";
+    var starsStr  = renderStars(dailyStars);
+    var text = "🏙 SHIFTGRID Daily #" + (seed%1000) + "\n" +
+               starsStr + "  " + tierLabel + "  Rank #" + rank + "\n" +
+               "Score: " + dailyFinalScore.toLocaleString() + "\n" +
+               "Moves left: " + dailyMovesLeft + "/" + dailyDef.moves + "\n" +
+               "Play at shiftgrid.app";
+    try {
+      navigator.clipboard.writeText(text).then(function(){
+        setCopied(true); setTimeout(function(){ setCopied(false); }, 2200);
+      });
+    } catch(e) { setCopied(true); setTimeout(function(){ setCopied(false); }, 2200); }
+  }
+
   return (
     <div style={{paddingBottom:16}}>
       <div className="sg-daily-hero">
@@ -2009,28 +2763,100 @@ function DailyTab(props) {
           <div className="sg-spec"><div className="sg-spec-val">{dailyDef.hazards}</div><div className="sg-spec-lbl" style={{color:"#ff2d95"}}>HAZARDS</div></div>
           <div className="sg-spec"><div className="sg-spec-val">{dailyDef.bids.length}</div><div className="sg-spec-lbl" style={{color:"#ffaa00"}}>BUILDINGS</div></div>
         </div>
-        {played?(
+        {played ? (
           <div className="sg-daily-done">
             <div style={{fontSize:28,marginBottom:4}}>✅</div>
-            <div style={{fontSize:13,color:"#00ff88",fontWeight:700}}>Challenge Complete!</div>
-            <div className="sg-daily-score">{(meta.dailyScore||0).toLocaleString()}</div>
+            <div style={{fontSize:13,color:"#00ff88",fontWeight:700}}>Today Complete!</div>
+            <div className="sg-daily-score">{dailyFinalScore.toLocaleString()}</div>
             <div style={{fontSize:10,color:"rgba(255,255,255,0.3)"}}>New board tomorrow</div>
           </div>
-        ):(
+        ) : (
           <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)",marginTop:4}} onClick={function(){ onPlay(dailyDef,handleComplete); }}>PLAY TODAY</button>
         )}
       </div>
-      <div className="sg-label">COMPLETION BONUS</div>
-      <div className="sg-bonus-row">
-        {[{icon:"⬡",val:"+20 coins",col:"#ffaa00"},{icon:"◈",val:"+2 parts",col:"#00e5ff"},{icon:"⭐",val:"District Star",col:"#00ff88"}].map(function(r,i){
-          return (
-            <div key={i} className="sg-bonus-card">
-              <div className="sg-bonus-icon">{r.icon}</div>
-              <div className="sg-bonus-val" style={{color:r.col}}>{r.val}</div>
+
+      {/* POST-PLAY: RANK CARD */}
+      {played && tier && (
+        <div className="sg-daily-rank-card" style={{background:"linear-gradient(135deg,"+tier.bg+",rgba(7,7,15,0.95))",border:"1px solid "+tier.border}}>
+          <div className="sg-daily-rank-badge" style={{background:tier.bg,border:"1px solid "+tier.border,color:tier.color}}>{tier.label}</div>
+          {isPerfect && <div className="sg-perfect-badge">⭐ PERFECT RUN — 3 STARS</div>}
+          <div className="sg-daily-rank-pos" style={{color:tier.color}}>{"#"+rank}</div>
+          <div className="sg-daily-rank-lbl">{"OUT OF " + lb.length + " PLAYERS TODAY"}</div>
+          <div className="sg-daily-score-row">
+            <div className="sg-daily-score-chip">
+              <div className="sg-daily-score-val" style={{color:tier.color}}>{dailyFinalScore.toLocaleString()}</div>
+              <div className="sg-daily-score-lbl">FINAL SCORE</div>
             </div>
-          );
-        })}
-      </div>
+            <div className="sg-daily-score-chip">
+              <div className="sg-daily-score-val" style={{color:"#00e5ff"}}>{dailyMovesLeft}</div>
+              <div className="sg-daily-score-lbl">MOVES LEFT</div>
+            </div>
+            <div className="sg-daily-score-chip">
+              <div className="sg-daily-score-val" style={{color:"#ffaa00"}}>{renderStars(dailyStars)}</div>
+              <div className="sg-daily-score-lbl">RATING</div>
+            </div>
+          </div>
+          <button className={"sg-share-btn"+(copied?" copied":"")} onClick={shareResult}>
+            {copied ? "✓ COPIED!" : "📋 SHARE RESULT"}
+          </button>
+        </div>
+      )}
+
+      {/* DAILY LEADERBOARD */}
+      {played && lb.length > 0 && (
+        <div className="sg-daily-lb">
+          <div className="sg-daily-lb-hdr">TODAY'S LEADERBOARD — CRISIS #{seed%1000}</div>
+          {lb.slice(0, 10).map(function(row, i) {
+            var rankColor = i===0?"#ffaa00":i===1?"rgba(255,255,255,0.55)":i===2?"#ff7700":"rgba(255,255,255,0.28)";
+            var medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":("#"+(i+1));
+            return (
+              <div key={i} className={"sg-daily-lb-row"+(row.you?" you-row":"")}>
+                <div className="sg-daily-lb-rank" style={{color:rankColor}}>{medal}</div>
+                <div className="sg-daily-lb-name" style={{color:row.you?"#00e5ff":"rgba(255,255,255,0.65)"}}>
+                  {row.name}{row.you?" (You)":""}
+                </div>
+                <div className="sg-daily-lb-score">{row.score.toLocaleString()}</div>
+                {!row.you && <div className="sg-daily-lb-moves">{row.moves}mv</div>}
+              </div>
+            );
+          })}
+          {/* Always show player row if outside top 10 */}
+          {rank > 10 && (
+            <div className="sg-daily-lb-row you-row" style={{borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+              <div className="sg-daily-lb-rank" style={{color:"#00e5ff"}}>{"#"+rank}</div>
+              <div className="sg-daily-lb-name" style={{color:"#00e5ff"}}>You</div>
+              <div className="sg-daily-lb-score">{dailyFinalScore.toLocaleString()}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TIER REWARDS (pre-play) */}
+      {!played && (
+        <>
+          <div className="sg-label">RANK REWARDS</div>
+          <div style={{display:"flex",gap:8,marginBottom:10}}>
+            {[
+              {label:"TOP 10%",  color:"#ffaa00", coins:80, parts:5},
+              {label:"TOP 50%",  color:"#00e5ff", coins:40, parts:2},
+              {label:"PLAYED",   color:"rgba(255,255,255,0.4)", coins:20, parts:1},
+            ].map(function(t,i){
+              return (
+                <div key={i} style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 6px",textAlign:"center"}}>
+                  <div style={{fontSize:9,fontWeight:700,color:t.color,letterSpacing:"0.1em",marginBottom:5}}>{t.label}</div>
+                  <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:11,color:"#ffaa00",marginBottom:2}}>+{t.coins} coins</div>
+                  <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:11,color:"#00e5ff"}}>+{t.parts} parts</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="sg-label">SCORING</div>
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px",fontSize:11,color:"rgba(255,255,255,0.4)",lineHeight:1.7}}>
+            Score = Raw match points + Moves efficiency bonus + Star rating bonus<br/>
+            <span style={{color:"rgba(255,255,255,0.25)",fontSize:10}}>Fewer moves = higher rank. 3-star = Perfect Run badge.</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -2144,14 +2970,78 @@ function EditorTab(props) {
   );
 }
 
+/* ─── SESSION GOALS STRIP ───────────────────────────────────────── */
+function SessionGoalsStrip(props) {
+  var sessionGoals = props.sessionGoals;
+  var setSessionGoals = props.setSessionGoals;
+  var setMeta = props.setMeta;
+
+  if (!sessionGoals) return null;
+  var defs = getSessionGoalDefs(sessionGoals.pickedIds);
+
+  function claimGoal(i) {
+    var def = defs[i];
+    var prog = sessionGoals.goals[i];
+    if (!prog || prog.claimed || prog.progress < def.goal) return;
+    var newGoals = sessionGoals.goals.map(function(g, gi) {
+      return gi === i ? Object.assign({}, g, {claimed: true}) : g;
+    });
+    var updated = Object.assign({}, sessionGoals, {goals: newGoals});
+    saveSessionGoals(updated);
+    setSessionGoals(updated);
+    setMeta(function(m) {
+      var n = Object.assign({}, m, {coins: m.coins + def.reward});
+      saveMeta(n); return n;
+    });
+    Audio.win();
+  }
+
+  return (
+    <div className="sg-goals-strip">
+      <div className="sg-label" style={{marginTop:8,marginBottom:6}}>SESSION GOALS</div>
+      <div className="sg-goals-row">
+        {defs.map(function(def, i) {
+          var prog = sessionGoals.goals[i];
+          if (!prog || !def) return null;
+          var pct = Math.min(100, (prog.progress / def.goal) * 100);
+          var done = prog.progress >= def.goal;
+          var claimed = prog.claimed;
+          var cls = "sg-goal-card" + (claimed ? " complete" : done ? " claimable" : "");
+          return (
+            <div key={def.id} className={cls}>
+              <div className="sg-goal-icon">{def.icon}</div>
+              <div className="sg-goal-name">{def.name}</div>
+              <div className="sg-goal-prog">{prog.progress + " / " + def.goal + " · +" + def.reward + " coins"}</div>
+              <div className="sg-goal-bar-track">
+                <div className="sg-goal-bar-fill" style={{
+                  width: pct + "%",
+                  background: claimed ? "#00ff88" : done ? "linear-gradient(90deg,#ffaa00,#ff7700)" : "linear-gradient(90deg,#00e5ff,#a855f7)"
+                }}/>
+              </div>
+              {claimed && <div className="sg-goal-done-badge">✓ CLAIMED</div>}
+              {done && !claimed && (
+                <button className="sg-goal-claim" onClick={function(){ claimGoal(i); }}>
+                  CLAIM +{def.reward} COINS
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ─── CAMPAIGN TAB ──────────────────────────────────────────────── */
 function CampaignTab(props) {
   var meta=props.meta, onPlay=props.onPlay;
+  var sessionGoals=props.sessionGoals, setSessionGoals=props.setSessionGoals, setMeta=props.setMeta;
   var cleared=meta.levelsCleared||[];
   var starsMap=meta.stars||{};
   return (
     <div style={{paddingBottom:20}}>
-      <div className="sg-label" style={{marginTop:8}}>{cleared.length+"/50 LEVELS CLEARED"}</div>
+      <SessionGoalsStrip sessionGoals={sessionGoals} setSessionGoals={setSessionGoals} setMeta={setMeta}/>
+      <div className="sg-label" style={{marginTop:4}}>{cleared.length+"/50 LEVELS CLEARED"}</div>
       {DISTRICTS.map(function(dist){
         var distCleared=dist.ids.filter(function(id){ return cleared.includes(id); }).length;
         var distDone=distCleared===10;
@@ -2175,6 +3065,7 @@ function CampaignTab(props) {
               var unlocked=id===0||cleared.includes(id-1)||done;
               var locked=!unlocked;
               var lvlStars=starsMap[id]||0;
+              var proof = (unlocked||done) ? getLevelSocialProof(id, meta) : null;
               return (
                 <div key={id} className={"sg-campaign-card"+(unlocked?" playable":"")}
                   style={{borderColor:lvl.boss?(done?"rgba(255,170,0,0.55)":"rgba(255,170,0,0.22)"):(done?dist.theme+"44":locked?"rgba(255,255,255,0.04)":dist.theme+"20"),background:lvl.boss?(done?"rgba(255,170,0,0.08)":"rgba(255,170,0,0.03)"):(done?dist.theme+"06":locked?"rgba(255,255,255,0.01)":dist.theme+"03"),opacity:locked?0.28:1,marginBottom:4}}
@@ -2192,6 +3083,14 @@ function CampaignTab(props) {
                         {lvl.hazards>0&&<span className="sg-camp-tag" style={{color:"#ff2d9566"}}>{"☠ "+lvl.hazards}</span>}
                         {done&&<span className="sg-stars" style={{marginLeft:4}}>{renderStars(lvlStars)}</span>}
                       </div>
+                      {/* ── SOCIAL PROOF ── */}
+                      {proof&&(
+                        <div className="sg-social-row">
+                          <div className="sg-social-chip">👥 <b>{proof.clearRate}%</b> cleared</div>
+                          <div className="sg-social-chip">📊 avg <b>{proof.avgMoves}</b> moves</div>
+                          {done&&<div className="sg-social-chip you">🏅 your best: <b>{renderStars(lvlStars)}</b></div>}
+                        </div>
+                      )}
                     </div>
                     {unlocked&&(
                       <button className="sg-play-btn"
@@ -2229,6 +3128,7 @@ function Shiftgrid() {
   var _cd=React.useState(function(){ return loadChallenges()||initChallenges(); });
   var challengeData=_cd[0]; var setChallengeData=_cd[1];
   var _su=React.useState(false); var showXPUp=_su[0]; var setShowXPUp=_su[1];
+  var _sg=React.useState(loadSessionGoals); var sessionGoals=_sg[0]; var setSessionGoals=_sg[1];
 
   React.useEffect(function(){
     var t=setInterval(function(){ setLives(loadLives()); },30000);
@@ -2294,6 +3194,30 @@ function Shiftgrid() {
       var n=Object.assign({},m,{coins:m.coins+(rewards.coins||0),parts:m.parts+(rewards.parts||0),levelsCleared:cleared,stars:newStars});
       saveMeta(n); return n;
     });
+
+    /* Session Goals */
+    setSessionGoals(function(sg) {
+      if (!sg) return sg;
+      var defs = getSessionGoalDefs(sg.pickedIds);
+      var wasNearWin = rewards.wasNearWin || false;
+      var newGoals = sg.goals.map(function(g, i) {
+        var def = defs[i]; if (!def || g.claimed) return g;
+        if (g.progress >= def.goal) return g;
+        var prog = g.progress;
+        if (def.type === "win")       prog = Math.min(def.goal, prog + 1);
+        if (def.type === "stars3" && stars === 3) prog = Math.min(def.goal, prog + 1);
+        if (def.type === "battery" && (rewards.batteries||0) > 0)  prog = Math.min(def.goal, prog + (rewards.batteries||0));
+        if (def.type === "pulse"   && (rewards.pulses||0) > 0)     prog = Math.min(def.goal, prog + 1);
+        if (def.type === "cascade4" && (rewards.maxCascade||0)>=4) prog = Math.min(def.goal, prog + 1);
+        if (def.type === "corrupt"  && (rewards.corruptCleared||0)>0) prog = Math.min(def.goal, prog + (rewards.corruptCleared||0));
+        if (def.type === "clean_win" && !wasNearWin) prog = Math.min(def.goal, prog + 1);
+        if (def.type === "streak2") prog = Math.min(def.goal, prog + 1);
+        return Object.assign({}, g, {progress: prog});
+      });
+      var updated = Object.assign({}, sg, {goals: newGoals});
+      saveSessionGoals(updated);
+      return updated;
+    });
     setPlaying(null);
     if(lvl.id>=4&&!meta.starterPackShown&&Math.random()<0.25){
       setMeta(function(m){ var n=Object.assign({},m,{starterPackShown:true}); saveMeta(n); return n; });
@@ -2336,6 +3260,15 @@ function Shiftgrid() {
 
   var allChallengesDone = challengeData && challengeData.challenges.every(function(c){ return c.done; });
   var chestUnclaimed = allChallengesDone && !challengeData.chestClaimed;
+  var streakAtRisk = (function(){
+    var d = new Date(), prev = new Date(d); prev.setDate(prev.getDate()-1);
+    var prevStr = prev.getFullYear()+"-"+String(prev.getMonth()+1).padStart(2,"0")+"-"+String(prev.getDate()).padStart(2,"0");
+    return streak.count >= 2 && streak.lastDay !== todayStr() && streak.lastDay !== prevStr && !isStreakProtected(streak);
+  })();
+  var hasClaimableGoal = sessionGoals && sessionGoals.goals && getSessionGoalDefs(sessionGoals.pickedIds).some(function(def, i) {
+    var g = sessionGoals.goals[i];
+    return def && g && !g.claimed && g.progress >= def.goal;
+  });
 
   return (
     <div className="sg-app">
@@ -2366,15 +3299,16 @@ function Shiftgrid() {
       </div>
       <XPBar xpData={xpData}/>
       <div className="sg-content">
-        {tab==="campaign"   &&<CampaignTab meta={meta} onPlay={handlePlay}/>}
-        {tab==="challenges" &&<ChallengesTab meta={meta} setMeta={setMeta} challengeData={challengeData} setChallengeData={setChallengeData} streak={streak} onStreakUpdate={setStreak}/>}
+        {tab==="campaign"   &&<CampaignTab meta={meta} onPlay={handlePlay} setMeta={setMeta} sessionGoals={sessionGoals} setSessionGoals={setSessionGoals}/>}
+        {tab==="challenges" &&<ChallengesTab meta={meta} setMeta={setMeta} challengeData={challengeData} setChallengeData={setChallengeData} streak={streak} onStreakUpdate={setStreak} onPlay={handlePlay}/>}
         {tab==="event"      &&<WeeklyTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
         {tab==="city"       &&<CityTab meta={meta} setMeta={setMeta} xpData={xpData}/>}
         {tab==="editor"     &&<EditorTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
       </div>
       <nav className="sg-nav">
         {TABS.map(function(t){
-          var hasDot = (t.id==="challenges"&&chestUnclaimed) || (t.id==="event"&&true);
+          var hasDot = (t.id==="campaign"&&hasClaimableGoal) || (t.id==="challenges"&&(chestUnclaimed||streakAtRisk)) || (t.id==="event"&&true);
+          var dotColor = t.id==="challenges"&&streakAtRisk ? "#ff2d95" : t.id==="challenges"&&chestUnclaimed ? "#00ff88" : "#ffaa00";
           return (
             <button key={t.id} className={"sg-nav-btn"+(tab===t.id?" active":"")} onClick={function(){ Audio.tap(); setTab(t.id); }} style={{position:"relative"}}>
               <span className="nav-icon">{t.icon}</span>
