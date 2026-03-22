@@ -704,6 +704,65 @@
 .sg-fail-line:last-child { margin-bottom: 0; }
 .sg-fail-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
+/* ── ABILITIES BAR ── */
+.sg-abilities-bar {
+  display: flex; gap: 8px; padding: 6px 14px 2px;
+  flex-shrink: 0; align-items: center;
+}
+.sg-ability-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 52px; height: 56px; border-radius: 13px; border: 1.5px solid;
+  background: rgba(255,255,255,0.04); cursor: pointer;
+  transition: all 0.15s; position: relative; flex-shrink: 0;
+  padding: 6px 4px 4px;
+}
+.sg-ability-btn:hover:not(:disabled) { transform: scale(1.07); }
+.sg-ability-btn:active:not(:disabled) { transform: scale(0.94); }
+.sg-ability-btn:disabled { opacity: 0.28; cursor: default; }
+.sg-ability-btn.active-ability {
+  animation: ability-ready 1s ease infinite alternate;
+}
+@keyframes ability-ready {
+  from { box-shadow: 0 0 6px currentColor; }
+  to   { box-shadow: 0 0 16px currentColor, 0 0 32px currentColor; }
+}
+.sg-ability-btn.used {
+  opacity: 0.22; filter: grayscale(0.7);
+}
+.sg-ability-icon { font-size: 22px; line-height: 1; }
+.sg-ability-count {
+  position: absolute; top: 3px; right: 5px;
+  font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 900;
+  color: #fff; background: rgba(0,0,0,0.6); border-radius: 4px;
+  padding: 1px 3px; line-height: 1.2;
+}
+.sg-ability-name { font-size: 7px; letter-spacing: 0.04em; font-weight: 700; }
+.sg-ability-use-flash {
+  position: fixed; inset: 0; z-index: 997; pointer-events: none;
+  animation: ability-flash 0.35s ease forwards;
+}
+@keyframes ability-flash { 0%{opacity:0.35} 100%{opacity:0} }
+
+/* Ability shop in CityTab */
+.sg-ability-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.sg-ability-shop-card {
+  border: 1px solid; border-radius: 14px; padding: 14px 12px;
+  background: rgba(255,255,255,0.03); transition: all 0.2s;
+}
+.sg-ability-shop-card:hover { background: rgba(255,255,255,0.06); }
+.sg-abilshop-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+.sg-abilshop-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.sg-abilshop-desc { font-size: 10px; color: rgba(255,255,255,0.38); line-height: 1.45; margin-bottom: 10px; }
+.sg-abilshop-footer { display: flex; align-items: center; justify-content: space-between; }
+.sg-abilshop-owned { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; }
+.sg-abilshop-buy {
+  border: none; border-radius: 8px; padding: 6px 12px;
+  font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s;
+}
+.sg-abilshop-buy:hover:not(:disabled) { transform: scale(1.05); }
+.sg-abilshop-buy:disabled { opacity: 0.3; cursor: default; }
+
 /* ── SPREAD TENSION BAR ── */
 .sg-spread-bar-wrap {
   margin: 0 14px 4px; flex-shrink: 0;
@@ -857,6 +916,7 @@
 .slide-down  { animation: sl-down  var(--slide-dur) ease-out both; }
 
 @keyframes sl-left  { from{transform:translateX(0)} to{transform:translateX(calc(-1*(var(--sz) + var(--gap))))} }
+@keyframes slide-right { from{background-position:0 0} to{background-position:200% 0} }
 @keyframes sl-right { from{transform:translateX(0)} to{transform:translateX(calc(var(--sz) + var(--gap)))} }
 @keyframes sl-up    { from{transform:translateY(0)} to{transform:translateY(calc(-1*(var(--sz) + var(--gap))))} }
 @keyframes sl-down  { from{transform:translateY(0)} to{transform:translateY(calc(var(--sz) + var(--gap)))} }
@@ -1197,6 +1257,89 @@
   background: rgba(255,255,255,0.03); border: 1px solid var(--border);
   border-radius: 11px; padding: 10px 12px; margin-bottom: 5px;
 }
+
+/* ── CAMPAIGN — NEW DISTRICT-FIRST UI ── */
+.sg-dist-selector {
+  display: grid; grid-template-columns: repeat(5,1fr); gap: 6px;
+  margin-bottom: 14px;
+}
+.sg-dist-pill {
+  border-radius: 12px; border: 1.5px solid; padding: 10px 4px;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+  position: relative;
+}
+.sg-dist-pill:active { transform: scale(0.95); }
+.sg-dist-pill.active { transform: scale(1.04); }
+.sg-dist-pill.locked { opacity: 0.28; cursor: default; }
+.sg-dist-pill-icon  { font-size: 20px; line-height: 1; margin-bottom: 4px; }
+.sg-dist-pill-num   { font-size: 7px; letter-spacing: 0.14em; font-weight: 700; }
+.sg-dist-pill-prog  { font-size: 8px; margin-top: 2px; }
+.sg-dist-pill-done  {
+  position: absolute; top: -4px; right: -4px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #00ff88; border: 2px solid #07070f;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px;
+}
+
+/* District detail header */
+.sg-dist-header {
+  border-radius: 16px; padding: 16px 14px 12px;
+  margin-bottom: 10px; position: relative; overflow: hidden;
+}
+.sg-dist-header::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+}
+.sg-dist-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.sg-dist-header-name { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 900; letter-spacing: 0.1em; }
+.sg-dist-header-sub  { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+.sg-dist-pbar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.sg-dist-pbar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+/* Compact level grid — 3 per row */
+.sg-level-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
+.sg-level-node {
+  border-radius: 12px; border: 1px solid; padding: 10px 6px;
+  text-align: center; cursor: pointer; transition: all 0.18s;
+  position: relative;
+}
+.sg-level-node:active { transform: scale(0.94); }
+.sg-level-node.locked { opacity: 0.22; cursor: default; }
+.sg-level-node-num  { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+.sg-level-node-meta { font-size: 8px; color: rgba(255,255,255,0.35); letter-spacing: 0.04em; }
+.sg-level-node-stars { font-size: 10px; color: #ffaa00; margin-top: 2px; }
+.sg-level-node-icon { font-size: 16px; margin-bottom: 2px; }
+
+/* Boss level — full width dramatic card */
+.sg-boss-card {
+  border-radius: 16px; border: 2px solid; padding: 18px 16px;
+  margin-bottom: 6px; position: relative; overflow: hidden;
+  cursor: pointer; transition: all 0.2s;
+}
+.sg-boss-card:active { transform: scale(0.98); }
+.sg-boss-card.locked { opacity: 0.25; cursor: default; }
+.sg-boss-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.015) 8px, rgba(255,255,255,0.015) 16px);
+}
+.sg-boss-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.sg-boss-card-icon { font-size: 36px; flex-shrink: 0; }
+.sg-boss-card-label { font-size: 8px; letter-spacing: 0.2em; font-weight: 700; margin-bottom: 3px; }
+.sg-boss-card-name  { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 900; letter-spacing: 0.08em; }
+.sg-boss-card-hint  { font-size: 10px; color: rgba(255,255,255,0.38); line-height: 1.55; margin-bottom: 12px; }
+.sg-boss-stats { display: flex; gap: 6px; margin-bottom: 12px; }
+.sg-boss-stat {
+  flex: 1; background: rgba(0,0,0,0.25); border-radius: 8px; padding: 7px 4px; text-align: center;
+}
+.sg-boss-stat-val { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; }
+.sg-boss-stat-lbl { font-size: 7px; letter-spacing: 0.12em; margin-top: 2px; opacity: 0.55; }
+.sg-boss-enter-btn {
+  width: 100%; border: none; border-radius: 11px; padding: 13px;
+  font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.1em; transition: all 0.15s;
+}
+.sg-boss-enter-btn:hover { opacity: 0.88; transform: scale(1.02); }
 
 /* ── CAMPAIGN ── */
 .sg-campaign-card {
@@ -1837,6 +1980,11 @@ window.sgMusic = {
     document.addEventListener('keydown',    handler, true);
   },
 
+  setVolume: function(v) {
+    window.sgMusic.volume = Math.max(0, Math.min(1, v));
+    if (window.sgMusic.el) window.sgMusic.el.volume = window.sgMusic.volume;
+  },
+
   _updateBtn: function() {
     var btn = document.getElementById('sg-music-btn');
     if (!btn) return;
@@ -2008,7 +2156,7 @@ const CAMPAIGN_LEVELS = [
   {id:6,  name:"BLACKOUT BLOCK 1-7",  dist:"DISTRICT 1",boss:false,moves:26,bids:["apt","factory","lab"],        hazards:2,  hint:"Look for shifts that match two different colors in one move."},
   {id:7,  name:"BLACKOUT BLOCK 1-8",  dist:"DISTRICT 1",boss:false,moves:25,bids:["apt","factory","lab"],        hazards:2,  hint:"Every shift should charge at least one building. No moves to waste."},
   {id:8,  name:"BLACKOUT BLOCK 1-9",  dist:"DISTRICT 1",boss:false,moves:24,bids:["apt","factory","lab"],        hazards:2,  hint:"A 2x2 square match fires a Battery — double charge to all buildings!"},
-  {id:9,  name:"BOSS: BLACKOUT BLOCK",dist:"DISTRICT 1",boss:true, moves:28,bids:["apt","factory","lab","power"],hazards:2,  hint:"BOSS — all four buildings need power. You have enough moves. Trust your instincts."},
+  {id:9,  name:"BOSS: BLACKOUT BLOCK",dist:"DISTRICT 1",boss:true, moves:10,bids:["apt","factory","lab","power"],hazards:8,  hint:"FINAL BOSS — all power systems failing. 10 moves. 8 corrupted sectors. Every shift must chain. No wasted moves."},
   {id:10, name:"INDUSTRIAL ROW 2-1",  dist:"DISTRICT 2",boss:false,moves:23,bids:["apt","factory","lab"],        hazards:3,  hint:"Three hazards. Clear at least one early before planning your main chain."},
   {id:11, name:"INDUSTRIAL ROW 2-2",  dist:"DISTRICT 2",boss:false,moves:22,bids:["apt","factory","lab","power"],hazards:3,  hint:"Four buildings now. Decide which color you need most before your first shift."},
   {id:12, name:"INDUSTRIAL ROW 2-3",  dist:"DISTRICT 2",boss:false,moves:21,bids:["apt","factory","lab","power"],hazards:3,  hint:"A plus-shape match triggers Pulse Blast — clears a full 3x3 area!"},
@@ -2018,7 +2166,7 @@ const CAMPAIGN_LEVELS = [
   {id:16, name:"INDUSTRIAL ROW 2-7",  dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","factory","lab","power"],hazards:5,  hint:"Five hazards spreading every 3 moves. Contain the rot before charging."},
   {id:17, name:"INDUSTRIAL ROW 2-8",  dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","lab","power"],          hazards:5,  hint:"Three buildings but tight on moves. Speed matters more than perfection."},
   {id:18, name:"INDUSTRIAL ROW 2-9",  dist:"DISTRICT 2",boss:false,moves:17,bids:["apt","factory","lab","power"],hazards:5,  hint:"Every single shift must trigger a match. Zero wasted moves from here."},
-  {id:19, name:"BOSS: INDUSTRIAL ROW",dist:"DISTRICT 2",boss:true, moves:22,bids:["apt","factory","lab","power"],hazards:5,  hint:"BOSS — five hazards, four buildings. One perfect chain changes everything."},
+  {id:19, name:"BOSS: INDUSTRIAL ROW",dist:"DISTRICT 2",boss:true, moves:8, bids:["apt","factory","lab","power"],hazards:13, hint:"BOSS — the factory core is collapsing. 8 moves. 13 corrupted sectors. You need back-to-back cascades to survive."},
   {id:20, name:"SKYLINE SECTOR 3-1",  dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"Six corrupted tiles. Clear the clusters before planning long chains."},
   {id:21, name:"SKYLINE SECTOR 3-2",  dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"No exploration moves. Plan your entire route before the first swipe."},
   {id:22, name:"SKYLINE SECTOR 3-3",  dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","power"],      hazards:6,  hint:"Three buildings helps. Save the freed moves for the toughest color."},
@@ -2028,7 +2176,7 @@ const CAMPAIGN_LEVELS = [
   {id:26, name:"SKYLINE SECTOR 3-7",  dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","factory","lab","power"],hazards:8,  hint:"Eight corrupted tiles. The board barely has room to breathe."},
   {id:27, name:"SKYLINE SECTOR 3-8",  dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","lab","power"],          hazards:8,  hint:"Fewer buildings means you can specialize your chains on two colors."},
   {id:28, name:"SKYLINE SECTOR 3-9",  dist:"DISTRICT 3",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Twelve moves, four buildings, heavy rot. Near-perfect play required."},
-  {id:29, name:"BOSS: SKYLINE SECTOR",dist:"DISTRICT 3",boss:true, moves:17,bids:["apt","factory","lab","power"],hazards:8,  hint:"BOSS — eight hazards, seventeen moves. Chain every shift or fail."},
+  {id:29, name:"BOSS: SKYLINE SECTOR",dist:"DISTRICT 3",boss:true, moves:6, bids:["apt","factory","lab","power"],hazards:15, hint:"BOSS — the skyline is crumbling. 6 moves. 15 sectors lost. You need a miracle chain. Use every ability you have."},
   {id:30, name:"UNDERGROUND GRID 4-1",dist:"DISTRICT 4",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Welcome to the Underground. Nothing comes easy from here."},
   {id:31, name:"UNDERGROUND GRID 4-2",dist:"DISTRICT 4",boss:false,moves:11,bids:["apt","factory","lab","power"],hazards:9,  hint:"Nine corrupted tiles. Clear the cluster — don't chase the stragglers."},
   {id:32, name:"UNDERGROUND GRID 4-3",dist:"DISTRICT 4",boss:false,moves:11,bids:["factory","lab","power"],      hazards:9,  hint:"Three buildings still. Nine rot tiles nearly fill an entire row."},
@@ -2038,7 +2186,7 @@ const CAMPAIGN_LEVELS = [
   {id:36, name:"UNDERGROUND GRID 4-7",dist:"DISTRICT 4",boss:false,moves:9, bids:["factory","lab","power"],      hazards:10, hint:"Ten rot tiles, nine moves. Maximum chain efficiency. Every shift counts."},
   {id:37, name:"UNDERGROUND GRID 4-8",dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Eight moves. Upgrades aren't optional anymore — they're essential."},
   {id:38, name:"UNDERGROUND GRID 4-9",dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","power"],      hazards:10, hint:"Three buildings but ten rot tiles. The clean tiles are your only path."},
-  {id:39, name:"BOSS: UNDERGROUND",   dist:"DISTRICT 4",boss:true, moves:14,bids:["apt","factory","lab","power"],hazards:10, hint:"BOSS — hardest the Underground has. Maximum performance. You know what to do."},
+  {id:39, name:"BOSS: UNDERGROUND",   dist:"DISTRICT 4",boss:true, moves:5, bids:["apt","factory","lab","power"],hazards:17, hint:"BOSS — the underground is gone. 5 moves. 17 corrupted tiles. The board is almost dead. Find the clean path — it exists."},
   {id:40, name:"CORE CITY 5-1",       dist:"DISTRICT 5",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Core City. Only the best make it here. Show everything you know."},
   {id:41, name:"CORE CITY 5-2",       dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Seven moves, eleven rot tiles. Every shift must be a multi-match."},
   {id:42, name:"CORE CITY 5-3",       dist:"DISTRICT 5",boss:false,moves:7, bids:["factory","lab","power"],      hazards:11, hint:"Eleven corrupted tiles on a 5x5. Work with what the board gives you."},
@@ -2048,8 +2196,72 @@ const CAMPAIGN_LEVELS = [
   {id:46, name:"CORE CITY 5-7",       dist:"DISTRICT 5",boss:false,moves:6, bids:["factory","lab","power"],      hazards:12, hint:"Twelve corrupted tiles. Half the board is dead. Find the other half."},
   {id:47, name:"CORE CITY 5-8",       dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"The most unforgiving board. Maxed upgrades and perfect play — both required."},
   {id:48, name:"CORE CITY 5-9",       dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"One level away from the final boss. No mistakes. No wasted moves."},
-  {id:49, name:"FINAL BOSS",          dist:"DISTRICT 5",boss:true, moves:12,bids:["apt","factory","lab","power"],hazards:12, hint:"FINAL BOSS — twelve corrupted tiles, twelve moves, full city power. Become a legend."},
+  {id:49, name:"FINAL BOSS: CORE AI", dist:"DISTRICT 5",boss:true, moves:5, bids:["apt","factory","lab","power"],hazards:19, hint:"FINAL BOSS — 19 sectors corrupted. 5 moves. 6 clean tiles remain. One perfect sequence saves the city. You are the last hope."},
 ];
+
+/* ─── ABILITIES SYSTEM ─────────────────────────────────────────── */
+const ABILITY_DEFS = [
+  {
+    id: "surge",      icon: "⚡", name: "POWER SURGE",
+    desc: "Next match charges ALL buildings regardless of color",
+    color: "#ffaa00", cost: 60,
+    effect: "surgeActive",
+    tip: "Guaranteed charge on any match — great for tight spots",
+  },
+  {
+    id: "cleanse",    icon: "🧹", name: "CLEANSE",
+    desc: "Instantly removes all corruption tiles from the board",
+    color: "#00ff88", cost: 80,
+    effect: "instant",
+    tip: "Wipes the entire board clean — use when overwhelmed",
+  },
+  {
+    id: "shift_plus", icon: "🔁", name: "+3 MOVES",
+    desc: "Adds 3 extra moves to your current total",
+    color: "#00e5ff", cost: 50,
+    effect: "instant",
+    tip: "Perfect mid-level when you're 1-2 matches short",
+  },
+  {
+    id: "freeze",     icon: "🧊", name: "FREEZE",
+    desc: "Corruption cannot spread for the next 5 moves",
+    color: "#a5f3fc", cost: 45,
+    effect: "freezeActive",
+    tip: "Buys time to set up big chain matches",
+  },
+  {
+    id: "wildfire",   icon: "🔥", name: "WILDFIRE",
+    desc: "Next shift matches ALL tiles in that row or column regardless of color",
+    color: "#ff7700", cost: 100,
+    effect: "wildfireActive",
+    tip: "One guaranteed mega-match — saves hopeless boards",
+  },
+  {
+    id: "detector",   icon: "🔍", name: "HINT",
+    desc: "Highlights the best available shift on the board",
+    color: "#c084fc", cost: 30,
+    effect: "instant",
+    tip: "Shows the move with the highest match potential",
+  },
+];
+
+const ABILITY_PRICES = { surge:60, cleanse:80, shift_plus:50, freeze:45, wildfire:100, detector:30 };
+
+const ABILITIES_KEY = "sg_abilities_v1";
+function loadAbilities(){
+  try{
+    var s=localStorage.getItem(ABILITIES_KEY);
+    var base={surge:0,cleanse:0,shift_plus:0,freeze:0,wildfire:0,detector:0};
+    if(!s){
+      /* New player starter pack — 1 free of each basic ability */
+      var starter=Object.assign({},base,{detector:2,shift_plus:1,surge:1});
+      localStorage.setItem(ABILITIES_KEY,JSON.stringify(starter));
+      return starter;
+    }
+    return Object.assign({},base,JSON.parse(s));
+  }catch{ return {surge:0,cleanse:0,shift_plus:0,freeze:0,wildfire:0,detector:0}; }
+}
+function saveAbilities(a){ try{ localStorage.setItem(ABILITIES_KEY,JSON.stringify(a)); }catch{} }
 
 const IDLE_RATES = [0, 5, 12, 25];
 const DEF_META = {
@@ -2065,7 +2277,20 @@ const DEF_META = {
 
 /* ─── META ──────────────────────────────────────────────────────── */
 function loadMeta(){
-  try{ const s=localStorage.getItem(STORE_KEY); return s?Object.assign({},DEF_META,JSON.parse(s)):Object.assign({},DEF_META); }
+  try{
+    const s=localStorage.getItem(STORE_KEY);
+    if(!s) return Object.assign({},DEF_META);
+    const saved=JSON.parse(s);
+    /* Deep merge nested objects so new keys (chests, trophyClaimed, etc) are always present */
+    return Object.assign({},DEF_META,saved,{
+      upgrades:  Object.assign({},DEF_META.upgrades,  saved.upgrades||{}),
+      chests:    Object.assign({},DEF_META.chests,    saved.chests||{}),
+      trophyClaimed: saved.trophyClaimed||[],
+      levelsCleared: saved.levelsCleared||[],
+      stars:     saved.stars||{},
+      customLevels:  saved.customLevels||[],
+    });
+  }
   catch{ return Object.assign({},DEF_META); }
 }
 function saveMeta(m){ try{ localStorage.setItem(STORE_KEY,JSON.stringify(m)); }catch{} }
@@ -2108,7 +2333,11 @@ function loadStats(){ try{ var s=localStorage.getItem(STATS_KEY); return s?Objec
 function saveStats(s){ try{ localStorage.setItem(STATS_KEY,JSON.stringify(s)); }catch{} }
 function bumpStats(patch){
   var s=loadStats();
-  Object.keys(patch).forEach(function(k){ s[k]=(s[k]||0)+patch[k]; });
+  Object.keys(patch).forEach(function(k){
+    /* longestCascade is a max stat, not a sum */
+    if(k==="longestCascade"){ s[k]=Math.max(s[k]||0, patch[k]); }
+    else { s[k]=(s[k]||0)+patch[k]; }
+  });
   saveStats(s);
 }
 
@@ -2257,7 +2486,7 @@ function renderStars(n){
 }
 
 /* ─── TUTORIAL ──────────────────────────────────────────────────── */
-var TUTO_KEY="sg_tuto_v3";
+const TUTO_KEY="sg_tuto_v3";
 function isTutoDone(){ try{ return localStorage.getItem(TUTO_KEY)==="1"; }catch{ return false; } }
 function markTutoDone(){ try{ localStorage.setItem(TUTO_KEY,"1"); }catch{} }
 
@@ -2397,6 +2626,22 @@ function loadStreak() {
   } catch { return { count: 0, lastDay: "", claimed: [] }; }
 }
 function saveStreak(d) { try { localStorage.setItem(STREAK_KEY, JSON.stringify(d)); } catch {} }
+/* ─── STREAK PROTECTION ─────────────────────────────────────────── */
+const PROTECT_COST = 30;
+
+function isStreakProtected(streak) {
+  return streak.protectedUntil && Date.now() < streak.protectedUntil;
+}
+
+function applyStreakProtection(streak) {
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(4, 0, 0, 0);
+  var updated = Object.assign({}, streak, { protectedUntil: tomorrow.getTime() });
+  saveStreak(updated);
+  return updated;
+}
+
 function checkAndUpdateStreak(st) {
   var today = todayStr();
   if (st.lastDay === today) return st;
@@ -2422,9 +2667,6 @@ function getStreakReward(day) {
   return { icon: "⬡",  label: "Coins",       coins: 10 + day * 3, special: null };
 }
 
-
-/* ─── STREAK PROTECTION ─────────────────────────────────────────── */
-/* defined later after saveWeekly — see below */
 
 const CHALLENGES_KEY = "sg_challenges_v1";
 const CHALLENGE_DEFS = [
@@ -2567,21 +2809,7 @@ function getDailyTierReward(tier) {
   return { coins: 20, parts: 1 };
 }
 
-/* ─── STREAK PROTECTION ─────────────────────────────────────────── */
-const PROTECT_COST = 30;
 
-function isStreakProtected(streak) {
-  return streak.protectedUntil && Date.now() < streak.protectedUntil;
-}
-
-function applyStreakProtection(streak) {
-  var tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(4, 0, 0, 0); /* expires 4am next day */
-  var updated = Object.assign({}, streak, { protectedUntil: tomorrow.getTime() });
-  saveStreak(updated);
-  return updated;
-}
 const SESSION_GOALS_KEY = "sg_session_goals_v1";
 
 const SESSION_GOAL_POOL = [
@@ -2922,10 +3150,16 @@ function GameBoard(props) {
   const [toasts,setToasts]=useState([]);
   const [slideAnim,setSlideAnim]=useState(null);
   const [moveCount,setMoveCount]=useState(0);
-  const [showAd,setShowAd]=useState(false);
   const lastChanceRef=useRef(false);
   const [nearWinData,setNearWinData]=useState(null);
   const [chargedBldgs,setChargedBldgs]=useState(new Set()); /* buildings that just received charge */
+  const [abilities,setAbilities]=useState(loadAbilities);
+  const [surgeActive,setSurgeActive]=useState(false);      /* next match charges all */
+  const [freezeActive,setFreezeActive]=useState(0);        /* moves remaining frozen */
+  const [wildfireActive,setWildfireActive]=useState(false); /* next shift = full row/col match */
+  const [hintTile,setHintTile]=useState(null);             /* {row,col} highlight for detector */
+  const [abilityFlash,setAbilityFlash]=useState(null);     /* color for flash overlay */
+  const [usedAbilities,setUsedAbilities]=useState(new Set()); /* track single-use per level */
   const sessionStatsRef=useRef({batteries:0,pulses:0,maxCascade:0,corruptCleared:0});
   const moveHistoryRef=useRef([]); /* Grid Memory — record every shift */
   const [showGhostReplay,setShowGhostReplay]=useState(false);
@@ -2962,9 +3196,29 @@ function GameBoard(props) {
     later(function(){
       setSlideAnim(null);
 
+      /* ── WILDFIRE: match entire shifted row/col ── */
+      var wasWildfire=wildfireActive;
+      if(wasWildfire) setWildfireActive(false);
+
       let g=doShift(grid,type,idx,dir);
-      const frames=[],totCleared={};
+      /* Wildfire: force-clear all non-corrupted tiles in the shifted row/col */
+      var wildfireCleared={};
+      if(wasWildfire){
+        var wildcells=[];
+        if(type==="row"){ for(var wc=0;wc<COLS;wc++) if(!g[idx][wc].corrupted) wildcells.push(idx+","+wc); }
+        else { for(var wr=0;wr<ROWS;wr++) if(!g[wr][idx].corrupted) wildcells.push(wr+","+idx); }
+        if(wildcells.length>=3){
+          var wm=new Set(wildcells);
+          var wres=applyGravity(g,wm);
+          /* Credit cleared colors directly */
+          Object.keys(wres.cleared).forEach(function(col){ wildfireCleared[col]=(wildfireCleared[col]||0)+wres.cleared[col]; });
+          g=wres.g;
+          addToast("🔥 WILDFIRE — FULL LINE CLEARED!","#ff7700");
+        }
+      }
+      let frames=[],totCleared=Object.assign({},wildfireCleared);
       let pts=0,cascades=0,chargeBoost=1;
+      if(wasWildfire&&Object.keys(wildfireCleared).length>0) pts+=25*comboAmp; /* base wildfire score */
       const toastQueue=[];
 
       while(true){
@@ -2978,7 +3232,10 @@ function GameBoard(props) {
         });
         var nearCorrupt=clearNearCorruption(g,m);
         nearCorrupt.forEach(function(k){ m.add(k); });
-        sessionStatsRef.current.corruptCleared+=nearCorrupt.size;
+        /* Count corrupted tiles IN the match set too (wildfire, pulse, etc) */
+        var inMatchCorrupt=0;
+        m.forEach(function(k){ var p=k.split(","); var t=g[+p[0]][+p[1]]; if(t&&t.corrupted) inMatchCorrupt++; });
+        sessionStatsRef.current.corruptCleared+=nearCorrupt.size+inMatchCorrupt;
         /* Remove locked nodes from match set (they require adjacent clearing) */
         var lockedCleared=new Set();
         m.forEach(function(k){
@@ -3017,13 +3274,27 @@ function GameBoard(props) {
 
       const newMC=moveCount+1;
       let finalG=g;
-      if((levelDef.hazards||0)>0&&newMC%spreadEvery===0) finalG=spreadCorruption(g,hazardSlow);
+      /* ── FREEZE: skip corruption spread when active ── */
+      if(freezeActive>0){
+        setFreezeActive(function(f){ return Math.max(0,f-1); });
+      } else if((levelDef.hazards||0)>0&&newMC%spreadEvery===0){
+        finalG=spreadCorruption(g,hazardSlow);
+      }
       /* Move patrollers on district 4+ levels */
       if((levelDef.id||0)>=30&&newMC%2===0) finalG=movePatrollers(finalG);
       const free=Math.random()<freeChance;
       const newMoves=free?moves:moves-1;
       if(free) addToast("FREE MOVE!","#00ff88");
 
+      /* ── SURGE: if any match happened, credit all building colors ── */
+      var totalCleared=Object.values(totCleared).reduce(function(a,b){return a+(b||0);},0);
+      if(surgeActive && (totalCleared>0||wasWildfire)){
+        setSurgeActive(false);
+        BLDG_DEFS.forEach(function(bd){
+          totCleared[bd.color]=(totCleared[bd.color]||0)+3; /* +3 guaranteed charge to every color */
+        });
+        addToast("⚡ SURGE — ALL BUILDINGS CHARGED!","#ffaa00");
+      }
       const newBldgs=bldgs.map(function(b){
         const add=(totCleared[b.color]||0)*chargeBoost;
         const ch=Math.min(b.max,b.ch+add);
@@ -3153,10 +3424,16 @@ function GameBoard(props) {
   function retry(){
     lastChanceRef.current=false;
     sessionStatsRef.current={batteries:0,pulses:0,maxCascade:0,corruptCleared:0};
+    moveHistoryRef.current=[];
     setNearWinData(null);
     setGrid(buildInitGrid()); setMoves(levelDef.moves);
     setBldgs(function(b){ return b.map(function(x){ return Object.assign({},x,{ch:0,on:false}); }); });
     setScore(0); setHi(new Set()); setPhase("idle"); setMoveCount(0); setSlideAnim(null);
+    /* Reset ability active states but not inventory */
+    setSurgeActive(false); setFreezeActive(0); setWildfireActive(false);
+    setHintTile(null); setUsedAbilities(new Set());
+    /* Reload latest ability counts from storage */
+    setAbilities(loadAbilities());
   }
 
   /* ── GRID MEMORY ── */
@@ -3178,10 +3455,88 @@ function GameBoard(props) {
     setPhase("idle");
   }
 
+  /* ── USE ABILITY ── */
+  function useAbility(id){
+    if(phase!=="idle") return;
+    var count=abilities[id]||0;
+    if(count<=0) return;
+    var newAbils=Object.assign({},abilities,{[id]:count-1});
+    setAbilities(newAbils); saveAbilities(newAbils);
+    setUsedAbilities(function(s){ var n=new Set(s); n.add(id); return n; });
+    var flashColor="#ffaa00";
+
+    if(id==="surge"){
+      setSurgeActive(true); flashColor="#ffaa00";
+      addToast("⚡ POWER SURGE — next match charges all!","#ffaa00");
+      Audio.win();
+    }
+    else if(id==="cleanse"){
+      flashColor="#00ff88";
+      setGrid(function(g){
+        var newG=g.map(function(row){ return row.map(function(t){
+          return t&&t.corrupted ? makeTile(rndColor()) : t;
+        }); });
+        return newG;
+      });
+      addToast("🧹 CLEANSED — corruption removed!","#00ff88");
+      Audio.win();
+    }
+    else if(id==="shift_plus"){
+      flashColor="#00e5ff";
+      setMoves(function(m){ return m+3; });
+      addToast("🔁 +3 MOVES ADDED","#00e5ff");
+      Audio.win();
+    }
+    else if(id==="freeze"){
+      flashColor="#a5f3fc";
+      setFreezeActive(5);
+      addToast("🧊 FROZEN — corruption halted for 5 moves","#a5f3fc");
+      Audio.win();
+    }
+    else if(id==="wildfire"){
+      setWildfireActive(true); flashColor="#ff7700";
+      addToast("🔥 WILDFIRE — next shift clears the whole line!","#ff7700");
+      Audio.win();
+    }
+    else if(id==="detector"){
+      flashColor="#c084fc";
+      /* Find best shift: scan all rows/cols, pick the one with most potential matches */
+      var bestScore=-1, bestHint=null;
+      for(var ri=0;ri<ROWS;ri++){
+        ["left","right"].forEach(function(dir){
+          var tg=doShift(grid,"row",ri,dir);
+          var m=findMatches(tg);
+          if(m.size>bestScore){ bestScore=m.size; bestHint={type:"row",idx:ri,dir:dir}; }
+        });
+      }
+      for(var ci=0;ci<COLS;ci++){
+        ["up","down"].forEach(function(dir){
+          var tg=doShift(grid,"col",ci,dir);
+          var m=findMatches(tg);
+          if(m.size>bestScore){ bestScore=m.size; bestHint={type:"col",idx:ci,dir:dir}; }
+        });
+      }
+      setHintTile(bestHint);
+      setTimeout(function(){ setHintTile(null); },3000);
+      addToast("🔍 BEST MOVE HIGHLIGHTED","#c084fc");
+      Audio.win();
+    }
+
+    Haptics.medium();
+    setAbilityFlash(flashColor);
+    setTimeout(function(){ setAbilityFlash(null); },350);
+  }
+
   function ShiftBtn(p){
+    var isHinted = hintTile && hintTile.type===p.type && hintTile.idx===p.idx && hintTile.dir===p.dir;
     return (
-      <button className={"sg-shift-btn"+(p.col?" col-btn":"")} style={{width:(p.col?SZ:30)+"px",height:(p.col?30:SZ)+"px"}}
-        onClick={function(){ handleShift(p.type,p.idx,p.dir); }} disabled={phase!=="idle"}>
+      <button className={"sg-shift-btn"+(p.col?" col-btn":"")+(isHinted?" flash":"")}
+        style={{width:(p.col?SZ:30)+"px",height:(p.col?30:SZ)+"px",
+          boxShadow:isHinted?"0 0 12px #c084fc":"none",
+          borderColor:isHinted?"#c084fc":"",
+          animation:isHinted?"ability-ready 0.8s ease infinite alternate":""}}
+        onClick={function(){ if(isHinted)setHintTile(null); handleShift(p.type,p.idx,p.dir); }}
+        disabled={phase!=="idle"}>
         {p.label}
       </button>
     );
@@ -3238,6 +3593,40 @@ function GameBoard(props) {
         )}
       </div>
 
+      {/* ── ABILITIES BAR ── */}
+      {(function(){
+        var ownedAbils=ABILITY_DEFS.filter(function(a){ return (abilities[a.id]||0)>0; });
+        if(ownedAbils.length===0) return null;
+        return (
+          <div className="sg-abilities-bar">
+            <div style={{fontSize:8,color:"rgba(255,255,255,0.25)",letterSpacing:"0.1em",flexShrink:0}}>ABILITIES</div>
+            {ownedAbils.map(function(ab){
+              var isOn = (ab.id==="surge"&&surgeActive)||(ab.id==="freeze"&&freezeActive>0)||(ab.id==="wildfire"&&wildfireActive);
+              var cnt  = abilities[ab.id]||0;
+              return (
+                <button key={ab.id}
+                  className={"sg-ability-btn"+(isOn?" active-ability":"")}
+                  style={{borderColor: isOn?ab.color:ab.color+"55", color:ab.color,
+                    background:isOn?ab.color+"1a":"rgba(255,255,255,0.04)"}}
+                  onClick={function(){ useAbility(ab.id); }}
+                  disabled={phase!=="idle"||cnt<=0}
+                  title={ab.name+": "+ab.desc}>
+                  <div className="sg-ability-count">{cnt}</div>
+                  <div className="sg-ability-icon">{ab.icon}</div>
+                  <div className="sg-ability-name" style={{color:ab.color}}>{ab.name.split(" ")[0]}</div>
+                </button>
+              );
+            })}
+            {/* Active state badges */}
+            {surgeActive&&<div style={{fontSize:9,color:"#ffaa00",letterSpacing:"0.06em",fontWeight:700,flexShrink:0}}>⚡ SURGE READY</div>}
+            {wildfireActive&&<div style={{fontSize:9,color:"#ff7700",letterSpacing:"0.06em",fontWeight:700,flexShrink:0}}>🔥 WILDFIRE READY</div>}
+            {freezeActive>0&&<div style={{fontSize:9,color:"#a5f3fc",letterSpacing:"0.06em",fontWeight:700,flexShrink:0}}>🧊 {freezeActive}mv</div>}
+          </div>
+        );
+      })()}
+
+      {abilityFlash&&<div className="sg-ability-use-flash" style={{background:abilityFlash+"22"}}/>}
+
       {isLastMove&&<div className="sg-last-move-banner">⚡ LAST MOVE — MAKE IT COUNT</div>}
       {/* Node type introduction banner for first time seeing a node type */}
       {(levelDef.id||0)===10&&<div style={{margin:"0 14px 4px",background:"rgba(0,229,255,0.08)",border:"1px solid rgba(0,229,255,0.25)",borderRadius:8,padding:"5px 12px",fontSize:10,color:"#00e5ff",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>🔒 NEW: LOCKED NODES appear — match adjacent tiles to free them</div>}
@@ -3246,8 +3635,8 @@ function GameBoard(props) {
       {(levelDef.id||0)===40&&<div style={{margin:"0 14px 4px",background:"rgba(168,85,247,0.08)",border:"1px solid rgba(168,85,247,0.3)",borderRadius:8,padding:"5px 12px",fontSize:10,color:"#a855f7",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>🌑 NEW: VOID NODES — clear them fast or they corrupt neighbors</div>}
       {(levelDef.id||0)>=30&&<div style={{margin:"0 14px 2px",background:"rgba(255,45,149,0.06)",border:"1px solid rgba(255,45,149,0.2)",borderRadius:8,padding:"4px 12px",fontSize:9,color:"#ff2d95",textAlign:"center",letterSpacing:"0.08em",flexShrink:0}}>👾 PATROL active — corrupted tiles move every 2 shifts</div>}
 
-      {/* ── SPREAD TENSION BAR ── */}
-      {(levelDef.hazards||0)>0&&(function(){
+      {/* ── SPREAD TENSION BAR — only when corruption tiles exist ── */}
+      {(levelDef.hazards||0)>0&&corr>0&&moveCount>0&&(function(){
         var movesToSpread = spreadEvery - (moveCount % spreadEvery);
         var pct = Math.round(((spreadEvery - movesToSpread) / spreadEvery) * 100);
         var imminent = movesToSpread === 1;
@@ -3773,6 +4162,10 @@ function ShiftWarsTab(props){
     var oppRng = mkSeededRng(opp.seed + todaySeedVal);
     var oppScore = Math.round(800 + oppRng()*1200);
     var won = finalScore > oppScore;
+    /* Persist wins/losses */
+    var swData=loadShiftWars();
+    if(won) swData.wins=(swData.wins||0)+1; else swData.losses=(swData.losses||0)+1;
+    saveShiftWars(swData);
     setMeta(function(m){
       var n=Object.assign({},m,{
         shiftWarsBest: Math.max(m.shiftWarsBest||0, finalScore),
@@ -4244,6 +4637,7 @@ function StatsPage(props){
   var cleared=(meta.levelsCleared||[]).length;
   var totalStars=Object.values(meta.stars||{}).reduce(function(a,b){return a+b;},0);
   var winRate=s.totalWins+s.totalLosses>0?Math.round((s.totalWins/(s.totalWins+s.totalLosses))*100):0;
+  var winRateStr=(winRate||0)+'%';
   var cards=[
     {val:cleared,           lbl:"LEVELS CLEARED",  color:"#00e5ff"},
     {val:totalStars,         lbl:"TOTAL STARS",     color:"#ffaa00"},
@@ -4345,6 +4739,66 @@ function EndGame(props){
   );
 }
 
+/* ─── ABILITY SHOP ─────────────────────────────────────────────── */
+function AbilityShop(props){
+  var meta=props.meta, setMeta=props.setMeta;
+  var _abils=React.useState(loadAbilities); var abils=_abils[0]; var setAbils=_abils[1];
+  var _flash=React.useState(null); var flash=_flash[0]; var setFlash=_flash[1];
+
+  function buy(ab){
+    if(meta.coins<ab.cost) return;
+    var newAbils=Object.assign({},abils,{[ab.id]:(abils[ab.id]||0)+1});
+    saveAbilities(newAbils); setAbils(newAbils);
+    setMeta(function(m){ var n=Object.assign({},m,{coins:m.coins-ab.cost}); saveMeta(n); return n; });
+    setFlash(ab.id); setTimeout(function(){ setFlash(null); },600);
+    Audio.win(); Haptics.medium();
+    /* Flash purchase button as confirmation */
+  }
+
+  return (
+    <div>
+      <div style={{fontSize:10,color:"rgba(255,255,255,0.28)",letterSpacing:"0.06em",marginBottom:10,lineHeight:1.6}}>
+        Buy abilities to use during levels. Tap the ability bar in-game to activate. Each purchase gives 1 use.
+      </div>
+      <div className="sg-ability-shop-grid">
+        {ABILITY_DEFS.map(function(ab){
+          var owned=abils[ab.id]||0;
+          var canAfford=meta.coins>=ab.cost;
+          var isFlash=flash===ab.id;
+          return (
+            <div key={ab.id} className="sg-ability-shop-card"
+              style={{borderColor:isFlash?ab.color:ab.color+"44",
+                background:isFlash?ab.color+"14":"rgba(255,255,255,0.03)",
+                transition:"all 0.3s"}}>
+              <span className="sg-abilshop-icon">{ab.icon}</span>
+              <div className="sg-abilshop-name" style={{color:ab.color}}>{ab.name}</div>
+              <div className="sg-abilshop-desc">{ab.desc}</div>
+              <div className="sg-abilshop-footer">
+                <div className="sg-abilshop-owned" style={{color:ab.color}}>
+                  {"×"+owned}
+                  <span style={{fontSize:8,color:"rgba(255,255,255,0.25)",marginLeft:4}}>owned</span>
+                </div>
+                <button data-abilbuy={ab.id}
+                  className="sg-abilshop-buy"
+                  disabled={!canAfford}
+                  onClick={function(){ buy(ab); }}
+                  style={{
+                    background:canAfford?ab.color:"rgba(255,255,255,0.08)",
+                    color:canAfford?"#06060f":"rgba(255,255,255,0.25)",
+                    boxShadow:canAfford?"0 0 10px "+ab.color+"44":"none",
+                  }}>
+                  {ab.cost}⬡
+                </button>
+              </div>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.2)",marginTop:5,letterSpacing:"0.04em",fontStyle:"italic"}}>{ab.tip}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ─── SKIN PICKER ──────────────────────────────────────────────── */
 function SkinPicker(props) {
   var meta = props.meta;
@@ -4410,6 +4864,9 @@ function CityTab(props) {
       <div className="sg-label" style={{marginTop:14}}>CHESTS</div>
       <ChestInventory meta={meta} setMeta={setMeta} lives={lives} setLives={setLives}/>
 
+      <div className="sg-label" style={{marginTop:14}}>ABILITIES SHOP</div>
+      <AbilityShop meta={meta} setMeta={setMeta}/>
+
       <div className="sg-label" style={{marginTop:14}}>GRID SKINS</div>
       <SkinPicker meta={meta}/>
 
@@ -4428,6 +4885,7 @@ function CityTab(props) {
         <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#00e5ff"}}>{meta.parts}</div><div className="sg-meta-chip-lbl">PARTS</div></div>
         <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#a855f7"}}>{xpData?xpData.level:1}</div><div className="sg-meta-chip-lbl">PLAYER LVL</div></div>
         <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#00ff88"}}>{(meta.levelsCleared||[]).length+"/50"}</div><div className="sg-meta-chip-lbl">LEVELS</div></div>
+        <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#ff7700"}}>{(function(){ var a=loadAbilities(); return Object.values(a).reduce(function(s,v){return s+v;},0); })()}</div><div className="sg-meta-chip-lbl">ABILITIES</div></div>
       </div>
 
       <div className="sg-label" style={{marginTop:14}}>UPGRADES</div>
@@ -4469,7 +4927,7 @@ function DailyTab(props) {
   var tier = played ? getDailyTier(rank, lb.length) : null;
   var isPerfect = played && dailyStars === 3;
 
-  function handleComplete(r){
+  function handleDailyComplete(r){
     var movesLeft = r.movesLeft || 0;
     var stars = calcStars(dailyDef.moves - movesLeft, dailyDef.moves);
     var finalScore = calcDailyScore(r.score || 0, movesLeft, dailyDef.moves, stars);
@@ -4521,7 +4979,7 @@ function DailyTab(props) {
             <div style={{fontSize:10,color:"rgba(255,255,255,0.3)"}}>New board tomorrow</div>
           </div>
         ) : (
-          <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)",marginTop:4}} onClick={function(){ onPlay(dailyDef,handleComplete); }}>PLAY TODAY</button>
+          <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)",marginTop:4}} onClick={function(){ onPlay(dailyDef,handleDailyComplete); }}>PLAY TODAY</button>
         )}
       </div>
 
@@ -4730,8 +5188,9 @@ function SessionGoalsStrip(props) {
   var setSessionGoals = props.setSessionGoals;
   var setMeta = props.setMeta;
 
-  if (!sessionGoals) return null;
+  if (!sessionGoals||!sessionGoals.pickedIds) return null;
   var defs = getSessionGoalDefs(sessionGoals.pickedIds);
+  if(!defs||!defs.length) return null;
 
   function claimGoal(i) {
     var def = defs[i];
@@ -4786,80 +5245,210 @@ function SessionGoalsStrip(props) {
   );
 }
 
-/* ─── CAMPAIGN TAB ──────────────────────────────────────────────── */
+/* ─── CAMPAIGN TAB — DISTRICT-FIRST UI ─────────────────────────── */
+const DIST_ICONS = ["🏙️","🏭","🌆","🌑","🏆"];
+const DIST_BG = [
+  "rgba(0,229,255,0.08)","rgba(255,170,0,0.08)","rgba(255,45,149,0.08)",
+  "rgba(168,85,247,0.08)","rgba(0,255,136,0.08)"
+];
+
 function CampaignTab(props) {
   var meta=props.meta, onPlay=props.onPlay;
   var sessionGoals=props.sessionGoals, setSessionGoals=props.setSessionGoals, setMeta=props.setMeta;
   var cleared=meta.levelsCleared||[];
   var starsMap=meta.stars||{};
+
+  /* Default to the first unlocked-but-incomplete district */
+  var defaultDist=0;
+  for(var di=0;di<DISTRICTS.length;di++){
+    var dc=DISTRICTS[di].ids.filter(function(id){ return cleared.includes(id); }).length;
+    if(dc<10){ defaultDist=di; break; }
+  }
+  var _sel=React.useState(defaultDist); var selDist=_sel[0]; var setSelDist=_sel[1];
+
+  var dist=DISTRICTS[selDist];
+  var distIdx=selDist;
+  var normalIds=dist.ids.slice(0,-1); /* first 9 = normal */
+  var bossId=dist.ids[9];
+  var bossLvl=CAMPAIGN_LEVELS[bossId];
+  var distCleared=dist.ids.filter(function(id){ return cleared.includes(id); }).length;
+  var distDone=distCleared===10;
+  var distUnlocked=distIdx===0||cleared.includes(DISTRICTS[distIdx-1].ids[9]);
+
   return (
     <div style={{paddingBottom:20}}>
       <SessionGoalsStrip sessionGoals={sessionGoals} setSessionGoals={setSessionGoals} setMeta={setMeta}/>
-      <div className="sg-label" style={{marginTop:4}}>{cleared.length+"/50 LEVELS CLEARED"}</div>
-      {DISTRICTS.map(function(dist){
-        var distCleared=dist.ids.filter(function(id){ return cleared.includes(id); }).length;
-        var distDone=distCleared===10;
-        var distLocked=dist.ids[0]>0&&!cleared.includes(dist.ids[0]-1)&&distCleared===0;
-        return (
-          <div key={dist.num} style={{marginBottom:18,opacity:distLocked?0.35:1}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <div style={{width:3,height:18,borderRadius:2,background:distDone?dist.theme:distLocked?"rgba(255,255,255,0.1)":dist.theme+"55"}}/>
-                <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:11,letterSpacing:"0.13em",color:distDone?dist.theme:"rgba(255,255,255,0.42)"}}>{dist.num}</span>
-                <span style={{fontSize:11,color:"rgba(255,255,255,0.22)"}}>{dist.label}</span>
+
+      {/* ── OVERALL PROGRESS ── */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,marginTop:4}}>
+        <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>{cleared.length+"/50 CLEARED"}</div>
+        <div style={{display:"flex",gap:3}}>
+          {DISTRICTS.map(function(d,i){
+            var dc=d.ids.filter(function(id){ return cleared.includes(id); }).length;
+            return <div key={i} style={{width:28,height:4,borderRadius:2,background:dc===10?d.theme:dc>0?d.theme+"55":"rgba(255,255,255,0.08)"}}/>;
+          })}
+        </div>
+      </div>
+
+      {/* ── DISTRICT SELECTOR PILLS ── */}
+      <div className="sg-dist-selector">
+        {DISTRICTS.map(function(d,i){
+          var dc=d.ids.filter(function(id){ return cleared.includes(id); }).length;
+          var done=dc===10;
+          var unlocked=i===0||cleared.includes(DISTRICTS[i-1].ids[9]);
+          var isActive=selDist===i;
+          return (
+            <div key={i}
+              className={"sg-dist-pill"+(isActive?" active":"")+(unlocked?"":" locked")}
+              style={{
+                borderColor:isActive?d.theme:(unlocked?d.theme+"44":"rgba(255,255,255,0.08)"),
+                background:isActive?d.theme+"18":DIST_BG[i],
+                color:isActive?d.theme:(unlocked?"rgba(255,255,255,0.6)":"rgba(255,255,255,0.2)"),
+              }}
+              onClick={function(){ if(unlocked){ setSelDist(i); Audio.tap(); } }}>
+              {done&&<div className="sg-dist-pill-done">✓</div>}
+              <div className="sg-dist-pill-icon">{DIST_ICONS[i]}</div>
+              <div className="sg-dist-pill-num" style={{color:isActive?d.theme:"rgba(255,255,255,0.4)"}}>{"D"+(i+1)}</div>
+              <div className="sg-dist-pill-prog" style={{color:isActive?d.theme+"cc":"rgba(255,255,255,0.25)"}}>{dc+"/10"}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── DISTRICT DETAIL ── */}
+      {!distUnlocked ? (
+        <div style={{textAlign:"center",padding:"32px 20px",background:"rgba(255,255,255,0.02)",borderRadius:16,border:"1px solid rgba(255,255,255,0.06)"}}>
+          <div style={{fontSize:32,marginBottom:8}}>🔒</div>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:12,fontWeight:700,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginBottom:6}}>{dist.num} LOCKED</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.2)"}}>Clear the previous district boss to unlock</div>
+        </div>
+      ) : (
+        <>
+          {/* District header card */}
+          <div className="sg-dist-header" style={{background:"linear-gradient(135deg,"+dist.theme+"12,"+dist.theme+"06)",border:"1px solid "+dist.theme+"33"}}>
+            <div className="sg-dist-header-top">
+              <div>
+                <div className="sg-dist-header-name" style={{color:dist.theme}}>{dist.num}</div>
+                <div className="sg-dist-header-sub">{dist.label}</div>
               </div>
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:distDone?dist.theme:"rgba(255,255,255,0.25)"}}>{distCleared+"/10"+(distDone?" ✓":"")}</span>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:700,color:dist.theme}}>{distCleared+"/10"}</div>
+                <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",marginTop:2}}>{distDone?"COMPLETE":"IN PROGRESS"}</div>
+              </div>
             </div>
-            <div className="dist-bar">
-              <div className="dist-bar-fill" style={{width:(distCleared/10*100)+"%",background:dist.theme,boxShadow:"0 0 6px "+dist.theme}}/>
+            <div className="sg-dist-pbar">
+              <div className="sg-dist-pbar-fill" style={{width:(distCleared/10*100)+"%",background:"linear-gradient(90deg,"+dist.theme+"88,"+dist.theme+")",boxShadow:"0 0 6px "+dist.theme}}/>
             </div>
-            {dist.ids.map(function(id){
+          </div>
+
+          {/* Normal levels — compact 3-column grid */}
+          <div className="sg-level-grid">
+            {normalIds.map(function(id){
               var lvl=CAMPAIGN_LEVELS[id];
               var done=cleared.includes(id);
               var unlocked=id===0||cleared.includes(id-1)||done;
               var locked=!unlocked;
-              var lvlStars=starsMap[id]||0;
-              var proof = (unlocked||done) ? getLevelSocialProof(id, meta) : null;
+              var stars=starsMap[id]||0;
+              var localNum=(id%10)+1; /* 1–9 within district */
               return (
-                <div key={id} className={"sg-campaign-card"+(unlocked?" playable":"")}
-                  style={{borderColor:lvl.boss?(done?"rgba(255,170,0,0.55)":"rgba(255,170,0,0.22)"):(done?dist.theme+"44":locked?"rgba(255,255,255,0.04)":dist.theme+"20"),background:lvl.boss?(done?"rgba(255,170,0,0.08)":"rgba(255,170,0,0.03)"):(done?dist.theme+"06":locked?"rgba(255,255,255,0.01)":dist.theme+"03"),opacity:locked?0.28:1,marginBottom:4}}
-                  onClick={function(){ if(unlocked) onPlay(lvl,null); }}>
-                  <div className="sg-camp-row">
-                    <div className="sg-camp-emoji" style={{fontSize:18}}>{done?(lvl.boss?"👑":"✅"):locked?"🔒":"▶"}</div>
-                    <div className="sg-camp-info">
-                      <div className="sg-camp-num">{"LVL "+(id+1)}</div>
-                      <div className="sg-camp-name" style={{color:lvl.boss?(done?"#ffaa00":"rgba(255,170,0,0.75)"):(done?dist.theme:locked?"rgba(255,255,255,0.18)":"rgba(255,255,255,0.88)"),fontSize:12}}>
-                        {lvl.name}
-                        {lvl.boss&&<span className="sg-boss-badge">BOSS</span>}
-                      </div>
-                      <div className="sg-camp-meta">
-                        <span className="sg-camp-tag">{lvl.moves+" moves"}</span>
-                        {lvl.hazards>0&&<span className="sg-camp-tag" style={{color:"#ff2d9566"}}>{"☠ "+lvl.hazards}</span>}
-                        {done&&<span className="sg-stars" style={{marginLeft:4}}>{renderStars(lvlStars)}</span>}
-                      </div>
-                      {/* ── SOCIAL PROOF ── */}
-                      {proof&&(
-                        <div className="sg-social-row">
-                          <div className="sg-social-chip">👥 <b>{proof.clearRate}%</b> cleared</div>
-                          <div className="sg-social-chip">📊 avg <b>{proof.avgMoves}</b> moves</div>
-                          {done&&<div className="sg-social-chip you">🏅 your best: <b>{renderStars(lvlStars)}</b></div>}
-                        </div>
-                      )}
-                    </div>
-                    {unlocked&&(
-                      <button className="sg-play-btn"
-                        style={{background:done?(lvl.boss?"rgba(255,170,0,0.14)":"rgba(255,255,255,0.07)"):"linear-gradient(135deg,"+dist.theme+"bb,"+dist.theme+"77)",color:done?(lvl.boss?"#ffaa00":"rgba(255,255,255,0.55)"):"#06060f",border:done?"1px solid rgba(255,255,255,0.1)":"none",fontSize:9,padding:"7px 11px"}}
-                        onClick={function(e){ e.stopPropagation(); onPlay(lvl,null); }}>
-                        {done?"REPLAY":"PLAY"}
-                      </button>
-                    )}
+                <div key={id}
+                  className={"sg-level-node"+(locked?" locked":"")}
+                  style={{
+                    borderColor:done?dist.theme+"55":(locked?"rgba(255,255,255,0.06)":dist.theme+"25"),
+                    background:done?dist.theme+"0a":(locked?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.03)"),
+                  }}
+                  onClick={function(){ if(unlocked&&!locked) onPlay(lvl,null); }}>
+                  <div className="sg-level-node-icon">
+                    {done?"✅":(locked?"🔒":"▶")}
                   </div>
+                  <div className="sg-level-node-num" style={{color:done?dist.theme:(locked?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.8)")}}>
+                    {"LVL "+(id+1)}
+                  </div>
+                  <div className="sg-level-node-meta">
+                    {lvl.moves+"mv"}
+                    {lvl.hazards>0&&" ☠"+lvl.hazards}
+                  </div>
+                  {done&&<div className="sg-level-node-stars">{renderStars(stars)}</div>}
                 </div>
               );
             })}
           </div>
-        );
-      })}
+
+          {/* Boss level — full-width dramatic card */}
+          {(function(){
+            var bossDone=cleared.includes(bossId);
+            var bossUnlocked=cleared.includes(bossId-1)||bossDone;
+            var bossLocked=!bossUnlocked;
+            var bossStars=starsMap[bossId]||0;
+            var proof=bossUnlocked?getLevelSocialProof(bossId,meta):null;
+            return (
+              <div
+                className={"sg-boss-card"+(bossLocked?" locked":"")}
+                style={{
+                  borderColor:bossDone?"#ffaa00":(bossLocked?"rgba(255,255,255,0.08)":"rgba(255,170,0,0.5)"),
+                  background:bossDone?"rgba(255,170,0,0.07)":(bossLocked?"rgba(255,255,255,0.01)":"linear-gradient(135deg,rgba(255,100,0,0.1),rgba(255,45,149,0.06))"),
+                  boxShadow:bossLocked?"none":(bossDone?"0 0 20px rgba(255,170,0,0.15)":"0 0 24px rgba(255,100,0,0.2)"),
+                }}
+                onClick={function(){ if(bossUnlocked) onPlay(bossLvl,null); }}>
+
+                {/* Animated danger stripes across top */}
+                {!bossLocked&&<div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ffaa00,#ff2d95,#ffaa00)",backgroundSize:"200% 100%",animation:"slide-right 2s linear infinite"}}/>}
+
+                <div className="sg-boss-card-top">
+                  <div className="sg-boss-card-icon">
+                    {bossDone?"👑":(bossLocked?"🔒":"💀")}
+                  </div>
+                  <div style={{flex:1}}>
+                    <div className="sg-boss-card-label" style={{color:"#ffaa00"}}>
+                      {bossLocked?"DISTRICT BOSS — LOCKED":"⚠ DISTRICT BOSS"}
+                    </div>
+                    <div className="sg-boss-card-name" style={{color:bossDone?"#ffaa00":"rgba(255,170,0,0.9)"}}>
+                      {bossLvl.name}
+                    </div>
+                    {bossDone&&<div style={{fontSize:12,color:"#ffaa00",marginTop:3}}>{renderStars(bossStars)}</div>}
+                  </div>
+                </div>
+
+                {!bossLocked&&(
+                  <>
+                    <div className="sg-boss-card-hint">{bossLvl.hint}</div>
+                    <div className="sg-boss-stats">
+                      <div className="sg-boss-stat" style={{borderLeft:"2px solid #00e5ff"}}>
+                        <div className="sg-boss-stat-val" style={{color:"#00e5ff"}}>{bossLvl.moves}</div>
+                        <div className="sg-boss-stat-lbl">MOVES</div>
+                      </div>
+                      <div className="sg-boss-stat" style={{borderLeft:"2px solid #ff2d95"}}>
+                        <div className="sg-boss-stat-val" style={{color:"#ff2d95"}}>{bossLvl.hazards}</div>
+                        <div className="sg-boss-stat-lbl">CORRUPTED</div>
+                      </div>
+                      <div className="sg-boss-stat" style={{borderLeft:"2px solid #ffaa00"}}>
+                        <div className="sg-boss-stat-val" style={{color:"#ffaa00"}}>{bossLvl.bids.length}</div>
+                        <div className="sg-boss-stat-lbl">BUILDINGS</div>
+                      </div>
+                      {proof&&(
+                        <div className="sg-boss-stat" style={{borderLeft:"2px solid #00ff88"}}>
+                          <div className="sg-boss-stat-val" style={{color:"#00ff88",fontSize:13}}>{proof.clearRate+"%"}</div>
+                          <div className="sg-boss-stat-lbl">CLEAR RATE</div>
+                        </div>
+                      )}
+                    </div>
+                    <button className="sg-boss-enter-btn"
+                      style={{
+                        background:bossDone?"rgba(255,170,0,0.12)":"linear-gradient(135deg,#ffaa00,#ff2d95)",
+                        color:bossDone?"#ffaa00":"#06060f",
+                        border:bossDone?"1px solid rgba(255,170,0,0.3)":"none",
+                        boxShadow:bossDone?"none":"0 0 16px rgba(255,100,0,0.4)",
+                      }}
+                      onClick={function(e){ e.stopPropagation(); if(bossUnlocked) onPlay(bossLvl,null); }}>
+                      {bossDone?"⟳ REPLAY BOSS":"⚔ ENTER BOSS — CLEAR ALL "+bossLvl.bids.length+" BUILDINGS"}
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })()}
+        </>
+      )}
     </div>
   );
 }
@@ -4939,6 +5528,11 @@ function Shiftgrid() {
         if(def.type==="complete") prog=Math.min(def.goal,prog+1);
         if(def.type==="stars3"&&stars===3) prog=Math.min(def.goal,prog+1);
         if(def.type==="session") prog=Math.min(def.goal,prog+1);
+        if(def.type==="cascade"&&(rewards.maxCascade||0)>=3) prog=Math.min(def.goal,prog+1);
+        if(def.type==="corrupt"&&(rewards.corruptCleared||0)>0) prog=Math.min(def.goal,prog+(rewards.corruptCleared||0));
+        if(def.type==="battery"&&(rewards.batteries||0)>0) prog=Math.min(def.goal,prog+1);
+        if(def.type==="pulse"&&(rewards.pulses||0)>0) prog=Math.min(def.goal,prog+1);
+        if(def.type==="moves5"&&(lvl.moves-(rewards.movesLeft||0))<=5&&stars>0) prog=Math.min(def.goal,prog+1);
         return Object.assign({},c,{progress:prog,done:prog>=def.goal});
       });
       var newCD=Object.assign({},challengeData,{challenges:updated});
@@ -5038,7 +5632,6 @@ function Shiftgrid() {
   }
 
   var rank = getKingdomRank(meta.levelsCleared);
-  var streakAtRisk = streak.count >= 2 && streak.lastDay !== todayStr() && !isStreakProtected(streak);
 
   var TABS=[
     {id:"campaign",  icon:"🗺", label:"PLAY"},
