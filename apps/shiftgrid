@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -29,801 +28,794 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; background: var(--bg); }
 
-```
-/* ── ROOT ── */
-#root { height: 100%; }
-.sg-app {
-  height: 100vh; height: 100dvh;
-  display: flex; flex-direction: column; align-items: center;
-  background: radial-gradient(ellipse 80% 50% at 50% -10%, #0e1428 0%, var(--bg) 65%);
-  font-family: 'Rajdhani', sans-serif;
-  color: #e4e4ff;
-  overflow: hidden;
-  position: relative;
-}
+    /* ── ROOT ── */
+    #root { height: 100%; }
+    .sg-app {
+      height: 100vh; height: 100dvh;
+      display: flex; flex-direction: column; align-items: center;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, #0e1428 0%, var(--bg) 65%);
+      font-family: 'Rajdhani', sans-serif;
+      color: #e4e4ff;
+      overflow: hidden;
+      position: relative;
+    }
 
-/* Scanlines */
-.sg-app::after {
-  content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 1000;
-  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
-}
+    /* Scanlines */
+    .sg-app::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 1000;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+    }
 
-/* Ambient particles */
-.sg-particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.sg-particle {
-  position: absolute; width: 2px; height: 2px; border-radius: 50%;
-  animation: pfloat linear infinite;
-  opacity: 0;
-}
-@keyframes pfloat {
-  0%   { opacity: 0; transform: translateY(0) scale(1); }
-  10%  { opacity: 0.6; }
-  90%  { opacity: 0.3; }
-  100% { opacity: 0; transform: translateY(-120vh) scale(0.5); }
-}
+    /* Ambient particles */
+    .sg-particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .sg-particle {
+      position: absolute; width: 2px; height: 2px; border-radius: 50%;
+      animation: pfloat linear infinite;
+      opacity: 0;
+    }
+    @keyframes pfloat {
+      0%   { opacity: 0; transform: translateY(0) scale(1); }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.3; }
+      100% { opacity: 0; transform: translateY(-120vh) scale(0.5); }
+    }
 
-/* ── HEADER ── */
-.sg-header {
-  width: 100%; max-width: 460px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px 8px;
-  position: relative; z-index: 10; flex-shrink: 0;
-}
-.sg-logo {
-  font-family: 'Orbitron', monospace; font-weight: 900;
-  font-size: clamp(18px, 4.5vw, 24px); letter-spacing: 0.22em;
-  background: linear-gradient(135deg, var(--cyan) 0%, var(--mag) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 14px rgba(0,229,255,0.35));
-}
-.sg-wallet {
-  display: flex; gap: 12px;
-}
-.sg-coin {
-  display: flex; align-items: center; gap: 4px;
-  font-family: 'Share Tech Mono', monospace; font-size: 12px;
-  color: rgba(255,255,255,0.6);
-}
-.sg-coin-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-}
+    /* ── HEADER ── */
+    .sg-header {
+      width: 100%; max-width: 460px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px 8px;
+      position: relative; z-index: 10; flex-shrink: 0;
+    }
+    .sg-logo {
+      font-family: 'Orbitron', monospace; font-weight: 900;
+      font-size: clamp(18px, 4.5vw, 24px); letter-spacing: 0.22em;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--mag) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 14px rgba(0,229,255,0.35));
+    }
+    .sg-wallet {
+      display: flex; gap: 12px;
+    }
+    .sg-coin {
+      display: flex; align-items: center; gap: 4px;
+      font-family: 'Share Tech Mono', monospace; font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    .sg-coin-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
 
-/* ── CONTENT AREA ── */
-.sg-content {
-  flex: 1; width: 100%; max-width: 460px;
-  overflow-y: auto; overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  position: relative; z-index: 10;
-  padding: 0 12px;
-}
-.sg-content::-webkit-scrollbar { display: none; }
+    /* ── CONTENT AREA ── */
+    .sg-content {
+      flex: 1; width: 100%; max-width: 460px;
+      overflow-y: auto; overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      position: relative; z-index: 10;
+      padding: 0 12px;
+    }
+    .sg-content::-webkit-scrollbar { display: none; }
 
-/* ── NAV ── */
-.sg-nav {
-  width: 100%; max-width: 460px;
-  display: flex;
-  background: rgba(7,7,15,0.95);
-  border-top: 1px solid var(--border);
-  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
-  position: relative; z-index: 100;
-  flex-shrink: 0;
-  gap: 4px;
-}
-.sg-nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 7px 4px 5px;
-  background: none; border: none; border-radius: 10px;
-  color: rgba(255,255,255,0.25); cursor: pointer;
-  font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700;
-  letter-spacing: 0.12em; transition: color 0.2s, background 0.2s;
-  position: relative;
-}
-.sg-nav-btn .nav-icon { font-size: 18px; line-height: 1; }
-.sg-nav-btn.active {
-  color: var(--cyan);
-  background: rgba(0,229,255,0.08);
-}
-.sg-nav-btn.active::before {
-  content: '';
-  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 24px; height: 2px; border-radius: 0 0 2px 2px;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan);
-}
+    /* ── NAV ── */
+    .sg-nav {
+      width: 100%; max-width: 460px;
+      display: flex;
+      background: rgba(7,7,15,0.95);
+      border-top: 1px solid var(--border);
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+      position: relative; z-index: 100;
+      flex-shrink: 0;
+      gap: 4px;
+    }
+    .sg-nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 7px 4px 5px;
+      background: none; border: none; border-radius: 10px;
+      color: rgba(255,255,255,0.25); cursor: pointer;
+      font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700;
+      letter-spacing: 0.12em; transition: color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .sg-nav-btn .nav-icon { font-size: 18px; line-height: 1; }
+    .sg-nav-btn.active {
+      color: var(--cyan);
+      background: rgba(0,229,255,0.08);
+    }
+    .sg-nav-btn.active::before {
+      content: '';
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 24px; height: 2px; border-radius: 0 0 2px 2px;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
 
-/* ── SECTION LABELS ── */
-.sg-label {
-  font-size: 9px; letter-spacing: 0.24em; color: rgba(255,255,255,0.2);
-  text-transform: uppercase; margin-bottom: 8px; margin-top: 16px;
-}
+    /* ── SECTION LABELS ── */
+    .sg-label {
+      font-size: 9px; letter-spacing: 0.24em; color: rgba(255,255,255,0.2);
+      text-transform: uppercase; margin-bottom: 8px; margin-top: 16px;
+    }
 
-/* ── PLAY SCREEN ── */
-.sg-play {
-  height: 100%; display: flex; flex-direction: column;
-  position: relative; z-index: 10;
-}
+    /* ── PLAY SCREEN ── */
+    .sg-play {
+      height: 100%; display: flex; flex-direction: column;
+      position: relative; z-index: 10;
+    }
 
-.sg-play-top {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px 6px; flex-shrink: 0;
-}
-.sg-back {
-  width: 34px; height: 34px; border-radius: 10px;
-  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-  color: rgba(255,255,255,0.5); font-size: 14px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
-}
-.sg-back:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.sg-lvl-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); text-align: center; }
-.sg-daily-badge { font-size: 8px; color: var(--amber); letter-spacing: 0.18em; margin-bottom: 2px; }
-.sg-score-live {
-  font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700;
-  color: var(--amber); text-shadow: 0 0 12px rgba(255,170,0,0.4);
-  min-width: 64px; text-align: right;
-}
+    .sg-play-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px 6px; flex-shrink: 0;
+    }
+    .sg-back {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: rgba(255,255,255,0.5); font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    }
+    .sg-back:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .sg-lvl-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); text-align: center; }
+    .sg-daily-badge { font-size: 8px; color: var(--amber); letter-spacing: 0.18em; margin-bottom: 2px; }
+    .sg-score-live {
+      font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700;
+      color: var(--amber); text-shadow: 0 0 12px rgba(255,170,0,0.4);
+      min-width: 64px; text-align: right;
+    }
 
-/* ── HUD ── */
-.sg-hud {
-  display: flex; gap: 6px; padding: 0 14px 6px;
-  flex-shrink: 0;
-}
-.sg-stat {
-  flex: 1; background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border); border-radius: 12px;
-  padding: 7px 6px; text-align: center;
-  transition: border-color 0.3s, background 0.3s;
-}
-.sg-stat-lbl { font-size: 7px; letter-spacing: 0.2em; color: rgba(255,255,255,0.22); margin-bottom: 2px; }
-.sg-stat-val {
-  font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700;
-  transition: color 0.3s, text-shadow 0.3s;
-}
-.sg-stat.danger { border-color: rgba(255,45,149,0.35); background: rgba(255,45,149,0.06); }
+    /* ── HUD ── */
+    .sg-hud {
+      display: flex; gap: 6px; padding: 0 14px 6px;
+      flex-shrink: 0;
+    }
+    .sg-stat {
+      flex: 1; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 7px 6px; text-align: center;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .sg-stat-lbl { font-size: 7px; letter-spacing: 0.2em; color: rgba(255,255,255,0.22); margin-bottom: 2px; }
+    .sg-stat-val {
+      font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    .sg-stat.danger { border-color: rgba(255,45,149,0.35); background: rgba(255,45,149,0.06); }
 
-/* ── CORRUPTION WARN ── */
-.sg-crpt-warn {
-  margin: 0 14px 4px;
-  background: rgba(255,45,149,0.08);
-  border: 1px solid rgba(255,45,149,0.3);
-  border-radius: 8px; padding: 5px 12px;
-  font-size: 10px; color: var(--mag); text-align: center;
-  letter-spacing: 0.1em; flex-shrink: 0;
-  animation: blink 0.7s ease infinite alternate;
-}
-@keyframes blink { from { opacity: 0.6; } to { opacity: 1; } }
+    /* ── CORRUPTION WARN ── */
+    .sg-crpt-warn {
+      margin: 0 14px 4px;
+      background: rgba(255,45,149,0.08);
+      border: 1px solid rgba(255,45,149,0.3);
+      border-radius: 8px; padding: 5px 12px;
+      font-size: 10px; color: var(--mag); text-align: center;
+      letter-spacing: 0.1em; flex-shrink: 0;
+      animation: blink 0.7s ease infinite alternate;
+    }
+    @keyframes blink { from { opacity: 0.6; } to { opacity: 1; } }
 
-/* ── TOASTS ── */
-.sg-toasts {
-  min-height: 28px; display: flex; align-items: center; justify-content: center;
-  gap: 10px; flex-wrap: wrap; padding: 0 14px 2px; flex-shrink: 0;
-}
-.sg-toast {
-  font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 700;
-  letter-spacing: 0.08em;
-  animation: toast-in 0.28s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes toast-in {
-  from { opacity: 0; transform: scale(0.6) translateY(6px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+    /* ── TOASTS ── */
+    .sg-toasts {
+      min-height: 28px; display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap; padding: 0 14px 2px; flex-shrink: 0;
+    }
+    .sg-toast {
+      font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em;
+      animation: toast-in 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes toast-in {
+      from { opacity: 0; transform: scale(0.6) translateY(6px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
 
-/* ── GRID AREA ── */
-.sg-grid-area {
-  display: flex; flex-direction: column; align-items: center;
-  gap: var(--gap); flex-shrink: 0; padding: 0 14px;
-  /* clip sliding tiles */
-}
-.sg-col-btns { display: flex; gap: var(--gap); padding: 0 calc(var(--bw) + var(--gap)); }
-.sg-grid-row { display: flex; gap: var(--gap); align-items: center; }
+    /* ── GRID AREA ── */
+    .sg-grid-area {
+      display: flex; flex-direction: column; align-items: center;
+      gap: var(--gap); flex-shrink: 0; padding: 0 14px;
+    }
+    .sg-col-btns { display: flex; gap: var(--gap); padding: 0 calc(var(--bw) + var(--gap)); }
+    .sg-grid-row { display: flex; gap: var(--gap); align-items: center; }
 
-/* Arrow shift buttons */
-.sg-shift-btn {
-  width: var(--bw); height: var(--sz);
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 8px;
-  color: rgba(255,255,255,0.25); font-size: 10px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.12s; flex-shrink: 0;
-  font-family: inherit;
-}
-.sg-shift-btn.col-btn { width: var(--sz); height: var(--bw); }
-.sg-shift-btn:hover:not(:disabled) {
-  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
-  border-color: rgba(255,255,255,0.18);
-}
-.sg-shift-btn:active:not(:disabled) { transform: scale(0.82); }
-.sg-shift-btn:disabled { opacity: 0.1; cursor: default; }
-.sg-shift-btn.flash {
-  background: rgba(255,255,255,0.18) !important;
-  color: #fff !important; border-color: rgba(255,255,255,0.4) !important;
-}
+    /* Arrow shift buttons */
+    .sg-shift-btn {
+      width: var(--bw); height: var(--sz);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.25); font-size: 10px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.12s; flex-shrink: 0;
+      font-family: inherit;
+    }
+    .sg-shift-btn.col-btn { width: var(--sz); height: var(--bw); }
+    .sg-shift-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .sg-shift-btn:active:not(:disabled) { transform: scale(0.82); }
+    .sg-shift-btn:disabled { opacity: 0.1; cursor: default; }
+    .sg-shift-btn.flash {
+      background: rgba(255,255,255,0.18) !important;
+      color: #fff !important; border-color: rgba(255,255,255,0.4) !important;
+    }
 
-/* Grid row wrapper — clips sliding tiles */
-.sg-row-clip {
-  overflow: hidden; border-radius: 11px;
-  display: flex; gap: var(--gap);
-}
-.sg-col-clip-wrap {
-  /* wraps a single tile, clips vertically */
-  overflow: hidden; border-radius: 11px;
-  display: inline-flex;
-}
+    /* Grid row wrapper — clips sliding tiles */
+    .sg-row-clip {
+      overflow: hidden; border-radius: 11px;
+      display: flex; gap: var(--gap);
+    }
+    .sg-col-clip-wrap {
+      overflow: hidden; border-radius: 11px;
+      display: inline-flex;
+    }
 
-/* ── TILE ── */
-.sg-tile {
-  width: var(--sz); height: var(--sz);
-  border-radius: 11px; border: 2px solid;
-  display: flex; align-items: center; justify-content: center;
-  position: relative; overflow: hidden;
-  transition: box-shadow 0.12s, border-color 0.12s, background 0.08s;
-  cursor: default; flex-shrink: 0;
-  will-change: transform;
-}
-.sg-tile.matched {
-  animation: tile-pop 0.44s cubic-bezier(0.36,0.07,0.19,0.97);
-  z-index: 3;
-}
-@keyframes tile-pop {
-  0%   { transform: scale(1); }
-  25%  { transform: scale(1.28) rotate(5deg); }
-  55%  { transform: scale(1.18) rotate(-3deg); }
-  100% { transform: scale(1); }
-}
-.sg-tile.corrupt { cursor: default; }
+    /* ── TILE ── */
+    .sg-tile {
+      width: var(--sz); height: var(--sz);
+      border-radius: 11px; border: 2px solid;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      transition: box-shadow 0.12s, border-color 0.12s, background 0.08s;
+      cursor: default; flex-shrink: 0;
+      will-change: transform;
+    }
+    .sg-tile.matched {
+      animation: tile-pop 0.44s cubic-bezier(0.36,0.07,0.19,0.97);
+      z-index: 3;
+    }
+    @keyframes tile-pop {
+      0%   { transform: scale(1); }
+      25%  { transform: scale(1.28) rotate(5deg); }
+      55%  { transform: scale(1.18) rotate(-3deg); }
+      100% { transform: scale(1); }
+    }
+    .sg-tile.corrupt { cursor: default; }
 
-/* Tile inner shapes */
-.sg-node {
-  width: 22px; height: 22px; border-radius: 4px;
-  transform: rotate(45deg);
-  position: relative; z-index: 2;
-  transition: background 0.1s, box-shadow 0.1s;
-}
-.sg-node-ring {
-  position: absolute; inset: -5px; border-radius: 7px;
-  border: 1px solid; opacity: 0;
-  transition: opacity 0.2s;
-  transform: rotate(45deg);
-}
-.sg-tile.matched .sg-node-ring { opacity: 0.5; animation: ring-pulse 0.44s ease; }
-@keyframes ring-pulse { 0%{transform:rotate(45deg) scale(1)} 50%{transform:rotate(45deg) scale(1.6); opacity:0.6} 100%{transform:rotate(45deg) scale(2); opacity:0;} }
+    /* Tile inner shapes */
+    .sg-node {
+      width: 22px; height: 22px; border-radius: 4px;
+      transform: rotate(45deg);
+      position: relative; z-index: 2;
+      transition: background 0.1s, box-shadow 0.1s;
+    }
+    .sg-node-ring {
+      position: absolute; inset: -5px; border-radius: 7px;
+      border: 1px solid; opacity: 0;
+      transition: opacity 0.2s;
+      transform: rotate(45deg);
+    }
+    .sg-tile.matched .sg-node-ring { opacity: 0.5; animation: ring-pulse 0.44s ease; }
+    @keyframes ring-pulse { 0%{transform:rotate(45deg) scale(1)} 50%{transform:rotate(45deg) scale(1.6); opacity:0.6} 100%{transform:rotate(45deg) scale(2); opacity:0;} }
 
-.sg-tile-glow {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  transition: opacity 0.12s;
-}
+    .sg-tile-glow {
+      position: absolute; inset: 0; pointer-events: none; z-index: 1;
+      transition: opacity 0.12s;
+    }
 
-/* Corrupt tile */
-.sg-corrupt-icon { font-size: 18px; z-index: 2; opacity: 0.7; filter: saturate(0.3); }
-.sg-corrupt-overlay {
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(150,0,220,0.08) 4px, rgba(150,0,220,0.08) 8px);
-  pointer-events: none;
-}
+    /* Corrupt tile */
+    .sg-corrupt-icon { font-size: 18px; z-index: 2; opacity: 0.7; filter: saturate(0.3); }
+    .sg-corrupt-overlay {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(150,0,220,0.08) 4px, rgba(150,0,220,0.08) 8px);
+      pointer-events: none;
+    }
 
-/* ── SLIDE ANIMATIONS ── */
-.slide-left  { animation: sl-left  var(--slide-dur) ease-out both; }
-.slide-right { animation: sl-right var(--slide-dur) ease-out both; }
-.slide-up    { animation: sl-up    var(--slide-dur) ease-out both; }
-.slide-down  { animation: sl-down  var(--slide-dur) ease-out both; }
+    /* ── SLIDE ANIMATIONS ── */
+    .slide-left  { animation: sl-left  var(--slide-dur) ease-out both; }
+    .slide-right { animation: sl-right var(--slide-dur) ease-out both; }
+    .slide-up    { animation: sl-up    var(--slide-dur) ease-out both; }
+    .slide-down  { animation: sl-down  var(--slide-dur) ease-out both; }
 
-@keyframes sl-left  { from{transform:translateX(0)} to{transform:translateX(calc(-1*(var(--sz) + var(--gap))))} }
-@keyframes sl-right { from{transform:translateX(0)} to{transform:translateX(calc(var(--sz) + var(--gap)))} }
-@keyframes sl-up    { from{transform:translateY(0)} to{transform:translateY(calc(-1*(var(--sz) + var(--gap))))} }
-@keyframes sl-down  { from{transform:translateY(0)} to{transform:translateY(calc(var(--sz) + var(--gap)))} }
+    @keyframes sl-left  { from{transform:translateX(0)} to{transform:translateX(calc(-1*(var(--sz) + var(--gap))))} }
+    @keyframes sl-right { from{transform:translateX(0)} to{transform:translateX(calc(var(--sz) + var(--gap)))} }
+    @keyframes sl-up    { from{transform:translateY(0)} to{transform:translateY(calc(-1*(var(--sz) + var(--gap))))} }
+    @keyframes sl-down  { from{transform:translateY(0)} to{transform:translateY(calc(var(--sz) + var(--gap)))} }
 
-/* ── BUILDINGS ── */
-.sg-bldg-list { padding: 0 14px 6px; flex-shrink: 0; }
-.sg-bldg-lbl { font-size: 8px; letter-spacing: 0.22em; color: rgba(255,255,255,0.18); margin-bottom: 6px; }
-.sg-bldg {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: 12px; border: 1px solid;
-  margin-bottom: 5px; transition: all 0.45s;
-  position: relative; overflow: hidden;
-}
-.sg-bldg::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 100%);
-}
-.sg-bldg-icon { font-size: 20px; flex-shrink: 0; transition: filter 0.4s; }
-.sg-bldg-info { flex: 1; }
-.sg-bldg-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-.sg-bldg-name { font-size: 13px; font-weight: 600; transition: color 0.4s; }
-.sg-bldg-count { font-family: 'Share Tech Mono', monospace; font-size: 11px; }
-.sg-bldg-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-.sg-bldg-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease, box-shadow 0.4s; }
-.sg-bldg-sub { font-size: 9px; margin-top: 3px; color: rgba(255,255,255,0.2); letter-spacing: 0.08em; }
+    /* ── BUILDINGS ── */
+    .sg-bldg-list { padding: 0 14px 6px; flex-shrink: 0; }
+    .sg-bldg-lbl { font-size: 8px; letter-spacing: 0.22em; color: rgba(255,255,255,0.18); margin-bottom: 6px; }
+    .sg-bldg {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 12px; border: 1px solid;
+      margin-bottom: 5px; transition: all 0.45s;
+      position: relative; overflow: hidden;
+    }
+    .sg-bldg::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 100%);
+    }
+    .sg-bldg-icon { font-size: 20px; flex-shrink: 0; transition: filter 0.4s; }
+    .sg-bldg-info { flex: 1; }
+    .sg-bldg-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .sg-bldg-name { font-size: 13px; font-weight: 600; transition: color 0.4s; }
+    .sg-bldg-count { font-family: 'Share Tech Mono', monospace; font-size: 11px; }
+    .sg-bldg-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+    .sg-bldg-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease, box-shadow 0.4s; }
+    .sg-bldg-sub { font-size: 9px; margin-top: 3px; color: rgba(255,255,255,0.2); letter-spacing: 0.08em; }
 
-.sg-bldg.online .sg-bldg-icon::after {
-  content: ''; display: block; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--green); margin: -6px auto 0;
-  box-shadow: 0 0 6px var(--green);
-  animation: dot-pulse 1.2s ease infinite;
-}
-@keyframes dot-pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+    .sg-bldg.online .sg-bldg-icon::after {
+      content: ''; display: block; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); margin: -6px auto 0;
+      box-shadow: 0 0 6px var(--green);
+      animation: dot-pulse 1.2s ease infinite;
+    }
+    @keyframes dot-pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 
-.sg-hint { font-size: 10px; color: rgba(255,255,255,0.15); text-align: center; padding: 6px 20px 8px; line-height: 1.5; flex-shrink: 0; }
+    .sg-hint { font-size: 10px; color: rgba(255,255,255,0.15); text-align: center; padding: 6px 20px 8px; line-height: 1.5; flex-shrink: 0; }
 
-/* Swipe hint */
-.sg-swipe-hint {
-  text-align: center; font-size: 9px; color: rgba(255,255,255,0.15);
-  letter-spacing: 0.12em; padding: 2px 0 4px; flex-shrink: 0;
-}
+    /* Swipe hint */
+    .sg-swipe-hint {
+      text-align: center; font-size: 9px; color: rgba(255,255,255,0.15);
+      letter-spacing: 0.12em; padding: 2px 0 4px; flex-shrink: 0;
+    }
 
-/* ── MODALS ── */
-.sg-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(7,7,15,0.88);
-  display: flex; align-items: center; justify-content: center;
-  animation: overlay-in 0.25s ease;
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-}
-@keyframes overlay-in { from{opacity:0} to{opacity:1} }
-.sg-modal {
-  background: rgba(13,13,26,0.98);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 24px; padding: 36px 28px;
-  max-width: 320px; width: 90%; text-align: center;
-  animation: modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  position: relative; overflow: hidden;
-}
-.sg-modal::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,229,255,0.06) 0%, transparent 70%);
-}
-@keyframes modal-in { from{opacity:0;transform:scale(0.85) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
-.sg-modal-icon { font-size: 52px; margin-bottom: 10px; display: block; }
-.sg-modal-title { font-family: 'Orbitron', monospace; font-size: clamp(15px,4vw,20px); font-weight: 900; letter-spacing: 0.08em; margin-bottom: 4px; }
-.sg-modal-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
-.sg-modal-rewards { display: flex; gap: 8px; justify-content: center; margin: 12px 0 20px; }
-.sg-reward-chip {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px; padding: 8px 16px;
-  font-family: 'Share Tech Mono', monospace; font-size: 13px;
-}
-.sg-modal-btn {
-  border: none; border-radius: 14px; padding: 14px 28px;
-  font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700;
-  color: #06060f; cursor: pointer; letter-spacing: 0.1em;
-  transition: transform 0.12s, opacity 0.12s; display: inline-block;
-}
-.sg-modal-btn:hover { opacity: 0.88; transform: scale(1.04); }
-.sg-modal-btn:active { transform: scale(0.96); }
-.sg-modal-ghost {
-  background: rgba(255,255,255,0.07) !important; color: rgba(255,255,255,0.7) !important;
-  border: 1px solid rgba(255,255,255,0.14) !important;
-}
-.sg-modal-row { display: flex; gap: 10px; justify-content: center; }
+    /* ── MODALS ── */
+    .sg-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(7,7,15,0.88);
+      display: flex; align-items: center; justify-content: center;
+      animation: overlay-in 0.25s ease;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    @keyframes overlay-in { from{opacity:0} to{opacity:1} }
+    .sg-modal {
+      background: rgba(13,13,26,0.98);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px; padding: 36px 28px;
+      max-width: 320px; width: 90%; text-align: center;
+      animation: modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative; overflow: hidden;
+    }
+    .sg-modal::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,229,255,0.06) 0%, transparent 70%);
+    }
+    @keyframes modal-in { from{opacity:0;transform:scale(0.85) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .sg-modal-icon { font-size: 52px; margin-bottom: 10px; display: block; }
+    .sg-modal-title { font-family: 'Orbitron', monospace; font-size: clamp(15px,4vw,20px); font-weight: 900; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .sg-modal-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
+    .sg-modal-rewards { display: flex; gap: 8px; justify-content: center; margin: 12px 0 20px; }
+    .sg-reward-chip {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 8px 16px;
+      font-family: 'Share Tech Mono', monospace; font-size: 13px;
+    }
+    .sg-modal-btn {
+      border: none; border-radius: 14px; padding: 14px 28px;
+      font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700;
+      color: #06060f; cursor: pointer; letter-spacing: 0.1em;
+      transition: transform 0.12s, opacity 0.12s; display: inline-block;
+    }
+    .sg-modal-btn:hover { opacity: 0.88; transform: scale(1.04); }
+    .sg-modal-btn:active { transform: scale(0.96); }
+    .sg-modal-ghost {
+      background: rgba(255,255,255,0.07) !important; color: rgba(255,255,255,0.7) !important;
+      border: 1px solid rgba(255,255,255,0.14) !important;
+    }
+    .sg-modal-row { display: flex; gap: 10px; justify-content: center; }
 
-/* ── CITY TAB ── */
-.sg-district-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.sg-district-card {
-  border: 1px solid; border-radius: 14px; padding: 14px 10px;
-  text-align: center; transition: all 0.3s;
-}
-.sg-district-emoji { font-size: 26px; margin-bottom: 5px; }
-.sg-district-name { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; }
-.sg-district-status { font-size: 8px; letter-spacing: 0.14em; margin-top: 4px; opacity: 0.5; }
+    /* ── CITY TAB ── */
+    .sg-district-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .sg-district-card {
+      border: 1px solid; border-radius: 14px; padding: 14px 10px;
+      text-align: center; transition: all 0.3s;
+    }
+    .sg-district-emoji { font-size: 26px; margin-bottom: 5px; }
+    .sg-district-name { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; }
+    .sg-district-status { font-size: 8px; letter-spacing: 0.14em; margin-top: 4px; opacity: 0.5; }
 
-.sg-idle-card {
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(255,170,0,0.05); border: 1px solid rgba(255,170,0,0.15);
-  border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
-}
-.sg-idle-amt { font-family: 'Orbitron', monospace; font-size: 24px; color: var(--amber); font-weight: 700; margin-top: 4px; }
-.sg-idle-note { font-size: 10px; color: rgba(255,255,255,0.22); margin-top: 3px; }
-.sg-collect-btn {
-  background: linear-gradient(135deg, var(--amber), #ff7700);
-  border: none; border-radius: 10px; padding: 11px 16px;
-  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
-  color: #06060f; cursor: pointer; transition: transform 0.12s, opacity 0.12s;
-  white-space: nowrap;
-}
-.sg-collect-btn:hover:not(:disabled) { transform: scale(1.05); }
-.sg-collect-btn:disabled { opacity: 0.3; }
+    .sg-idle-card {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,170,0,0.05); border: 1px solid rgba(255,170,0,0.15);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
+    }
+    .sg-idle-amt { font-family: 'Orbitron', monospace; font-size: 24px; color: var(--amber); font-weight: 700; margin-top: 4px; }
+    .sg-idle-note { font-size: 10px; color: rgba(255,255,255,0.22); margin-top: 3px; }
+    .sg-collect-btn {
+      background: linear-gradient(135deg, var(--amber), #ff7700);
+      border: none; border-radius: 10px; padding: 11px 16px;
+      font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
+      color: #06060f; cursor: pointer; transition: transform 0.12s, opacity 0.12s;
+      white-space: nowrap;
+    }
+    .sg-collect-btn:hover:not(:disabled) { transform: scale(1.05); }
+    .sg-collect-btn:disabled { opacity: 0.3; }
 
-.sg-meta-chips { display: flex; gap: 8px; margin-bottom: 4px; }
-.sg-meta-chip {
-  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-  border-radius: 12px; padding: 10px; text-align: center;
-}
-.sg-meta-chip-val { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 700; }
-.sg-meta-chip-lbl { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; margin-top: 2px; }
+    .sg-meta-chips { display: flex; gap: 8px; margin-bottom: 4px; }
+    .sg-meta-chip {
+      flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px; text-align: center;
+    }
+    .sg-meta-chip-val { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 700; }
+    .sg-meta-chip-lbl { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; margin-top: 2px; }
 
-.sg-upg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-.sg-upg-card {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-  border-radius: 13px; padding: 12px 8px; text-align: center;
-  transition: border-color 0.3s;
-}
-.sg-upg-card:hover { border-color: rgba(0,229,255,0.2); }
-.sg-upg-icon { font-size: 22px; margin-bottom: 5px; }
-.sg-upg-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.82); margin-bottom: 3px; }
-.sg-upg-desc { font-size: 9px; color: rgba(255,255,255,0.3); line-height: 1.4; margin-bottom: 8px; }
-.sg-upg-pips { display: flex; gap: 3px; justify-content: center; margin-bottom: 8px; }
-.sg-pip { width: 14px; height: 4px; border-radius: 2px; transition: background 0.3s; }
-.sg-upg-cost-btn {
-  border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.07);
-  color: var(--cyan); border-radius: 7px; padding: 5px 8px;
-  font-family: 'Share Tech Mono', monospace; font-size: 9px;
-  cursor: pointer; width: 100%; transition: all 0.12s;
-}
-.sg-upg-cost-btn:hover:not(:disabled) { background: rgba(0,229,255,0.16); }
-.sg-upg-cost-btn:disabled { opacity: 0.3; }
-.sg-upg-max { font-size: 9px; color: var(--green); letter-spacing: 0.12em; margin-top: 4px; }
+    .sg-upg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .sg-upg-card {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 13px; padding: 12px 8px; text-align: center;
+      transition: border-color 0.3s;
+    }
+    .sg-upg-card:hover { border-color: rgba(0,229,255,0.2); }
+    .sg-upg-icon { font-size: 22px; margin-bottom: 5px; }
+    .sg-upg-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.82); margin-bottom: 3px; }
+    .sg-upg-desc { font-size: 9px; color: rgba(255,255,255,0.3); line-height: 1.4; margin-bottom: 8px; }
+    .sg-upg-pips { display: flex; gap: 3px; justify-content: center; margin-bottom: 8px; }
+    .sg-pip { width: 14px; height: 4px; border-radius: 2px; transition: background 0.3s; }
+    .sg-upg-cost-btn {
+      border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.07);
+      color: var(--cyan); border-radius: 7px; padding: 5px 8px;
+      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      cursor: pointer; width: 100%; transition: all 0.12s;
+    }
+    .sg-upg-cost-btn:hover:not(:disabled) { background: rgba(0,229,255,0.16); }
+    .sg-upg-cost-btn:disabled { opacity: 0.3; }
+    .sg-upg-max { font-size: 9px; color: var(--green); letter-spacing: 0.12em; margin-top: 4px; }
 
-/* ── DAILY TAB ── */
-.sg-daily-hero {
-  background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.14);
-  border-radius: 18px; padding: 24px 20px; text-align: center; margin-bottom: 12px;
-  position: relative; overflow: hidden;
-}
-.sg-daily-hero::before {
-  content: ''; position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
-  width: 200px; height: 200px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,170,0,0.08) 0%, transparent 70%);
-  pointer-events: none;
-}
-.sg-daily-city { font-size: 52px; margin-bottom: 8px; display: block; }
-.sg-daily-num { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 6px; }
-.sg-daily-desc { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.5; margin-bottom: 16px; }
-.sg-daily-specs { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
-.sg-spec {
-  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-  border-radius: 10px; padding: 8px 14px; text-align: center;
-}
-.sg-spec-val { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.85); }
-.sg-spec-lbl { font-size: 8px; letter-spacing: 0.14em; margin-top: 2px; }
-.sg-daily-done {
-  background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.18);
-  border-radius: 12px; padding: 16px; margin-top: 6px;
-}
-.sg-daily-score { font-family: 'Orbitron', monospace; font-size: 22px; color: var(--amber); font-weight: 700; margin: 6px 0; }
+    /* ── DAILY TAB ── */
+    .sg-daily-hero {
+      background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.14);
+      border-radius: 18px; padding: 24px 20px; text-align: center; margin-bottom: 12px;
+      position: relative; overflow: hidden;
+    }
+    .sg-daily-hero::before {
+      content: ''; position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,170,0,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .sg-daily-city { font-size: 52px; margin-bottom: 8px; display: block; }
+    .sg-daily-num { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 6px; }
+    .sg-daily-desc { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.5; margin-bottom: 16px; }
+    .sg-daily-specs { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+    .sg-spec {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 14px; text-align: center;
+    }
+    .sg-spec-val { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.85); }
+    .sg-spec-lbl { font-size: 8px; letter-spacing: 0.14em; margin-top: 2px; }
+    .sg-daily-done {
+      background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.18);
+      border-radius: 12px; padding: 16px; margin-top: 6px;
+    }
+    .sg-daily-score { font-family: 'Orbitron', monospace; font-size: 22px; color: var(--amber); font-weight: 700; margin: 6px 0; }
 
-.sg-bonus-row { display: flex; gap: 8px; }
-.sg-bonus-card {
-  flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-  border-radius: 12px; padding: 12px 6px; text-align: center;
-}
-.sg-bonus-icon { font-size: 20px; margin-bottom: 4px; }
-.sg-bonus-val { font-size: 10px; font-weight: 600; }
+    .sg-bonus-row { display: flex; gap: 8px; }
+    .sg-bonus-card {
+      flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 6px; text-align: center;
+    }
+    .sg-bonus-icon { font-size: 20px; margin-bottom: 4px; }
+    .sg-bonus-val { font-size: 10px; font-weight: 600; }
 
-/* ── EDITOR TAB ── */
-.sg-brush-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
-.sg-brush {
-  padding: 5px 12px; border-radius: 8px; border: 1px solid;
-  font-size: 10px; font-weight: 700; cursor: pointer;
-  font-family: 'Rajdhani', sans-serif; transition: all 0.12s; letter-spacing: 0.06em;
-}
-.sg-edit-grid { display: flex; flex-direction: column; gap: 3px; align-items: center; margin-bottom: 12px; }
-.sg-edit-row { display: flex; gap: 3px; }
-.sg-edit-tile {
-  width: 46px; height: 46px; border-radius: 9px; border: 2px solid;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-  transition: all 0.1s;
-}
-.sg-edit-tile:hover { transform: scale(1.08); }
-.sg-editor-panel {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-  border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 11px;
-  margin-bottom: 10px;
-}
-.sg-srow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.sg-srow label { font-size: 12px; color: rgba(255,255,255,0.42); min-width: 72px; }
-.sg-input {
-  flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px; color: #fff; padding: 6px 10px;
-  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 600;
-  outline: none; transition: border-color 0.2s;
-}
-.sg-input:focus { border-color: rgba(0,229,255,0.4); }
-.sg-step-btns { display: flex; gap: 8px; align-items: center; }
-.sg-step { width: 30px; height: 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
-.sg-step:hover { background: rgba(255,255,255,0.12); }
-.sg-step-val { font-family: 'Orbitron', monospace; font-size: 16px; color: var(--cyan); min-width: 36px; text-align: center; }
-.sg-bld-chips { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
-.sg-bld-chip { font-size: 10px; padding: 4px 9px; border-radius: 7px; border: 1px solid; cursor: pointer; transition: all 0.12s; }
-.sg-action-row { display: flex; gap: 8px; }
-.sg-action-btn {
-  flex: 1; padding: 11px 8px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);
-  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
-  cursor: pointer; transition: all 0.15s; letter-spacing: 0.06em; text-align: center;
-}
-.sg-action-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.sg-saved-level {
-  display: flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-  border-radius: 11px; padding: 10px 12px; margin-bottom: 5px;
-}
+    /* ── EDITOR TAB ── */
+    .sg-brush-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+    .sg-brush {
+      padding: 5px 12px; border-radius: 8px; border: 1px solid;
+      font-size: 10px; font-weight: 700; cursor: pointer;
+      font-family: 'Rajdhani', sans-serif; transition: all 0.12s; letter-spacing: 0.06em;
+    }
+    .sg-edit-grid { display: flex; flex-direction: column; gap: 3px; align-items: center; margin-bottom: 12px; }
+    .sg-edit-row { display: flex; gap: 3px; }
+    .sg-edit-tile {
+      width: 46px; height: 46px; border-radius: 9px; border: 2px solid;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: all 0.1s;
+    }
+    .sg-edit-tile:hover { transform: scale(1.08); }
+    .sg-editor-panel {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 11px;
+      margin-bottom: 10px;
+    }
+    .sg-srow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .sg-srow label { font-size: 12px; color: rgba(255,255,255,0.42); min-width: 72px; }
+    .sg-input {
+      flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; color: #fff; padding: 6px 10px;
+      font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 600;
+      outline: none; transition: border-color 0.2s;
+    }
+    .sg-input:focus { border-color: rgba(0,229,255,0.4); }
+    .sg-step-btns { display: flex; gap: 8px; align-items: center; }
+    .sg-step { width: 30px; height: 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+    .sg-step:hover { background: rgba(255,255,255,0.12); }
+    .sg-step-val { font-family: 'Orbitron', monospace; font-size: 16px; color: var(--cyan); min-width: 36px; text-align: center; }
+    .sg-bld-chips { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
+    .sg-bld-chip { font-size: 10px; padding: 4px 9px; border-radius: 7px; border: 1px solid; cursor: pointer; transition: all 0.12px; }
+    .sg-action-row { display: flex; gap: 8px; }
+    .sg-action-btn {
+      flex: 1; padding: 11px 8px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);
+      font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; letter-spacing: 0.06em; text-align: center;
+    }
+    .sg-action-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .sg-saved-level {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 11px; padding: 10px 12px; margin-bottom: 5px;
+    }
 
-/* ── CAMPAIGN ── */
-.sg-campaign-card {
-  border: 1px solid; border-radius: 14px; padding: 13px 14px;
-  margin-bottom: 8px; transition: all 0.3s; cursor: default;
-}
-.sg-campaign-card.playable { cursor: pointer; }
-.sg-campaign-card.playable:active { transform: scale(0.98); }
-.sg-camp-row { display: flex; align-items: center; gap: 12px; }
-.sg-camp-emoji { font-size: 30px; flex-shrink: 0; }
-.sg-camp-info { flex: 1; }
-.sg-camp-num { font-size: 9px; letter-spacing: 0.2em; color: rgba(255,255,255,0.25); margin-bottom: 2px; }
-.sg-camp-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-.sg-camp-meta { display: flex; gap: 10px; }
-.sg-camp-tag { font-size: 10px; color: rgba(255,255,255,0.32); }
-.sg-play-btn {
-  border: none; border-radius: 11px; padding: 9px 16px;
-  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
-  cursor: pointer; letter-spacing: 0.08em; transition: transform 0.12s, opacity 0.12s;
-  flex-shrink: 0;
-}
-.sg-play-btn:hover { opacity: 0.85; transform: scale(1.06); }
-.sg-camp-bids { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
-.sg-bid-chip { font-size: 9px; padding: 2px 8px; border-radius: 5px; border: 1px solid; }
+    /* ── CAMPAIGN ── */
+    .sg-campaign-card {
+      border: 1px solid; border-radius: 14px; padding: 13px 14px;
+      margin-bottom: 8px; transition: all 0.3s; cursor: default;
+    }
+    .sg-campaign-card.playable { cursor: pointer; }
+    .sg-campaign-card.playable:active { transform: scale(0.98); }
+    .sg-camp-row { display: flex; align-items: center; gap: 12px; }
+    .sg-camp-emoji { font-size: 30px; flex-shrink: 0; }
+    .sg-camp-info { flex: 1; }
+    .sg-camp-num { font-size: 9px; letter-spacing: 0.2em; color: rgba(255,255,255,0.25); margin-bottom: 2px; }
+    .sg-camp-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .sg-camp-meta { display: flex; gap: 10px; }
+    .sg-camp-tag { font-size: 10px; color: rgba(255,255,255,0.32); }
+    .sg-play-btn {
+      border: none; border-radius: 11px; padding: 9px 16px;
+      font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.08em; transition: transform 0.12s, opacity 0.12s;
+      flex-shrink: 0;
+    }
+    .sg-play-btn:hover { opacity: 0.85; transform: scale(1.06); }
+    .sg-camp-bids { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+    .sg-bid-chip { font-size: 9px; padding: 2px 8px; border-radius: 5px; border: 1px solid; }
 
-/* ── PILL BTN ── */
-.sg-pill {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 9px; color: rgba(255,255,255,0.55); padding: 7px 13px;
-  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
-  cursor: pointer; transition: all 0.12s; letter-spacing: 0.06em;
-}
-.sg-pill:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    /* ── PILL BTN ── */
+    .sg-pill {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9px; color: rgba(255,255,255,0.55); padding: 7px 13px;
+      font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: all 0.12s; letter-spacing: 0.06em;
+    }
+    .sg-pill:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-/* ── ADJACENT CORRUPTION PREVIEW ── */
-.sg-tile.adj-corrupt {
-  box-shadow: 0 0 0 2px rgba(255,45,149,0.28) !important;
-  animation: adj-pulse 1.5s ease infinite;
-}
-@keyframes adj-pulse {
-  0%,100% { box-shadow: 0 0 0 1px rgba(255,45,149,0.15); }
-  50%      { box-shadow: 0 0 0 2px rgba(255,45,149,0.5), 0 0 10px rgba(255,45,149,0.2); }
-}
-/* ── BUILDING ONLINE FLASH ── */
-@keyframes bldg-flash {
-  0%   { transform:scale(1); }
-  25%  { transform:scale(1.03); }
-  50%  { transform:scale(0.99); }
-  100% { transform:scale(1); }
-}
-.sg-bldg.online { animation: bldg-flash 0.55s ease; }
-/* ── LIVES ── */
-.sg-lives { display:flex; gap:2px; align-items:center; }
-.sg-heart { font-size:12px; transition: opacity 0.3s, filter 0.3s; line-height:1; }
-.sg-heart.empty { opacity:0.18; filter:grayscale(1) brightness(0.5); }
-/* ── BOSS BADGE ── */
-.sg-boss-badge { display:inline-block; background:linear-gradient(135deg,#ffaa00,#ff7700); color:#06060f; font-family:'Orbitron',monospace; font-size:7px; font-weight:900; letter-spacing:0.12em; padding:2px 5px; border-radius:4px; margin-left:5px; vertical-align:middle; }
-/* ── STARS ── */
-.sg-stars { font-size:10px; letter-spacing:0.05em; color:#ffaa00; }
-/* ── DISTRICT PROGRESS BAR ── */
-.dist-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-bottom:8px; overflow:hidden; }
-.dist-bar-fill { height:100%; border-radius:2px; transition:width 0.5s ease; }
+    /* ── ADJACENT CORRUPTION PREVIEW ── */
+    .sg-tile.adj-corrupt {
+      box-shadow: 0 0 0 2px rgba(255,45,149,0.28) !important;
+      animation: adj-pulse 1.5s ease infinite;
+    }
+    @keyframes adj-pulse {
+      0%,100% { box-shadow: 0 0 0 1px rgba(255,45,149,0.15); }
+      50%      { box-shadow: 0 0 0 2px rgba(255,45,149,0.5), 0 0 10px rgba(255,45,149,0.2); }
+    }
+    /* ── BUILDING ONLINE FLASH ── */
+    @keyframes bldg-flash {
+      0%   { transform:scale(1); }
+      25%  { transform:scale(1.03); }
+      50%  { transform:scale(0.99); }
+      100% { transform:scale(1); }
+    }
+    .sg-bldg.online { animation: bldg-flash 0.55s ease; }
+    /* ── LIVES ── */
+    .sg-lives { display:flex; gap:2px; align-items:center; }
+    .sg-heart { font-size:12px; transition: opacity 0.3s, filter 0.3s; line-height:1; }
+    .sg-heart.empty { opacity:0.18; filter:grayscale(1) brightness(0.5); }
+    /* ── BOSS BADGE ── */
+    .sg-boss-badge { display:inline-block; background:linear-gradient(135deg,#ffaa00,#ff7700); color:#06060f; font-family:'Orbitron',monospace; font-size:7px; font-weight:900; letter-spacing:0.12em; padding:2px 5px; border-radius:4px; margin-left:5px; vertical-align:middle; }
+    /* ── STARS ── */
+    .sg-stars { font-size:10px; letter-spacing:0.05em; color:#ffaa00; }
+    /* ── DISTRICT PROGRESS BAR ── */
+    .dist-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-bottom:8px; overflow:hidden; }
+    .dist-bar-fill { height:100%; border-radius:2px; transition:width 0.5s ease; }
 
+    /* ── XP BAR ── */
+    .sg-xp-bar-wrap {
+      width: 100%; max-width: 460px; padding: 0 16px 8px;
+      flex-shrink: 0; position: relative; z-index: 10;
+    }
+    .sg-xp-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 4px;
+    }
+    .sg-xp-lbl {
+      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      color: rgba(255,255,255,0.4); letter-spacing: 0.1em;
+    }
+    .sg-xp-track {
+      height: 4px; background: rgba(255,255,255,0.07);
+      border-radius: 2px; overflow: hidden;
+    }
+    .sg-xp-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, #a855f7, #00e5ff);
+      box-shadow: 0 0 6px rgba(168,85,247,0.5);
+      transition: width 0.6s ease;
+    }
+    .sg-xp-levelup {
+      animation: xp-flash 0.5s ease;
+    }
+    @keyframes xp-flash {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.06); box-shadow: 0 0 20px rgba(168,85,247,0.7); }
+      100% { transform: scale(1); }
+    }
 
-/* ── XP BAR ── */
-.sg-xp-bar-wrap {
-  width: 100%; max-width: 460px; padding: 0 16px 8px;
-  flex-shrink: 0; position: relative; z-index: 10;
-}
-.sg-xp-row {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 4px;
-}
-.sg-xp-lbl {
-  font-family: 'Share Tech Mono', monospace; font-size: 10px;
-  color: rgba(255,255,255,0.4); letter-spacing: 0.1em;
-}
-.sg-xp-track {
-  height: 4px; background: rgba(255,255,255,0.07);
-  border-radius: 2px; overflow: hidden;
-}
-.sg-xp-fill {
-  height: 100%; border-radius: 2px;
-  background: linear-gradient(90deg, #a855f7, #00e5ff);
-  box-shadow: 0 0 6px rgba(168,85,247,0.5);
-  transition: width 0.6s ease;
-}
-.sg-xp-levelup {
-  animation: xp-flash 0.5s ease;
-}
-@keyframes xp-flash {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.06); box-shadow: 0 0 20px rgba(168,85,247,0.7); }
-  100% { transform: scale(1); }
-}
+    /* ── STREAK ── */
+    .sg-streak-banner {
+      background: linear-gradient(90deg, rgba(255,170,0,0.12), rgba(255,120,0,0.08));
+      border: 1px solid rgba(255,170,0,0.25); border-radius: 14px;
+      padding: 12px 14px; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sg-streak-fire { font-size: 28px; }
+    .sg-streak-val {
+      font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900;
+      color: #ffaa00; text-shadow: 0 0 14px rgba(255,170,0,0.5);
+    }
+    .sg-streak-lbl { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; margin-top: 1px; }
+    .sg-streak-days { display: flex; gap: 4px; }
+    .sg-streak-day {
+      width: 28px; height: 28px; border-radius: 8px; border: 1px solid;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; transition: all 0.3s;
+    }
+    .sg-streak-day.done {
+      background: rgba(255,170,0,0.2); border-color: #ffaa00;
+      box-shadow: 0 0 8px rgba(255,170,0,0.3);
+    }
+    .sg-streak-day.today {
+      background: rgba(255,170,0,0.35); border-color: #ffaa00;
+      animation: today-pulse 1.2s ease infinite;
+    }
+    .sg-streak-day.pending {
+      background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);
+    }
+    @keyframes today-pulse {
+      0%,100% { box-shadow: 0 0 6px rgba(255,170,0,0.3); }
+      50%      { box-shadow: 0 0 14px rgba(255,170,0,0.6); }
+    }
 
-/* ── STREAK ── */
-.sg-streak-banner {
-  background: linear-gradient(90deg, rgba(255,170,0,0.12), rgba(255,120,0,0.08));
-  border: 1px solid rgba(255,170,0,0.25); border-radius: 14px;
-  padding: 12px 14px; margin-bottom: 10px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.sg-streak-fire { font-size: 28px; }
-.sg-streak-val {
-  font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900;
-  color: #ffaa00; text-shadow: 0 0 14px rgba(255,170,0,0.5);
-}
-.sg-streak-lbl { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; margin-top: 1px; }
-.sg-streak-days {
-  display: flex; gap: 4px;
-}
-.sg-streak-day {
-  width: 28px; height: 28px; border-radius: 8px; border: 1px solid;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; transition: all 0.3s;
-}
-.sg-streak-day.done {
-  background: rgba(255,170,0,0.2); border-color: #ffaa00;
-  box-shadow: 0 0 8px rgba(255,170,0,0.3);
-}
-.sg-streak-day.today {
-  background: rgba(255,170,0,0.35); border-color: #ffaa00;
-  animation: today-pulse 1.2s ease infinite;
-}
-.sg-streak-day.pending {
-  background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);
-}
-@keyframes today-pulse {
-  0%,100% { box-shadow: 0 0 6px rgba(255,170,0,0.3); }
-  50%      { box-shadow: 0 0 14px rgba(255,170,0,0.6); }
-}
+    /* ── REWARD CALENDAR ── */
+    .sg-calendar {
+      display: grid; grid-template-columns: repeat(7,1fr); gap: 5px;
+      margin-bottom: 8px;
+    }
+    .sg-cal-day {
+      border: 1px solid; border-radius: 10px; padding: 8px 4px;
+      text-align: center; transition: all 0.3s;
+    }
+    .sg-cal-day.claimed  { background: rgba(0,255,136,0.1);  border-color: rgba(0,255,136,0.4); }
+    .sg-cal-day.today    { background: rgba(255,170,0,0.12); border-color: rgba(255,170,0,0.5); animation: today-pulse 1.2s ease infinite; }
+    .sg-cal-day.future   { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06); }
+    .sg-cal-day .day-num { font-size: 8px; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+    .sg-cal-day .day-ico { font-size: 16px; }
+    .sg-cal-day .day-val { font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .sg-cal-day.milestone { border-color: rgba(255,170,0,0.5); background: rgba(255,170,0,0.06); }
+    .sg-cal-day.milestone .day-ico { filter: drop-shadow(0 0 4px #ffaa00); }
 
-/* ── REWARD CALENDAR ── */
-.sg-calendar {
-  display: grid; grid-template-columns: repeat(7,1fr); gap: 5px;
-  margin-bottom: 8px;
-}
-.sg-cal-day {
-  border: 1px solid; border-radius: 10px; padding: 8px 4px;
-  text-align: center; transition: all 0.3s;
-}
-.sg-cal-day.claimed  { background: rgba(0,255,136,0.1);  border-color: rgba(0,255,136,0.4); }
-.sg-cal-day.today    { background: rgba(255,170,0,0.12); border-color: rgba(255,170,0,0.5); animation: today-pulse 1.2s ease infinite; }
-.sg-cal-day.future   { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06); }
-.sg-cal-day .day-num { font-size: 8px; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
-.sg-cal-day .day-ico { font-size: 16px; }
-.sg-cal-day .day-val { font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-.sg-cal-day.milestone { border-color: rgba(255,170,0,0.5); background: rgba(255,170,0,0.06); }
-.sg-cal-day.milestone .day-ico { filter: drop-shadow(0 0 4px #ffaa00); }
+    /* ── DAILY CHALLENGES ── */
+    .sg-challenge-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 13px; padding: 11px 13px; margin-bottom: 7px;
+      display: flex; align-items: center; gap: 11px;
+      transition: all 0.3s;
+    }
+    .sg-challenge-card.complete {
+      border-color: rgba(0,255,136,0.35); background: rgba(0,255,136,0.05);
+    }
+    .sg-challenge-icon { font-size: 22px; flex-shrink: 0; }
+    .sg-challenge-info { flex: 1; }
+    .sg-challenge-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 3px; }
+    .sg-challenge-prog { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 5px; }
+    .sg-challenge-bar-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+    .sg-challenge-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+    .sg-challenge-check { font-size: 20px; flex-shrink: 0; }
+    .sg-chest-card {
+      background: linear-gradient(135deg, rgba(255,170,0,0.12), rgba(255,100,0,0.06));
+      border: 1px solid rgba(255,170,0,0.3); border-radius: 16px;
+      padding: 18px; text-align: center; margin-bottom: 10px;
+      position: relative; overflow: hidden;
+    }
+    .sg-chest-card.unlocked {
+      border-color: rgba(0,255,136,0.5); background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,229,255,0.06));
+      animation: chest-glow 1.5s ease infinite;
+    }
+    @keyframes chest-glow {
+      0%,100% { box-shadow: 0 0 12px rgba(0,255,136,0.2); }
+      50%      { box-shadow: 0 0 24px rgba(0,255,136,0.4); }
+    }
+    .sg-chest-icon { font-size: 44px; margin-bottom: 6px; display: block; }
+    .sg-chest-title { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .sg-chest-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
 
-/* ── DAILY CHALLENGES ── */
-.sg-challenge-card {
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 13px; padding: 11px 13px; margin-bottom: 7px;
-  display: flex; align-items: center; gap: 11px;
-  transition: all 0.3s;
-}
-.sg-challenge-card.complete {
-  border-color: rgba(0,255,136,0.35); background: rgba(0,255,136,0.05);
-}
-.sg-challenge-icon { font-size: 22px; flex-shrink: 0; }
-.sg-challenge-info { flex: 1; }
-.sg-challenge-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 3px; }
-.sg-challenge-prog { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 5px; }
-.sg-challenge-bar-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-.sg-challenge-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-.sg-challenge-check { font-size: 20px; flex-shrink: 0; }
-.sg-chest-card {
-  background: linear-gradient(135deg, rgba(255,170,0,0.12), rgba(255,100,0,0.06));
-  border: 1px solid rgba(255,170,0,0.3); border-radius: 16px;
-  padding: 18px; text-align: center; margin-bottom: 10px;
-  position: relative; overflow: hidden;
-}
-.sg-chest-card.unlocked {
-  border-color: rgba(0,255,136,0.5); background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,229,255,0.06));
-  animation: chest-glow 1.5s ease infinite;
-}
-@keyframes chest-glow {
-  0%,100% { box-shadow: 0 0 12px rgba(0,255,136,0.2); }
-  50%      { box-shadow: 0 0 24px rgba(0,255,136,0.4); }
-}
-.sg-chest-icon { font-size: 44px; margin-bottom: 6px; display: block; }
-.sg-chest-title { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 4px; }
-.sg-chest-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+    /* ── CITY OVERVIEW ── */
+    .sg-city-overview {
+      border-radius: 16px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 12px; position: relative;
+      background: rgba(13,13,26,0.9);
+      min-height: 180px;
+    }
+    .sg-city-skyline {
+      display: flex; align-items: flex-end; justify-content: center;
+      gap: 6px; padding: 16px 12px 0; height: 140px;
+    }
+    .sg-city-building {
+      border-radius: 4px 4px 0 0; transition: all 0.6s ease;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: flex-start;
+      align-items: center; padding-top: 6px;
+    }
+    .sg-city-building::after {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(255,255,255,0.04) 8px, rgba(255,255,255,0.04) 9px);
+    }
+    .sg-city-building.lit .window {
+      animation: window-flicker 3s ease infinite;
+    }
+    @keyframes window-flicker {
+      0%,95%,100% { opacity: 1; }
+      96%          { opacity: 0.3; }
+    }
+    .sg-building-windows {
+      display: grid; gap: 2px; position: relative; z-index: 2;
+    }
+    .sg-window {
+      width: 6px; height: 4px; border-radius: 1px;
+      transition: background 0.8s ease, box-shadow 0.8s;
+    }
+    .sg-city-label {
+      text-align: center; padding: 8px 0 10px;
+      font-size: 9px; letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.3);
+    }
+    .sg-city-stats {
+      display: flex; gap: 8px; padding: 0 12px 12px;
+    }
+    .sg-city-stat {
+      flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px; padding: 8px; text-align: center;
+    }
+    .sg-city-stat-val { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; }
+    .sg-city-stat-lbl { font-size: 8px; color: rgba(255,255,255,0.28); letter-spacing: 0.1em; margin-top: 2px; }
 
-/* ── CITY OVERVIEW ── */
-.sg-city-overview {
-  border-radius: 16px; overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.08);
-  margin-bottom: 12px; position: relative;
-  background: rgba(13,13,26,0.9);
-  min-height: 180px;
-}
-.sg-city-skyline {
-  display: flex; align-items: flex-end; justify-content: center;
-  gap: 6px; padding: 16px 12px 0; height: 140px;
-}
-.sg-city-building {
-  border-radius: 4px 4px 0 0; transition: all 0.6s ease;
-  position: relative; overflow: hidden;
-  display: flex; flex-direction: column; justify-content: flex-start;
-  align-items: center; padding-top: 6px;
-}
-.sg-city-building::after {
-  content: ''; position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(255,255,255,0.04) 8px, rgba(255,255,255,0.04) 9px);
-}
-.sg-city-building.lit .window {
-  animation: window-flicker 3s ease infinite;
-}
-@keyframes window-flicker {
-  0%,95%,100% { opacity: 1; }
-  96%          { opacity: 0.3; }
-}
-.sg-building-windows {
-  display: grid; gap: 2px; position: relative; z-index: 2;
-}
-.sg-window {
-  width: 6px; height: 4px; border-radius: 1px;
-  transition: background 0.8s ease, box-shadow 0.8s;
-}
-.sg-city-label {
-  text-align: center; padding: 8px 0 10px;
-  font-size: 9px; letter-spacing: 0.14em;
-  color: rgba(255,255,255,0.3);
-}
-.sg-city-stats {
-  display: flex; gap: 8px; padding: 0 12px 12px;
-}
-.sg-city-stat {
-  flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px; padding: 8px; text-align: center;
-}
-.sg-city-stat-val { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; }
-.sg-city-stat-lbl { font-size: 8px; color: rgba(255,255,255,0.28); letter-spacing: 0.1em; margin-top: 2px; }
-
-/* ── WEEKLY EVENT ── */
-.sg-event-hero {
-  border-radius: 18px; padding: 0; margin-bottom: 12px;
-  overflow: hidden; position: relative; border: 1px solid;
-}
-.sg-event-banner {
-  padding: 20px 18px 16px; text-align: center; position: relative; z-index: 2;
-}
-.sg-event-icon { font-size: 48px; display: block; margin-bottom: 8px; }
-.sg-event-title { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 4px; }
-.sg-event-timer-label { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.14em; margin-bottom: 6px; }
-.sg-event-timer { font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: 700; }
-.sg-event-desc { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.55; margin: 10px 0; }
-.sg-event-modifiers {
-  display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px;
-}
-.sg-event-mod {
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px; padding: 5px 10px; font-size: 10px; font-weight: 600;
-}
-.sg-leaderboard {
-  background: rgba(7,7,15,0.7); border-top: 1px solid rgba(255,255,255,0.07);
-  padding: 12px 14px;
-}
-.sg-lb-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.sg-lb-row:last-child { border-bottom: none; }
-.sg-lb-rank { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; min-width: 22px; }
-.sg-lb-name { flex: 1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); }
-.sg-lb-score { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.55); }
-.sg-lb-row.you .sg-lb-name { color: #00e5ff; }
-.sg-lb-row.you .sg-lb-score { color: #00e5ff; }
-```
-
+    /* ── WEEKLY EVENT ── */
+    .sg-event-hero {
+      border-radius: 18px; padding: 0; margin-bottom: 12px;
+      overflow: hidden; position: relative; border: 1px solid;
+    }
+    .sg-event-banner {
+      padding: 20px 18px 16px; text-align: center; position: relative; z-index: 2;
+    }
+    .sg-event-icon { font-size: 48px; display: block; margin-bottom: 8px; }
+    .sg-event-title { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .sg-event-timer-label { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.14em; margin-bottom: 6px; }
+    .sg-event-timer { font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: 700; }
+    .sg-event-desc { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.55; margin: 10px 0; }
+    .sg-event-modifiers {
+      display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px;
+    }
+    .sg-event-mod {
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; padding: 5px 10px; font-size: 10px; font-weight: 600;
+    }
+    .sg-leaderboard {
+      background: rgba(7,7,15,0.7); border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 12px 14px;
+    }
+    .sg-lb-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .sg-lb-row:last-child { border-bottom: none; }
+    .sg-lb-rank { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; min-width: 22px; }
+    .sg-lb-name { flex: 1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); }
+    .sg-lb-score { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.55); }
+    .sg-lb-row.you .sg-lb-name { color: #00e5ff; }
+    .sg-lb-row.you .sg-lb-score { color: #00e5ff; }
   </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
+
+/* ─── FIX 1: declare _uid so nextId() works ─────────────────────── */
+var _uid = 0;
 
 const ROWS = 5, COLS = 5;
 const COLORS = ["cyan","magenta","amber","green"];
@@ -860,56 +852,56 @@ const DISTRICTS = [
 ];
 
 const CAMPAIGN_LEVELS = [
-  {id:0,  dist:"DISTRICT 1",boss:false,moves:35,bids:["apt","factory"],              hazards:0,  hint:"Swipe any row or column — the board wraps around the edges!"},
-  {id:1,  dist:"DISTRICT 1",boss:false,moves:33,bids:["apt","factory"],              hazards:0,  hint:"Match 3 or more same-color nodes in a line to charge buildings."},
-  {id:2,  dist:"DISTRICT 1",boss:false,moves:31,bids:["apt","factory","lab"],        hazards:0,  hint:"A cascade — one match triggering another — is worth double points."},
-  {id:3,  dist:"DISTRICT 1",boss:false,moves:30,bids:["apt","factory","lab"],        hazards:1,  hint:"First corrupted tile. Match the tiles right next to it to clear the rot."},
-  {id:4,  dist:"DISTRICT 1",boss:false,moves:28,bids:["apt","factory","lab"],        hazards:1,  hint:"Corruption spreads every few moves. Clear it before it blocks your chains."},
-  {id:5,  dist:"DISTRICT 1",boss:false,moves:27,bids:["apt","factory","lab"],        hazards:1,  hint:"Wrapping a tile around the edge can unlock chains you couldn't see before."},
-  {id:6,  dist:"DISTRICT 1",boss:false,moves:26,bids:["apt","factory","lab"],        hazards:2,  hint:"Look for shifts that match two different colors in one move."},
-  {id:7,  dist:"DISTRICT 1",boss:false,moves:25,bids:["apt","factory","lab"],        hazards:2,  hint:"Every shift should charge at least one building. No moves to waste."},
-  {id:8,  dist:"DISTRICT 1",boss:false,moves:24,bids:["apt","factory","lab"],        hazards:2,  hint:"A 2x2 square match fires a Battery — double charge to all buildings!"},
-  {id:9,  dist:"DISTRICT 1",boss:true, moves:28,bids:["apt","factory","lab","power"],hazards:2,  hint:"BOSS — all four buildings need power. You have enough moves. Trust your instincts."},
-  {id:10, dist:"DISTRICT 2",boss:false,moves:23,bids:["apt","factory","lab"],        hazards:3,  hint:"Three hazards. Clear at least one early before planning your main chain."},
-  {id:11, dist:"DISTRICT 2",boss:false,moves:22,bids:["apt","factory","lab","power"],hazards:3,  hint:"Four buildings now. Decide which color you need most before your first shift."},
-  {id:12, dist:"DISTRICT 2",boss:false,moves:21,bids:["apt","factory","lab","power"],hazards:3,  hint:"A plus-shape match triggers Pulse Blast — clears a full 3x3 area!"},
-  {id:13, dist:"DISTRICT 2",boss:false,moves:20,bids:["apt","factory","lab","power"],hazards:4,  hint:"Four hazards. Cluster them to one corner rather than chasing each one."},
-  {id:14, dist:"DISTRICT 2",boss:false,moves:20,bids:["factory","lab","power"],      hazards:4,  hint:"Three buildings gives breathing room. Use extra moves to clear corruption first."},
-  {id:15, dist:"DISTRICT 2",boss:false,moves:19,bids:["apt","factory","lab","power"],hazards:4,  hint:"You need cascades to win this. Set up a match that triggers two more."},
-  {id:16, dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","factory","lab","power"],hazards:5,  hint:"Five hazards spreading every 3 moves. Contain the rot before charging."},
-  {id:17, dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","lab","power"],          hazards:5,  hint:"Three buildings but tight on moves. Speed matters more than perfection."},
-  {id:18, dist:"DISTRICT 2",boss:false,moves:17,bids:["apt","factory","lab","power"],hazards:5,  hint:"Every single shift must trigger a match. Zero wasted moves from here."},
-  {id:19, dist:"DISTRICT 2",boss:true, moves:22,bids:["apt","factory","lab","power"],hazards:5,  hint:"BOSS — five hazards, four buildings. One perfect chain changes everything."},
-  {id:20, dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"Six corrupted tiles. Clear the clusters before planning long chains."},
-  {id:21, dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"No exploration moves. Plan your entire route before the first swipe."},
-  {id:22, dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","power"],      hazards:6,  hint:"Three buildings helps. Save the freed moves for the toughest color."},
-  {id:23, dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","lab","power"],hazards:7,  hint:"Seven hazards on a 5x5 board. Every clean tile is precious now."},
-  {id:24, dist:"DISTRICT 3",boss:false,moves:14,bids:["factory","lab","power"],      hazards:7,  hint:"Fourteen moves means cascades on almost every single shift."},
-  {id:25, dist:"DISTRICT 3",boss:false,moves:14,bids:["apt","factory","lab","power"],hazards:7,  hint:"Contain the rot to one side of the board. Don't let it split your color lines."},
-  {id:26, dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","factory","lab","power"],hazards:8,  hint:"Eight corrupted tiles. The board barely has room to breathe."},
-  {id:27, dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","lab","power"],          hazards:8,  hint:"Fewer buildings means you can specialize your chains on two colors."},
-  {id:28, dist:"DISTRICT 3",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Twelve moves, four buildings, heavy rot. Near-perfect play required."},
-  {id:29, dist:"DISTRICT 3",boss:true, moves:17,bids:["apt","factory","lab","power"],hazards:8,  hint:"BOSS — eight hazards, seventeen moves. Chain every shift or fail."},
-  {id:30, dist:"DISTRICT 4",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Welcome to the Underground. Nothing comes easy from here."},
-  {id:31, dist:"DISTRICT 4",boss:false,moves:11,bids:["apt","factory","lab","power"],hazards:9,  hint:"Nine corrupted tiles. Clear the cluster — don't chase the stragglers."},
-  {id:32, dist:"DISTRICT 4",boss:false,moves:11,bids:["factory","lab","power"],      hazards:9,  hint:"Three buildings still. Nine rot tiles nearly fill an entire row."},
-  {id:33, dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","factory","lab","power"],hazards:9,  hint:"Ten moves means chain reactions on every single shift. No exceptions."},
-  {id:34, dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","lab","power"],          hazards:9,  hint:"Two-fifths of the board is blocked. Find the clean diagonal lines."},
-  {id:35, dist:"DISTRICT 4",boss:false,moves:9, bids:["apt","factory","lab","power"],hazards:10, hint:"Nine moves. If you're not cascading every turn, restart and rethink your approach."},
-  {id:36, dist:"DISTRICT 4",boss:false,moves:9, bids:["factory","lab","power"],      hazards:10, hint:"Ten rot tiles, nine moves. Maximum chain efficiency. Every shift counts."},
-  {id:37, dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Eight moves. Upgrades aren't optional anymore — they're essential."},
-  {id:38, dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","power"],      hazards:10, hint:"Three buildings but ten rot tiles. The clean tiles are your only path."},
-  {id:39, dist:"DISTRICT 4",boss:true, moves:14,bids:["apt","factory","lab","power"],hazards:10, hint:"BOSS — hardest the Underground has. Maximum performance. You know what to do."},
-  {id:40, dist:"DISTRICT 5",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Core City. Only the best make it here. Show everything you know."},
-  {id:41, dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Seven moves, eleven rot tiles. Every shift must be a multi-match."},
-  {id:42, dist:"DISTRICT 5",boss:false,moves:7, bids:["factory","lab","power"],      hazards:11, hint:"Eleven corrupted tiles on a 5x5. Work with what the board gives you."},
-  {id:43, dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Find the clean lines. They're there — you just have to see them."},
-  {id:44, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","lab","power"],          hazards:11, hint:"Six moves. This is solved, not played. Think before every swipe."},
-  {id:45, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:11, hint:"Six moves, four buildings. Every bit of board knowledge you have matters now."},
-  {id:46, dist:"DISTRICT 5",boss:false,moves:6, bids:["factory","lab","power"],      hazards:12, hint:"Twelve corrupted tiles. Half the board is dead. Find the other half."},
-  {id:47, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"The most unforgiving board. Maxed upgrades and perfect play — both required."},
-  {id:48, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"One level away from the final boss. No mistakes. No wasted moves."},
-  {id:49, dist:"DISTRICT 5",boss:true, moves:12,bids:["apt","factory","lab","power"],hazards:12, hint:"FINAL BOSS — twelve corrupted tiles, twelve moves, full city power. Become a legend."},
+  {id:0,  name:"BLACKOUT BLOCK 1-1",  dist:"DISTRICT 1",boss:false,moves:35,bids:["apt","factory"],              hazards:0,  hint:"Swipe any row or column — the board wraps around the edges!"},
+  {id:1,  name:"BLACKOUT BLOCK 1-2",  dist:"DISTRICT 1",boss:false,moves:33,bids:["apt","factory"],              hazards:0,  hint:"Match 3 or more same-color nodes in a line to charge buildings."},
+  {id:2,  name:"BLACKOUT BLOCK 1-3",  dist:"DISTRICT 1",boss:false,moves:31,bids:["apt","factory","lab"],        hazards:0,  hint:"A cascade — one match triggering another — is worth double points."},
+  {id:3,  name:"BLACKOUT BLOCK 1-4",  dist:"DISTRICT 1",boss:false,moves:30,bids:["apt","factory","lab"],        hazards:1,  hint:"First corrupted tile. Match the tiles right next to it to clear the rot."},
+  {id:4,  name:"BLACKOUT BLOCK 1-5",  dist:"DISTRICT 1",boss:false,moves:28,bids:["apt","factory","lab"],        hazards:1,  hint:"Corruption spreads every few moves. Clear it before it blocks your chains."},
+  {id:5,  name:"BLACKOUT BLOCK 1-6",  dist:"DISTRICT 1",boss:false,moves:27,bids:["apt","factory","lab"],        hazards:1,  hint:"Wrapping a tile around the edge can unlock chains you couldn't see before."},
+  {id:6,  name:"BLACKOUT BLOCK 1-7",  dist:"DISTRICT 1",boss:false,moves:26,bids:["apt","factory","lab"],        hazards:2,  hint:"Look for shifts that match two different colors in one move."},
+  {id:7,  name:"BLACKOUT BLOCK 1-8",  dist:"DISTRICT 1",boss:false,moves:25,bids:["apt","factory","lab"],        hazards:2,  hint:"Every shift should charge at least one building. No moves to waste."},
+  {id:8,  name:"BLACKOUT BLOCK 1-9",  dist:"DISTRICT 1",boss:false,moves:24,bids:["apt","factory","lab"],        hazards:2,  hint:"A 2x2 square match fires a Battery — double charge to all buildings!"},
+  {id:9,  name:"BOSS: BLACKOUT BLOCK",dist:"DISTRICT 1",boss:true, moves:28,bids:["apt","factory","lab","power"],hazards:2,  hint:"BOSS — all four buildings need power. You have enough moves. Trust your instincts."},
+  {id:10, name:"INDUSTRIAL ROW 2-1",  dist:"DISTRICT 2",boss:false,moves:23,bids:["apt","factory","lab"],        hazards:3,  hint:"Three hazards. Clear at least one early before planning your main chain."},
+  {id:11, name:"INDUSTRIAL ROW 2-2",  dist:"DISTRICT 2",boss:false,moves:22,bids:["apt","factory","lab","power"],hazards:3,  hint:"Four buildings now. Decide which color you need most before your first shift."},
+  {id:12, name:"INDUSTRIAL ROW 2-3",  dist:"DISTRICT 2",boss:false,moves:21,bids:["apt","factory","lab","power"],hazards:3,  hint:"A plus-shape match triggers Pulse Blast — clears a full 3x3 area!"},
+  {id:13, name:"INDUSTRIAL ROW 2-4",  dist:"DISTRICT 2",boss:false,moves:20,bids:["apt","factory","lab","power"],hazards:4,  hint:"Four hazards. Cluster them to one corner rather than chasing each one."},
+  {id:14, name:"INDUSTRIAL ROW 2-5",  dist:"DISTRICT 2",boss:false,moves:20,bids:["factory","lab","power"],      hazards:4,  hint:"Three buildings gives breathing room. Use extra moves to clear corruption first."},
+  {id:15, name:"INDUSTRIAL ROW 2-6",  dist:"DISTRICT 2",boss:false,moves:19,bids:["apt","factory","lab","power"],hazards:4,  hint:"You need cascades to win this. Set up a match that triggers two more."},
+  {id:16, name:"INDUSTRIAL ROW 2-7",  dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","factory","lab","power"],hazards:5,  hint:"Five hazards spreading every 3 moves. Contain the rot before charging."},
+  {id:17, name:"INDUSTRIAL ROW 2-8",  dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","lab","power"],          hazards:5,  hint:"Three buildings but tight on moves. Speed matters more than perfection."},
+  {id:18, name:"INDUSTRIAL ROW 2-9",  dist:"DISTRICT 2",boss:false,moves:17,bids:["apt","factory","lab","power"],hazards:5,  hint:"Every single shift must trigger a match. Zero wasted moves from here."},
+  {id:19, name:"BOSS: INDUSTRIAL ROW",dist:"DISTRICT 2",boss:true, moves:22,bids:["apt","factory","lab","power"],hazards:5,  hint:"BOSS — five hazards, four buildings. One perfect chain changes everything."},
+  {id:20, name:"SKYLINE SECTOR 3-1",  dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"Six corrupted tiles. Clear the clusters before planning long chains."},
+  {id:21, name:"SKYLINE SECTOR 3-2",  dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"No exploration moves. Plan your entire route before the first swipe."},
+  {id:22, name:"SKYLINE SECTOR 3-3",  dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","power"],      hazards:6,  hint:"Three buildings helps. Save the freed moves for the toughest color."},
+  {id:23, name:"SKYLINE SECTOR 3-4",  dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","lab","power"],hazards:7,  hint:"Seven hazards on a 5x5 board. Every clean tile is precious now."},
+  {id:24, name:"SKYLINE SECTOR 3-5",  dist:"DISTRICT 3",boss:false,moves:14,bids:["factory","lab","power"],      hazards:7,  hint:"Fourteen moves means cascades on almost every single shift."},
+  {id:25, name:"SKYLINE SECTOR 3-6",  dist:"DISTRICT 3",boss:false,moves:14,bids:["apt","factory","lab","power"],hazards:7,  hint:"Contain the rot to one side of the board. Don't let it split your color lines."},
+  {id:26, name:"SKYLINE SECTOR 3-7",  dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","factory","lab","power"],hazards:8,  hint:"Eight corrupted tiles. The board barely has room to breathe."},
+  {id:27, name:"SKYLINE SECTOR 3-8",  dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","lab","power"],          hazards:8,  hint:"Fewer buildings means you can specialize your chains on two colors."},
+  {id:28, name:"SKYLINE SECTOR 3-9",  dist:"DISTRICT 3",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Twelve moves, four buildings, heavy rot. Near-perfect play required."},
+  {id:29, name:"BOSS: SKYLINE SECTOR",dist:"DISTRICT 3",boss:true, moves:17,bids:["apt","factory","lab","power"],hazards:8,  hint:"BOSS — eight hazards, seventeen moves. Chain every shift or fail."},
+  {id:30, name:"UNDERGROUND GRID 4-1",dist:"DISTRICT 4",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Welcome to the Underground. Nothing comes easy from here."},
+  {id:31, name:"UNDERGROUND GRID 4-2",dist:"DISTRICT 4",boss:false,moves:11,bids:["apt","factory","lab","power"],hazards:9,  hint:"Nine corrupted tiles. Clear the cluster — don't chase the stragglers."},
+  {id:32, name:"UNDERGROUND GRID 4-3",dist:"DISTRICT 4",boss:false,moves:11,bids:["factory","lab","power"],      hazards:9,  hint:"Three buildings still. Nine rot tiles nearly fill an entire row."},
+  {id:33, name:"UNDERGROUND GRID 4-4",dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","factory","lab","power"],hazards:9,  hint:"Ten moves means chain reactions on every single shift. No exceptions."},
+  {id:34, name:"UNDERGROUND GRID 4-5",dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","lab","power"],          hazards:9,  hint:"Two-fifths of the board is blocked. Find the clean diagonal lines."},
+  {id:35, name:"UNDERGROUND GRID 4-6",dist:"DISTRICT 4",boss:false,moves:9, bids:["apt","factory","lab","power"],hazards:10, hint:"Nine moves. If you're not cascading every turn, restart and rethink your approach."},
+  {id:36, name:"UNDERGROUND GRID 4-7",dist:"DISTRICT 4",boss:false,moves:9, bids:["factory","lab","power"],      hazards:10, hint:"Ten rot tiles, nine moves. Maximum chain efficiency. Every shift counts."},
+  {id:37, name:"UNDERGROUND GRID 4-8",dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Eight moves. Upgrades aren't optional anymore — they're essential."},
+  {id:38, name:"UNDERGROUND GRID 4-9",dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","power"],      hazards:10, hint:"Three buildings but ten rot tiles. The clean tiles are your only path."},
+  {id:39, name:"BOSS: UNDERGROUND",   dist:"DISTRICT 4",boss:true, moves:14,bids:["apt","factory","lab","power"],hazards:10, hint:"BOSS — hardest the Underground has. Maximum performance. You know what to do."},
+  {id:40, name:"CORE CITY 5-1",       dist:"DISTRICT 5",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Core City. Only the best make it here. Show everything you know."},
+  {id:41, name:"CORE CITY 5-2",       dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Seven moves, eleven rot tiles. Every shift must be a multi-match."},
+  {id:42, name:"CORE CITY 5-3",       dist:"DISTRICT 5",boss:false,moves:7, bids:["factory","lab","power"],      hazards:11, hint:"Eleven corrupted tiles on a 5x5. Work with what the board gives you."},
+  {id:43, name:"CORE CITY 5-4",       dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Find the clean lines. They're there — you just have to see them."},
+  {id:44, name:"CORE CITY 5-5",       dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","lab","power"],          hazards:11, hint:"Six moves. This is solved, not played. Think before every swipe."},
+  {id:45, name:"CORE CITY 5-6",       dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:11, hint:"Six moves, four buildings. Every bit of board knowledge you have matters now."},
+  {id:46, name:"CORE CITY 5-7",       dist:"DISTRICT 5",boss:false,moves:6, bids:["factory","lab","power"],      hazards:12, hint:"Twelve corrupted tiles. Half the board is dead. Find the other half."},
+  {id:47, name:"CORE CITY 5-8",       dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"The most unforgiving board. Maxed upgrades and perfect play — both required."},
+  {id:48, name:"CORE CITY 5-9",       dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"One level away from the final boss. No mistakes. No wasted moves."},
+  {id:49, name:"FINAL BOSS",          dist:"DISTRICT 5",boss:true, moves:12,bids:["apt","factory","lab","power"],hazards:12, hint:"FINAL BOSS — twelve corrupted tiles, twelve moves, full city power. Become a legend."},
 ];
 
 const IDLE_RATES = [0, 5, 12, 25];
@@ -1075,8 +1067,6 @@ function StarterPack(props){
     </div>
   );
 }
-
-
 
 /* ─── XP SYSTEM ─────────────────────────────────────────────────── */
 const XP_PER_LEVEL = 200;
@@ -1304,7 +1294,6 @@ function spreadCorruption(grid,slow){
 function countCorruption(grid){ let n=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].corrupted) n++; return n; }
 
 
-
 /* ─── TILE COMPONENT ────────────────────────────────────────────── */
 function Tile(props) {
   const tile = props.tile, isHi = props.isHi, size = props.size, slideClass = props.slideClass || "", adjacentCorrupt = props.adjacentCorrupt;
@@ -1332,27 +1321,7 @@ function Tile(props) {
   );
 }
 
-
- ─────────────────────────────────────────────────── */
-function Particles() {
-  const particles = [];
-  const cols = ["#00e5ff","#ff2d95","#ffaa00","#00ff88","#a855f7"];
-  for (let i = 0; i < 18; i++) {
-    const col = cols[i % cols.length];
-    const left = (i * 17 + 3) % 97;
-    const dur = 8 + (i * 3.7) % 14;
-    const delay = -(i * 2.1) % dur;
-    const size = 1.5 + (i % 3);
-    particles.push(
-      <div key={i} className="sg-particle" style={{left: left+"%", bottom: "-4px", width: size+"px", height: size+"px", background: col, boxShadow: "0 0 6px "+col, animationDuration: dur+"s", animationDelay: delay+"s"}}/>
-    );
-  }
-  return <div className="sg-particles">{particles}</div>;
-}
-
-
-
-/* ─── PARTICLES ─────────────────────────────────────────────────── */
+/* ─── FIX 2: single Particles definition (duplicate removed) ─────── */
 function Particles() {
   var particles = [];
   var cols = ["#00e5ff","#ff2d95","#ffaa00","#00ff88","#a855f7"];
@@ -1398,7 +1367,6 @@ function GameBoard(props) {
   const [slideAnim,setSlideAnim]=useState(null);
   const [moveCount,setMoveCount]=useState(0);
   const [showAd,setShowAd]=useState(false);
-  const [showPack,setShowPack]=useState(false);
   const timers=useRef([]);
   const gridRef=useRef(null);
   const touchRef=useRef({startX:0,startY:0,startRow:-1,startCol:-1,moved:false});
@@ -1417,14 +1385,11 @@ function GameBoard(props) {
     if(phase!=="idle") return;
     timers.current.forEach(clearTimeout); timers.current=[];
 
-    /* 1 — start slide animation, lock phase */
     setSlideAnim({type:type,idx:idx,dir:dir});
     setPhase("busy");
     Audio.shift();
-    Audio.shift();
 
     later(function(){
-      /* 2 — after slide completes: run game logic with captured closure values */
       setSlideAnim(null);
 
       let g=doShift(grid,type,idx,dir);
@@ -1494,8 +1459,8 @@ function GameBoard(props) {
     if(phase!=="idle") return;
     const touch=e.touches[0];
     const rect=gridRef.current.getBoundingClientRect();
-    const relX=touch.clientX-rect.left-(SZ+GAP); /* offset for left arrow col */
-    const relY=touch.clientY-rect.top-(SZ+GAP);  /* offset for top arrow row */
+    const relX=touch.clientX-rect.left-(SZ+GAP);
+    const relY=touch.clientY-rect.top-(SZ+GAP);
     touchRef.current={
       startX:touch.clientX, startY:touch.clientY,
       startRow:Math.floor(relY/(SZ+GAP)),
@@ -1518,10 +1483,8 @@ function GameBoard(props) {
     const THRESH=32;
     if(absDx<THRESH&&absDy<THRESH) return;
     if(absDx>absDy){
-      /* horizontal → row */
       if(t.startRow>=0&&t.startRow<ROWS) handleShift("row",t.startRow,dx>0?"right":"left");
     } else {
-      /* vertical → col */
       if(t.startCol>=0&&t.startCol<COLS) handleShift("col",t.startCol,dy>0?"down":"up");
     }
   }
@@ -1547,13 +1510,16 @@ function GameBoard(props) {
   const movesUsed=levelDef.moves-moves;
   const stars=calcStars(movesUsed,levelDef.moves);
 
+  /* ─── FIX 3: safe level name for campaign levels ────────────────── */
+  const displayName = levelDef.name || (levelDef.dist ? levelDef.dist + " · LVL " + ((levelDef.id||0)+1) : "CUSTOM LEVEL");
+
   return (
     <div className="sg-play">
       <div className="sg-play-top">
         <button className="sg-back" onClick={onBack}>←</button>
         <div style={{textAlign:"center"}}>
           {levelDef.isDaily&&<div className="sg-daily-badge">DAILY CHALLENGE</div>}
-          <div className="sg-lvl-label">{levelDef.name}</div>
+          <div className="sg-lvl-label">{displayName}</div>
         </div>
         <div className="sg-score-live">{score.toLocaleString()}</div>
       </div>
@@ -1599,7 +1565,6 @@ function GameBoard(props) {
 
         {/* Rows */}
         {grid.map(function(row,r){
-          /* Determine slide class for this row */
           const rowSlide = slideAnim&&slideAnim.type==="row"&&slideAnim.idx===r ? ("slide-"+(slideAnim.dir==="left"?"left":"right")) : "";
           return (
             <div key={r} className="sg-grid-row">
@@ -1657,7 +1622,7 @@ function GameBoard(props) {
           <div className="sg-modal">
             <span className="sg-modal-icon">⚡</span>
             <div className="sg-modal-title" style={{background:"linear-gradient(135deg,#ffaa00,#00ff88)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>DISTRICT POWERED!</div>
-            <div className="sg-modal-sub">{levelDef.name}</div>
+            <div className="sg-modal-sub">{displayName}</div>
             <div style={{fontSize:22,color:"#ffaa00",letterSpacing:"0.12em",margin:"6px 0"}}>{renderStars(stars)}</div>
             <div className="sg-modal-rewards">
               <div className="sg-reward-chip">{"+" + winCoins} <span style={{color:"#ffaa00"}}>coins</span></div>
@@ -1688,8 +1653,6 @@ function GameBoard(props) {
 }
 
 
-
-
 /* ─── XP BAR COMPONENT ──────────────────────────────────────────── */
 function XPBar(props) {
   var xpData = props.xpData;
@@ -1707,12 +1670,11 @@ function XPBar(props) {
   );
 }
 
-/* ─── CITY OVERVIEW ──────────────────────────────────────────────── */
+/* ─── CITY OVERVIEW ─────────────────────────────────────────────── */
 function CityOverview(props) {
   var levelsCleared = props.levelsCleared || [];
   var totalLevels = 50;
   var totalStars = Object.values(props.stars || {}).reduce(function(a,b){return a+b;},0);
-  var totalPossible = levelsCleared.length * 3;
 
   var buildings = [
     {color:"#00e5ff",  h:90, w:18, windows:[3,3,3,3]},
@@ -1743,7 +1705,7 @@ function CityOverview(props) {
                 boxShadow: lit ? ("0 0 20px " + b.color + "33, 0 -4px 12px " + b.color + "44") : "none",
               }}>
               <div className="sg-building-windows" style={{gridTemplateColumns: "repeat(" + b.windows[0] + ", 1fr)", gap: "2px", padding: "4px 3px"}}>
-                {b.windows.reduce(function(a,c){return a+c;},0) > 0 && b.windows.map(function(rowCount, ri) {
+                {b.windows.map(function(rowCount, ri) {
                   return Array.from({length: rowCount}).map(function(_, ci) {
                     return (
                       <div key={ri+"-"+ci} className="sg-window" style={{
@@ -1978,8 +1940,6 @@ function WeeklyTab(props) {
   );
 }
 
-/* ─── UPDATED CITY TAB (with City Overview + Streak) ────────────── */
-
 /* ─── CITY TAB ──────────────────────────────────────────────────── */
 function CityTab(props) {
   var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData;
@@ -2074,7 +2034,6 @@ function DailyTab(props) {
     </div>
   );
 }
-
 
 /* ─── EDITOR TAB ────────────────────────────────────────────────── */
 function EditorTab(props) {
@@ -2184,8 +2143,6 @@ function EditorTab(props) {
     </div>
   );
 }
-
-
 
 /* ─── CAMPAIGN TAB ──────────────────────────────────────────────── */
 function CampaignTab(props) {
@@ -2308,11 +2265,11 @@ function Shiftgrid() {
     saveXP(newXP); setXpData(newXP);
     if(leveledUp){ setShowXPUp(true); setTimeout(function(){ setShowXPUp(false); },2500); }
 
-    /* Streak — mark today as played */
+    /* Streak */
     var newStreak=checkAndUpdateStreak(streak);
     setStreak(newStreak);
 
-    /* Challenges — update progress */
+    /* Challenges */
     if(challengeData){
       var today=todayStr();
       var seed=parseInt(today.replace(/-/g,""));
@@ -2433,8 +2390,6 @@ function Shiftgrid() {
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Shiftgrid/>);
-
 </script>
-
 </body>
 </html>
