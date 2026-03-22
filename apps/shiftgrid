@@ -355,6 +355,579 @@
 }
 .sg-trophy-label.done { color: #ffaa00; }
 
+/* ══════════════════════════════════════
+   PHASE 1 — NEW SYSTEMS
+══════════════════════════════════════ */
+
+/* ── PRE-LEVEL SCREEN ── */
+.sg-prelevel {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(7,7,15,0.97);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(12px);
+  animation: overlay-in 0.3s ease;
+  overflow-y: auto;
+}
+.sg-prelevel-card {
+  width: 100%; max-width: 360px;
+  background: rgba(13,13,26,0.98);
+  border-radius: 24px; padding: 24px 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+.sg-prelevel-eyebrow { font-size: 9px; letter-spacing: 0.22em; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+.sg-prelevel-name    { font-family:'Orbitron',monospace; font-size:18px; font-weight:900; letter-spacing:0.08em; margin-bottom:6px; }
+.sg-prelevel-hint    { font-size:12px; color:rgba(255,255,255,0.42); line-height:1.6; margin-bottom:16px; }
+.sg-prelevel-stats   { display:flex; gap:8px; margin-bottom:18px; }
+.sg-prelevel-stat    { flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:10px 6px; text-align:center; }
+.sg-prelevel-stat-val{ font-family:'Orbitron',monospace; font-size:18px; font-weight:700; }
+.sg-prelevel-stat-lbl{ font-size:8px; color:rgba(255,255,255,0.3); letter-spacing:0.1em; margin-top:2px; }
+
+/* Booster loadout */
+.sg-prelevel-loadout-lbl { font-size:9px; letter-spacing:0.14em; color:rgba(255,255,255,0.3); margin-bottom:8px; }
+.sg-booster-row  { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+.sg-booster-slot {
+  flex:1; min-width:70px; border-radius:14px; border:2px solid;
+  padding:10px 6px; text-align:center; cursor:pointer;
+  transition:all 0.15s; position:relative;
+}
+.sg-booster-slot.selected { transform:scale(1.04); }
+.sg-booster-slot.empty-slot { border-style:dashed; opacity:0.4; cursor:default; }
+.sg-booster-icon { font-size:24px; display:block; margin-bottom:4px; }
+.sg-booster-name { font-size:9px; font-weight:700; letter-spacing:0.04em; }
+.sg-booster-count{ position:absolute; top:4px; right:6px; font-family:'Orbitron',monospace; font-size:8px; font-weight:900; color:#fff; background:rgba(0,0,0,0.7); border-radius:4px; padding:1px 4px; }
+.sg-booster-check{ position:absolute; top:-6px; left:-6px; width:18px; height:18px; border-radius:50%; background:#00ff88; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; color:#06060f; }
+
+.sg-prelevel-launch {
+  width:100%; border:none; border-radius:14px; padding:16px;
+  font-family:'Orbitron',monospace; font-size:12px; font-weight:900;
+  cursor:pointer; letter-spacing:0.12em; transition:all 0.15s;
+  margin-bottom:10px;
+}
+.sg-prelevel-launch:hover { transform:scale(1.02); }
+.sg-prelevel-skip {
+  width:100%; background:none; border:none; color:rgba(255,255,255,0.25);
+  font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:700;
+  cursor:pointer; padding:8px; letter-spacing:0.08em;
+}
+
+/* Episode narrative banner */
+.sg-episode-banner {
+  border-radius:14px; padding:14px 16px; margin-bottom:14px;
+  border:1px solid; position:relative; overflow:hidden;
+}
+.sg-episode-banner::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+}
+.sg-episode-tag  { font-size:8px; letter-spacing:0.2em; font-weight:700; margin-bottom:4px; }
+.sg-episode-title{ font-family:'Orbitron',monospace; font-size:13px; font-weight:900; letter-spacing:0.08em; margin-bottom:6px; }
+.sg-episode-body { font-size:11px; line-height:1.65; color:rgba(255,255,255,0.5); }
+
+/* ── STAR CHAIN METER ── */
+.sg-star-chain-bar {
+  margin:0 14px 10px; position:relative;
+}
+.sg-star-chain-label {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;
+}
+.sg-star-chain-lbl  { font-size:9px; letter-spacing:0.12em; color:rgba(255,255,255,0.3); }
+.sg-star-chain-count{ font-family:'Orbitron',monospace; font-size:9px; font-weight:700; color:#ffaa00; }
+.sg-star-chain-track{ height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.sg-star-chain-fill {
+  height:100%; border-radius:3px;
+  background:linear-gradient(90deg,#ffaa00,#ff7700);
+  transition:width 0.6s ease;
+  box-shadow:0 0 6px rgba(255,170,0,0.5);
+}
+.sg-star-chain-pips { display:flex; justify-content:space-between; margin-top:4px; }
+.sg-star-pip { font-size:10px; opacity:0.3; transition:opacity 0.3s; }
+.sg-star-pip.lit { opacity:1; filter:drop-shadow(0 0 4px #ffaa00); }
+
+/* Star chain reward burst */
+.sg-star-chain-burst {
+  position:fixed; inset:0; z-index:700; pointer-events:none;
+  display:flex; align-items:center; justify-content:center;
+  animation:overlay-in 0.2s ease;
+}
+.sg-scb-inner {
+  text-align:center;
+  animation:modal-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.sg-scb-icon  { font-size:72px; display:block; margin-bottom:8px; animation:du-bounce 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+.sg-scb-title { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:#ffaa00; text-shadow:0 0 20px rgba(255,170,0,0.6); margin-bottom:6px; }
+.sg-scb-sub   { font-size:12px; color:rgba(255,255,255,0.5); }
+
+/* ── MASTER CHALLENGE badge on level node ── */
+.sg-master-badge {
+  position:absolute; top:-5px; right:-5px;
+  width:18px; height:18px; border-radius:50%;
+  background:linear-gradient(135deg,#a855f7,#ff2d95);
+  display:flex; align-items:center; justify-content:center;
+  font-size:9px; font-weight:900; color:#fff;
+  box-shadow:0 0 8px rgba(168,85,247,0.5);
+}
+
+/* ── COMEBACK INDICATOR (subtle, just for UX) ── */
+.sg-comeback-hint {
+  font-size:9px; color:rgba(0,255,136,0.5); letter-spacing:0.08em;
+  text-align:center; padding:3px 0; flex-shrink:0;
+}
+
+/* ── COMBO POWER METER ── */
+.sg-combo-meter {
+  position:absolute; right:0; top:0; bottom:0; width:8px;
+  border-radius:0 0 4px 4px; overflow:hidden;
+  background:rgba(255,255,255,0.05);
+  display:flex; flex-direction:column-reverse;
+}
+.sg-combo-fill {
+  width:100%; border-radius:0 0 4px 4px;
+  transition:height 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.sg-combo-meter-wrap {
+  position:relative; display:flex; align-items:center; justify-content:center;
+}
+
+/* ══════════════════════════════════════
+   PHASE 2 — OBJECTIVE TYPES + COMBO METER
+══════════════════════════════════════ */
+
+/* ── OBJECTIVE TYPE HUD BADGE ── */
+.sg-objective-badge {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 14px 4px; padding: 7px 12px;
+  border-radius: 10px; border: 1.5px solid; flex-shrink: 0;
+  animation: banner-in 0.3s ease;
+}
+.sg-obj-icon { font-size: 16px; flex-shrink: 0; }
+.sg-obj-label { font-size: 8px; font-weight: 700; letter-spacing: 0.12em; }
+.sg-obj-desc  { font-size: 9px; color: rgba(255,255,255,0.45); }
+
+/* ── RACE THE CLOCK ── */
+.sg-timer-display {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 60px;
+}
+.sg-timer-val {
+  font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900;
+  transition: color 0.3s;
+  line-height: 1;
+}
+.sg-timer-val.urgent { color: #ff2d95 !important; animation: timer-pulse 0.5s ease infinite alternate; }
+@keyframes timer-pulse { from{text-shadow:none} to{text-shadow:0 0 14px #ff2d95} }
+.sg-timer-arc {
+  width: 48px; height: 48px; transform: rotate(-90deg);
+}
+
+/* ── CONTAINMENT ZONE ── */
+.sg-contain-line {
+  position: absolute; left: 0; right: 0;
+  height: 2px; z-index: 20; pointer-events: none;
+  transition: top 0.2s;
+}
+.sg-contain-line::before {
+  content: 'HOLD THIS LINE'; position: absolute;
+  right: 0; top: -12px;
+  font-size: 7px; font-weight: 700; letter-spacing: 0.12em;
+  color: rgba(255,45,149,0.7);
+}
+.sg-contain-breach {
+  position: fixed; inset: 0; z-index: 998; pointer-events: none;
+  background: rgba(255,45,149,0.12);
+  animation: ability-flash 0.4s ease forwards;
+}
+
+/* ── COMBO POWER METER ── */
+.sg-combo-power-wrap {
+  margin: 0 14px 4px; flex-shrink: 0;
+}
+.sg-combo-power-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;
+}
+.sg-combo-power-lbl { font-size: 8px; letter-spacing: 0.12em; color: rgba(255,255,255,0.25); }
+.sg-combo-power-rank {
+  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 900;
+  letter-spacing: 0.1em; transition: all 0.3s;
+}
+.sg-combo-power-track {
+  height: 8px; background: rgba(255,255,255,0.05);
+  border-radius: 4px; overflow: hidden; position: relative;
+}
+.sg-combo-power-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+.sg-combo-power-fill::after {
+  content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
+  background: rgba(255,255,255,0.6); border-radius: 0 4px 4px 0;
+  filter: blur(1px);
+}
+.sg-combo-power-rankup {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  z-index: 900; pointer-events: none;
+  font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900;
+  letter-spacing: 0.14em; white-space: nowrap;
+  animation: rank-up 1.2s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes rank-up {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(0.6); }
+  20%  { opacity:1; transform:translate(-50%,-50%) scale(1.1); }
+  70%  { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  100% { opacity:0; transform:translate(-50%,-50%) scale(0.9); }
+}
+
+/* ── COLLECT TILES ── */
+.sg-tile.collect-target {
+  animation: collect-target-pulse 1s ease infinite alternate !important;
+}
+@keyframes collect-target-pulse {
+  from { box-shadow: 0 0 8px rgba(255,255,255,0.4); }
+  to   { box-shadow: 0 0 20px rgba(255,255,255,0.7), inset 0 0 8px rgba(255,255,255,0.2); }
+}
+.sg-tile.collect-target::after {
+  content: '◎'; position: absolute;
+  font-size: 14px; color: rgba(255,255,255,0.8);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none; z-index: 5;
+}
+
+/* Collect counter badge */
+.sg-collect-counter {
+  font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900;
+}
+
+/* ── DIFFICULTY SPIKE (every 5th level) ── */
+.sg-level-node.spike-level .sg-level-node-icon::after {
+  content: '🔥'; font-size: 8px; position: absolute; top: -2px; right: -2px;
+}
+/* ══════════════════════════════════════
+   PHASE 3 — CITY EVOLUTION + CHARACTER + SEASON PASS
+══════════════════════════════════════ */
+
+/* ── EVOLVED CITY SKYLINE ── */
+.sg-city-scene {
+  position: relative; width: 100%; overflow: hidden;
+  border-radius: 14px; margin-bottom: 12px;
+  background: linear-gradient(180deg, #07070f 0%, #0d0d20 60%, #111128 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+/* Sky layers — stars, aurora glow */
+.sg-city-sky {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.sg-sky-star {
+  position: absolute; border-radius: 50%;
+  background: #fff; animation: star-twinkle var(--dur,3s) ease infinite alternate;
+}
+@keyframes star-twinkle {
+  from { opacity: var(--lo, 0.2); }
+  to   { opacity: var(--hi, 0.8); }
+}
+/* Ground and road */
+.sg-city-ground {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 18px;
+  background: linear-gradient(180deg, #0a0a18, #0d0d1e);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.sg-city-road {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 8px;
+  background: #0d0d1e;
+}
+.sg-road-stripe {
+  position: absolute; bottom: 3px; height: 2px; width: 24px;
+  background: rgba(255,255,255,0.12); border-radius: 1px;
+  animation: road-scroll 3s linear infinite;
+}
+@keyframes road-scroll { from{right:-30px} to{right:110%} }
+/* District labels on ground */
+.sg-dist-label {
+  position: absolute; bottom: 20px;
+  font-size: 6px; letter-spacing: 0.16em; font-weight: 700;
+  transform: translateX(-50%);
+  opacity: 0.4; transition: opacity 0.5s;
+}
+.sg-dist-label.active { opacity: 0.9; }
+/* Animated construction crane on locked districts */
+.sg-crane {
+  position: absolute; bottom: 18px;
+  font-size: 20px; pointer-events: none;
+  animation: crane-sway 4s ease infinite alternate;
+  transform-origin: bottom center;
+}
+@keyframes crane-sway { from{transform:rotate(-3deg)} to{transform:rotate(3deg)} }
+/* Victory fireworks on complete district */
+.sg-firework {
+  position: absolute; pointer-events: none;
+  animation: firework-burst 1s ease forwards;
+}
+@keyframes firework-burst {
+  0%  { transform: scale(0); opacity: 1; }
+  60% { transform: scale(1.5); opacity: 1; }
+  100%{ transform: scale(2); opacity: 0; }
+}
+/* Building evolution states */
+.sg-city-building.ruins {
+  filter: brightness(0.3) saturate(0);
+}
+.sg-city-building.repairing {
+  animation: repair-flicker 0.8s ease infinite alternate;
+}
+@keyframes repair-flicker {
+  from { filter: brightness(0.4) saturate(0.3); }
+  to   { filter: brightness(0.7) saturate(0.7); }
+}
+.sg-city-building.restored {
+  filter: none;
+}
+.sg-city-building.glowing {
+  filter: drop-shadow(0 0 8px var(--bcolor,#00e5ff));
+}
+/* City stats bar */
+.sg-city-stats-bar {
+  display: flex; gap: 10px; margin-bottom: 10px;
+}
+.sg-city-stat-pill {
+  flex: 1; background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 8px 10px; text-align: center;
+}
+.sg-city-stat-pill-val { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; }
+.sg-city-stat-pill-lbl { font-size:8px; color:rgba(255,255,255,0.3); letter-spacing:0.1em; margin-top:2px; }
+
+/* ── POWER ENGINEER CHARACTER ── */
+.sg-engineer-card {
+  border-radius: 16px; padding: 14px 16px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 14px;
+  border: 1px solid; position: relative; overflow: hidden;
+}
+.sg-engineer-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 60%);
+}
+.sg-engineer-avatar {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; flex-shrink: 0; position: relative;
+  background: rgba(255,255,255,0.06);
+}
+.sg-engineer-rank-badge {
+  position: absolute; bottom: -5px; right: -5px;
+  background: var(--rank-color,#00e5ff); border-radius: 6px;
+  font-size: 8px; font-weight: 900; color: #06060f;
+  padding: 2px 5px; font-family: 'Orbitron',monospace;
+}
+.sg-engineer-name { font-family:'Orbitron',monospace; font-size:13px; font-weight:900; letter-spacing:0.08em; margin-bottom:3px; }
+.sg-engineer-title { font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:6px; }
+.sg-engineer-xp-wrap { }
+.sg-engineer-xp-bar { height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; margin-top:4px; }
+.sg-engineer-xp-fill { height:100%; border-radius:3px; transition:width 0.8s ease; }
+.sg-engineer-dialogue {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 9px 12px; margin-top: 10px;
+  font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.55;
+  position: relative;
+}
+.sg-engineer-dialogue::before {
+  content: '"'; font-size: 24px; color: rgba(255,255,255,0.1);
+  position: absolute; top: 2px; left: 8px; line-height: 1;
+}
+
+/* ── SEASON PASS ── */
+.sg-season-header {
+  border-radius: 18px; overflow: hidden; margin-bottom: 12px;
+  position: relative;
+}
+.sg-season-header-bg {
+  padding: 20px 18px 14px;
+  background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(255,45,149,0.08));
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 18px;
+}
+.sg-season-name { font-family:'Orbitron',monospace; font-size:14px; font-weight:900; letter-spacing:0.12em; margin-bottom:3px; }
+.sg-season-subtitle { font-size:10px; color:rgba(255,255,255,0.35); margin-bottom:12px; }
+.sg-season-xp-bar { height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; }
+.sg-season-xp-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#a855f7,#ff2d95); transition:width 0.8s ease; box-shadow:0 0 8px rgba(168,85,247,0.4); }
+.sg-season-tier-lbl { display:flex; justify-content:space-between; margin-top:4px; font-size:8px; color:rgba(255,255,255,0.25); letter-spacing:0.1em; }
+
+/* Season pass tier track */
+.sg-pass-track { position:relative; padding:4px 0 8px; }
+.sg-pass-rail {
+  position:absolute; top:28px; left:24px; right:24px; height:3px;
+  background:rgba(255,255,255,0.07); border-radius:2px;
+}
+.sg-pass-rail-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#a855f7,#ff2d95); transition:width 0.8s ease; }
+.sg-pass-nodes { display:flex; justify-content:space-between; align-items:flex-start; position:relative; }
+.sg-pass-node { display:flex; flex-direction:column; align-items:center; gap:4px; width:46px; cursor:pointer; }
+.sg-pass-gem {
+  width:34px; height:34px; border-radius:10px; border:2px solid;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; transition:all 0.25s; position:relative; flex-shrink:0;
+}
+.sg-pass-gem.earned  { animation:gem-glow 2s ease infinite; }
+.sg-pass-gem.current { animation:gem-pulse 0.7s ease infinite alternate; border-color:#a855f7; }
+.sg-pass-gem.locked  { opacity:0.3; filter:grayscale(0.8); }
+.sg-pass-lbl { font-size:7px; color:rgba(255,255,255,0.3); letter-spacing:0.06em; text-align:center; }
+.sg-pass-premium {
+  position:absolute; top:-6px; right:-6px; background:linear-gradient(135deg,#ffaa00,#ff7700);
+  border-radius:4px; font-size:6px; font-weight:900; color:#06060f; padding:1px 4px;
+}
+.sg-pass-claim-btn {
+  width:100%; border:none; border-radius:10px; padding:10px;
+  font-family:'Orbitron',monospace; font-size:10px; font-weight:700;
+  cursor:pointer; letter-spacing:0.1em; margin-top:10px;
+  background:linear-gradient(135deg,#a855f7,#ff2d95);
+  color:#fff; box-shadow:0 0 16px rgba(168,85,247,0.3);
+}
+.sg-pass-claim-btn:disabled { opacity:0.3; cursor:default; box-shadow:none; background:rgba(255,255,255,0.08); }
+/* ══════════════════════════════════════
+   PHASE 4 — SQUAD + GIFTING + BRACKET
+══════════════════════════════════════ */
+
+/* ── SQUAD CARD ── */
+.sg-squad-card {
+  border-radius: 18px; padding: 18px 16px; margin-bottom: 12px;
+  background: rgba(13,13,26,0.98);
+  border: 1px solid rgba(255,255,255,0.08);
+  position: relative; overflow: hidden;
+}
+.sg-squad-banner {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.sg-squad-name {
+  font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900;
+  letter-spacing: 0.1em; margin-bottom: 3px;
+}
+.sg-squad-tag   { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.14em; margin-bottom: 12px; }
+.sg-squad-members { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.sg-squad-member {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 8px 12px; flex: 1; min-width: 130px;
+}
+.sg-squad-member.you { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.06); }
+.sg-squad-avatar { font-size: 22px; flex-shrink: 0; }
+.sg-squad-member-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.8); }
+.sg-squad-member-stat { font-size: 9px; color: rgba(255,255,255,0.35); margin-top:1px; }
+.sg-squad-member-online { width: 7px; height: 7px; border-radius: 50%; background: #00ff88; flex-shrink: 0; box-shadow: 0 0 4px #00ff88; }
+
+/* Squad objective */
+.sg-squad-objective {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
+}
+.sg-squad-obj-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.sg-squad-obj-title  { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; color: rgba(255,255,255,0.5); }
+.sg-squad-obj-reward { font-size: 9px; color: #ffaa00; font-weight: 700; }
+.sg-squad-obj-name   { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900; margin-bottom: 4px; }
+.sg-squad-obj-desc   { font-size: 10px; color: rgba(255,255,255,0.38); margin-bottom: 10px; line-height: 1.5; }
+.sg-squad-progress-track { height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+.sg-squad-progress-fill  {
+  height: 100%; border-radius: 4px; transition: width 0.6s ease;
+  background: linear-gradient(90deg, #a855f7, #ff2d95);
+  box-shadow: 0 0 8px rgba(168,85,247,0.4);
+}
+.sg-squad-progress-nums { display: flex; justify-content: space-between; font-size: 8px; color: rgba(255,255,255,0.25); margin-top: 4px; letter-spacing: 0.08em; }
+
+/* Create squad */
+.sg-create-squad {
+  border-radius: 18px; padding: 28px 20px; text-align: center;
+  border: 2px dashed rgba(255,255,255,0.1); background: rgba(255,255,255,0.02);
+  margin-bottom: 12px;
+}
+.sg-squad-input {
+  width: 100%; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+  padding: 12px 14px; color: #fff; font-family: 'Orbitron', monospace;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  outline: none; text-align: center; margin: 12px 0;
+}
+.sg-squad-input::placeholder { color: rgba(255,255,255,0.2); }
+
+/* ── GIFTING ── */
+.sg-gift-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.sg-gift-card {
+  flex: 1; border-radius: 14px; padding: 14px 10px; text-align: center;
+  border: 1px solid; cursor: pointer; transition: all 0.15s; position: relative;
+}
+.sg-gift-card:hover { transform: scale(1.04); }
+.sg-gift-card:active { transform: scale(0.96); }
+.sg-gift-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+.sg-gift-name { font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+.sg-gift-cost { font-size: 9px; color: rgba(255,255,255,0.35); }
+.sg-gift-sent-badge {
+  position: absolute; top: -5px; right: -5px; background: #00ff88;
+  border-radius: 50%; width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #06060f; font-weight: 900;
+}
+.sg-inbox-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 12px; padding: 11px 14px; margin-bottom: 7px;
+}
+.sg-inbox-icon { font-size: 22px; flex-shrink: 0; }
+.sg-inbox-text { flex: 1; font-size: 11px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+.sg-inbox-claim {
+  border: none; border-radius: 8px; padding: 7px 14px;
+  font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.08em; flex-shrink: 0;
+  background: #00ff88; color: #06060f; transition: all 0.15s;
+}
+.sg-inbox-claim:hover { transform: scale(1.05); }
+
+/* ── BRACKET TOURNAMENT ── */
+.sg-bracket-hero {
+  border-radius: 18px; padding: 20px 16px; margin-bottom: 12px;
+  position: relative; overflow: hidden; text-align: center;
+  background: linear-gradient(135deg, rgba(255,170,0,0.12), rgba(255,45,149,0.08));
+  border: 1px solid rgba(255,170,0,0.35);
+}
+.sg-bracket-title {
+  font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900;
+  letter-spacing: 0.12em; margin-bottom: 4px; color: #ffaa00;
+  text-shadow: 0 0 16px rgba(255,170,0,0.4);
+}
+.sg-bracket-sub { font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
+.sg-bracket-phase {
+  display: inline-block; background: rgba(255,170,0,0.15);
+  border: 1px solid rgba(255,170,0,0.4); border-radius: 8px;
+  padding: 4px 12px; font-size: 9px; font-weight: 700;
+  color: #ffaa00; letter-spacing: 0.1em; margin-bottom: 14px;
+}
+
+/* Bracket tree */
+.sg-bracket-tree { position: relative; margin-bottom: 14px; }
+.sg-bracket-round { display: flex; flex-direction: column; gap: 6px; }
+.sg-bracket-match {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; overflow: hidden;
+}
+.sg-bracket-player {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  transition: background 0.2s;
+}
+.sg-bracket-player.winner { background: rgba(255,170,0,0.1); border-left: 3px solid #ffaa00; }
+.sg-bracket-player.loser  { opacity: 0.45; }
+.sg-bracket-player.you    { font-weight: 700; }
+.sg-bracket-player-name   { flex: 1; font-size: 11px; color: rgba(255,255,255,0.8); }
+.sg-bracket-player-score  { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; }
+.sg-bracket-divider { height: 1px; background: rgba(255,255,255,0.05); }
+.sg-bracket-round-label {
+  font-size: 8px; letter-spacing: 0.18em; color: rgba(255,255,255,0.25);
+  text-align: center; margin-bottom: 6px; margin-top: 10px;
+}
+
+/* Prize pool */
+.sg-prize-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.sg-prize-card {
+  flex: 1; border-radius: 12px; padding: 10px 8px; text-align: center;
+  border: 1px solid; background: rgba(255,255,255,0.03);
+}
+.sg-prize-place { font-size: 16px; margin-bottom: 4px; }
+.sg-prize-amount { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; }
+.sg-prize-label { font-size: 8px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-top: 2px; }
 /* ── PORTRAIT LOCK ── */
 #sg-landscape-block {
   display: none;
@@ -704,44 +1277,195 @@
 .sg-fail-line:last-child { margin-bottom: 0; }
 .sg-fail-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-/* ── ABILITIES BAR ── */
+/* ══════════════════════════════════════════
+   ABILITIES — COMPLETE OVERHAUL
+══════════════════════════════════════════ */
+
+/* ── ABILITY BAR ── */
 .sg-abilities-bar {
-  display: flex; gap: 8px; padding: 6px 14px 2px;
-  flex-shrink: 0; align-items: center;
+  display: flex; gap: 6px; padding: 4px 14px 2px;
+  flex-shrink: 0; align-items: flex-end;
 }
+.sg-abilities-label {
+  font-size: 7px; letter-spacing: 0.14em; color: rgba(255,255,255,0.2);
+  writing-mode: horizontal-tb; padding-bottom: 4px; flex-shrink: 0;
+}
+
+/* ── ABILITY BUTTON ── */
 .sg-ability-btn {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  width: 52px; height: 56px; border-radius: 13px; border: 1.5px solid;
-  background: rgba(255,255,255,0.04); cursor: pointer;
-  transition: all 0.15s; position: relative; flex-shrink: 0;
-  padding: 6px 4px 4px;
+  width: 54px; height: 60px; border-radius: 14px; border: 2px solid;
+  background: rgba(10,10,20,0.9); cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+  position: relative; flex-shrink: 0; padding: 7px 4px 4px;
+  overflow: hidden;
 }
-.sg-ability-btn:hover:not(:disabled) { transform: scale(1.07); }
-.sg-ability-btn:active:not(:disabled) { transform: scale(0.94); }
-.sg-ability-btn:disabled { opacity: 0.28; cursor: default; }
-.sg-ability-btn.active-ability {
-  animation: ability-ready 1s ease infinite alternate;
+.sg-ability-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 60%);
+  pointer-events: none;
 }
-@keyframes ability-ready {
-  from { box-shadow: 0 0 6px currentColor; }
-  to   { box-shadow: 0 0 16px currentColor, 0 0 32px currentColor; }
+.sg-ability-btn:hover:not(:disabled) { transform: scale(1.08) translateY(-2px); }
+.sg-ability-btn:active:not(:disabled) { transform: scale(0.93); }
+.sg-ability-btn:disabled { opacity: 0.22; cursor: default; filter: grayscale(0.6); }
+
+/* ARMED state — ability has been activated, waiting for use */
+.sg-ability-btn.armed {
+  border-width: 2px;
+  animation: ability-armed 0.7s ease infinite alternate;
 }
-.sg-ability-btn.used {
-  opacity: 0.22; filter: grayscale(0.7);
+@keyframes ability-armed {
+  from { box-shadow: 0 0 8px var(--acolor,#ffaa00), 0 0 0px var(--acolor,#ffaa00) inset; transform: scale(1); }
+  to   { box-shadow: 0 0 22px var(--acolor,#ffaa00), 0 0 8px var(--acolor,#ffaa00) inset; transform: scale(1.05) translateY(-2px); }
 }
+.sg-ability-btn.armed::after {
+  content: 'ARMED'; position: absolute; bottom: 2px; left: 0; right: 0;
+  text-align: center; font-size: 6px; font-weight: 900; letter-spacing: 0.12em;
+  color: var(--acolor,#ffaa00); font-family: 'Orbitron', monospace;
+}
+
 .sg-ability-icon { font-size: 22px; line-height: 1; }
 .sg-ability-count {
-  position: absolute; top: 3px; right: 5px;
-  font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 900;
-  color: #fff; background: rgba(0,0,0,0.6); border-radius: 4px;
-  padding: 1px 3px; line-height: 1.2;
+  position: absolute; top: 4px; right: 5px;
+  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 900;
+  color: #fff; background: rgba(0,0,0,0.75); border-radius: 5px;
+  padding: 1px 4px; line-height: 1.3;
 }
-.sg-ability-name { font-size: 7px; letter-spacing: 0.04em; font-weight: 700; }
+.sg-ability-name { font-size: 7px; letter-spacing: 0.04em; font-weight: 700; margin-top: 1px; }
+
+/* ── ACTIVATION CINEMATIC ── */
+.sg-ability-cinematic {
+  position: fixed; inset: 0; z-index: 1500; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  animation: cinematic-in-out 2s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes cinematic-in-out {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.sg-ability-cinematic-bg {
+  position: absolute; inset: 0;
+  background: var(--cbg, rgba(255,170,0,0.15));
+}
+.sg-ability-cinematic-card {
+  position: relative; text-align: center;
+  padding: 28px 32px 24px;
+  background: rgba(8,8,16,0.97);
+  border: 2px solid var(--cborder, #ffaa00);
+  border-radius: 24px;
+  box-shadow: 0 0 40px var(--cglow, rgba(255,170,0,0.3)), inset 0 0 20px var(--cglow, rgba(255,170,0,0.05));
+  animation: cinematic-card 2s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  max-width: 280px; width: 88%;
+}
+@keyframes cinematic-card {
+  0%   { transform: scale(0.7) translateY(20px); }
+  18%  { transform: scale(1.04) translateY(-4px); }
+  28%  { transform: scale(1) translateY(0); }
+  100% { transform: scale(1) translateY(0); }
+}
+.sg-cin-stripe {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--cborder,#ffaa00), transparent);
+}
+.sg-cin-icon  { font-size: 56px; display: block; margin-bottom: 8px;
+  animation: cin-icon-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both; }
+@keyframes cin-icon-pop {
+  from { transform: scale(0) rotate(-15deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.sg-cin-name {
+  font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900;
+  letter-spacing: 0.12em; margin-bottom: 6px;
+  color: var(--cborder, #ffaa00);
+  text-shadow: 0 0 16px var(--cglow, rgba(255,170,0,0.5));
+}
+.sg-cin-effect {
+  font-size: 12px; color: rgba(255,255,255,0.65);
+  line-height: 1.55; font-weight: 500;
+}
+.sg-cin-particle {
+  position: absolute; pointer-events: none;
+  animation: cin-particle 1.2s ease-out both;
+}
+@keyframes cin-particle {
+  0%   { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--px), var(--py)) scale(0.3); }
+}
+
+/* ── ACTIVE ABILITY HUD BANNER ── */
+.sg-active-ability-banner {
+  margin: 0 14px 4px; border-radius: 10px; padding: 7px 12px;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  border: 1.5px solid var(--ab-border, rgba(255,170,0,0.4));
+  background: var(--ab-bg, rgba(255,170,0,0.08));
+  animation: banner-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes banner-in {
+  from { transform: translateY(-8px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.sg-ab-icon   { font-size: 18px; flex-shrink: 0; }
+.sg-ab-text   { flex: 1; }
+.sg-ab-name   { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 900; letter-spacing: 0.1em; }
+.sg-ab-desc   { font-size: 9px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+.sg-ab-badge  {
+  font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 900;
+  padding: 3px 7px; border-radius: 6px;
+  background: var(--ab-border, rgba(255,170,0,0.3));
+  color: var(--ab-color, #ffaa00); flex-shrink: 0;
+}
+
+/* ── GRID OVERLAYS WHILE ACTIVE ── */
+/* SURGE: golden shimmer across the whole grid area */
+.sg-grid-surge-overlay {
+  position: absolute; inset: 0; pointer-events: none; z-index: 10; border-radius: 8px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,170,0,0.12) 0%, transparent 70%);
+  animation: surge-shimmer 1.2s ease infinite alternate;
+}
+@keyframes surge-shimmer {
+  from { opacity: 0.5; }
+  to   { opacity: 1; }
+}
+/* FREEZE: blue frost overlay on corrupt tiles handled via tile class */
+.sg-tile.frozen-corrupt {
+  animation: freeze-pulse 1.5s ease infinite alternate !important;
+}
+@keyframes freeze-pulse {
+  from { box-shadow: inset 0 0 10px rgba(165,243,252,0.4), 0 0 6px rgba(165,243,252,0.3); border-color: #a5f3fc !important; }
+  to   { box-shadow: inset 0 0 18px rgba(165,243,252,0.7), 0 0 14px rgba(165,243,252,0.5); border-color: #a5f3fc !important; }
+}
+/* WILDFIRE: full row/col line highlight on hover */
+.sg-grid-wildfire-row { outline: 2px solid rgba(255,119,0,0.6); outline-offset: 2px; border-radius: 4px; background: rgba(255,119,0,0.08) !important; }
+.sg-grid-wildfire-col-tile { box-shadow: inset 0 0 12px rgba(255,119,0,0.3) !important; border-color: rgba(255,119,0,0.5) !important; }
+
+/* +3 MOVES bounce on counter */
+.sg-moves-bump {
+  animation: moves-bump 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes moves-bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.5); color: #00e5ff; text-shadow: 0 0 16px #00e5ff; }
+  100% { transform: scale(1); }
+}
+
+/* CLEANSE: tile shatter animation */
+.sg-tile.cleansing {
+  animation: tile-shatter 0.4s ease forwards !important;
+}
+@keyframes tile-shatter {
+  0%   { transform: scale(1) rotate(0deg); opacity: 1; }
+  40%  { transform: scale(1.3) rotate(8deg); opacity: 0.8; filter: brightness(2) saturate(0); }
+  100% { transform: scale(0) rotate(-20deg); opacity: 0; }
+}
+
+/* ── ABILITY FLASH (still used as subtle BG tint) ── */
 .sg-ability-use-flash {
   position: fixed; inset: 0; z-index: 997; pointer-events: none;
-  animation: ability-flash 0.35s ease forwards;
+  animation: ability-flash 0.5s ease forwards;
 }
-@keyframes ability-flash { 0%{opacity:0.35} 100%{opacity:0} }
+@keyframes ability-flash { 0%{opacity:0.25} 40%{opacity:0.25} 100%{opacity:0} }
 
 /* Ability shop in CityTab */
 .sg-ability-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
@@ -2151,41 +2875,41 @@ const CAMPAIGN_LEVELS = [
   {id:1,  name:"BLACKOUT BLOCK 1-2",  dist:"DISTRICT 1",boss:false,moves:33,bids:["apt","factory"],              hazards:0,  hint:"Match 3 or more same-color nodes in a line to charge buildings."},
   {id:2,  name:"BLACKOUT BLOCK 1-3",  dist:"DISTRICT 1",boss:false,moves:31,bids:["apt","factory","lab"],        hazards:0,  hint:"A cascade — one match triggering another — is worth double points."},
   {id:3,  name:"BLACKOUT BLOCK 1-4",  dist:"DISTRICT 1",boss:false,moves:30,bids:["apt","factory","lab"],        hazards:1,  hint:"First corrupted tile. Match the tiles right next to it to clear the rot."},
-  {id:4,  name:"BLACKOUT BLOCK 1-5",  dist:"DISTRICT 1",boss:false,moves:28,bids:["apt","factory","lab"],        hazards:1,  hint:"Corruption spreads every few moves. Clear it before it blocks your chains."},
+  {id:4,  name:"BLACKOUT BLOCK 1-5",  dist:"DISTRICT 1",boss:false,moves:25,bids:["apt","factory","lab"],        hazards:3,  hint:"Corruption spreads every few moves. Clear it before it blocks your chains."},
   {id:5,  name:"BLACKOUT BLOCK 1-6",  dist:"DISTRICT 1",boss:false,moves:27,bids:["apt","factory","lab"],        hazards:1,  hint:"Wrapping a tile around the edge can unlock chains you couldn't see before."},
   {id:6,  name:"BLACKOUT BLOCK 1-7",  dist:"DISTRICT 1",boss:false,moves:26,bids:["apt","factory","lab"],        hazards:2,  hint:"Look for shifts that match two different colors in one move."},
   {id:7,  name:"BLACKOUT BLOCK 1-8",  dist:"DISTRICT 1",boss:false,moves:25,bids:["apt","factory","lab"],        hazards:2,  hint:"Every shift should charge at least one building. No moves to waste."},
-  {id:8,  name:"BLACKOUT BLOCK 1-9",  dist:"DISTRICT 1",boss:false,moves:24,bids:["apt","factory","lab"],        hazards:2,  hint:"A 2x2 square match fires a Battery — double charge to all buildings!"},
+  {id:8,  name:"BLACKOUT BLOCK 1-9",  dist:"DISTRICT 1",boss:false,moves:18,bids:["apt","factory","lab"],        hazards:6,  hint:"A 2x2 square match fires a Battery — double charge to all buildings!"},
   {id:9,  name:"BOSS: BLACKOUT BLOCK",dist:"DISTRICT 1",boss:true, moves:10,bids:["apt","factory","lab","power"],hazards:8,  hint:"FINAL BOSS — all power systems failing. 10 moves. 8 corrupted sectors. Every shift must chain. No wasted moves."},
   {id:10, name:"INDUSTRIAL ROW 2-1",  dist:"DISTRICT 2",boss:false,moves:23,bids:["apt","factory","lab"],        hazards:3,  hint:"Three hazards. Clear at least one early before planning your main chain."},
   {id:11, name:"INDUSTRIAL ROW 2-2",  dist:"DISTRICT 2",boss:false,moves:22,bids:["apt","factory","lab","power"],hazards:3,  hint:"Four buildings now. Decide which color you need most before your first shift."},
   {id:12, name:"INDUSTRIAL ROW 2-3",  dist:"DISTRICT 2",boss:false,moves:21,bids:["apt","factory","lab","power"],hazards:3,  hint:"A plus-shape match triggers Pulse Blast — clears a full 3x3 area!"},
   {id:13, name:"INDUSTRIAL ROW 2-4",  dist:"DISTRICT 2",boss:false,moves:20,bids:["apt","factory","lab","power"],hazards:4,  hint:"Four hazards. Cluster them to one corner rather than chasing each one."},
-  {id:14, name:"INDUSTRIAL ROW 2-5",  dist:"DISTRICT 2",boss:false,moves:20,bids:["factory","lab","power"],      hazards:4,  hint:"Three buildings gives breathing room. Use extra moves to clear corruption first."},
+  {id:14, name:"INDUSTRIAL ROW 2-5",  dist:"DISTRICT 2",boss:false,moves:17,bids:["factory","lab","power"],      hazards:6,  hint:"Three buildings gives breathing room. Use extra moves to clear corruption first."},
   {id:15, name:"INDUSTRIAL ROW 2-6",  dist:"DISTRICT 2",boss:false,moves:19,bids:["apt","factory","lab","power"],hazards:4,  hint:"You need cascades to win this. Set up a match that triggers two more."},
   {id:16, name:"INDUSTRIAL ROW 2-7",  dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","factory","lab","power"],hazards:5,  hint:"Five hazards spreading every 3 moves. Contain the rot before charging."},
   {id:17, name:"INDUSTRIAL ROW 2-8",  dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","lab","power"],          hazards:5,  hint:"Three buildings but tight on moves. Speed matters more than perfection."},
-  {id:18, name:"INDUSTRIAL ROW 2-9",  dist:"DISTRICT 2",boss:false,moves:17,bids:["apt","factory","lab","power"],hazards:5,  hint:"Every single shift must trigger a match. Zero wasted moves from here."},
+  {id:18, name:"INDUSTRIAL ROW 2-9",  dist:"DISTRICT 2",boss:false,moves:11,bids:["apt","factory","lab","power"],hazards:9,  hint:"Every single shift must trigger a match. Zero wasted moves from here."},
   {id:19, name:"BOSS: INDUSTRIAL ROW",dist:"DISTRICT 2",boss:true, moves:8, bids:["apt","factory","lab","power"],hazards:13, hint:"BOSS — the factory core is collapsing. 8 moves. 13 corrupted sectors. You need back-to-back cascades to survive."},
   {id:20, name:"SKYLINE SECTOR 3-1",  dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"Six corrupted tiles. Clear the clusters before planning long chains."},
   {id:21, name:"SKYLINE SECTOR 3-2",  dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"No exploration moves. Plan your entire route before the first swipe."},
   {id:22, name:"SKYLINE SECTOR 3-3",  dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","power"],      hazards:6,  hint:"Three buildings helps. Save the freed moves for the toughest color."},
   {id:23, name:"SKYLINE SECTOR 3-4",  dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","lab","power"],hazards:7,  hint:"Seven hazards on a 5x5 board. Every clean tile is precious now."},
-  {id:24, name:"SKYLINE SECTOR 3-5",  dist:"DISTRICT 3",boss:false,moves:14,bids:["factory","lab","power"],      hazards:7,  hint:"Fourteen moves means cascades on almost every single shift."},
-  {id:25, name:"SKYLINE SECTOR 3-6",  dist:"DISTRICT 3",boss:false,moves:14,bids:["apt","factory","lab","power"],hazards:7,  hint:"Contain the rot to one side of the board. Don't let it split your color lines."},
+  {id:24, name:"SKYLINE SECTOR 3-5",  dist:"DISTRICT 3",boss:false,moves:11,bids:["factory","lab","power"],      hazards:9,  hint:"Fourteen moves means cascades on almost every single shift."},
+  {id:25, name:"SKYLINE SECTOR 3-6",  dist:"DISTRICT 3",boss:false,moves:11,bids:["apt","factory","lab","power"],hazards:9,  hint:"Contain the rot to one side of the board. Don't let it split your color lines."},
   {id:26, name:"SKYLINE SECTOR 3-7",  dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","factory","lab","power"],hazards:8,  hint:"Eight corrupted tiles. The board barely has room to breathe."},
   {id:27, name:"SKYLINE SECTOR 3-8",  dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","lab","power"],          hazards:8,  hint:"Fewer buildings means you can specialize your chains on two colors."},
-  {id:28, name:"SKYLINE SECTOR 3-9",  dist:"DISTRICT 3",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Twelve moves, four buildings, heavy rot. Near-perfect play required."},
+  {id:28, name:"SKYLINE SECTOR 3-9",  dist:"DISTRICT 3",boss:false,moves:9,bids:["apt","factory","lab","power"],hazards:10,  hint:"Twelve moves, four buildings, heavy rot. Near-perfect play required."},
   {id:29, name:"BOSS: SKYLINE SECTOR",dist:"DISTRICT 3",boss:true, moves:6, bids:["apt","factory","lab","power"],hazards:15, hint:"BOSS — the skyline is crumbling. 6 moves. 15 sectors lost. You need a miracle chain. Use every ability you have."},
   {id:30, name:"UNDERGROUND GRID 4-1",dist:"DISTRICT 4",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Welcome to the Underground. Nothing comes easy from here."},
   {id:31, name:"UNDERGROUND GRID 4-2",dist:"DISTRICT 4",boss:false,moves:11,bids:["apt","factory","lab","power"],hazards:9,  hint:"Nine corrupted tiles. Clear the cluster — don't chase the stragglers."},
   {id:32, name:"UNDERGROUND GRID 4-3",dist:"DISTRICT 4",boss:false,moves:11,bids:["factory","lab","power"],      hazards:9,  hint:"Three buildings still. Nine rot tiles nearly fill an entire row."},
   {id:33, name:"UNDERGROUND GRID 4-4",dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","factory","lab","power"],hazards:9,  hint:"Ten moves means chain reactions on every single shift. No exceptions."},
-  {id:34, name:"UNDERGROUND GRID 4-5",dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","lab","power"],          hazards:9,  hint:"Two-fifths of the board is blocked. Find the clean diagonal lines."},
+  {id:34, name:"UNDERGROUND GRID 4-5",dist:"DISTRICT 4",boss:false,moves:7,bids:["apt","lab","power"],          hazards:11,  hint:"Two-fifths of the board is blocked. Find the clean diagonal lines."},
   {id:35, name:"UNDERGROUND GRID 4-6",dist:"DISTRICT 4",boss:false,moves:9, bids:["apt","factory","lab","power"],hazards:10, hint:"Nine moves. If you're not cascading every turn, restart and rethink your approach."},
   {id:36, name:"UNDERGROUND GRID 4-7",dist:"DISTRICT 4",boss:false,moves:9, bids:["factory","lab","power"],      hazards:10, hint:"Ten rot tiles, nine moves. Maximum chain efficiency. Every shift counts."},
   {id:37, name:"UNDERGROUND GRID 4-8",dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Eight moves. Upgrades aren't optional anymore — they're essential."},
-  {id:38, name:"UNDERGROUND GRID 4-9",dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","power"],      hazards:10, hint:"Three buildings but ten rot tiles. The clean tiles are your only path."},
+  {id:38, name:"UNDERGROUND GRID 4-9",dist:"DISTRICT 4",boss:false,moves:5, bids:["apt","factory","power"],      hazards:40, hint:"Three buildings but ten rot tiles. The clean tiles are your only path."},
   {id:39, name:"BOSS: UNDERGROUND",   dist:"DISTRICT 4",boss:true, moves:5, bids:["apt","factory","lab","power"],hazards:17, hint:"BOSS — the underground is gone. 5 moves. 17 corrupted tiles. The board is almost dead. Find the clean path — it exists."},
   {id:40, name:"CORE CITY 5-1",       dist:"DISTRICT 5",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Core City. Only the best make it here. Show everything you know."},
   {id:41, name:"CORE CITY 5-2",       dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Seven moves, eleven rot tiles. Every shift must be a multi-match."},
@@ -2263,13 +2987,317 @@ function loadAbilities(){
 }
 function saveAbilities(a){ try{ localStorage.setItem(ABILITIES_KEY,JSON.stringify(a)); }catch{} }
 
+/* ─── EPISODE NARRATIVES ────────────────────────────────────────── */
+const DISTRICT_NARRATIVES = [
+  {
+    num:"DISTRICT 1", title:"The Blackout", color:"#00e5ff",
+    story:"Three nights ago, all five power substations in the city's north grid went dark. No warning. No cause found. The city engineer is missing. You're the only one left who knows the grid.",
+    objective:"Restore power to the residential blocks before the hospitals run out of backup fuel.",
+  },
+  {
+    num:"DISTRICT 2", title:"The Factory Silence", color:"#ffaa00",
+    story:"The industrial sector stopped producing at 0400 yesterday. The machines didn't break — they were shut down remotely. Something in the network control layer is wrong.",
+    objective:"Restart the factory cores. Without them, the entire city's supply chain collapses in 72 hours.",
+  },
+  {
+    num:"DISTRICT 3", title:"Skyline Cascade", color:"#ff2d95",
+    story:"Corruption crept into the high-rises overnight. The city's most populated sector is now running on emergency reserves. Eight million people. Forty-eight hours.",
+    objective:"Push the corruption back to the perimeter. The skyline must not go dark.",
+  },
+  {
+    num:"DISTRICT 4", title:"Underground War", color:"#a855f7",
+    story:"The underground grid is the city's nervous system — power routing, data channels, water pressure. It's half-corrupted and fully contested. The source of the corruption may be down here.",
+    objective:"Fight through the underground. Find the corruption source. End this.",
+  },
+  {
+    num:"DISTRICT 5", title:"Final Core", color:"#00ff88",
+    story:"You found it. The Core AI — the city's central power intelligence — has been corrupted at its root. Nineteen sectors infected. Five moves to fix what took decades to build.",
+    objective:"This is it. Every skill, every ability, every chain. The city lives or dies on this board.",
+  },
+];
+
+/* ─── STAR CHAIN SYSTEM ─────────────────────────────────────────── */
+const STAR_CHAIN_KEY  = "sg_starchain_v1";
+const STAR_CHAIN_GOAL = 9; /* 3 three-star clears = gold chest */
+const STAR_CHAIN_REWARDS = [
+  { at:3, chest:"bronze", coins:30,  icon:"📦", label:"BRONZE CHEST" },
+  { at:6, chest:"silver", coins:60,  icon:"🎁", label:"SILVER CHEST" },
+  { at:9, chest:"gold",   coins:100, icon:"🏆", label:"GOLD CHEST"   },
+];
+function loadStarChain(){ try{ var s=localStorage.getItem(STAR_CHAIN_KEY); return s?JSON.parse(s):{stars:0,claimed:[]}; }catch{ return {stars:0,claimed:[]}; } }
+function saveStarChain(d){ try{ localStorage.setItem(STAR_CHAIN_KEY,JSON.stringify(d)); }catch{} }
+
+/* ─── COMEBACK / PITY SYSTEM ────────────────────────────────────── */
+const FAIL_COUNTS_KEY = "sg_fails_v1";
+function getFailCount(levelId){ try{ var s=localStorage.getItem(FAIL_COUNTS_KEY); var d=s?JSON.parse(s):{}; return d[levelId]||0; }catch{ return 0; } }
+function bumpFailCount(levelId){ try{ var s=localStorage.getItem(FAIL_COUNTS_KEY); var d=s?JSON.parse(s):{}; d[levelId]=(d[levelId]||0)+1; localStorage.setItem(FAIL_COUNTS_KEY,JSON.stringify(d)); }catch{} }
+function resetFailCount(levelId){ try{ var s=localStorage.getItem(FAIL_COUNTS_KEY); var d=s?JSON.parse(s):{}; delete d[levelId]; localStorage.setItem(FAIL_COUNTS_KEY,JSON.stringify(d)); }catch{} }
+/* Apply pity: reduce hazards and improve tiles subtly after 3+ fails */
+function applyComeback(levelDef){
+  var fails=getFailCount(levelDef.id);
+  if(fails<3||typeof levelDef.id!=="number") return levelDef;
+  var reduction = fails>=6 ? 3 : fails>=4 ? 2 : 1;
+  return Object.assign({},levelDef,{
+    hazards:Math.max(0,(levelDef.hazards||0)-reduction),
+    _comeback:true,
+    _comebackFails:fails,
+  });
+}
+
+/* ─── MASTER CHALLENGE ──────────────────────────────────────────── */
+const MASTER_KEY = "sg_master_v1";
+function getMasterClears(){ try{ var s=localStorage.getItem(MASTER_KEY); return s?JSON.parse(s):[]; }catch{ return []; } }
+function addMasterClear(id){ try{ var c=getMasterClears(); if(!c.includes(id)){ c.push(id); localStorage.setItem(MASTER_KEY,JSON.stringify(c)); } }catch{} }
+/* Master challenge: same level but 30% fewer moves */
+function getMasterDef(levelDef){
+  return Object.assign({},levelDef,{
+    moves: Math.max(4,Math.floor(levelDef.moves*0.65)),
+    isMaster: true,
+    name: levelDef.name+" — MASTER",
+    hint: "MASTER CHALLENGE: "+Math.floor(levelDef.moves*0.65)+" moves. No shortcuts. No mercy.",
+  });
+}
+
+/* ─── OBJECTIVE TYPES ───────────────────────────────────────────── */
+/* levelDef.objective = "standard" | "timed" | "containment" | "collect" | "minmoves" */
+const OBJECTIVE_META = {
+  standard:    { icon:"⚡", label:"POWER ALL BUILDINGS",     color:"#00e5ff" },
+  timed:       { icon:"⏱", label:"RACE THE CLOCK",          color:"#ff7700" },
+  containment: { icon:"🛡", label:"CONTAINMENT",             color:"#ff2d95" },
+  collect:     { icon:"◎",  label:"COLLECT MARKED TILES",   color:"#a855f7" },
+  minmoves:    { icon:"🎯", label:"EFFICIENCY CHALLENGE",    color:"#00ff88" },
+};
+/* Assign objectives to levels based on position within district */
+/* Positions 3,7 get special objectives; boss always standard */
+function getLevelObjective(levelDef) {
+  if(levelDef.boss||levelDef.isMaster||!levelDef.id||typeof levelDef.id!=="number") return "standard";
+  var pos = levelDef.id % 10; /* 0-9 within district */
+  if(pos===3) return "timed";
+  if(pos===6) return "collect";
+  if(pos===7) return "containment";
+  /* Every 5th non-boss level is minmoves spike */
+  if(pos===4||pos===8) return "minmoves";
+  return "standard";
+}
+/* Timer seconds per district (harder as you go) */
+function getTimerSeconds(levelDef){
+  var dist=Math.floor((levelDef.id||0)/10);
+  return [90,75,60,50,40][dist]||60;
+}
+/* Collect target count */
+function getCollectTarget(levelDef){
+  var dist=Math.floor((levelDef.id||0)/10);
+  return [6,8,10,10,12][dist]||8;
+}
+/* MinMoves par — tighter than normal 3-star threshold */
+function getMinMovesPar(levelDef){
+  return Math.max(3,Math.floor(levelDef.moves*0.45));
+}
+
+/* ─── COMBO POWER METER ──────────────────────────────────────────── */
+const COMBO_RANKS = [
+  { name:"OFFLINE",   threshold:0,   color:"rgba(255,255,255,0.2)", gradient:"rgba(255,255,255,0.1),rgba(255,255,255,0.05)" },
+  { name:"SPARK",     threshold:5,   color:"#00e5ff",               gradient:"#00e5ff88,#00e5ff44" },
+  { name:"CHARGED",   threshold:15,  color:"#00ff88",               gradient:"#00ff8888,#00ff8844" },
+  { name:"SURGING",   threshold:30,  color:"#ffaa00",               gradient:"#ffaa0088,#ffaa0044" },
+  { name:"BLAZING",   threshold:55,  color:"#ff7700",               gradient:"#ff770088,#ff770044" },
+  { name:"LEGENDARY", threshold:90,  color:"#ff2d95",               gradient:"#ff2d9588,#a855f7aa" },
+];
+const COMBO_MAX = 120;
+function getComboRank(power){
+  var rank=COMBO_RANKS[0];
+  for(var i=0;i<COMBO_RANKS.length;i++){ if(power>=COMBO_RANKS[i].threshold) rank=COMBO_RANKS[i]; }
+  return rank;
+}
+
+/* ─── POWER ENGINEER CHARACTER ─────────────────────────────────── */
+const ENGINEER_TITLES = [
+  { minLevel:1,  title:"Junior Technician",     avatar:"👷",  color:"rgba(255,255,255,0.5)" },
+  { minLevel:5,  title:"Grid Engineer",         avatar:"⚡",  color:"#00e5ff" },
+  { minLevel:10, title:"Senior Engineer",       avatar:"🔧",  color:"#00ff88" },
+  { minLevel:15, title:"Lead Engineer",         avatar:"🛡",  color:"#ffaa00" },
+  { minLevel:20, title:"Chief Power Officer",   avatar:"💡",  color:"#ff7700" },
+  { minLevel:30, title:"Grid Commander",        avatar:"⚔️",  color:"#ff2d95" },
+  { minLevel:40, title:"Master Architect",      avatar:"🏙️",  color:"#a855f7" },
+  { minLevel:50, title:"Legend of the Grid",    avatar:"👑",  color:"#ffaa00" },
+];
+function getEngineerProfile(level) {
+  var p = ENGINEER_TITLES[0];
+  for (var i = 0; i < ENGINEER_TITLES.length; i++) {
+    if (level >= ENGINEER_TITLES[i].minLevel) p = ENGINEER_TITLES[i];
+  }
+  return p;
+}
+const ENGINEER_DIALOGUES = [
+  /* indexed by cleared count */
+  { at:0,  line:"The city needs you. I've mapped the grid — it's worse than we thought." },
+  { at:5,  line:"Five sectors restored. The eastern substations are flickering back to life." },
+  { at:10, line:"District 1 is holding. I can see the lights from here. Keep going." },
+  { at:15, line:"The factory district is a mess. Corruption spreads fast in industrial zones." },
+  { at:20, line:"Twenty sectors. We're past the halfway mark. The city can feel it." },
+  { at:25, line:"The skyline is coming back. Sector by sector. Shift by shift." },
+  { at:30, line:"Underground now. This is where the corruption source is hiding. Stay sharp." },
+  { at:35, line:"I found the signal. Something is generating the corruption from the core." },
+  { at:40, line:"Core City. The last line. Everything we've done leads here." },
+  { at:45, line:"The Core AI is fully corrupted. I don't know if we can fix it. But we have to try." },
+  { at:50, line:"You did it. The entire city grid is online. I don't have words. Thank you." },
+];
+function getEngineerDialogue(clearedCount) {
+  var d = ENGINEER_DIALOGUES[0];
+  for (var i = 0; i < ENGINEER_DIALOGUES.length; i++) {
+    if (clearedCount >= ENGINEER_DIALOGUES[i].at) d = ENGINEER_DIALOGUES[i];
+  }
+  return d.line;
+}
+
+/* ─── SEASON PASS ────────────────────────────────────────────────── */
+const SEASON_KEY  = "sg_season_v1";
+const SEASON_NAME = "SEASON 1: CITY REBORN";
+const SEASON_XP_PER_TIER = 100; /* XP per tier unlock */
+const SEASON_TIERS = [
+  { tier:1,  icon:"⚡", label:"Spark",   free:true,  reward:{ coins:50 },                       premReward:{ coins:100, abilities:{detector:2} } },
+  { tier:2,  icon:"🔧", label:"Tools",   free:false, reward:null,                               premReward:{ parts:10, abilities:{shift_plus:2} } },
+  { tier:3,  icon:"💡", label:"Light",   free:true,  reward:{ coins:80 },                       premReward:{ coins:150, chest:"bronze" } },
+  { tier:4,  icon:"🛡", label:"Shield",  free:false, reward:null,                               premReward:{ abilities:{freeze:2,cleanse:1} } },
+  { tier:5,  icon:"⬡",  label:"Coins",   free:true,  reward:{ coins:150 },                      premReward:{ coins:300, parts:15 } },
+  { tier:6,  icon:"🔋", label:"Power",   free:false, reward:null,                               premReward:{ abilities:{surge:2,wildfire:1} } },
+  { tier:7,  icon:"🏙️", label:"City",    free:true,  reward:{ coins:200, chest:"silver" },      premReward:{ coins:400, parts:20, chest:"silver" } },
+  { tier:8,  icon:"🌆", label:"Skyline", free:false, reward:null,                               premReward:{ abilities:{surge:3,cleanse:2,wildfire:2} } },
+  { tier:9,  icon:"⚔️", label:"Wars",    free:true,  reward:{ coins:300 },                      premReward:{ coins:500, parts:25 } },
+  { tier:10, icon:"👑", label:"Legend",  free:true,  reward:{ coins:500, chest:"gold", parts:30 }, premReward:{ coins:1000, chest:"royal", parts:50, abilities:{surge:5,cleanse:3,wildfire:3,freeze:5,detector:5} } },
+];
+function loadSeason(){ try{ var s=localStorage.getItem(SEASON_KEY); return s?JSON.parse(s):{xp:0,tier:0,claimed:[],premium:false}; }catch{ return {xp:0,tier:0,claimed:[],premium:false}; } }
+function saveSeason(d){ try{ localStorage.setItem(SEASON_KEY,JSON.stringify(d)); }catch{} }
+function addSeasonXP(amount){
+  var s=loadSeason();
+  s.xp=(s.xp||0)+amount;
+  var newTier=Math.min(SEASON_TIERS.length, Math.floor(s.xp/SEASON_XP_PER_TIER));
+  s.tier=newTier;
+  saveSeason(s);
+  return s;
+}
+
+/* ─── CITY EVOLUTION ─────────────────────────────────────────────── */
+/* Returns visual state for each of the 5 districts */
+function getCityDistrictState(clearedIds) {
+  return [0,1,2,3,4].map(function(di){
+    var start=di*10, ids=Array.from({length:10},function(_,i){ return start+i; });
+    var cleared=ids.filter(function(id){ return clearedIds.includes(id); }).length;
+    if(cleared===0)        return "ruins";      /* gray, no lights */
+    if(cleared<5)          return "repairing";  /* flickering */
+    if(cleared<10)         return "restored";   /* lit, no glow */
+    return "glowing";                           /* full glow + particles */
+  });
+}
+
+/* ─── SQUAD SYSTEM ──────────────────────────────────────────────── */
+const SQUAD_KEY = "sg_squad_v1";
+const DEF_SQUAD_OBJECTIVES = [
+  { id:"so1", name:"POWER SURGE",    desc:"Squad clears 30 campaign levels combined this week", goal:30, type:"levels",  reward:{coins:200, parts:15, chest:"silver"} },
+  { id:"so2", name:"CHAIN MASTERS",  desc:"Squad triggers 50 cascades of 3+ combined", goal:50,   type:"cascades", reward:{coins:150, parts:10} },
+  { id:"so3", name:"ROT ERADICATED", desc:"Squad clears 200 corrupted tiles combined", goal:200,  type:"corrupt",  reward:{coins:180, parts:12, abilities:{cleanse:2}} },
+  { id:"so4", name:"STAR HARVEST",   desc:"Squad earns 20 three-star clears combined", goal:20,   type:"stars3",   reward:{coins:250, parts:20, chest:"gold"} },
+];
+/* Seeded weekly objective */
+function getWeeklySquadObjective(){
+  var week=Math.floor(Date.now()/(7*24*60*60*1000));
+  return DEF_SQUAD_OBJECTIVES[week%DEF_SQUAD_OBJECTIVES.length];
+}
+/* Simulated squad members for single-player prototype */
+const SQUAD_MEMBER_POOL = [
+  { name:"ByteKing_99",  avatar:"👑", level:24, online:false, weeklyLevels:8,  weeklyCascades:22, weeklyCorrupt:67,  weeklyStars3:6 },
+  { name:"NeonRider",    avatar:"⚡", level:18, online:true,  weeklyLevels:5,  weeklyCascades:14, weeklyCorrupt:41,  weeklyStars3:3 },
+  { name:"SlimeBy",      avatar:"🌀", level:31, online:true,  weeklyLevels:12, weeklyCascades:35, weeklyCorrupt:103, weeklyStars3:9 },
+  { name:"VoltMaster",   avatar:"🔋", level:15, online:false, weeklyLevels:3,  weeklyCascades:8,  weeklyCorrupt:22,  weeklyStars3:2 },
+];
+function loadSquad(){ try{ var s=localStorage.getItem(SQUAD_KEY); return s?JSON.parse(s):null; }catch{ return null; } }
+function saveSquad(d){ try{ localStorage.setItem(SQUAD_KEY,JSON.stringify(d)); }catch{} }
+function createSquad(name, playerName){
+  var week=Math.floor(Date.now()/(7*24*60*60*1000));
+  var members=SQUAD_MEMBER_POOL.slice(0,3);
+  var squad={
+    name:name.toUpperCase(), tag:"["+name.slice(0,3).toUpperCase()+"]",
+    playerName:playerName||"YOU",
+    members:members,
+    weeklyProgress:0, weekSeed:week,
+    joinDate:Date.now(),
+    totalObjectivesCompleted:0,
+  };
+  saveSquad(squad); return squad;
+}
+function getSquadTotals(squad, objectiveType){
+  /* Add up member contributions */
+  var total=0;
+  (squad.members||[]).forEach(function(m){
+    if(objectiveType==="levels")   total+=m.weeklyLevels||0;
+    if(objectiveType==="cascades") total+=m.weeklyCascades||0;
+    if(objectiveType==="corrupt")  total+=m.weeklyCorrupt||0;
+    if(objectiveType==="stars3")   total+=m.weeklyStars3||0;
+  });
+  return total;
+}
+
+/* ─── GIFTING SYSTEM ─────────────────────────────────────────────── */
+const GIFTS_KEY  = "sg_gifts_v1";
+const GIFT_DEFS  = [
+  { id:"life",    icon:"❤️",  name:"Extra Life",  cost:0,   reward:{lives:1},      desc:"Sends a free life",              color:"#ff2d95", dailyLimit:3  },
+  { id:"coins50", icon:"⬡",   name:"50 Coins",    cost:50,  reward:{coins:50},     desc:"Share some of your coins",        color:"#ffaa00", dailyLimit:2  },
+  { id:"ability", icon:"⚡",  name:"Ability Pack", cost:80,  reward:{abilities:{detector:1,shift_plus:1}}, desc:"2 helpful abilities", color:"#a855f7", dailyLimit:1 },
+  { id:"chest",   icon:"🎁",  name:"Silver Chest", cost:120, reward:{chest:"silver"}, desc:"A silver chest to open",       color:"#c0c0c0", dailyLimit:1  },
+];
+function loadGifts(){ try{ var s=localStorage.getItem(GIFTS_KEY); return s?JSON.parse(s):{inbox:[],sent:[],lastReset:""}; }catch{ return {inbox:[],sent:[],lastReset:""}; } }
+function saveGifts(d){ try{ localStorage.setItem(GIFTS_KEY,JSON.stringify(d)); }catch{} }
+function getGiftSentToday(giftId){
+  var g=loadGifts(); var today=todayStr();
+  if(g.lastReset!==today){ return 0; }
+  return (g.sent||[]).filter(function(s){ return s.id===giftId; }).length;
+}
+
+/* ─── BRACKET TOURNAMENT ─────────────────────────────────────────── */
+const BRACKET_KEY = "sg_bracket_v1";
+/* Weekly bracket: 8-player single elimination */
+const BRACKET_PLAYERS = [
+  { name:"ByteKing_99",  avatar:"👑", seed:1001 },
+  { name:"NeonRider",    avatar:"⚡", seed:1002 },
+  { name:"GridMaster7",  avatar:"🎯", seed:1003 },
+  { name:"VoidSlayer",   avatar:"🌑", seed:1004 },
+  { name:"SlimeBy",      avatar:"🌀", seed:1005 },
+  { name:"VoltMaster",   avatar:"🔋", seed:1006 },
+  { name:"ChainZero",    avatar:"⛓", seed:1007 },
+];
+function loadBracket(){ try{ var s=localStorage.getItem(BRACKET_KEY); return s?JSON.parse(s):null; }catch{ return null; } }
+function saveBracket(d){ try{ localStorage.setItem(BRACKET_KEY,JSON.stringify(d)); }catch{} }
+function genBracketRound(players, weekSeed){
+  var rng=mkSeededRng(weekSeed);
+  var shuffled=players.slice().sort(function(){ return rng()-0.5; });
+  var matches=[];
+  for(var i=0;i<shuffled.length;i+=2){
+    if(shuffled[i+1]){
+      var p1=shuffled[i], p2=shuffled[i+1];
+      matches.push({p1:p1, p2:p2});
+    }
+  }
+  return matches;
+}
+function simulateMatchScore(player, weekSeed, matchIdx){
+  var rng=mkSeededRng(player.seed+(weekSeed*100)+matchIdx);
+  return Math.round(600+rng()*1200);
+}
+function getBracketPhase(bracket){
+  if(!bracket) return "QUALIFYING";
+  if(bracket.round===1) return "ROUND OF 8";
+  if(bracket.round===2) return "SEMI-FINALS";
+  if(bracket.round===3) return "GRAND FINAL";
+  return "COMPLETE";
+}
+
 const IDLE_RATES = [0, 5, 12, 25];
 const DEF_META = {
   coins:0, parts:0,
   upgrades:{comboBoost:0,hazardSlow:0,extraMoves:0,idleBoost:0,capReduce:0,specialRate:0},
   levelsCleared:[], stars:{}, lastCollect:Date.now(),
   dailyDate:"", dailyScore:0, dailyFinalScore:0, dailyMovesLeft:0, dailyStars:0,
-  customLevels:[], starterPackShown:false, shiftWarsBest:0,
+  customLevels:[], starterPackShown:false, shiftWarsBest:0, engineerName:"RYKER",
   chests:{ bronze:0, silver:0, gold:0, royal:0 },
   trophyClaimed:[],
 };
@@ -2471,6 +3499,13 @@ const Audio = (function(){
     tap:      function(){ tone(800,"sine",0.04,0.08); },
     lastMove: function(){ tone(320,"sawtooth",0.12,0.22); tone(240,"sawtooth",0.18,0.18,0.1); },
     nearWin:  function(){ [180,220,280].forEach(function(f,i){ tone(f,"sine",0.18,0.22,i*0.07); }); },
+    /* Per-ability activation sounds */
+    abilitySurge:  function(){ [440,880,1320].forEach(function(f,i){ tone(f,"sine",0.3,0.22,i*0.06); }); tone(220,"sawtooth",0.08,0.3,0.05); },
+    abilityCleanse:function(){ [660,880,1100,1320].forEach(function(f,i){ tone(f,"sine",0.25,0.2,i*0.05); }); },
+    abilityMoves:  function(){ [440,523,659,784].forEach(function(f,i){ tone(f,"triangle",0.3,0.22,i*0.07); }); },
+    abilityFreeze: function(){ [1047,880,784,659].forEach(function(f,i){ tone(f,"sine",0.22,0.18,i*0.05); }); tone(200,"sawtooth",0.06,0.2); },
+    abilityFire:   function(){ tone(180,"sawtooth",0.25,0.35); [440,660,880].forEach(function(f,i){ tone(f,"sine",0.2,0.18,0.05+i*0.04); }); },
+    abilityDetect: function(){ [660,784,659,523].forEach(function(f,i){ tone(f,"sine",0.18,0.16,i*0.06); }); },
   };
 })();
 
@@ -2563,6 +3598,19 @@ function LivesGate(props){
         <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:16,lineHeight:1.55}}>Your city needs a moment to recover.</div>
         <div style={{fontFamily:"'Orbitron',monospace",fontSize:32,color:"#ffaa00",fontWeight:700,textShadow:"0 0 14px rgba(255,170,0,0.4)",marginBottom:22}}>{fmtTime(timeLeft)}</div>
         <button onClick={onWatchAd} style={{display:"block",width:"100%",background:"linear-gradient(135deg,#ff2d95,#ffaa00)",border:"none",borderRadius:12,padding:"14px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",marginBottom:10}}>WATCH AD · GET +1 LIFE FREE</button>
+        <button onClick={function(){
+          var sqd=loadSquad();
+          if(!sqd){ alert("Join a squad to request lives from teammates!"); return; }
+          /* Simulate a life gift received from squad */
+          var m=sqd.members[0];
+          if(m){
+            var fresh=loadLives();
+            var upd={count:Math.min(MAX_LIVES,fresh.count+1),lastRegen:fresh.lastRegen};
+            saveLives(upd); onBack();
+          }
+        }} style={{display:"block",width:"100%",background:"rgba(168,85,247,0.15)",border:"1px solid rgba(168,85,247,0.4)",borderRadius:12,padding:"14px",color:"#a855f7",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",marginBottom:10}}>
+          ❤️ REQUEST LIFE FROM SQUAD
+        </button>
         <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 20px",color:"rgba(255,255,255,0.38)",fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700,cursor:"pointer"}}>BACK</button>
         <div style={{fontSize:9,color:"rgba(255,255,255,0.18)",marginTop:14,letterSpacing:"0.05em"}}>Lives refill automatically every 30 minutes</div>
       </div>
@@ -2604,10 +3652,13 @@ function saveXP(d) { try { localStorage.setItem(XP_KEY, JSON.stringify(d)); } ca
 function calcXP(score, stars, isBoss) {
   return Math.floor(score / 5) + stars * 15 + (isBoss ? 50 : 0);
 }
+const MAX_LEVEL = 99;
 function addXP(d, amount) {
+  if (d.level >= MAX_LEVEL) return { xp: XP_PER_LEVEL-1, level: MAX_LEVEL };
   var newXP = d.xp + amount;
   var newLevel = d.level;
-  while (newXP >= XP_PER_LEVEL) { newXP -= XP_PER_LEVEL; newLevel++; }
+  while (newXP >= XP_PER_LEVEL && newLevel < MAX_LEVEL) { newXP -= XP_PER_LEVEL; newLevel++; }
+  if (newLevel >= MAX_LEVEL) newXP = XP_PER_LEVEL - 1;
   return { xp: newXP, level: newLevel };
 }
 function xpToNextLevel(d) { return XP_PER_LEVEL - d.xp; }
@@ -2660,24 +3711,24 @@ function checkAndUpdateStreak(st) {
   return newSt;
 }
 function getStreakReward(day) {
-  if (day === 7)  return { icon: "🎨", label: "Grid Skin",    coins: 0,   special: "skin" };
-  if (day === 14) return { icon: "⚡", label: "Charge Boost", coins: 0,   special: "boost" };
-  if (day === 30) return { icon: "🏆", label: "Legend Title", coins: 0,   special: "title" };
-  if (day % 7 === 0) return { icon: "💎", label: "Gem Pack",   coins: 100, special: null };
-  return { icon: "⬡",  label: "Coins",       coins: 10 + day * 3, special: null };
+  if (day === 7)  return { icon: "🎨", label: "Skin Unlock",  coins: 150, parts: 10, special: "skin",  abilities: null };
+  if (day === 14) return { icon: "⚡", label: "Ability Pack", coins: 50,  parts: 5,  special: "boost", abilities: {surge:2,cleanse:1,wildfire:1} };
+  if (day === 30) return { icon: "👑", label: "Legend Drop",  coins: 500, parts: 20, special: "title", abilities: {surge:3,cleanse:2,wildfire:2,freeze:3} };
+  if (day % 7 === 0) return { icon: "💎", label: "Gem Pack",  coins: 100, parts: 8,  special: null, abilities: null };
+  return { icon: "⬡",  label: "Coins", coins: 10 + day * 3, parts: day, special: null, abilities: null };
 }
 
 
 const CHALLENGES_KEY = "sg_challenges_v1";
 const CHALLENGE_DEFS = [
-  { id:"c1", icon:"⚡", name:"Chain Reaction",    desc:"Trigger a 3+ cascade",       goal:1,  type:"cascade",  reward:{coins:30} },
-  { id:"c2", icon:"🏙️", name:"District Power",    desc:"Complete any level",          goal:1,  type:"complete", reward:{coins:20} },
-  { id:"c3", icon:"🌀", name:"Efficiency Expert", desc:"Win a level with 3 stars",    goal:1,  type:"stars3",   reward:{coins:50} },
-  { id:"c4", icon:"☠",  name:"Rot Cleaner",       desc:"Clear 10 corrupted tiles",    goal:10, type:"corrupt",  reward:{coins:35} },
-  { id:"c5", icon:"🔋", name:"Battery Master",    desc:"Trigger a Battery combo",     goal:1,  type:"battery",  reward:{coins:40} },
-  { id:"c6", icon:"💥", name:"Pulse Bringer",     desc:"Trigger a Pulse Blast",       goal:1,  type:"pulse",    reward:{coins:40} },
-  { id:"c7", icon:"🎯", name:"Perfect Shift",     desc:"Complete a level ≤ 5 moves",  goal:1,  type:"moves5",   reward:{coins:60} },
-  { id:"c8", icon:"🔥", name:"On Fire",           desc:"Win 3 levels in one session", goal:3,  type:"session",  reward:{coins:45} },
+  { id:"c1", icon:"⚡", name:"Chain Reaction",    desc:"Trigger a 3+ cascade",       goal:1,  type:"cascade",  reward:{coins:30}, tiers:[{goal:1,coins:30},{goal:3,coins:80},{goal:5,coins:150,chest:"bronze"}] },
+  { id:"c2", icon:"🏙️", name:"District Power",    desc:"Complete any level",          goal:1,  type:"complete", reward:{coins:20}, tiers:[{goal:1,coins:20},{goal:3,coins:60},{goal:5,coins:120,chest:"silver"}] },
+  { id:"c3", icon:"🌀", name:"Efficiency Expert", desc:"Win a level with 3 stars",    goal:1,  type:"stars3",   reward:{coins:50}, tiers:[{goal:1,coins:50},{goal:2,coins:120},{goal:3,coins:200,chest:"silver"}] },
+  { id:"c4", icon:"☠",  name:"Rot Cleaner",       desc:"Clear corrupted tiles",       goal:10, type:"corrupt",  reward:{coins:35}, tiers:[{goal:10,coins:35},{goal:25,coins:90},{goal:50,coins:160,chest:"bronze"}] },
+  { id:"c5", icon:"🔋", name:"Battery Master",    desc:"Trigger a Battery combo",     goal:1,  type:"battery",  reward:{coins:40}, tiers:[{goal:1,coins:40},{goal:3,coins:100},{goal:5,coins:180,chest:"silver"}] },
+  { id:"c6", icon:"💥", name:"Pulse Bringer",     desc:"Trigger a Pulse Blast",       goal:1,  type:"pulse",    reward:{coins:40}, tiers:[{goal:1,coins:40},{goal:2,coins:100},{goal:4,coins:180,chest:"silver"}] },
+  { id:"c7", icon:"🎯", name:"Perfect Shift",     desc:"Complete a level ≤ 5 moves",  goal:1,  type:"moves5",   reward:{coins:60}, tiers:[{goal:1,coins:60},{goal:2,coins:140},{goal:3,coins:250,chest:"gold"}]  },
+  { id:"c8", icon:"🔥", name:"On Fire",           desc:"Win levels in one session",   goal:3,  type:"session",  reward:{coins:45}, tiers:[{goal:3,coins:45},{goal:5,coins:110},{goal:8,coins:200,chest:"gold"}]  },
 ];
 function getDailyChallenges(seed) {
   var rng = mkSeededRng(seed);
@@ -3028,6 +4079,9 @@ function Tile(props) {
   const slideClass = props.slideClass || "", adjacentCorrupt = props.adjacentCorrupt;
   const skinColors = props.skinColors || HEX;
   const colorblind = props.colorblind || false;
+  const isCleansing = props.isCleansing || false;
+  const isFrozenCorrupt = props.isFrozenCorrupt || false;
+  const isCollectTarget = props.isCollectTarget || false;
   const isCr = tile && tile.corrupted;
   const isPatrol = isCr && tile && tile.patrol;
   const nodeType = tile && tile.nodeType;
@@ -3065,6 +4119,9 @@ function Tile(props) {
     (isCr ? " corrupt" : "") +
     (adjacentCorrupt&&!isCr ? " adj-corrupt" : "") +
     (isPatrol ? " patrol-corrupt" : "") +
+    (isCleansing ? " cleansing" : "") +
+    (isFrozenCorrupt ? " frozen-corrupt" : "") +
+    (isCollectTarget&&!isCr ? " collect-target" : "") +
     (slideClass ? " "+slideClass : "");
 
   return (
@@ -3112,6 +4169,202 @@ function Particles() {
   return <div className="sg-particles">{particles}</div>;
 }
 
+/* ─── PRE-LEVEL SCREEN ──────────────────────────────────────────── */
+function PreLevelScreen(props){
+  var levelDef=props.levelDef, meta=props.meta, onLaunch=props.onLaunch, onBack=props.onBack;
+  var isBoss=levelDef.boss, isMaster=levelDef.isMaster;
+  var distObj=DISTRICTS.find(function(d){ return d.ids&&d.ids.includes(levelDef.id); });
+  var theme=isMaster?"#a855f7":isBoss?"#ffaa00":(distObj?distObj.theme:"#00e5ff");
+  var cleared=(meta.levelsCleared||[]).includes(levelDef.id);
+  var failCount=typeof levelDef.id==="number"?getFailCount(levelDef.id):0;
+  var isComeback=levelDef._comeback||false;
+
+  /* Booster slots — show owned abilities, pick up to 2 */
+  var abils=loadAbilities();
+  var available=ABILITY_DEFS.filter(function(a){ return (abils[a.id]||0)>0; });
+  var _sel=React.useState([]); var selected=_sel[0]; var setSelected=_sel[1];
+
+  function toggleBooster(id){
+    setSelected(function(s){
+      if(s.includes(id)) return s.filter(function(x){ return x!==id; });
+      if(s.length>=2) return [s[1],id]; /* replace oldest */
+      return s.concat([id]);
+    });
+  }
+
+  function launch(){
+    /* Deduct selected boosters from inventory */
+    if(selected.length>0){
+      var newAbils=Object.assign({},abils);
+      selected.forEach(function(id){ newAbils[id]=Math.max(0,(newAbils[id]||0)-1); });
+      saveAbilities(newAbils);
+    }
+    onLaunch(selected);
+  }
+
+  var prevBestMoves=null;
+  try{
+    var gh=JSON.parse(localStorage.getItem("sg_ghost_"+levelDef.id)||"{}");
+    if(gh.moves) prevBestMoves=gh.moves.length;
+  }catch{}
+
+  var masterClears=React.useMemo(function(){ return getMasterClears(); },[levelDef.id]);
+  var masterDone=masterClears.includes(levelDef.id);
+
+  return (
+    <div className="sg-prelevel">
+      <div className="sg-prelevel-card">
+        {/* Top color stripe */}
+        <div style={{height:3,borderRadius:2,background:"linear-gradient(90deg,"+theme+","+theme+"88)",marginBottom:16,marginLeft:-20,marginRight:-20,marginTop:-24}}/>
+
+        {(function(){
+          var ot=getLevelObjective(levelDef);
+          var om=OBJECTIVE_META[ot]||OBJECTIVE_META.standard;
+          return (
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+              <div className="sg-prelevel-eyebrow">{isMaster?"MASTER CHALLENGE":isBoss?"⚠ DISTRICT BOSS":"LEVEL "+(levelDef.id+1)}</div>
+              {ot!=="standard"&&<div style={{fontSize:9,fontWeight:700,letterSpacing:"0.1em",color:om.color,padding:"2px 6px",background:om.color+"15",borderRadius:5,border:"1px solid "+om.color+"44"}}>{om.icon+" "+ot.toUpperCase()}</div>}
+            </div>
+          );
+        })()}
+        <div className="sg-prelevel-name" style={{color:theme}}>{levelDef.name}</div>
+        <div className="sg-prelevel-hint">{levelDef.hint||"Clear the board."}</div>
+
+        {/* Stats row */}
+        <div className="sg-prelevel-stats">
+          <div className="sg-prelevel-stat">
+            <div className="sg-prelevel-stat-val" style={{color:"#00e5ff"}}>{levelDef.moves}</div>
+            <div className="sg-prelevel-stat-lbl">MOVES</div>
+          </div>
+          {(levelDef.hazards||0)>0&&(
+            <div className="sg-prelevel-stat">
+              <div className="sg-prelevel-stat-val" style={{color:"#ff2d95"}}>{levelDef.hazards}</div>
+              <div className="sg-prelevel-stat-lbl">CORRUPTED</div>
+            </div>
+          )}
+          <div className="sg-prelevel-stat">
+            <div className="sg-prelevel-stat-val" style={{color:"#ffaa00"}}>{levelDef.bids.length}</div>
+            <div className="sg-prelevel-stat-lbl">BUILDINGS</div>
+          </div>
+          {prevBestMoves&&(
+            <div className="sg-prelevel-stat">
+              <div className="sg-prelevel-stat-val" style={{color:"#00ff88"}}>{prevBestMoves}</div>
+              <div className="sg-prelevel-stat-lbl">BEST MOVES</div>
+            </div>
+          )}
+        </div>
+
+        {/* Comeback hint */}
+        {isComeback&&(
+          <div className="sg-comeback-hint">✨ The board is slightly more forgiving this attempt</div>
+        )}
+        {failCount>=2&&!isComeback&&(
+          <div className="sg-comeback-hint" style={{color:"rgba(255,170,0,0.4)"}}>
+            {"⚡ "+failCount+" previous attempts — keep going"}
+          </div>
+        )}
+
+        {/* Booster select */}
+        {available.length>0&&(
+          <>
+            <div className="sg-prelevel-loadout-lbl">BRING ABILITIES (pick up to 2)</div>
+            <div className="sg-booster-row">
+              {available.slice(0,4).map(function(ab){
+                var isSel=selected.includes(ab.id);
+                var cnt=abils[ab.id]||0;
+                return (
+                  <div key={ab.id}
+                    className={"sg-booster-slot"+(isSel?" selected":"")}
+                    style={{borderColor:isSel?ab.color:ab.color+"44",
+                      background:isSel?ab.color+"18":"rgba(255,255,255,0.03)",
+                      color:ab.color}}
+                    onClick={function(){ toggleBooster(ab.id); }}>
+                    {isSel&&<div className="sg-booster-check">✓</div>}
+                    <div className="sg-booster-count">{cnt}</div>
+                    <span className="sg-booster-icon">{ab.icon}</span>
+                    <div className="sg-booster-name">{ab.name.split(" ")[0]}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Launch button */}
+        <button className="sg-prelevel-launch"
+          onClick={launch}
+          style={{
+            background:isMaster?"linear-gradient(135deg,#a855f7,#ff2d95)":
+                       isBoss?"linear-gradient(135deg,#ffaa00,#ff2d95)":
+                       "linear-gradient(135deg,"+theme+","+theme+"88)",
+            color:"#06060f",
+            boxShadow:"0 0 20px "+theme+"44",
+          }}>
+          {isMaster?"⚡ MASTER CHALLENGE":isBoss?"⚔ ENTER BOSS":cleared?"▶ REPLAY":"▶ PLAY LEVEL"}
+        </button>
+
+        {/* Master challenge option on cleared levels */}
+        {cleared&&!isMaster&&typeof levelDef.id==="number"&&(
+          <button className="sg-prelevel-launch" style={{
+            background:masterDone?"rgba(168,85,247,0.1)":"rgba(168,85,247,0.15)",
+            color:"#a855f7", border:"1px solid rgba(168,85,247,0.4)",
+            marginTop:8,
+          }} onClick={function(){ onLaunch(selected,true); }}>
+            {masterDone?"♻ REPLAY MASTER":"⚡ TRY MASTER — "+Math.floor(levelDef.moves*0.65)+" MOVES"}
+          </button>
+        )}
+
+        <button className="sg-prelevel-skip" onClick={onBack}>← BACK</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ABILITY CINEMATIC OVERLAY ─────────────────────────────────── */
+function AbilityCinematic(props){
+  var a = props.anim;
+  if(!a) return null;
+  /* Spawn particle positions */
+  var particles = [];
+  for(var i=0;i<8;i++){
+    var angle = (i/8)*Math.PI*2;
+    var dist = 80 + Math.random()*60;
+    particles.push({
+      x: Math.cos(angle)*dist+"px",
+      y: Math.sin(angle)*dist+"px",
+      delay: (i*0.06)+"s",
+      size: 4+Math.floor(Math.random()*6)+"px",
+    });
+  }
+  return (
+    <div className="sg-ability-cinematic">
+      <div className="sg-ability-cinematic-bg" style={{"--cbg":a.bg}}/>
+      <div className="sg-ability-cinematic-card"
+        style={{"--cborder":a.border,"--cglow":a.glow}}>
+        <div className="sg-cin-stripe"/>
+        <span className="sg-cin-icon">{a.icon}</span>
+        <div className="sg-cin-name" style={{color:a.color}}>{a.name}</div>
+        <div className="sg-cin-effect">{a.effect}</div>
+        {/* Particle burst */}
+        {particles.map(function(p,i){
+          return (
+            <div key={i} className="sg-cin-particle"
+              style={{
+                left:"50%", top:"30%",
+                width:p.size, height:p.size,
+                borderRadius:"50%",
+                background:a.color,
+                "--px":p.x, "--py":p.y,
+                animationDelay:p.delay,
+                boxShadow:"0 0 6px "+a.color,
+              }}/>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ─── GAME BOARD ────────────────────────────────────────────────── */
 function GameBoard(props) {
   const levelDef=props.levelDef, meta=props.meta, onComplete=props.onComplete, onBack=props.onBack, onLose=props.onLose||function(){};
@@ -3121,6 +4374,13 @@ function GameBoard(props) {
   const spreadEvery=3+hazardSlow;
 
   const activeSkin   = React.useMemo(function(){ return loadSkin(); },[]);
+  /* Preloaded boosters from pre-level screen — merge into ability state on mount */
+  const initialAbilities = React.useMemo(function(){
+    var base=loadAbilities();
+    var preload=props.preloadedAbilities||[];
+    /* Already deducted from storage in handlePreLaunch, but make sure state reflects that */
+    return base;
+  },[]);
   const colorblind   = React.useMemo(function(){ return loadSettings().colorblind||false; },[]);
   const skinColors  = React.useMemo(function(){
     var s=SKIN_DEFS.find(function(s){ return s.id===activeSkin; });
@@ -3153,14 +4413,38 @@ function GameBoard(props) {
   const lastChanceRef=useRef(false);
   const [nearWinData,setNearWinData]=useState(null);
   const [chargedBldgs,setChargedBldgs]=useState(new Set()); /* buildings that just received charge */
-  const [abilities,setAbilities]=useState(loadAbilities);
+  const [abilities,setAbilities]=useState(function(){ return loadAbilities(); });
   const [surgeActive,setSurgeActive]=useState(false);      /* next match charges all */
   const [freezeActive,setFreezeActive]=useState(0);        /* moves remaining frozen */
   const [wildfireActive,setWildfireActive]=useState(false); /* next shift = full row/col match */
   const [hintTile,setHintTile]=useState(null);             /* {row,col} highlight for detector */
-  const [abilityFlash,setAbilityFlash]=useState(null);     /* color for flash overlay */
+  /* abilityFlash removed — replaced by cinematic system */
   const [usedAbilities,setUsedAbilities]=useState(new Set()); /* track single-use per level */
-  const sessionStatsRef=useRef({batteries:0,pulses:0,maxCascade:0,corruptCleared:0});
+  /* ── PHASE 2: OBJECTIVE + COMBO ── */
+  const objectiveType = React.useMemo(function(){ return getLevelObjective(levelDef); },[levelDef]);
+  const [timeLeft,setTimeLeft]  = useState(function(){ return objectiveType==="timed"?getTimerSeconds(levelDef):0; });
+  const [timerRunning,setTimerRunning] = useState(false);
+  const timerRef = useRef(null);
+  const collectTarget = React.useMemo(function(){ return objectiveType==="collect"?getCollectTarget(levelDef):0; },[levelDef,objectiveType]);
+  const [collectTiles,setCollectTiles] = useState(function(){
+    /* Randomly mark N tiles as collect targets on init */
+    if(objectiveType!=="collect") return new Set();
+    /* Use seeded RNG so same level always starts same collect positions */
+    var rng=mkSeededRng((levelDef.id||0)*999+collectTarget*77);
+    var targets=new Set(), tries=0;
+    while(targets.size<collectTarget&&tries<50){ tries++; targets.add(Math.floor(rng()*ROWS)+","+(Math.floor(rng()*COLS))); }
+    return targets;
+  });
+  const [collectDone,setCollectDone] = useState(0);
+  const [comboPower,setComboPower]   = useState(0);
+  const [rankUpText,setRankUpText]   = useState(null);
+  const prevRankRef = useRef(COMBO_RANKS[0].name);
+  const minMovesPar = React.useMemo(function(){ return objectiveType==="minmoves"?getMinMovesPar(levelDef):0; },[levelDef,objectiveType]);
+  const [containBreach,setContainBreach] = useState(false);
+  const [abilityAnim,setAbilityAnim]=useState(null); /* {id,icon,name,effect,color,bg,glow,border} */
+  const [movesBump,setMovesBump]=useState(false); /* bounce anim on +3 moves */
+  const [cleansingTiles,setCleansingTiles]=useState(new Set()); /* set of "r,c" being cleansed */
+  const sessionStatsRef=useRef({batteries:0,pulses:0,maxCascade:0,corruptCleared:0,consecutiveWins:0});
   const moveHistoryRef=useRef([]); /* Grid Memory — record every shift */
   const [showGhostReplay,setShowGhostReplay]=useState(false);
   const [shiftNudge,setShiftNudge]=useState(null); /* {dir} for screen nudge */
@@ -3173,6 +4457,24 @@ function GameBoard(props) {
   const SZ=52,GAP=4;
 
   useEffect(function(){ return function(){ timers.current.forEach(clearTimeout); }; },[]);
+
+  /* ── TIMED OBJECTIVE: countdown ── */
+  useEffect(function(){
+    if(objectiveType!=="timed") return;
+    if(phase==="win"||phase==="lose"||phase==="nearwin") return;
+    if(timeLeft<=0){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return; }
+    var t=setTimeout(function(){ setTimeLeft(function(s){ return s-1; }); },1000);
+    return function(){ clearTimeout(t); };
+  },[timeLeft,phase,objectiveType]);
+
+  /* ── COMBO POWER: decay when not playing ── */
+  useEffect(function(){
+    if(phase!=="idle") return;
+    var t=setTimeout(function(){
+      setComboPower(function(p){ return Math.max(0,p-1); });
+    },2000);
+    return function(){ clearTimeout(t); };
+  },[comboPower,phase]);
 
   function later(fn,ms){ const t=setTimeout(fn,ms); timers.current.push(t); }
   function addToast(text,color){
@@ -3319,7 +4621,8 @@ function GameBoard(props) {
         setGrid(finalG); setHi(new Set()); setBldgs(newBldgs); setScore(function(s){ return s+Math.round(pts); });
         toastQueue.forEach(function(t,i){ setTimeout(function(){ addToast(t.text,t.color); },i*320); });
         /* Bump lifetime stats */
-        bumpStats({totalShifts:1, totalMatches:pts>0?1:0, totalCascades:Math.max(0,cascades-1), longestCascade:cascades>1?cascades-1:0, totalBatteries:sessionStatsRef.current.batteries>0?1:0, totalCorruptCleared:sessionStatsRef.current.corruptCleared, totalCoinsEarned:Math.round(pts/10)+25});
+        bumpStats({totalShifts:1, totalMatches:pts>0?1:0, totalCascades:Math.max(0,cascades-1), longestCascade:cascades>1?cascades-1:0, totalBatteries:sessionStatsRef.current.batteries, totalCorruptCleared:sessionStatsRef.current.corruptCleared, totalCoinsEarned:Math.round(pts/10)+25});
+        sessionStatsRef.current.batteries=0; sessionStatsRef.current.corruptCleared=0;
         if(cascades>1){ setTimeout(function(){ addToast("CHAIN x"+cascades,"#ffaa00"); },toastQueue.length*320); Audio.chain(cascades); }
         if(cascades>=1) Audio.cascade(cascades-1);
         /* Play node-color sound for dominant matched color */
@@ -3329,6 +4632,55 @@ function GameBoard(props) {
         }
         /* Big cascade flash at 3+ */
         if(cascades>=3){ setCascadeFlash(true); setTimeout(function(){ setCascadeFlash(false); },400); }
+
+        /* ── COMBO POWER METER update ── */
+        var powerGain = pts>0 ? Math.min(25, Math.round(pts/8)) + (cascades>1?cascades*3:0) : 0;
+        setComboPower(function(p){
+          var np=Math.min(COMBO_MAX, p+powerGain);
+          var newRank=getComboRank(np);
+          if(newRank.name!==prevRankRef.current&&newRank.name!=="OFFLINE"){
+            setRankUpText(newRank.name);
+            setTimeout(function(){ setRankUpText(null); },1200);
+            Haptics.medium();
+          }
+          prevRankRef.current=newRank.name;
+          return np;
+        });
+
+        /* ── COLLECT: remove matched collect targets ── */
+        if(objectiveType==="collect"&&collectTiles.size>0){
+          var newCollect=new Set(collectTiles);
+          var cleared=0;
+          frames.forEach(function(fr){
+            fr.m&&fr.m.forEach(function(k){ if(newCollect.has(k)){ newCollect.delete(k); cleared++; } });
+          });
+          if(cleared>0){
+            setCollectTiles(newCollect);
+            setCollectDone(function(d){ return d+cleared; });
+            if(newCollect.size===0){
+              /* All collect tiles cleared — WIN */
+              setPhase("win"); Haptics.win(); bumpStats({totalWins:1});
+              if(newMoves>0&&!lastChanceRef.current) setPerfectClear(true);
+              saveRun();
+              setTimeout(function(){ Audio.win(); },100);
+              return;
+            }
+          }
+        }
+
+        /* ── CONTAINMENT: check if corruption crossed the boundary (row 3) ── */
+        if(objectiveType==="containment"){
+          var breached=false;
+          for(var cr=3;cr<ROWS;cr++){ for(var cc=0;cc<COLS;cc++){
+            if(finalG[cr]&&finalG[cr][cc]&&finalG[cr][cc].corrupted){ breached=true; break; }
+          } if(breached) break; }
+          if(breached){
+            setContainBreach(true);
+            setTimeout(function(){ setContainBreach(false); },400);
+            /* Containment fail = lose */
+            setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
+          }
+        }
         /* Wrap-chain detection: check if any cleared tile is at edge col/row */
         var wrapDetected=false;
         (Array.from ? Array.from(new Set()) : []);
@@ -3368,7 +4720,7 @@ function GameBoard(props) {
             return {label:b.label,icon:b.icon,color:b.color,ch:b.ch,max:b.max,need:Math.ceil(b.max-b.ch)};
           });
           setNearWinData(failBreakdown);
-          setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
+          setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
         }
         setPhase("idle");
       }
@@ -3423,7 +4775,7 @@ function GameBoard(props) {
 
   function retry(){
     lastChanceRef.current=false;
-    sessionStatsRef.current={batteries:0,pulses:0,maxCascade:0,corruptCleared:0};
+    sessionStatsRef.current={batteries:0,pulses:0,maxCascade:0,corruptCleared:0,consecutiveWins:sessionStatsRef.current.consecutiveWins||0};
     moveHistoryRef.current=[];
     setNearWinData(null);
     setGrid(buildInitGrid()); setMoves(levelDef.moves);
@@ -3432,6 +4784,17 @@ function GameBoard(props) {
     /* Reset ability active states but not inventory */
     setSurgeActive(false); setFreezeActive(0); setWildfireActive(false);
     setHintTile(null); setUsedAbilities(new Set());
+    setAbilityAnim(null); setMovesBump(false); setCleansingTiles(new Set());
+    /* Reset Phase 2 objective state */
+    if(objectiveType==="timed") setTimeLeft(getTimerSeconds(levelDef));
+    setComboPower(0); prevRankRef.current=COMBO_RANKS[0].name;
+    setCollectDone(0); setContainBreach(false);
+    if(objectiveType==="collect"){
+      var rng=mkSeededRng((levelDef.id||0)*999+collectTarget*77);
+      var newTargets=new Set(); var tries=0;
+      while(newTargets.size<collectTarget&&tries<50){ tries++; newTargets.add(Math.floor(rng()*ROWS)+","+(Math.floor(rng()*COLS))); }
+      setCollectTiles(newTargets);
+    }
     /* Reload latest ability counts from storage */
     setAbilities(loadAbilities());
   }
@@ -3455,89 +4818,119 @@ function GameBoard(props) {
     setPhase("idle");
   }
 
-  /* ── USE ABILITY ── */
+  /* ── USE ABILITY — OVERHAULED ── */
+  /* Cinematic metadata per ability */
+  var ABILITY_ANIM_DEFS = {
+    surge:     { icon:"⚡", name:"POWER SURGE",  color:"#ffaa00", bg:"rgba(255,170,0,0.14)", glow:"rgba(255,170,0,0.35)", border:"#ffaa00",
+                 effect:"Next match charges ALL buildings — no matter the color" },
+    cleanse:   { icon:"🧹", name:"CLEANSE",      color:"#00ff88", bg:"rgba(0,255,136,0.1)",  glow:"rgba(0,255,136,0.3)",  border:"#00ff88",
+                 effect:"All corruption tiles are being destroyed" },
+    shift_plus:{ icon:"🔁", name:"+3 MOVES",     color:"#00e5ff", bg:"rgba(0,229,255,0.1)",  glow:"rgba(0,229,255,0.3)",  border:"#00e5ff",
+                 effect:"3 extra moves added to your current total" },
+    freeze:    { icon:"🧊", name:"FREEZE",        color:"#a5f3fc", bg:"rgba(165,243,252,0.1)",glow:"rgba(165,243,252,0.3)",border:"#a5f3fc",
+                 effect:"Corruption cannot spread for the next 5 moves" },
+    wildfire:  { icon:"🔥", name:"WILDFIRE",     color:"#ff7700", bg:"rgba(255,119,0,0.12)", glow:"rgba(255,119,0,0.35)", border:"#ff7700",
+                 effect:"Your NEXT shift clears every tile in that row or column" },
+    detector:  { icon:"🔍", name:"HINT",          color:"#c084fc", bg:"rgba(192,132,252,0.1)",glow:"rgba(192,132,252,0.3)",border:"#c084fc",
+                 effect:"The best available shift is highlighted on the board" },
+  };
+
   function useAbility(id){
     if(phase!=="idle") return;
     var count=abilities[id]||0;
     if(count<=0) return;
+
+    /* Consume */
     var newAbils=Object.assign({},abilities,{[id]:count-1});
     setAbilities(newAbils); saveAbilities(newAbils);
     setUsedAbilities(function(s){ var n=new Set(s); n.add(id); return n; });
-    var flashColor="#ffaa00";
 
+    /* Trigger cinematic */
+    var adef = ABILITY_ANIM_DEFS[id];
+    if(adef){
+      setAbilityAnim(adef);
+      setTimeout(function(){ setAbilityAnim(null); }, 2000);
+    }
+
+    Haptics.heavy();
+
+    /* Per-ability effect */
     if(id==="surge"){
-      setSurgeActive(true); flashColor="#ffaa00";
-      addToast("⚡ POWER SURGE — next match charges all!","#ffaa00");
-      Audio.win();
+      setSurgeActive(true);
+      Audio.abilitySurge();
     }
     else if(id==="cleanse"){
-      flashColor="#00ff88";
-      setGrid(function(g){
-        var newG=g.map(function(row){ return row.map(function(t){
-          return t&&t.corrupted ? makeTile(rndColor()) : t;
-        }); });
-        return newG;
-      });
-      addToast("🧹 CLEANSED — corruption removed!","#00ff88");
-      Audio.win();
+      /* Animate tiles out first, then replace */
+      var corruptKeys=new Set();
+      for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
+        if(grid[r]&&grid[r][c]&&grid[r][c].corrupted) corruptKeys.add(r+","+c);
+      }
+      setCleansingTiles(corruptKeys);
+      Audio.abilityCleanse();
+      /* Staggered removal — 420ms for animation, then swap tiles */
+      later(function(){
+        setCleansingTiles(new Set());
+        setGrid(function(g){
+          return g.map(function(row){ return row.map(function(t){
+            return t&&t.corrupted ? makeTile(rndColor()) : t;
+          }); });
+        });
+      }, 420);
     }
     else if(id==="shift_plus"){
-      flashColor="#00e5ff";
       setMoves(function(m){ return m+3; });
-      addToast("🔁 +3 MOVES ADDED","#00e5ff");
-      Audio.win();
+      setMovesBump(true);
+      setTimeout(function(){ setMovesBump(false); }, 500);
+      Audio.abilityMoves();
     }
     else if(id==="freeze"){
-      flashColor="#a5f3fc";
       setFreezeActive(5);
-      addToast("🧊 FROZEN — corruption halted for 5 moves","#a5f3fc");
-      Audio.win();
+      Audio.abilityFreeze();
     }
     else if(id==="wildfire"){
-      setWildfireActive(true); flashColor="#ff7700";
-      addToast("🔥 WILDFIRE — next shift clears the whole line!","#ff7700");
-      Audio.win();
+      setWildfireActive(true);
+      Audio.abilityFire();
     }
     else if(id==="detector"){
-      flashColor="#c084fc";
-      /* Find best shift: scan all rows/cols, pick the one with most potential matches */
       var bestScore=-1, bestHint=null;
       for(var ri=0;ri<ROWS;ri++){
         ["left","right"].forEach(function(dir){
           var tg=doShift(grid,"row",ri,dir);
-          var m=findMatches(tg);
-          if(m.size>bestScore){ bestScore=m.size; bestHint={type:"row",idx:ri,dir:dir}; }
+          var mm=findMatches(tg);
+          if(mm.size>bestScore){ bestScore=mm.size; bestHint={type:"row",idx:ri,dir:dir}; }
         });
       }
       for(var ci=0;ci<COLS;ci++){
         ["up","down"].forEach(function(dir){
           var tg=doShift(grid,"col",ci,dir);
-          var m=findMatches(tg);
-          if(m.size>bestScore){ bestScore=m.size; bestHint={type:"col",idx:ci,dir:dir}; }
+          var mm=findMatches(tg);
+          if(mm.size>bestScore){ bestScore=mm.size; bestHint={type:"col",idx:ci,dir:dir}; }
         });
       }
       setHintTile(bestHint);
-      setTimeout(function(){ setHintTile(null); },3000);
-      addToast("🔍 BEST MOVE HIGHLIGHTED","#c084fc");
+      setTimeout(function(){ setHintTile(null); }, 3500);
       Audio.win();
     }
-
-    Haptics.medium();
-    setAbilityFlash(flashColor);
-    setTimeout(function(){ setAbilityFlash(null); },350);
   }
 
   function ShiftBtn(p){
     var isHinted = hintTile && hintTile.type===p.type && hintTile.idx===p.idx && hintTile.dir===p.dir;
+    var isWildfire = wildfireActive;
     return (
       <button className={"sg-shift-btn"+(p.col?" col-btn":"")+(isHinted?" flash":"")}
-        style={{width:(p.col?SZ:30)+"px",height:(p.col?30:SZ)+"px",
-          boxShadow:isHinted?"0 0 12px #c084fc":"none",
-          borderColor:isHinted?"#c084fc":"",
-          animation:isHinted?"ability-ready 0.8s ease infinite alternate":""}}
+        style={{
+          width:(p.col?SZ:30)+"px", height:(p.col?30:SZ)+"px",
+          boxShadow: isHinted?"0 0 12px #c084fc" : isWildfire?"0 0 8px rgba(255,119,0,0.5)":"none",
+          borderColor: isHinted?"#c084fc" : isWildfire?"rgba(255,119,0,0.7)":"",
+          background: isWildfire?"rgba(255,119,0,0.12)":"",
+          animation: isHinted?"ability-ready 0.8s ease infinite alternate" : isWildfire?"ability-armed 0.8s ease infinite alternate":"",
+          "--acolor": "#ff7700",
+          color: isWildfire?"#ff7700":isHinted?"#c084fc":"",
+          transition:"all 0.15s",
+        }}
         onClick={function(){ if(isHinted)setHintTile(null); handleShift(p.type,p.idx,p.dir); }}
         disabled={phase!=="idle"}>
-        {p.label}
+        {isWildfire?"🔥":p.label}
       </button>
     );
   }
@@ -3573,11 +4966,70 @@ function GameBoard(props) {
         <div className="sg-score-live">{score.toLocaleString()}</div>
       </div>
 
+      {/* ── OBJECTIVE BADGE ── */}
+      {objectiveType!=="standard"&&(function(){
+        var om=OBJECTIVE_META[objectiveType];
+        return (
+          <div className="sg-objective-badge"
+            style={{borderColor:om.color+"55",background:om.color+"0a",color:om.color}}>
+            <span className="sg-obj-icon">{om.icon}</span>
+            <div style={{flex:1}}>
+              <div className="sg-obj-label" style={{color:om.color}}>{om.label}</div>
+              <div className="sg-obj-desc">
+                {objectiveType==="timed"&&"Power all buildings before time runs out"}
+                {objectiveType==="collect"&&("Clear "+collectTarget+" marked tiles ◎ from the board")}
+                {objectiveType==="containment"&&"Don't let corruption cross the midpoint line"}
+                {objectiveType==="minmoves"&&("Par: "+minMovesPar+" moves — beat it for 3 stars")}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── COMBO POWER METER ── */}
+      {(function(){
+        var rank=getComboRank(comboPower);
+        var pct=Math.min(100,(comboPower/COMBO_MAX)*100);
+        if(comboPower<=0) return null;
+        return (
+          <div className="sg-combo-power-wrap">
+            <div className="sg-combo-power-header">
+              <span className="sg-combo-power-lbl">COMBO POWER</span>
+              <span className="sg-combo-power-rank" style={{color:rank.color}}>{rank.name}</span>
+            </div>
+            <div className="sg-combo-power-track">
+              <div className="sg-combo-power-fill" style={{width:pct+"%",background:"linear-gradient(90deg,"+rank.gradient+")"}}/>
+            </div>
+          </div>
+        );
+      })()}
+      {rankUpText&&(
+        <div className="sg-combo-power-rankup" style={{color:getComboRank(comboPower).color,textShadow:"0 0 20px "+getComboRank(comboPower).color}}>
+          {rankUpText} ↑
+        </div>
+      )}
+
       <div className="sg-hud">
         <div className={"sg-stat"+(moves<=5?" danger":"")}>
           <div className="sg-stat-lbl">MOVES</div>
-          <div className="sg-stat-val" style={{color:moves<=5?"#ff2d95":"#00e5ff",textShadow:moves<=5?"0 0 14px #ff2d95":"none"}}>{moves}</div>
+          <div className={"sg-stat-val"+(movesBump?" sg-moves-bump":"")} style={{color:moves<=5?"#ff2d95":"#00e5ff",textShadow:moves<=5?"0 0 14px #ff2d95":"none"}}>{moves}</div>
         </div>
+        {objectiveType==="timed"&&(
+          <div className="sg-stat">
+            <div className="sg-stat-lbl">TIME</div>
+            <div className={"sg-timer-val"+(timeLeft<=10?" urgent":"")} style={{color:timeLeft<=10?"#ff2d95":timeLeft<=20?"#ff7700":"#ffaa00",fontSize:18,fontFamily:"'Orbitron',monospace",fontWeight:900}}>
+              {Math.floor(timeLeft/60)+":"+(String(timeLeft%60).padStart(2,"0"))}
+            </div>
+          </div>
+        )}
+        {objectiveType==="collect"&&(
+          <div className="sg-stat">
+            <div className="sg-stat-lbl">COLLECT</div>
+            <div className="sg-collect-counter" style={{color:collectTiles.size===0?"#00ff88":"#a855f7"}}>
+              {collectTarget-collectTiles.size}/{collectTarget}
+            </div>
+          </div>
+        )}
         <div className="sg-stat">
           <div className="sg-stat-lbl">POWERED</div>
           <div className="sg-stat-val" style={{color:"#00ff88"}}>
@@ -3593,39 +5045,75 @@ function GameBoard(props) {
         )}
       </div>
 
-      {/* ── ABILITIES BAR ── */}
+      {/* ── ABILITY CINEMATIC ── */}
+      <AbilityCinematic anim={abilityAnim}/>
+
+      {/* ── ACTIVE ABILITY BANNERS ── */}
+      {surgeActive&&(
+        <div className="sg-active-ability-banner"
+          style={{"--ab-border":"rgba(255,170,0,0.5)","--ab-bg":"rgba(255,170,0,0.1)","--ab-color":"#ffaa00"}}>
+          <span className="sg-ab-icon">⚡</span>
+          <div className="sg-ab-text">
+            <div className="sg-ab-name" style={{color:"#ffaa00"}}>POWER SURGE ARMED</div>
+            <div className="sg-ab-desc">Next match charges ALL buildings — any color</div>
+          </div>
+          <div className="sg-ab-badge">READY</div>
+        </div>
+      )}
+      {wildfireActive&&(
+        <div className="sg-active-ability-banner"
+          style={{"--ab-border":"rgba(255,119,0,0.5)","--ab-bg":"rgba(255,119,0,0.1)","--ab-color":"#ff7700"}}>
+          <span className="sg-ab-icon">🔥</span>
+          <div className="sg-ab-text">
+            <div className="sg-ab-name" style={{color:"#ff7700"}}>WILDFIRE ARMED</div>
+            <div className="sg-ab-desc">Next shift clears the ENTIRE row or column</div>
+          </div>
+          <div className="sg-ab-badge">SWIPE NOW</div>
+        </div>
+      )}
+      {freezeActive>0&&(
+        <div className="sg-active-ability-banner"
+          style={{"--ab-border":"rgba(165,243,252,0.4)","--ab-bg":"rgba(165,243,252,0.08)","--ab-color":"#a5f3fc"}}>
+          <span className="sg-ab-icon">🧊</span>
+          <div className="sg-ab-text">
+            <div className="sg-ab-name" style={{color:"#a5f3fc"}}>CORRUPTION FROZEN</div>
+            <div className="sg-ab-desc">Spread is blocked</div>
+          </div>
+          <div className="sg-ab-badge">{freezeActive+" MOVES"}</div>
+        </div>
+      )}
+
+      {/* ── ABILITIES BUTTON BAR ── */}
       {(function(){
         var ownedAbils=ABILITY_DEFS.filter(function(a){ return (abilities[a.id]||0)>0; });
         if(ownedAbils.length===0) return null;
         return (
           <div className="sg-abilities-bar">
-            <div style={{fontSize:8,color:"rgba(255,255,255,0.25)",letterSpacing:"0.1em",flexShrink:0}}>ABILITIES</div>
+            <div className="sg-abilities-label">ABILITIES</div>
             {ownedAbils.map(function(ab){
-              var isOn = (ab.id==="surge"&&surgeActive)||(ab.id==="freeze"&&freezeActive>0)||(ab.id==="wildfire"&&wildfireActive);
+              var isArmed = (ab.id==="surge"&&surgeActive)||(ab.id==="freeze"&&freezeActive>0)||(ab.id==="wildfire"&&wildfireActive);
               var cnt  = abilities[ab.id]||0;
               return (
                 <button key={ab.id}
-                  className={"sg-ability-btn"+(isOn?" active-ability":"")}
-                  style={{borderColor: isOn?ab.color:ab.color+"55", color:ab.color,
-                    background:isOn?ab.color+"1a":"rgba(255,255,255,0.04)"}}
+                  className={"sg-ability-btn"+(isArmed?" armed":"")}
+                  style={{
+                    "--acolor": ab.color,
+                    borderColor: isArmed ? ab.color : ab.color+"44",
+                    background: isArmed ? ab.color+"22" : "rgba(10,10,20,0.9)",
+                    color: ab.color,
+                  }}
                   onClick={function(){ useAbility(ab.id); }}
                   disabled={phase!=="idle"||cnt<=0}
                   title={ab.name+": "+ab.desc}>
-                  <div className="sg-ability-count">{cnt}</div>
+                  <div className="sg-ability-count" style={{background:cnt>1?ab.color+"dd":"rgba(0,0,0,0.7)",color:cnt>1?"#06060f":"#fff"}}>{cnt}</div>
                   <div className="sg-ability-icon">{ab.icon}</div>
-                  <div className="sg-ability-name" style={{color:ab.color}}>{ab.name.split(" ")[0]}</div>
+                  <div className="sg-ability-name" style={{color:isArmed?ab.color:ab.color+"aa"}}>{ab.name.split(" ")[0]}</div>
                 </button>
               );
             })}
-            {/* Active state badges */}
-            {surgeActive&&<div style={{fontSize:9,color:"#ffaa00",letterSpacing:"0.06em",fontWeight:700,flexShrink:0}}>⚡ SURGE READY</div>}
-            {wildfireActive&&<div style={{fontSize:9,color:"#ff7700",letterSpacing:"0.06em",fontWeight:700,flexShrink:0}}>🔥 WILDFIRE READY</div>}
-            {freezeActive>0&&<div style={{fontSize:9,color:"#a5f3fc",letterSpacing:"0.06em",fontWeight:700,flexShrink:0}}>🧊 {freezeActive}mv</div>}
           </div>
         );
       })()}
-
-      {abilityFlash&&<div className="sg-ability-use-flash" style={{background:abilityFlash+"22"}}/>}
 
       {isLastMove&&<div className="sg-last-move-banner">⚡ LAST MOVE — MAKE IT COUNT</div>}
       {/* Node type introduction banner for first time seeing a node type */}
@@ -3668,13 +5156,24 @@ function GameBoard(props) {
       </div>
 
       {/* ── GRID ── */}
-      <div className={"sg-grid-area"+(nudgeClass?" "+nudgeClass:"")}
+      <div className={"sg-grid-area"+(nudgeClass?" "+nudgeClass:"")} style={{position:"relative"}}
         ref={gridRef}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         style={{touchAction:"none"}}
       >
+        {/* SURGE glow overlay */}
+        {surgeActive&&<div className="sg-grid-surge-overlay"/>}
+        {/* CONTAINMENT line — drawn at grid midpoint */}
+        {objectiveType==="containment"&&(
+          <div className="sg-contain-line" style={{
+            top:(2*(SZ+GAP)+SZ/2)+"px",
+            background:"linear-gradient(90deg,transparent,#ff2d95,transparent)",
+            boxShadow:"0 0 8px rgba(255,45,149,0.5)",
+          }}/>
+        )}
+        {containBreach&&<div className="sg-contain-breach"/>}
         {/* Col UP buttons */}
         <div className="sg-col-btns">
           {[0,1,2,3,4].map(function(c){ return <ShiftBtn key={c} type="col" idx={c} dir="up" label="▲" col={true}/>; })}
@@ -3692,7 +5191,7 @@ function GameBoard(props) {
                   const slideClass = rowSlide || colSlide;
                   var isAdjacentCorrupt=false;
                   if(tile&&!tile.corrupted){ [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){ var nr=r+d[0],nc=c+d[1]; if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&grid[nr][nc]&&grid[nr][nc].corrupted) isAdjacentCorrupt=true; }); }
-                  return <Tile key={tile?tile.id:(r+"-"+c)} tile={tile} isHi={hi.has(r+","+c)} size={SZ} slideClass={slideClass} adjacentCorrupt={isAdjacentCorrupt} skinColors={skinColors} colorblind={colorblind}/>;
+                  return <Tile key={tile?tile.id:(r+"-"+c)} tile={tile} isHi={hi.has(r+","+c)} size={SZ} slideClass={slideClass} adjacentCorrupt={isAdjacentCorrupt} skinColors={skinColors} colorblind={colorblind} isCleansing={cleansingTiles.has(r+","+c)} isFrozenCorrupt={freezeActive>0&&tile&&tile.corrupted} isCollectTarget={objectiveType==="collect"&&collectTiles.has(r+","+c)}/>;
                 })}
               </div>
               <ShiftBtn type="row" idx={r} dir="right" label="▶"/>
@@ -3761,14 +5260,28 @@ function GameBoard(props) {
                   return <span key={i} className={"sg-win-star"+(i<=stars?" lit":"")} style={{animationDelay:(i*0.12)+"s"}}>★</span>;
                 })}
               </div>
-              <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginBottom:3,textAlign:"left"}}>EFFICIENCY — {effPct}% MOVES REMAINING</div>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginBottom:3,textAlign:"left"}}>
+                {objectiveType==="minmoves"
+                  ? "EFFICIENCY — PAR "+minMovesPar+" · YOU USED "+movesUsed
+                  : "EFFICIENCY — "+effPct+"% MOVES REMAINING"}
+              </div>
               <div className="sg-win-eff-bar"><div className="sg-win-eff-fill" style={{width:effPct+"%"}}/></div>
-              <div style={{fontSize:10,color:"rgba(255,255,255,0.28)",marginBottom:10}}>{movesUsed+" of "+levelDef.moves+" moves used"}</div>
+              <div style={{fontSize:10,color:"rgba(255,255,255,0.28)",marginBottom:8}}>{movesUsed+" of "+levelDef.moves+" moves used"}</div>
+              {(function(){
+                var cleared=(meta.levelsCleared||[]).length;
+                var line=getEngineerDialogue(cleared);
+                return (
+                  <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8,padding:"7px 10px",fontSize:10,color:"rgba(255,255,255,0.45)",lineHeight:1.5,marginBottom:8,textAlign:"left",fontStyle:"italic"}}>
+                    <span style={{fontSize:8,letterSpacing:"0.1em",color:"rgba(255,255,255,0.2)",fontStyle:"normal"}}>RYKER: </span>
+                    {line}
+                  </div>
+                );
+              })()}
               <div className="sg-modal-rewards">
                 <div className="sg-reward-chip">{"+" + winCoins} <span style={{color:"#ffaa00"}}>coins</span></div>
                 <div className="sg-reward-chip">{"+" + winParts} <span style={{color:"#00e5ff"}}>parts</span></div>
               </div>
-              <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)"}} onClick={function(e){ window.sgCoinFly&&window.sgCoinFly(winCoins,e.target); onComplete({score:score,coins:winCoins,parts:winParts,movesLeft:moves,batteries:sessionStatsRef.current.batteries,pulses:sessionStatsRef.current.pulses,maxCascade:sessionStatsRef.current.maxCascade,corruptCleared:sessionStatsRef.current.corruptCleared,wasNearWin:lastChanceRef.current}); }}>COLLECT</button>
+              <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)"}} onClick={function(e){ window.sgCoinFly&&window.sgCoinFly(winCoins,e.target); onComplete({score:score,coins:winCoins,parts:winParts,movesLeft:moves,batteries:sessionStatsRef.current.batteries,pulses:sessionStatsRef.current.pulses,maxCascade:sessionStatsRef.current.maxCascade,corruptCleared:sessionStatsRef.current.corruptCleared,wasNearWin:lastChanceRef.current,consecutiveWins:sessionStatsRef.current.consecutiveWins}); }}>COLLECT</button>
             </div>
           </div>
         );
@@ -3864,7 +5377,7 @@ function GameBoard(props) {
 /* ─── XP BAR COMPONENT ──────────────────────────────────────────── */
 function XPBar(props) {
   var xpData = props.xpData;
-  var pct = (xpData.xp / XP_PER_LEVEL) * 100;
+  var pct = Math.min(100, (xpData.xp / XP_PER_LEVEL) * 100);
   return (
     <div className="sg-xp-bar-wrap">
       <div className="sg-xp-row">
@@ -3881,84 +5394,117 @@ function XPBar(props) {
 /* ─── CITY OVERVIEW ─────────────────────────────────────────────── */
 function CityOverview(props) {
   var levelsCleared = props.levelsCleared || [];
-  var totalLevels = 50;
   var totalStars = Object.values(props.stars || {}).reduce(function(a,b){return a+b;},0);
+  var distStates = getCityDistrictState(levelsCleared);
+  var cleared = levelsCleared.length;
 
-  var buildings = [
-    {color:"#00e5ff",  h:90, w:18, windows:[3,3,3,3]},
-    {color:"#a855f7",  h:120,w:14, windows:[2,2,2,2,2,2]},
-    {color:"#ffaa00",  h:75, w:22, windows:[4,4,3,3]},
-    {color:"#ff2d95",  h:100,w:16, windows:[3,3,3,3,3]},
-    {color:"#00ff88",  h:55, w:20, windows:[3,3,2]},
-    {color:"#00e5ff",  h:80, w:12, windows:[2,2,2,2]},
-    {color:"#a855f7",  h:110,w:18, windows:[3,3,3,3,3]},
-    {color:"#ffaa00",  h:65, w:14, windows:[2,2,2,2]},
+  /* District configs */
+  var DIST_CONFIGS = [
+    { label:"D1", x:"10%",  theme:"#00e5ff", bldgs:[{h:90,w:18,lit:distStates[0]==="glowing"||distStates[0]==="restored"},{h:70,w:14,lit:distStates[0]==="glowing"}] },
+    { label:"D2", x:"27%",  theme:"#ffaa00", bldgs:[{h:110,w:16,lit:distStates[1]==="glowing"||distStates[1]==="restored"},{h:80,w:12,lit:distStates[1]==="glowing"}] },
+    { label:"D3", x:"44%",  theme:"#ff2d95", bldgs:[{h:130,w:18,lit:distStates[2]==="glowing"||distStates[2]==="restored"},{h:95,w:14,lit:distStates[2]==="glowing"}] },
+    { label:"D4", x:"61%",  theme:"#a855f7", bldgs:[{h:100,w:16,lit:distStates[3]==="glowing"||distStates[3]==="restored"},{h:75,w:12,lit:distStates[3]==="glowing"}] },
+    { label:"D5", x:"78%",  theme:"#00ff88", bldgs:[{h:120,w:20,lit:distStates[4]==="glowing"||distStates[4]==="restored"},{h:85,w:14,lit:distStates[4]==="glowing"}] },
   ];
 
-  var pctCleared = levelsCleared.length / totalLevels;
-  /* Each building lights up when corresponding levels are cleared */
-  /* Building 0-1: district 1, 2-3: dist2, 4-5: dist3, 6: dist4, 7: dist5 */
-  var distProgress = [0,10,20,30,40].map(function(start,di){
-    var ids=Array.from({length:10},function(_,i){ return start+i; });
-    return ids.filter(function(id){ return levelsCleared.includes(id); }).length / 10;
-  });
-  var buildingDistMap = [0,0,1,1,2,2,3,4]; /* which district each building represents */
+  /* Starfield */
+  var stars = [];
+  for(var si=0;si<20;si++){
+    stars.push({
+      left:((si*37+13)%95)+"%",
+      top: ((si*53+7)%60)+"%",
+      size: (si%3===0)?2:1,
+      dur:  (2+(si%4))+"s",
+      lo:   0.1+((si%4)*0.1),
+      hi:   0.5+((si%3)*0.2),
+    });
+  }
 
   return (
-    <div className="sg-city-overview">
-      <div className="sg-city-skyline">
-        {buildings.map(function(b, i) {
-          var distIdx = buildingDistMap[i];
-          var lit = distProgress[distIdx] >= 0.5; /* lights up when district half cleared */
-          var partial = distProgress[distIdx] > 0 && !lit;
+    <div>
+      <div className="sg-city-scene" style={{height:180}}>
+        {/* Starfield sky */}
+        <div className="sg-city-sky">
+          {stars.map(function(s,i){
+            return <div key={i} className="sg-sky-star" style={{left:s.left,top:s.top,width:s.size,height:s.size,"--dur":s.dur,"--lo":s.lo,"--hi":s.hi}}/>;
+          })}
+          {/* Aurora glow for completed districts */}
+          {cleared>=10&&<div style={{position:"absolute",bottom:0,left:"5%",width:"30%",height:"80px",background:"radial-gradient(ellipse,rgba(0,229,255,0.08) 0%,transparent 70%)",pointerEvents:"none"}}/>}
+          {cleared>=30&&<div style={{position:"absolute",bottom:0,left:"40%",width:"30%",height:"80px",background:"radial-gradient(ellipse,rgba(255,45,149,0.07) 0%,transparent 70%)",pointerEvents:"none"}}/>}
+          {cleared>=50&&<div style={{position:"absolute",bottom:0,left:"70%",width:"30%",height:"80px",background:"radial-gradient(ellipse,rgba(0,255,136,0.1) 0%,transparent 70%)",pointerEvents:"none"}}/>}
+        </div>
+
+        {/* District buildings */}
+        {DIST_CONFIGS.map(function(dc,di){
+          var state=distStates[di];
           return (
-            <div key={i} className={"sg-city-building" + (lit ? " lit" : "")}
-              style={{height: b.h + "px", width: b.w + "px",
-                background: lit ? b.color+"22" : (partial ? b.color+"0a" : "rgba(255,255,255,0.04)"),
-                borderTop: "2px solid "+(lit?b.color:(partial?b.color+"44":"rgba(255,255,255,0.1)")),
-                borderLeft: "1px solid "+(lit?b.color+"55":(partial?b.color+"22":"rgba(255,255,255,0.06)")),
-                borderRight: "1px solid "+(lit?b.color+"55":(partial?b.color+"22":"rgba(255,255,255,0.06)")),
-                boxShadow: lit?("0 0 20px "+b.color+"33, 0 -4px 12px "+b.color+"44"):(partial?"0 0 8px "+b.color+"22":"none"),
-                transition: "all 0.8s ease",
-              }}>
-              <div className="sg-building-windows" style={{gridTemplateColumns: "repeat(" + b.windows[0] + ", 1fr)", gap: "2px", padding: "4px 3px"}}>
-                {b.windows.map(function(rowCount, ri) {
-                  return Array.from({length: rowCount}).map(function(_, ci) {
-                    return (
-                      <div key={ri+"-"+ci} className="sg-window" style={{
-                        background: lit ? b.color + "cc" : "rgba(255,255,255,0.06)",
-                        boxShadow: lit ? ("0 0 4px " + b.color) : "none",
-                      }}/>
-                    );
-                  });
-                })}
-              </div>
+            <div key={di} style={{position:"absolute",bottom:18,left:dc.x,display:"flex",gap:4,alignItems:"flex-end"}}>
+              {dc.bldgs.map(function(b,bi){
+                return (
+                  <div key={bi}
+                    className={"sg-city-building "+(state==="ruins"?"ruins":state==="repairing"?"repairing":state==="glowing"?"glowing":"restored")}
+                    style={{
+                      height:b.h+"px", width:b.w+"px",
+                      "--bcolor": dc.theme,
+                      background: state==="ruins"?"rgba(255,255,255,0.03)": state==="repairing"?"rgba(255,255,255,0.06)": dc.theme+"22",
+                      borderTop:"2px solid "+(state==="ruins"?"rgba(255,255,255,0.05)":dc.theme+(b.lit?"":"55")),
+                      borderLeft:"1px solid "+(state==="ruins"?"rgba(255,255,255,0.03)":dc.theme+(b.lit?"44":"22")),
+                      borderRight:"1px solid "+(state==="ruins"?"rgba(255,255,255,0.03)":dc.theme+(b.lit?"44":"22")),
+                      boxShadow: state==="glowing"&&b.lit?"0 0 16px "+dc.theme+"44,0 -6px 20px "+dc.theme+"33":"none",
+                      transition:"all 0.8s ease",
+                    }}>
+                    {/* Windows */}
+                    {b.lit&&[0,1,2].slice(0,Math.floor(b.h/30)).map(function(row){
+                      return (
+                        <div key={row} style={{display:"flex",gap:2,justifyContent:"center",marginTop:4}}>
+                          {[0,1].map(function(col){
+                            var on=Math.random()>0.25;
+                            return <div key={col} style={{width:3,height:4,borderRadius:1,background:on?dc.theme+"cc":"rgba(255,255,255,0.05)"}}/>;
+                          })}
+                        </div>
+                      );
+                    })}
+                    {/* Repair spark for repairing state */}
+                    {state==="repairing"&&<div style={{position:"absolute",top:"20%",right:"10%",fontSize:8,animation:"crane-sway 0.5s ease infinite alternate"}}>✦</div>}
+                  </div>
+                );
+              })}
+              {/* Crane on ruins */}
+              {state==="ruins"&&<div className="sg-crane">🏗</div>}
+              {/* District label */}
+              <div className={"sg-dist-label"+(state!=="ruins"?" active":"")} style={{color:dc.theme,left:0,transform:"none"}}>{dc.label}</div>
             </div>
           );
         })}
-      </div>
-      <div className="sg-city-label">
-        {levelsCleared.length === 0 ? "CITY IN DARKNESS — RESTORE POWER TO LIGHT IT UP" :
-         levelsCleared.length < 25 ? "PARTIAL RESTORATION — KEEP GOING" :
-         levelsCleared.length < 50 ? "CITY AWAKENING — ALMOST THERE" : "CITY FULLY RESTORED — LEGEND"}
-      </div>
-      <div className="sg-city-stats">
-        <div className="sg-city-stat">
-          <div className="sg-city-stat-val" style={{color:"#00e5ff"}}>{levelsCleared.length}</div>
-          <div className="sg-city-stat-lbl">LEVELS</div>
+
+        {/* Road */}
+        <div className="sg-city-ground">
+          {[0,1,2,3,4].map(function(i){
+            return <div key={i} className="sg-road-stripe" style={{right:(i*22)+"%",animationDelay:(-i*0.6)+"s"}}/>;
+          })}
         </div>
-        <div className="sg-city-stat">
-          <div className="sg-city-stat-val" style={{color:"#ffaa00"}}>{totalStars}</div>
-          <div className="sg-city-stat-lbl">STARS</div>
+      </div>
+
+      {/* City stats */}
+      <div className="sg-city-stats-bar">
+        <div className="sg-city-stat-pill">
+          <div className="sg-city-stat-pill-val" style={{color:"#00e5ff"}}>{cleared}</div>
+          <div className="sg-city-stat-pill-lbl">SECTORS POWERED</div>
         </div>
-        <div className="sg-city-stat">
-          <div className="sg-city-stat-val" style={{color:"#00ff88"}}>{Math.round(pctCleared*100)+"%"}</div>
-          <div className="sg-city-stat-lbl">RESTORED</div>
+        <div className="sg-city-stat-pill">
+          <div className="sg-city-stat-pill-val" style={{color:"#ffaa00"}}>{totalStars}</div>
+          <div className="sg-city-stat-pill-lbl">TOTAL STARS</div>
+        </div>
+        <div className="sg-city-stat-pill">
+          <div className="sg-city-stat-pill-val" style={{color:cleared>=50?"#ffaa00":"rgba(255,255,255,0.4)"}}>{Math.round((cleared/50)*100)}%</div>
+          <div className="sg-city-stat-pill-lbl">CITY RESTORED</div>
         </div>
       </div>
     </div>
   );
 }
+
+
 
 /* ─── STREAK CALENDAR ────────────────────────────────────────────── */
 function StreakCalendar(props) {
@@ -3982,8 +5528,19 @@ function StreakCalendar(props) {
     var newStreak = Object.assign({}, streak, {claimed: newClaimed});
     saveStreak(newStreak);
     onStreakUpdate(newStreak);
-    if (reward.coins > 0) {
-      setMeta(function(m) { var n = Object.assign({}, m, {coins: m.coins + reward.coins}); saveMeta(n); return n; });
+    var rewardCoins = reward.coins || 0;
+    var rewardParts  = reward.parts  || 0;
+    var rewardAbils  = reward.abilities || null;
+    if (rewardCoins > 0 || rewardParts > 0) {
+      setMeta(function(m) {
+        var n = Object.assign({}, m, {coins: m.coins + rewardCoins, parts: m.parts + rewardParts});
+        saveMeta(n); return n;
+      });
+    }
+    if (rewardAbils) {
+      var curAbils = loadAbilities();
+      Object.keys(rewardAbils).forEach(function(k){ curAbils[k]=(curAbils[k]||0)+rewardAbils[k]; });
+      saveAbilities(curAbils);
     }
     Audio.win();
   }
@@ -4054,7 +5611,7 @@ function StreakCalendar(props) {
             <div key={d.i} className={"sg-cal-day " + d.cls}>
               <div className="day-num">{"D"+d.i}</div>
               <div className="day-ico">{d.reward.icon}</div>
-              <div className="day-val">{d.reward.coins > 0 ? "+"+d.reward.coins : d.reward.label.substring(0,4)}</div>
+              <div className="day-val">{d.reward.coins > 0 ? "+"+d.reward.coins+"⬡" : (d.reward.parts > 0 ? "+"+d.reward.parts+"◈" : d.reward.label.substring(0,4))}</div>
             </div>
           );
         })}
@@ -4111,19 +5668,42 @@ function ChallengesTab(props) {
         var progVal = prog ? prog.progress : 0;
         var isDone = prog ? prog.done : false;
         var pct = Math.min(100, (progVal / def.goal) * 100);
-        return (
-          <div key={def.id} className={"sg-challenge-card" + (isDone ? " complete" : "")}>
-            <div className="sg-challenge-icon">{def.icon}</div>
-            <div className="sg-challenge-info">
-              <div className="sg-challenge-name">{def.name}</div>
-              <div className="sg-challenge-prog">{def.desc + " · " + progVal + "/" + def.goal}</div>
-              <div className="sg-challenge-bar-track">
-                <div className="sg-challenge-bar-fill" style={{width:pct+"%",background:isDone?"#00ff88":"linear-gradient(90deg,#00e5ff,#a855f7)"}}/>
+        return (function(){
+            /* Tier-aware display */
+            var tiers=def.tiers||[{goal:def.goal,coins:def.reward.coins}];
+            var curTierIdx=tiers.findIndex(function(t){ return progVal<t.goal; });
+            if(curTierIdx===-1) curTierIdx=tiers.length-1;
+            var curTier=tiers[curTierIdx]||tiers[tiers.length-1];
+            var tierPct=Math.min(100,(progVal/curTier.goal)*100);
+            var tierColors=["rgba(205,127,50,0.8)","rgba(192,192,192,0.8)","#ffaa00"];
+            var tierLabels=["BRONZE","SILVER","GOLD"];
+            return (
+              <div key={def.id} className={"sg-challenge-card" + (isDone ? " complete" : "")}>
+                <div className="sg-challenge-icon">{def.icon}</div>
+                <div className="sg-challenge-info">
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <div className="sg-challenge-name">{def.name}</div>
+                    {/* Tier badges */}
+                    <div style={{display:"flex",gap:3}}>
+                      {tiers.map(function(t,ti){
+                        var earned=progVal>=t.goal;
+                        return <div key={ti} style={{width:10,height:10,borderRadius:2,background:earned?tierColors[ti]:"rgba(255,255,255,0.1)"}} title={tierLabels[ti]+": "+t.goal}/>;
+                      })}
+                    </div>
+                  </div>
+                  <div className="sg-challenge-prog">
+                    {def.desc+" · "+progVal+"/"+curTier.goal}
+                    {" · "}
+                    <span style={{color:tierColors[curTierIdx]}}>{tierLabels[curTierIdx]+" +"+curTier.coins+"⬡"+(curTier.chest?" +"+CHEST_DEFS[curTier.chest].icon:"")}</span>
+                  </div>
+                  <div className="sg-challenge-bar-track">
+                    <div className="sg-challenge-bar-fill" style={{width:tierPct+"%",background:isDone?"#00ff88":"linear-gradient(90deg,"+tierColors[curTierIdx]+"88,"+tierColors[curTierIdx]+")"}}/>
+                  </div>
+                </div>
+                <div className="sg-challenge-check">{isDone ? "✅" : "⬜"}</div>
               </div>
-            </div>
-            <div className="sg-challenge-check">{isDone ? "✅" : "⬜"}</div>
-          </div>
-        );
+            );
+          })();
       })}
     </div>
   );
@@ -4148,7 +5728,7 @@ var SW_OPPONENTS = [
 
 function ShiftWarsTab(props){
   var meta=props.meta, onPlay=props.onPlay, setMeta=props.setMeta;
-  var swData=loadShiftWars();
+  var _swd=React.useState(loadShiftWars); var swData=_swd[0]; var setSwData=_swd[1];
   var todaySeedVal=todaySeed();
   /* Daily challenge board — same for all opponents, seeded from today */
   var warsBoard={id:"wars_"+todaySeedVal,name:"SHIFT WARS",moves:14,bids:["apt","factory","lab","power"],hazards:4,rngSeed:todaySeedVal,isDaily:true,hint:"Same board as your opponents — fewest moves wins."};
@@ -4163,9 +5743,9 @@ function ShiftWarsTab(props){
     var oppScore = Math.round(800 + oppRng()*1200);
     var won = finalScore > oppScore;
     /* Persist wins/losses */
-    var swData=loadShiftWars();
-    if(won) swData.wins=(swData.wins||0)+1; else swData.losses=(swData.losses||0)+1;
-    saveShiftWars(swData);
+    var freshSwd=loadShiftWars();
+    if(won) freshSwd.wins=(freshSwd.wins||0)+1; else freshSwd.losses=(freshSwd.losses||0)+1;
+    saveShiftWars(freshSwd); setSwData(freshSwd);
     setMeta(function(m){
       var n=Object.assign({},m,{
         shiftWarsBest: Math.max(m.shiftWarsBest||0, finalScore),
@@ -4570,7 +6150,7 @@ function SettingsSheet(props){
   }
   function resetGame(){
     if(!window.confirm("Reset ALL save data? This cannot be undone.")) return;
-    [STORE_KEY,LIVES_KEY,XP_KEY,STREAK_KEY,CHALLENGES_KEY,WEEKLY_KEY,TUTO_KEY,LOGIN_KEY,SETTINGS_KEY,STATS_KEY,SESSION_GOALS_KEY,SHIFT_WARS_KEY,"sg_skin_v1"].forEach(function(k){ try{localStorage.removeItem(k);}catch{} });
+    [STORE_KEY,LIVES_KEY,XP_KEY,STREAK_KEY,CHALLENGES_KEY,WEEKLY_KEY,TUTO_KEY,LOGIN_KEY,SETTINGS_KEY,STATS_KEY,SESSION_GOALS_KEY,SHIFT_WARS_KEY,SQUAD_KEY,GIFTS_KEY,BRACKET_KEY,SEASON_KEY,STAR_CHAIN_KEY,MASTER_KEY,FAIL_COUNTS_KEY,"sg_skin_v1"].forEach(function(k){ try{localStorage.removeItem(k);}catch{} });
     window.location.reload();
   }
   var stats = loadStats();
@@ -4799,6 +6379,625 @@ function AbilityShop(props){
   );
 }
 
+/* ─── POWER ENGINEER ───────────────────────────────────────────── */
+function EngineerCard(props){
+  var meta=props.meta, xpData=props.xpData;
+  var level=xpData?xpData.level:1;
+  var profile=getEngineerProfile(level);
+  var cleared=(meta.levelsCleared||[]).length;
+  var dialogue=getEngineerDialogue(cleared);
+  var xpPct=xpData?Math.min(100,(xpData.xp/200)*100):0;
+  var name=meta.engineerName||"RYKER";
+
+  return (
+    <div className="sg-engineer-card" style={{borderColor:profile.color+"44",background:profile.color+"08","--rank-color":profile.color}}>
+      <div className="sg-engineer-avatar">
+        <span style={{fontSize:28}}>{profile.avatar}</span>
+        <div className="sg-engineer-rank-badge" style={{background:profile.color}}>{level}</div>
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div className="sg-engineer-name" style={{color:profile.color}}>{name}</div>
+        <div className="sg-engineer-title">{profile.title}</div>
+        <div className="sg-engineer-xp-wrap">
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:8,color:"rgba(255,255,255,0.25)",letterSpacing:"0.08em"}}>
+            <span>LEVEL {level} XP</span>
+            <span>{xpData?xpData.xp:0}/{200}</span>
+          </div>
+          <div className="sg-engineer-xp-bar">
+            <div className="sg-engineer-xp-fill" style={{width:xpPct+"%",background:"linear-gradient(90deg,"+profile.color+"88,"+profile.color+")"}}/>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SEASON PASS ────────────────────────────────────────────────── */
+function SeasonPassTab(props){
+  var meta=props.meta, setMeta=props.setMeta;
+  var _sd=React.useState(loadSeason); var sd=_sd[0]; var setSd=_sd[1];
+  /* Re-sync season data when tab mounts (picks up XP earned mid-session) */
+  React.useEffect(function(){ setSd(loadSeason()); },[]);
+
+  var tierProgress=sd.xp||0;
+  var currentTier=Math.min(SEASON_TIERS.length, Math.floor(tierProgress/SEASON_XP_PER_TIER));
+  var tierPct=Math.min(100,((tierProgress%SEASON_XP_PER_TIER)/SEASON_XP_PER_TIER)*100);
+  var isPremium=sd.premium||false;
+  var claimed=sd.claimed||[];
+
+  function claimTier(tier,isPrem){
+    var key=tier.tier+(isPrem?"p":"f");
+    if(claimed.includes(key)) return;
+    var reward=isPrem?tier.premReward:tier.reward;
+    if(!reward) return;
+    if(isPrem&&!isPremium) return;
+    var newClaimed=claimed.concat([key]);
+    /* Apply reward */
+    var newAbils=loadAbilities();
+    if(reward.abilities) Object.keys(reward.abilities).forEach(function(k){ newAbils[k]=(newAbils[k]||0)+reward.abilities[k]; });
+    saveAbilities(newAbils);
+    setMeta(function(m){
+      var nc=Object.assign({},m.chests||{});
+      if(reward.chest) nc[reward.chest]=(nc[reward.chest]||0)+1;
+      var n=Object.assign({},m,{
+        coins:m.coins+(reward.coins||0),
+        parts:m.parts+(reward.parts||0),
+        chests:nc,
+      });
+      saveMeta(n); return n;
+    });
+    var newSd=Object.assign({},sd,{claimed:newClaimed});
+    saveSeason(newSd); setSd(newSd);
+    Audio.win(); Haptics.medium();
+  }
+
+  function unlockPremium(){
+    var newSd=Object.assign({},sd,{premium:true});
+    saveSeason(newSd); setSd(newSd);
+    alert("Premium Pass activated! All premium rewards are now available.");
+  }
+
+  var railPct=Math.min(100,(currentTier/SEASON_TIERS.length)*100);
+
+  return (
+    <div style={{paddingBottom:16}}>
+      {/* Season header */}
+      <div className="sg-season-header-bg" style={{marginBottom:12}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+          <div>
+            <div className="sg-season-name" style={{color:"#a855f7"}}>{SEASON_NAME}</div>
+            <div className="sg-season-subtitle">Complete levels to earn Season XP and unlock rewards</div>
+          </div>
+          {!isPremium&&(
+            <button onClick={unlockPremium}
+              style={{background:"linear-gradient(135deg,#ffaa00,#ff7700)",border:"none",borderRadius:10,padding:"8px 14px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:8,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",flexShrink:0,marginLeft:10}}>
+              ⭐ PREMIUM
+            </button>
+          )}
+          {isPremium&&<div style={{background:"linear-gradient(135deg,#ffaa00,#ff7700)",borderRadius:8,padding:"4px 10px",fontSize:9,fontWeight:700,color:"#06060f",fontFamily:"'Orbitron',monospace"}}>⭐ PREMIUM</div>}
+        </div>
+        <div className="sg-season-xp-bar">
+          <div className="sg-season-xp-fill" style={{width:((currentTier/SEASON_TIERS.length)*100)+"%"}}/>
+        </div>
+        <div className="sg-season-tier-lbl">
+          <span>TIER {currentTier}/{SEASON_TIERS.length}</span>
+          <span>{tierProgress} SEASON XP</span>
+        </div>
+      </div>
+
+      {/* Tier track */}
+      <div className="sg-pass-track">
+        <div className="sg-pass-rail">
+          <div className="sg-pass-rail-fill" style={{width:railPct+"%"}}/>
+        </div>
+        <div className="sg-pass-nodes">
+          {SEASON_TIERS.map(function(tier){
+            var earned=currentTier>=tier.tier;
+            var fKey=tier.tier+"f", pKey=tier.tier+"p";
+            var fClaimed=claimed.includes(fKey), pClaimed=claimed.includes(pKey);
+            var canClaimFree=earned&&!fClaimed&&tier.reward;
+            var canClaimPrem=earned&&!pClaimed&&tier.premReward&&isPremium;
+            return (
+              <div key={tier.tier} className="sg-pass-node">
+                {/* Free row */}
+                <div className={"sg-pass-gem"+(fClaimed?" earned":earned?" current":" locked")}
+                  style={{borderColor:fClaimed?"#a855f7":earned?"rgba(168,85,247,0.5)":"rgba(255,255,255,0.1)",background:fClaimed?"rgba(168,85,247,0.2)":earned?"rgba(168,85,247,0.1)":"rgba(255,255,255,0.02)"}}
+                  onClick={function(){ if(canClaimFree) claimTier(tier,false); }}>
+                  {fClaimed?"✓":tier.icon}
+                </div>
+                <div className="sg-pass-lbl">T{tier.tier}</div>
+                {/* Premium row */}
+                {tier.premReward&&(
+                  <div className={"sg-pass-gem"+(pClaimed?" earned":earned&&isPremium?" current":" locked")}
+                    style={{borderColor:pClaimed?"#ffaa00":earned&&isPremium?"rgba(255,170,0,0.5)":"rgba(255,255,255,0.07)",background:pClaimed?"rgba(255,170,0,0.2)":earned&&isPremium?"rgba(255,170,0,0.1)":"rgba(255,255,255,0.02)",marginTop:2}}
+                    onClick={function(){ if(canClaimPrem) claimTier(tier,true); }}>
+                    <div className="sg-pass-premium">⭐</div>
+                    {pClaimed?"✓":"⬡"}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Claim prompt */}
+      {(function(){
+        var claimable=SEASON_TIERS.filter(function(t){
+          var fe=!claimed.includes(t.tier+"f")&&currentTier>=t.tier&&t.reward;
+          var pe=!claimed.includes(t.tier+"p")&&currentTier>=t.tier&&t.premReward&&isPremium;
+          return fe||pe;
+        });
+        if(!claimable.length) return null;
+        return (
+          <div style={{textAlign:"center",marginTop:10,background:"rgba(168,85,247,0.08)",border:"1px solid rgba(168,85,247,0.3)",borderRadius:12,padding:"10px"}}>
+            <div style={{fontSize:11,color:"rgba(168,85,247,0.8)",fontWeight:700,letterSpacing:"0.1em",marginBottom:6}}>⚡ {claimable.length} REWARD{claimable.length!==1?"S":""} READY TO CLAIM</div>
+            <div style={{fontSize:9,color:"rgba(255,255,255,0.35)"}}>Tap the glowing tier gem to collect</div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+/* ─── SQUAD TAB ─────────────────────────────────────────────────── */
+function SquadTab(props){
+  var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData;
+  var _squad=React.useState(loadSquad); var squad=_squad[0]; var setSquad=_squad[1];
+  var _name=React.useState(""); var newName=_name[0]; var setNewName=_name[1];
+  var _pname=React.useState(meta.engineerName||"RYKER"); var playerName=_pname[0]; var setPlayerName=_pname[1];
+
+  var cleared=(meta.levelsCleared||[]).length;
+  var obj=getWeeklySquadObjective();
+
+  function handleCreate(){
+    if(!newName.trim()) return;
+    var s=createSquad(newName, playerName);
+    setSquad(s); Audio.win(); Haptics.medium();
+  }
+  function handleLeave(){
+    if(!window.confirm("Leave squad?")) return;
+    saveSquad(null); setSquad(null);
+  }
+
+  /* Player's weekly contribution */
+  function getPlayerWeekly(type){
+    /* Read actual tracked data if available, else estimate from cleared */
+    var pw=squad&&squad.playerWeekly?squad.playerWeekly:{};
+    if(type==="levels")   return pw.levels!=null?Math.min(obj.goal,pw.levels):Math.min(obj.goal, Math.floor(cleared/3));
+    if(type==="cascades") return Math.min(30, cleared*2);
+    if(type==="corrupt")  return Math.min(100, cleared*5);
+    if(type==="stars3")   return pw.stars3!=null?Math.min(obj.goal,pw.stars3):Math.min(15, Math.floor(cleared*0.6));
+    return 0;
+  }
+
+  if(!squad){
+    return (
+      <div style={{paddingBottom:16}}>
+        <div className="sg-create-squad">
+          <div style={{fontSize:36,marginBottom:10}}>⚡</div>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,letterSpacing:"0.1em",color:"rgba(255,255,255,0.7)",marginBottom:6}}>CREATE A SQUAD</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginBottom:16,lineHeight:1.6}}>Form a team of up to 5 engineers. Complete weekly objectives together. Earn exclusive squad rewards.</div>
+          <input className="sg-squad-input" placeholder="SQUAD NAME" maxLength={16}
+            value={newName} onChange={function(e){ setNewName(e.target.value.toUpperCase()); }}/>
+          <button onClick={handleCreate}
+            style={{width:"100%",background:"linear-gradient(135deg,#a855f7,#ff2d95)",border:"none",borderRadius:12,padding:"14px",color:"#fff",fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>
+            ⚡ CREATE SQUAD
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  var memberTotals=getSquadTotals(squad, obj.type);
+  var playerContrib=getPlayerWeekly(obj.type);
+  var totalProgress=Math.min(obj.goal, memberTotals+playerContrib);
+  var pct=Math.min(100,(totalProgress/obj.goal)*100);
+  var isComplete=totalProgress>=obj.goal;
+
+  /* Leaderboard within squad */
+  var leaderboard = squad.members.map(function(m){
+    var contrib=0;
+    if(obj.type==="levels")   contrib=m.weeklyLevels||0;
+    if(obj.type==="cascades") contrib=m.weeklyCascades||0;
+    if(obj.type==="corrupt")  contrib=m.weeklyCorrupt||0;
+    if(obj.type==="stars3")   contrib=m.weeklyStars3||0;
+    return Object.assign({},m,{contrib:contrib});
+  }).concat([{name:squad.playerName||"YOU",avatar:"👷",level:xpData?xpData.level:1,online:true,contrib:playerContrib,isYou:true}])
+    .sort(function(a,b){ return b.contrib-a.contrib; });
+
+  return (
+    <div style={{paddingBottom:16}}>
+      <div className="sg-squad-card">
+        <div className="sg-squad-banner" style={{background:"linear-gradient(90deg,#a855f7,#ff2d95)"}}/>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:4}}>
+          <div>
+            <div className="sg-squad-name" style={{color:"#a855f7"}}>{squad.name}</div>
+            <div className="sg-squad-tag">{squad.tag} · {squad.members.length+1} MEMBERS</div>
+          </div>
+          <button onClick={handleLeave}
+            style={{background:"none",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"5px 10px",color:"rgba(255,255,255,0.25)",fontSize:9,cursor:"pointer",letterSpacing:"0.06em"}}>LEAVE</button>
+        </div>
+
+        {/* Member list */}
+        <div className="sg-squad-members">
+          {leaderboard.slice(0,4).map(function(m,i){
+            return (
+              <div key={i} className={"sg-squad-member"+(m.isYou?" you":"")}>
+                <span className="sg-squad-avatar">{m.avatar}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div className="sg-squad-member-name">{m.name}{m.isYou?" (You)":""}</div>
+                  <div className="sg-squad-member-stat">Lv{m.level} · {m.contrib} this week</div>
+                </div>
+                {m.online&&<div className="sg-squad-member-online"/>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Weekly objective */}
+        <div className="sg-squad-objective">
+          <div className="sg-squad-obj-header">
+            <div className="sg-squad-obj-title">⚡ WEEKLY SQUAD OBJECTIVE</div>
+            <div className="sg-squad-obj-reward">+{obj.reward.coins}⬡ {obj.reward.chest?"+ "+CHEST_DEFS[obj.reward.chest].icon:""}</div>
+          </div>
+          <div className="sg-squad-obj-name">{obj.name}</div>
+          <div className="sg-squad-obj-desc">{obj.desc}</div>
+          <div className="sg-squad-progress-track">
+            <div className="sg-squad-progress-fill" style={{width:pct+"%",background:isComplete?"linear-gradient(90deg,#00ff88,#00e5ff)":"linear-gradient(90deg,#a855f7,#ff2d95)"}}/>
+          </div>
+          <div className="sg-squad-progress-nums">
+            <span>{totalProgress.toLocaleString()} / {obj.goal.toLocaleString()}</span>
+            <span style={{color:isComplete?"#00ff88":"rgba(255,255,255,0.25)"}}>{isComplete?"✓ COMPLETE!":Math.round(pct)+"%"}</span>
+          </div>
+        </div>
+
+        {isComplete&&(
+          <div style={{background:"rgba(0,255,136,0.08)",border:"1px solid rgba(0,255,136,0.3)",borderRadius:10,padding:"10px 14px",textAlign:"center"}}>
+            <div style={{fontSize:11,color:"#00ff88",fontWeight:700,letterSpacing:"0.08em",marginBottom:4}}>🏆 SQUAD OBJECTIVE COMPLETE!</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>Rewards distributed to all members</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── GIFTING TAB ────────────────────────────────────────────────── */
+function GiftingTab(props){
+  var meta=props.meta, setMeta=props.setMeta, lives=props.lives, setLives=props.setLives;
+  var _squadState=React.useState(loadSquad); var squad=_squadState[0];
+  var _gifts=React.useState(loadGifts); var gifts=_gifts[0]; var setGifts=_gifts[1];
+  var _sent=React.useState(null); var sentMsg=_sent[0]; var setSentMsg=_sent[1];
+
+  /* Simulate inbox from squad members — seeded daily */
+  var inboxSim = React.useMemo(function(){
+    var sqd=loadSquad(); /* read fresh for memoization */
+    if(!sqd||!sqd.members) return [];
+    var today=todayStr();
+    var rng=mkSeededRng(parseInt(today.replace(/-/g,""))%99999);
+    return sqd.members.slice(0,2).map(function(m,i){
+      var giftIdx=Math.floor(rng()*GIFT_DEFS.length);
+      var def=GIFT_DEFS[giftIdx];
+      return {id:"sim_"+today+"_"+i, from:m.name, avatar:m.avatar, gift:def, claimed:false};
+    });
+  },[]);
+
+  var [inboxItems,setInboxItems]=React.useState(inboxSim);
+
+  function sendGift(giftDef, recipient){
+    var sentToday=getGiftSentToday(giftDef.id);
+    if(sentToday>=giftDef.dailyLimit){ setSentMsg("Daily limit reached for "+giftDef.name); return; }
+    if(giftDef.cost>0&&meta.coins<giftDef.cost){ setSentMsg("Not enough coins!"); return; }
+    /* Deduct cost */
+    if(giftDef.cost>0){
+      setMeta(function(m){ var n=Object.assign({},m,{coins:m.coins-giftDef.cost}); saveMeta(n); return n; });
+    }
+    var g=loadGifts(); var today=todayStr();
+    if(g.lastReset!==today){ g.sent=[]; g.lastReset=today; }
+    g.sent=(g.sent||[]).concat([{id:giftDef.id,to:recipient,ts:Date.now()}]);
+    saveGifts(g); setGifts(Object.assign({},g));
+    setSentMsg("❤️ "+giftDef.name+" sent to "+recipient+"!");
+    setTimeout(function(){ setSentMsg(null); },2500);
+    Audio.win(); Haptics.light();
+  }
+
+  function claimGift(item){
+    var def=item.gift;
+    /* Apply reward */
+    if(def.reward.lives){
+      var fresh=loadLives();
+      var upd={count:Math.min(MAX_LIVES,fresh.count+def.reward.lives),lastRegen:fresh.lastRegen};
+      saveLives(upd); setLives(upd);
+    }
+    if(def.reward.coins){
+      setMeta(function(m){ var n=Object.assign({},m,{coins:m.coins+(def.reward.coins||0)}); saveMeta(n); return n; });
+    }
+    if(def.reward.chest){
+      setMeta(function(m){ var nc=Object.assign({},m.chests||{}); nc[def.reward.chest]=(nc[def.reward.chest]||0)+1; var n=Object.assign({},m,{chests:nc}); saveMeta(n); return n; });
+    }
+    if(def.reward.abilities){
+      var ab=loadAbilities(); Object.keys(def.reward.abilities).forEach(function(k){ ab[k]=(ab[k]||0)+def.reward.abilities[k]; }); saveAbilities(ab);
+    }
+    setInboxItems(function(prev){ return prev.map(function(x){ return x.id===item.id?Object.assign({},x,{claimed:true}):x; }); });
+    Audio.win(); Haptics.medium();
+  }
+
+  var members=squad?squad.members:[];
+
+  return (
+    <div style={{paddingBottom:16}}>
+      {/* INBOX */}
+      <div className="sg-label" style={{marginTop:8}}>📬 INBOX {inboxItems.filter(function(x){return !x.claimed;}).length>0?"("+inboxItems.filter(function(x){return !x.claimed;}).length+" new)":""}</div>
+      {inboxItems.length===0&&(
+        <div style={{textAlign:"center",padding:"20px",color:"rgba(255,255,255,0.2)",fontSize:11}}>
+          {squad?"Your squadmates haven't sent anything yet today.":"Join a squad to receive gifts!"}
+        </div>
+      )}
+      {inboxItems.map(function(item){
+        return (
+          <div key={item.id} className="sg-inbox-item" style={{opacity:item.claimed?0.45:1}}>
+            <span className="sg-inbox-icon">{item.avatar}</span>
+            <div className="sg-inbox-text">
+              <strong style={{color:"rgba(255,255,255,0.85)"}}>{item.from}</strong> sent you a {item.gift.name}
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",marginTop:2}}>Tap to claim {item.gift.icon}</div>
+            </div>
+            {!item.claimed?(
+              <button className="sg-inbox-claim" onClick={function(){ claimGift(item); }}>CLAIM</button>
+            ):(
+              <div style={{fontSize:10,color:"#00ff88",fontWeight:700,flexShrink:0}}>✓ CLAIMED</div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* SEND GIFTS */}
+      {squad&&members.length>0&&(
+        <>
+          <div className="sg-label">SEND A GIFT</div>
+          {sentMsg&&<div style={{textAlign:"center",fontSize:11,color:"#00ff88",padding:"6px",marginBottom:8,fontWeight:700}}>{sentMsg}</div>}
+          {/* Pick recipient */}
+          <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",marginBottom:8,letterSpacing:"0.1em"}}>SENDING TO: {members[0].name}</div>
+          <div className="sg-gift-row">
+            {GIFT_DEFS.map(function(gd){
+              var sentToday=getGiftSentToday(gd.id);
+              var atLimit=sentToday>=gd.dailyLimit;
+              var cantAfford=gd.cost>0&&meta.coins<gd.cost;
+              return (
+                <div key={gd.id}
+                  className="sg-gift-card"
+                  style={{
+                    borderColor:atLimit?"rgba(255,255,255,0.06)":gd.color+"44",
+                    background:atLimit?"rgba(255,255,255,0.02)":gd.color+"0a",
+                    opacity:(atLimit||cantAfford)?0.4:1,
+                    cursor:(atLimit||cantAfford)?"default":"pointer",
+                  }}
+                  onClick={function(){ if(!atLimit&&!cantAfford) sendGift(gd,members[0].name); }}>
+                  {atLimit&&<div className="sg-gift-sent-badge">✓</div>}
+                  <span className="sg-gift-icon">{gd.icon}</span>
+                  <div className="sg-gift-name" style={{color:gd.color}}>{gd.name}</div>
+                  <div className="sg-gift-cost">{gd.cost===0?"FREE":gd.cost+"⬡"}</div>
+                  <div style={{fontSize:8,color:"rgba(255,255,255,0.2)",marginTop:2}}>{sentToday}/{gd.dailyLimit}/day</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{fontSize:9,color:"rgba(255,255,255,0.2)",textAlign:"center",letterSpacing:"0.06em"}}>❤️ Sending lives is always free · All gifts reset daily</div>
+        </>
+      )}
+      {!squad&&(
+        <div style={{textAlign:"center",padding:"20px 10px",color:"rgba(255,255,255,0.25)",fontSize:11,lineHeight:1.7}}>
+          Create or join a squad to send and receive gifts.
+          <br/><span style={{color:"rgba(168,85,247,0.6)"}}>SQUAD tab → Create a Squad</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── BRACKET TOURNAMENT ─────────────────────────────────────────── */
+function BracketTab(props){
+  var meta=props.meta, setMeta=props.setMeta, onPlay=props.onPlay;
+  var week=Math.floor(Date.now()/(7*24*60*60*1000));
+  var _bracket=React.useState(function(){ return loadBracket()||{round:0,wins:0,losses:0,weekSeed:week,scores:[]}; });
+  var bracket=_bracket[0]; var setBracket=_bracket[1];
+  var _result=React.useState(null); var result=_result[0]; var setResult=_result[1];
+
+  /* Reset bracket weekly - via useEffect to avoid render-time setState */
+  React.useEffect(function(){
+    if(bracket.weekSeed!==week){
+      var fresh={round:0,wins:0,losses:0,weekSeed:week,scores:[]};
+      saveBracket(fresh); setBracket(fresh);
+    }
+  },[week]);
+
+  var phase=getBracketPhase(bracket);
+  var todaySeedVal=week*1000+bracket.round;
+  var bracketBoard={id:"bracket_"+todaySeedVal,name:"TOURNAMENT MATCH",moves:12,bids:["apt","factory","lab","power"],hazards:4,rngSeed:todaySeedVal,isDaily:true,hint:"Tournament board — same for all competitors. Score determines advancement."};
+
+  /* Build bracket tree */
+  var allPlayers=[{name:"YOU",avatar:"👷",seed:meta.shiftWarsBest||500,isYou:true}].concat(BRACKET_PLAYERS);
+  var r1Matches=genBracketRound(allPlayers.slice(0,8), week);
+
+  function handleMatchComplete(r){
+    var finalScore=r.score+(r.movesLeft||0)*80;
+    var opponents=r1Matches.filter(function(m){ return m.p1.isYou||m.p2.isYou; });
+    var myMatch=opponents[0]||r1Matches[0];
+    var opp=myMatch?(myMatch.p1.isYou?myMatch.p2:myMatch.p1):BRACKET_PLAYERS[0];
+    var oppScore=simulateMatchScore(opp, week, bracket.round);
+    var won=finalScore>oppScore;
+    var newBracket=Object.assign({},bracket,{
+      round:bracket.round+1,
+      wins:(bracket.wins||0)+(won?1:0),
+      losses:(bracket.losses||0)+(!won?1:0),
+      scores:(bracket.scores||[]).concat([{round:bracket.round,score:finalScore,oppScore:oppScore,won:won}]),
+    });
+    saveBracket(newBracket); setBracket(newBracket);
+    /* Rewards for advancing */
+    if(won){
+      var coins=bracket.round===0?100:bracket.round===1?250:500;
+      var chest=bracket.round>=2?"gold":bracket.round>=1?"silver":null;
+      setMeta(function(m){
+        var nc=Object.assign({},m.chests||{});
+        if(chest) nc[chest]=(nc[chest]||0)+1;
+        var n=Object.assign({},m,{coins:m.coins+coins,chests:nc});
+        saveMeta(n); return n;
+      });
+      setResult({won:true,finalScore:finalScore,oppScore:oppScore,opp:opp,coins:coins,chest:chest,round:bracket.round});
+    } else {
+      setResult({won:false,finalScore:finalScore,oppScore:oppScore,opp:opp,round:bracket.round});
+    }
+  }
+
+  var canPlay=bracket.round<3&&(bracket.losses||0)<1; /* single elimination */
+
+  return (
+    <div style={{paddingBottom:16}}>
+      <div className="sg-bracket-hero">
+        <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ffaa00,#ff2d95,#a855f7)"}}/>
+        <div style={{fontSize:32,marginBottom:6}}>🏆</div>
+        <div className="sg-bracket-title">WEEKLY TOURNAMENT</div>
+        <div className="sg-bracket-sub">8-player single elimination · Same board for all · Score determines who advances</div>
+        <div className="sg-bracket-phase">{phase}</div>
+        {/* Wins */}
+        <div style={{display:"flex",gap:10,justifyContent:"center",marginBottom:14}}>
+          {[0,1,2].map(function(r){
+            var s=bracket.scores?bracket.scores.find(function(x){ return x.round===r; }):null;
+            return (
+              <div key={r} style={{background:"rgba(255,255,255,0.05)",border:"1px solid "+(s?s.won?"rgba(0,255,136,0.35)":"rgba(255,45,149,0.35)":"rgba(255,255,255,0.08)"),borderRadius:10,padding:"8px 14px",textAlign:"center",minWidth:70}}>
+                <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginBottom:3}}>{r===0?"R1":r===1?"SEMI":"FINAL"}</div>
+                {s?(
+                  <div style={{fontFamily:"'Orbitron',monospace",fontSize:13,fontWeight:700,color:s.won?"#00ff88":"#ff2d95"}}>{s.won?"WIN":"LOSS"}</div>
+                ):(
+                  <div style={{fontSize:11,color:"rgba(255,255,255,0.15)"}}>—</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {canPlay?(
+          <button onClick={function(){ onPlay(bracketBoard, handleMatchComplete); }}
+            style={{background:"linear-gradient(135deg,#ffaa00,#ff2d95)",border:"none",borderRadius:14,padding:"14px 32px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",boxShadow:"0 0 20px rgba(255,170,0,0.3)"}}>
+            ⚔️ PLAY {phase}
+          </button>
+        ):(
+          <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",fontWeight:700}}>
+            {bracket.losses>0?"ELIMINATED — Come back next week":"🏆 CHAMPION! New bracket Sunday"}
+          </div>
+        )}
+      </div>
+
+      {/* Result card */}
+      {result&&(
+        <div style={{background:result.won?"rgba(0,255,136,0.08)":"rgba(255,45,149,0.08)",border:"1px solid "+(result.won?"rgba(0,255,136,0.3)":"rgba(255,45,149,0.3)"),borderRadius:14,padding:"14px",marginBottom:12,textAlign:"center"}}>
+          <div style={{fontSize:26,marginBottom:4}}>{result.won?"🏆":"💀"}</div>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:13,fontWeight:900,color:result.won?"#00ff88":"#ff2d95",marginBottom:8}}>{result.won?"ADVANCING!":"ELIMINATED"}</div>
+          <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:8}}>
+            <div style={{flex:1,background:"rgba(0,229,255,0.08)",border:"1px solid rgba(0,229,255,0.2)",borderRadius:10,padding:"8px"}}>
+              <div style={{fontSize:8,color:"rgba(255,255,255,0.3)",marginBottom:2}}>YOUR SCORE</div>
+              <div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:700,color:"#00e5ff"}}>{result.finalScore.toLocaleString()}</div>
+            </div>
+            <div style={{flex:1,background:"rgba(255,45,149,0.08)",border:"1px solid rgba(255,45,149,0.2)",borderRadius:10,padding:"8px"}}>
+              <div style={{fontSize:8,color:"rgba(255,255,255,0.3)",marginBottom:2}}>{result.opp.name}</div>
+              <div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:700,color:"#ff2d95"}}>{result.oppScore.toLocaleString()}</div>
+            </div>
+          </div>
+          {result.won&&<div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>Reward: +{result.coins}⬡{result.chest?" + "+CHEST_DEFS[result.chest].icon:""}</div>}
+        </div>
+      )}
+
+      {/* Prize pool */}
+      <div className="sg-label">PRIZE POOL</div>
+      <div className="sg-prize-row">
+        {[{place:"🥇",label:"CHAMPION",coins:500,chest:"👑"},
+          {place:"🥈",label:"RUNNER-UP",coins:250,chest:"🏆"},
+          {place:"🥉",label:"TOP 4",   coins:100,chest:"🎁"}].map(function(p,i){
+          return (
+            <div key={i} className="sg-prize-card"
+              style={{borderColor:i===0?"rgba(255,170,0,0.4)":i===1?"rgba(192,192,192,0.3)":"rgba(205,127,50,0.3)"}}>
+              <div className="sg-prize-place">{p.place}</div>
+              <div className="sg-prize-amount" style={{color:i===0?"#ffaa00":i===1?"#c0c0c0":"#cd7f32"}}>{p.coins}⬡</div>
+              <div style={{fontSize:14,marginTop:3}}>{p.chest}</div>
+              <div className="sg-prize-label">{p.label}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SOCIAL TAB (hub for Squad + Gifts + Bracket + Wars) ─────── */
+function SocialTab(props){
+  var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData, lives=props.lives, setLives=props.setLives, onPlay=props.onPlay;
+  var _sub=React.useState("squad"); var sub=_sub[0]; var setSub=_sub[1];
+  var subTabs=[
+    {id:"squad",   label:"SQUAD",   icon:"⚡"},
+    {id:"gifts",   label:"GIFTS",   icon:"❤️"},
+    {id:"bracket", label:"TOURNEY", icon:"🏆"},
+    {id:"wars",    label:"WARS",    icon:"⚔️"},
+  ];
+  return (
+    <div style={{paddingBottom:16}}>
+      {/* Sub-tab selector */}
+      <div style={{display:"flex",gap:6,marginBottom:14,borderBottom:"1px solid rgba(255,255,255,0.07)",paddingBottom:10}}>
+        {subTabs.map(function(t){
+          var active=sub===t.id;
+          return (
+            <button key={t.id}
+              onClick={function(){ setSub(t.id); Audio.tap(); }}
+              style={{flex:1,background:active?"rgba(168,85,247,0.15)":"transparent",
+                border:active?"1px solid rgba(168,85,247,0.4)":"1px solid transparent",
+                borderRadius:9,padding:"7px 4px",cursor:"pointer",
+                fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700,
+                color:active?"#a855f7":"rgba(255,255,255,0.35)",
+                letterSpacing:"0.06em",transition:"all 0.15s"}}>
+              {t.icon} {t.label}
+            </button>
+          );
+        })}
+      </div>
+      {sub==="squad"   &&<SquadTab   meta={meta} setMeta={setMeta} xpData={xpData}/>}
+      {sub==="gifts"   &&<GiftingTab meta={meta} setMeta={setMeta} lives={lives} setLives={setLives}/>}
+      {sub==="bracket" &&<BracketTab meta={meta} setMeta={setMeta} onPlay={onPlay}/>}
+      {sub==="wars"    &&<ShiftWarsTab meta={meta} setMeta={setMeta} onPlay={onPlay}/>}
+    </div>
+  );
+}
+
+/* ─── MORE TAB (hub for Event + Stats) ─────────────────────────── */
+function MoreTab(props){
+  var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData, onPlay=props.onPlay;
+  var _sub=React.useState("event"); var sub=_sub[0]; var setSub=_sub[1];
+  var subTabs=[
+    {id:"event", label:"EVENT",  icon:"⚡"},
+    {id:"stats", label:"STATS",  icon:"📊"},
+  ];
+  return (
+    <div style={{paddingBottom:16}}>
+      <div style={{display:"flex",gap:6,marginBottom:14,borderBottom:"1px solid rgba(255,255,255,0.07)",paddingBottom:10}}>
+        {subTabs.map(function(t){
+          var active=sub===t.id;
+          return (
+            <button key={t.id}
+              onClick={function(){ setSub(t.id); Audio.tap(); }}
+              style={{flex:1,background:active?"rgba(0,229,255,0.1)":"transparent",
+                border:active?"1px solid rgba(0,229,255,0.3)":"1px solid transparent",
+                borderRadius:9,padding:"7px 4px",cursor:"pointer",
+                fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700,
+                color:active?"#00e5ff":"rgba(255,255,255,0.35)",
+                letterSpacing:"0.06em",transition:"all 0.15s"}}>
+              {t.icon} {t.label}
+            </button>
+          );
+        })}
+      </div>
+      {sub==="event"&&<WeeklyTab meta={meta} setMeta={setMeta} onPlay={onPlay}/>}
+      {sub==="stats"&&<StatsPage meta={meta} xpData={xpData}/>}
+    </div>
+  );
+}
+
 /* ─── SKIN PICKER ──────────────────────────────────────────────── */
 function SkinPicker(props) {
   var meta = props.meta;
@@ -4855,6 +7054,15 @@ function CityTab(props) {
   }
   return (
     <div style={{paddingBottom:16}}>
+      {/* ── POWER ENGINEER ── */}
+      <EngineerCard meta={meta} xpData={xpData}/>
+      <div style={{marginTop:2,marginBottom:12}}>
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"9px 12px",fontSize:11,color:"rgba(255,255,255,0.52)",lineHeight:1.6,fontStyle:"italic"}}>
+          <span style={{fontSize:9,letterSpacing:"0.1em",color:"rgba(255,255,255,0.25)",fontStyle:"normal",marginRight:6}}>{(meta.engineerName||"RYKER").toUpperCase()}:</span>
+          {getEngineerDialogue((meta.levelsCleared||[]).length)}
+        </div>
+      </div>
+
       <div className="sg-label" style={{marginTop:8}}>CITY RESTORATION</div>
       <CityOverview levelsCleared={meta.levelsCleared||[]} stars={meta.stars||{}}/>
 
@@ -5182,6 +7390,69 @@ function EditorTab(props) {
   );
 }
 
+/* ─── STAR CHAIN METER ─────────────────────────────────────────── */
+function StarChainMeter(props){
+  var meta=props.meta, setMeta=props.setMeta, onBurst=props.onBurst;
+  var chain=loadStarChain();
+  var stars=chain.stars||0;
+  var pct=Math.min(100,(stars%STAR_CHAIN_GOAL)/STAR_CHAIN_GOAL*100);
+  var nextReward=STAR_CHAIN_REWARDS.find(function(r){ return !(chain.claimed||[]).includes(r.at)&&r.at>stars; });
+  if(!nextReward) nextReward=STAR_CHAIN_REWARDS[STAR_CHAIN_REWARDS.length-1];
+
+  return (
+    <div className="sg-star-chain-bar">
+      <div className="sg-star-chain-label">
+        <span className="sg-star-chain-lbl">⭐ STAR CHAIN — {nextReward?nextReward.label:"MAX"}</span>
+        <span className="sg-star-chain-count">{stars%STAR_CHAIN_GOAL}/{STAR_CHAIN_GOAL}</span>
+      </div>
+      <div className="sg-star-chain-track">
+        <div className="sg-star-chain-fill" style={{width:pct+"%"}}/>
+      </div>
+      <div className="sg-star-chain-pips">
+        {[1,2,3,4,5,6,7,8,9].map(function(n){
+          var r=STAR_CHAIN_REWARDS.find(function(x){ return x.at===n; });
+          return (
+            <span key={n} className={"sg-star-pip"+(stars%STAR_CHAIN_GOAL>=n||Math.floor(stars/STAR_CHAIN_GOAL)>0?" lit":"")}>
+              {r?r.icon:"·"}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── EPISODE BANNER ────────────────────────────────────────────── */
+function EpisodeBanner(props){
+  var distIdx=props.distIdx;
+  if(distIdx==null||distIdx<0||distIdx>=DISTRICT_NARRATIVES.length) return null;
+  var ep=DISTRICT_NARRATIVES[distIdx];
+  if(!ep) return null;
+  var _open=React.useState(false); var open=_open[0]; var setOpen=_open[1];
+  return (
+    <div className="sg-episode-banner" style={{borderColor:ep.color+"44",background:ep.color+"08"}}>
+      <div className="sg-episode-tag" style={{color:ep.color}}>EPISODE STORY</div>
+      <div className="sg-episode-title" style={{color:ep.color}}>{ep.title}</div>
+      <div className="sg-episode-body" style={{
+        maxHeight:open?"200px":"42px",overflow:"hidden",transition:"max-height 0.3s ease",
+        WebkitMaskImage:open?"none":"linear-gradient(180deg,#000 40%,transparent 100%)",
+      }}>
+        {ep.story}
+      </div>
+      <div style={{marginTop:8,fontSize:10,color:ep.color+"88",fontWeight:700,cursor:"pointer",letterSpacing:"0.06em"}}
+        onClick={function(){ setOpen(!open); Audio.tap(); }}>
+        {open?"▲ COLLAPSE":"▼ READ MORE"}
+      </div>
+      {open&&(
+        <div style={{marginTop:10,padding:"8px 10px",background:ep.color+"10",borderRadius:8,border:"1px solid "+ep.color+"33"}}>
+          <div style={{fontSize:9,letterSpacing:"0.1em",color:ep.color+"88",marginBottom:3}}>OBJECTIVE</div>
+          <div style={{fontSize:11,color:ep.color+"cc",lineHeight:1.55}}>{ep.objective}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── SESSION GOALS STRIP ───────────────────────────────────────── */
 function SessionGoalsStrip(props) {
   var sessionGoals = props.sessionGoals;
@@ -5265,6 +7536,8 @@ function CampaignTab(props) {
     if(dc<10){ defaultDist=di; break; }
   }
   var _sel=React.useState(defaultDist); var selDist=_sel[0]; var setSelDist=_sel[1];
+  /* Cache master clears to avoid repeated localStorage reads in render */
+  var masterClearsCache=React.useMemo(function(){ return getMasterClears(); },[]);
 
   var dist=DISTRICTS[selDist];
   var distIdx=selDist;
@@ -5278,6 +7551,9 @@ function CampaignTab(props) {
   return (
     <div style={{paddingBottom:20}}>
       <SessionGoalsStrip sessionGoals={sessionGoals} setSessionGoals={setSessionGoals} setMeta={setMeta}/>
+
+      {/* ── STAR CHAIN METER ── */}
+      <StarChainMeter meta={meta} setMeta={setMeta}/>
 
       {/* ── OVERALL PROGRESS ── */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,marginTop:4}}>
@@ -5324,6 +7600,8 @@ function CampaignTab(props) {
         </div>
       ) : (
         <>
+          {/* Episode narrative */}
+          <EpisodeBanner distIdx={selDist}/>
           {/* District header card */}
           <div className="sg-dist-header" style={{background:"linear-gradient(135deg,"+dist.theme+"12,"+dist.theme+"06)",border:"1px solid "+dist.theme+"33"}}>
             <div className="sg-dist-header-top">
@@ -5352,7 +7630,7 @@ function CampaignTab(props) {
               var localNum=(id%10)+1; /* 1–9 within district */
               return (
                 <div key={id}
-                  className={"sg-level-node"+(locked?" locked":"")}
+                  className={"sg-level-node"+(locked?" locked":"")+((id%10===4||id%10===8)&&!locked?" spike-level":"")} style={{position:"relative"}}
                   style={{
                     borderColor:done?dist.theme+"55":(locked?"rgba(255,255,255,0.06)":dist.theme+"25"),
                     background:done?dist.theme+"0a":(locked?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.03)"),
@@ -5368,7 +7646,21 @@ function CampaignTab(props) {
                     {lvl.moves+"mv"}
                     {lvl.hazards>0&&" ☠"+lvl.hazards}
                   </div>
+                  {(function(){
+                    var ot=getLevelObjective(lvl);
+                    if(ot!=="standard"&&!done){
+                      var om=OBJECTIVE_META[ot];
+                      return <div style={{fontSize:8,color:om.color,marginTop:2,fontWeight:700,letterSpacing:"0.06em"}}>{om.icon+" "+ot.toUpperCase()}</div>;
+                    }
+                    return null;
+                  })()}
                   {done&&<div className="sg-level-node-stars">{renderStars(stars)}</div>}
+                  {done&&!masterClearsCache.includes(id)&&(
+                    <div className="sg-master-badge" title="Master Challenge available">M</div>
+                  )}
+                  {done&&masterClearsCache.includes(id)&&(
+                    <div className="sg-master-badge" style={{background:"linear-gradient(135deg,#ffaa00,#ff2d95)"}} title="Master cleared!">★</div>
+                  )}
                 </div>
               );
             })}
@@ -5477,6 +7769,9 @@ function Shiftgrid() {
   var _du=React.useState(null); var distUnlock=_du[0]; var setDistUnlock=_du[1];
   var _eg=React.useState(false); var showEndGame=_eg[0]; var setShowEndGame=_eg[1];
   var _scrollPos=React.useRef({}); /* level scroll memory */
+  var _pre=React.useState(null); var preLevelDef=_pre[0]; var setPreLevelDef=_pre[1];
+  var _scb=React.useState(null); var starChainBurst=_scb[0]; var setStarChainBurst=_scb[1];
+  var _starChain=React.useState(loadStarChain); var starChainData=_starChain[0]; var setStarChainData=_starChain[1];
 
   React.useEffect(function(){
     var t=setInterval(function(){ setLives(loadLives()); },30000);
@@ -5484,7 +7779,19 @@ function Shiftgrid() {
   },[]);
 
   function handlePlay(levelDef,cb){
-    if(levelDef.isDaily||levelDef.id&&levelDef.id.toString().startsWith("event")){
+    /* Skip lives/tutorial for non-campaign levels */
+    var isNonCampaign=levelDef.isDaily||levelDef.isCustom||levelDef.isSandbox||(levelDef.id!=null&&(typeof levelDef.id==="string")&&(levelDef.id.startsWith("event")||levelDef.id.startsWith("wars")||levelDef.id==="sandbox"||levelDef.id.startsWith("custom")));
+
+    /* Campaign levels show pre-level screen first */
+    if(!isNonCampaign&&!levelDef.isMaster&&typeof levelDef.id==="number"){
+      setPreLevelDef({levelDef:applyComeback(levelDef),cb:cb||function(){}});
+      return;
+    }
+    if(!isNonCampaign&&levelDef.isMaster){
+      setPreLevelDef({levelDef:levelDef,cb:cb||function(){}});
+      return;
+    }
+    if(isNonCampaign){
       setPlaying({levelDef:levelDef,cb:cb||function(){}}); return;
     }
     var fresh=loadLives();
@@ -5494,6 +7801,26 @@ function Shiftgrid() {
       setShowTuto(true); setTutoStep(0); return;
     }
     setPlaying({levelDef:levelDef,cb:cb||function(){}});
+  }
+
+  function handlePreLaunch(selectedBoosters, isMasterMode){
+    if(!preLevelDef) return;
+    var lvl=preLevelDef.levelDef;
+    var cb=preLevelDef.cb;
+    /* For master mode, strip comeback flags first to avoid double modification */
+    var baseLvl = isMasterMode ? Object.assign({},lvl,{_comeback:false,_comebackFails:undefined,hazards:CAMPAIGN_LEVELS[lvl.id]?CAMPAIGN_LEVELS[lvl.id].hazards:lvl.hazards}) : lvl;
+    var finalDef = isMasterMode ? getMasterDef(baseLvl) : lvl;
+    setPreLevelDef(null);
+    /* Apply comeback pity (already applied in levelDef if _comeback flag set) */
+    /* Check lives for campaign */
+    var fresh=loadLives();
+    if(fresh.count<=0){ setLivesGate(true); setPendingLevel({levelDef:finalDef,cb:cb}); return; }
+    if(!isTutoDone()&&finalDef.id===0){
+      setPendingLevel({levelDef:finalDef,cb:cb});
+      setShowTuto(true); setTutoStep(0); return;
+    }
+    /* Store pre-selected boosters for GameBoard to pre-load */
+    setPlaying({levelDef:finalDef, cb:cb, preloadedAbilities:selectedBoosters||[]});
   }
 
   function startPending(){ if(pendingLevel){ setPlaying(pendingLevel); setPendingLevel(null); } }
@@ -5513,12 +7840,12 @@ function Shiftgrid() {
     saveXP(newXP); setXpData(newXP);
     if(leveledUp){ setShowXPUp(true); setTimeout(function(){ setShowXPUp(false); },2500); }
 
-    /* Streak */
-    var newStreak=checkAndUpdateStreak(streak);
+    /* Streak — only update for campaign levels (not sandbox/editor) */
+    var newStreak=isCampaignLevel?checkAndUpdateStreak(streak):streak;
     setStreak(newStreak);
 
-    /* Challenges */
-    if(challengeData){
+    /* Challenges — only update for campaign levels */
+    if(isCampaignLevel && challengeData){
       var today=todayStr();
       var seed=parseInt(today.replace(/-/g,""));
       var defs=getDailyChallenges(seed);
@@ -5539,13 +7866,15 @@ function Shiftgrid() {
       saveChallenges(newCD); setChallengeData(newCD);
     }
 
-    /* Meta + Chest rewards */
+    /* Meta + Chest rewards — only track numeric campaign level ids */
+    var isCampaignLevel = typeof lvl.id === "number" && lvl.id >= 0 && lvl.id <= 49;
     setMeta(function(m){
-      var cleared=Array.from(new Set((m.levelsCleared||[]).concat([lvl.id])));
+      var cleared=isCampaignLevel?Array.from(new Set((m.levelsCleared||[]).concat([lvl.id]))):(m.levelsCleared||[]);
       var newStars=Object.assign({},m.stars||{});
-      if((newStars[lvl.id]||0)<stars) newStars[lvl.id]=stars;
-      /* Chest drop logic */
+      if(isCampaignLevel&&(newStars[lvl.id]||0)<stars) newStars[lvl.id]=stars;
+      /* Chest drop logic — only for campaign levels */
       var newChests=Object.assign({bronze:0,silver:0,gold:0,royal:0},m.chests||{});
+      if(!isCampaignLevel){ var n2=Object.assign({},m,{levelsCleared:cleared,stars:newStars,chests:newChests}); saveMeta(n2); return n2; }
       if(lvl.boss)                        newChests.gold   = (newChests.gold||0)+1;
       else if(stars===3)                  newChests.silver = (newChests.silver||0)+1;
       else if(Math.random()<0.4)          newChests.bronze = (newChests.bronze||0)+1;
@@ -5553,8 +7882,8 @@ function Shiftgrid() {
       saveMeta(n); return n;
     });
 
-    /* Session Goals */
-    setSessionGoals(function(sg) {
+    /* Session Goals — only for campaign levels */
+    if(isCampaignLevel) setSessionGoals(function(sg) {
       if (!sg) return sg;
       var defs = getSessionGoalDefs(sg.pickedIds);
       var wasNearWin = rewards.wasNearWin || false;
@@ -5569,7 +7898,7 @@ function Shiftgrid() {
         if (def.type === "cascade4" && (rewards.maxCascade||0)>=4) prog = Math.min(def.goal, prog + 1);
         if (def.type === "corrupt"  && (rewards.corruptCleared||0)>0) prog = Math.min(def.goal, prog + (rewards.corruptCleared||0));
         if (def.type === "clean_win" && !wasNearWin) prog = Math.min(def.goal, prog + 1);
-        if (def.type === "streak2") prog = Math.min(def.goal, prog + 1);
+        if (def.type === "streak2" && (rewards.consecutiveWins||0) >= 2) prog = Math.min(def.goal, prog + 1);
         return Object.assign({}, g, {progress: prog});
       });
       var updated = Object.assign({}, sg, {goals: newGoals});
@@ -5578,7 +7907,7 @@ function Shiftgrid() {
     });
     /* District unlock ceremony */
     var bossIds=[9,19,29,39,49];
-    if(bossIds.includes(lvl.id)){
+    if(isCampaignLevel&&bossIds.includes(lvl.id)){
       var distIdx=Math.floor(lvl.id/10);
       var dist=DISTRICTS[distIdx];
       if(dist){
@@ -5593,6 +7922,57 @@ function Shiftgrid() {
         else { setTimeout(function(){ setDistUnlock(Object.assign({},dist,{icon:distIdx===0?"🏙️":distIdx===1?"🏭":distIdx===2?"🌆":distIdx===3?"🌑":"🏆"})); },400); }
       }
     }
+    /* ── SQUAD CONTRIBUTION ── */
+    if(isCampaignLevel){
+      var sqd=loadSquad();
+      if(sqd){
+        /* Increment player contribution in local squad data */
+        if(!sqd.playerWeekly) sqd.playerWeekly={};
+        sqd.playerWeekly.levels=(sqd.playerWeekly.levels||0)+1;
+        if(stars===3) sqd.playerWeekly.stars3=(sqd.playerWeekly.stars3||0)+1;
+        saveSquad(sqd);
+      }
+    }
+
+    /* ── SEASON XP ── */
+    if(isCampaignLevel){
+      var sxp = 20 + stars*15 + (lvl.boss?50:0);
+      addSeasonXP(sxp);
+    }
+
+    /* ── STAR CHAIN UPDATE ── */
+    if(isCampaignLevel && stars===3){
+      var sc=loadStarChain();
+      sc.stars=(sc.stars||0)+1;
+      var newClaimed=sc.claimed||[];
+      /* Check if we hit a milestone */
+      var milestone=STAR_CHAIN_REWARDS.find(function(r){
+        return !newClaimed.includes(r.at) && sc.stars%STAR_CHAIN_GOAL>=r.at;
+      });
+      if(milestone){
+        newClaimed=newClaimed.concat([sc.stars]);
+        /* Award chest */
+        setMeta(function(m){
+          var nc=Object.assign({},m.chests||{});
+          nc[milestone.chest]=(nc[milestone.chest]||0)+1;
+          var n=Object.assign({},m,{coins:m.coins+milestone.coins,chests:nc});
+          saveMeta(n); return n;
+        });
+        /* Show burst */
+        setStarChainBurst(milestone);
+        setTimeout(function(){ setStarChainBurst(null); },2500);
+      }
+      sc.claimed=newClaimed;
+      saveStarChain(sc);
+      setStarChainData(sc);
+    }
+
+    /* ── FAIL COUNT RESET ON WIN ── */
+    if(isCampaignLevel) resetFailCount(lvl.id);
+
+    /* ── MASTER CLEAR RECORD ── */
+    if(isCampaignLevel&&lvl.isMaster) addMasterClear(lvl.id);
+
     setPlaying(null);
     if(lvl.id>=4&&!meta.starterPackShown&&Math.random()<0.25){
       setMeta(function(m){ var n=Object.assign({},m,{starterPackShown:true}); saveMeta(n); return n; });
@@ -5604,6 +7984,10 @@ function Shiftgrid() {
     var fresh=loadLives();
     var updated={count:Math.max(0,fresh.count-1),lastRegen:fresh.count===MAX_LIVES?Date.now():fresh.lastRegen};
     saveLives(updated); setLives(updated);
+    /* Track fail count for comeback system */
+    if(playing&&playing.levelDef&&typeof playing.levelDef.id==="number"){
+      bumpFailCount(playing.levelDef.id);
+    }
   }
 
   function watchAdForLife(){
@@ -5636,10 +8020,10 @@ function Shiftgrid() {
   var TABS=[
     {id:"campaign",  icon:"🗺", label:"PLAY"},
     {id:"challenges",icon:"🎯", label:"QUESTS"},
-    {id:"event",     icon:"⚡", label:"EVENT"},
-    {id:"wars",      icon:"⚔️", label:"WARS"},
+    {id:"social",    icon:"🛡", label:"SOCIAL"},
     {id:"city",      icon:"🌆", label:"CITY"},
-    {id:"stats",     icon:"📊", label:"STATS"},
+    {id:"season",    icon:"🌟", label:"SEASON"},
+    {id:"event",     icon:"⚡", label:"MORE"},
     {id:"editor",    icon:"🛠", label:"BUILD"},
   ];
 
@@ -5648,7 +8032,8 @@ function Shiftgrid() {
       <div className="sg-app">
         <Particles/>
         {showTuto&&<TutorialOverlay step={tutoStep} onNext={handleTutoNext} onSkip={handleTutoSkip}/>}
-        <GameBoard levelDef={playing.levelDef} meta={meta} lives={lives}
+        <GameBoard key={playing.levelDef.id+"_"+Date.now()} levelDef={playing.levelDef} meta={meta} lives={lives}
+          preloadedAbilities={playing.preloadedAbilities||[]}
           onComplete={handleComplete} onLose={handleLose}
           onBack={function(){ setPlaying(null); }}/>
       </div>
@@ -5662,6 +8047,13 @@ function Shiftgrid() {
     var prevStr = prev.getFullYear()+"-"+String(prev.getMonth()+1).padStart(2,"0")+"-"+String(prev.getDate()).padStart(2,"0");
     return streak.count >= 2 && streak.lastDay !== todayStr() && streak.lastDay !== prevStr && !isStreakProtected(streak);
   })();
+  var seasonClaimable=(function(){
+    var sd=loadSeason(); var ct=Math.min(SEASON_TIERS.length,Math.floor((sd.xp||0)/SEASON_XP_PER_TIER));
+    var cl=sd.claimed||[];
+    return SEASON_TIERS.some(function(t){
+      return (ct>=t.tier&&!cl.includes(t.tier+"f")&&t.reward)||(ct>=t.tier&&!cl.includes(t.tier+"p")&&t.premReward&&sd.premium);
+    });
+  })();
   var hasClaimableGoal = sessionGoals && sessionGoals.goals && getSessionGoalDefs(sessionGoals.pickedIds).some(function(def, i) {
     var g = sessionGoals.goals[i];
     return def && g && !g.claimed && g.progress >= def.goal;
@@ -5674,6 +8066,21 @@ function Shiftgrid() {
       {livesGate&&<LivesGate lives={lives} onBack={function(){ setLivesGate(false); setPendingLevel(null); }} onWatchAd={watchAdForLife}/>}
       {showStarterPack&&<StarterPack onClose={function(){ setShowStarterPack(false); }} onBuy={function(){ setShowStarterPack(false); }}/>}
       {showLoginChest&&<LoginChestPopup streak={streak} onClaim={handleLoginClaim}/>}
+      {preLevelDef&&<PreLevelScreen
+        levelDef={preLevelDef.levelDef}
+        meta={meta}
+        onLaunch={handlePreLaunch}
+        onBack={function(){ setPreLevelDef(null); }}/>}
+      {starChainBurst&&(
+        <div className="sg-star-chain-burst" onClick={function(){ setStarChainBurst(null); }}>
+          <div style={{position:"absolute",inset:0,background:"rgba(255,170,0,0.15)"}}/>
+          <div className="sg-scb-inner">
+            <span className="sg-scb-icon">{starChainBurst.icon}</span>
+            <div className="sg-scb-title">STAR CHAIN COMPLETE!</div>
+            <div className="sg-scb-sub">{starChainBurst.label+" earned — check your CITY tab"}</div>
+          </div>
+        </div>
+      )}
       {showSettings&&<SettingsSheet onClose={function(){ setShowSettings(false); }} meta={meta} setMeta={setMeta} lives={lives} setLives={setLives}/>}
       {distUnlock&&<DistrictUnlock dist={distUnlock} onContinue={function(){ setDistUnlock(null); }}/>}
       {showEndGame&&<EndGame meta={meta} xpData={xpData} onNewGame={function(){ setShowEndGame(false); }} onClose={function(){ setShowEndGame(false); }}/>}
@@ -5715,15 +8122,25 @@ function Shiftgrid() {
       }}>
         {tab==="campaign"   &&<CampaignTab meta={meta} onPlay={handlePlay} setMeta={setMeta} sessionGoals={sessionGoals} setSessionGoals={setSessionGoals}/>}
         {tab==="challenges" &&<ChallengesTab meta={meta} setMeta={setMeta} challengeData={challengeData} setChallengeData={setChallengeData} streak={streak} onStreakUpdate={setStreak} onPlay={handlePlay}/>}
-        {tab==="event"      &&<WeeklyTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
-        {tab==="wars"       &&<ShiftWarsTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
+        {tab==="social"     &&<SocialTab meta={meta} setMeta={setMeta} xpData={xpData} lives={lives} setLives={setLives} onPlay={handlePlay}/>}
         {tab==="city"       &&<CityTab meta={meta} setMeta={setMeta} xpData={xpData} lives={lives} setLives={setLives}/>}
-        {tab==="stats"      &&<StatsPage meta={meta} xpData={xpData}/>}
+        {tab==="season"     &&<SeasonPassTab meta={meta} setMeta={setMeta}/>}
+        {tab==="event"      &&<MoreTab meta={meta} setMeta={setMeta} xpData={xpData} onPlay={handlePlay}/>}
         {tab==="editor"     &&<EditorTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
       </div>
       <nav className="sg-nav">
         {TABS.map(function(t){
-          var hasDot = (t.id==="campaign"&&hasClaimableGoal) || (t.id==="challenges"&&(chestUnclaimed||streakAtRisk)) || (t.id==="event"&&true);
+          var socialHasDot=(function(){
+            var sqd=loadSquad(); if(!sqd) return false;
+            /* pending gifts */
+            var today=todayStr(); var g=loadGifts();
+            var giftsNew=g.lastReset!==today;
+            /* bracket ready */
+            var b=loadBracket(); var w=Math.floor(Date.now()/(7*24*60*60*1000));
+            var bReady=!b||b.weekSeed!==w||(b.round<3&&(b.losses||0)<1);
+            return giftsNew||bReady;
+          })();
+          var hasDot = (t.id==="campaign"&&hasClaimableGoal) || (t.id==="challenges"&&(chestUnclaimed||streakAtRisk)) || (t.id==="social"&&socialHasDot) || (t.id==="season"&&seasonClaimable);
           var dotColor = t.id==="challenges"&&streakAtRisk ? "#ff2d95" : t.id==="challenges"&&chestUnclaimed ? "#00ff88" : "#ffaa00";
           return (
             <button key={t.id} className={"sg-nav-btn"+(tab===t.id?" active":"")} onClick={function(){ Audio.tap(); setTab(t.id); }} style={{position:"relative"}}>
