@@ -9,612 +9,1676 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#06060f" />
   <title>SHIFTGRID</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap');
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:#06060f;}
-.sg-root{min-height:100vh;max-height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;background:radial-gradient(ellipse at 50% 0%,#0e0e22 0%,#06060f 60%);font-family:'Rajdhani','Segoe UI',sans-serif;color:#e0e0ff;padding:14px 12px 0;user-select:none;-webkit-user-select:none;position:relative;}
-.sg-root::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.055) 2px,rgba(0,0,0,0.055) 4px);}
-.sg-title{font-family:'Orbitron',monospace;font-size:clamp(19px,5vw,27px);font-weight:900;letter-spacing:0.18em;background:linear-gradient(90deg,#00e5ff 0%,#ff2d95 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(0,229,255,0.28));position:relative;z-index:1;}
-.sg-subtitle{font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.22);font-family:'Orbitron',monospace;margin-top:4px;}
-.sg-wallet-row{display:flex;gap:10px;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:7px 14px;position:relative;z-index:1;}
-.sg-wallet-chip{font-family:'Orbitron',monospace;font-size:11px;display:flex;gap:6px;align-items:center;color:rgba(255,255,255,0.65);}
-.sg-screen{width:100%;max-width:440px;display:flex;flex-direction:column;position:relative;z-index:1;flex:1;overflow-y:auto;}
-.sg-tab-content{width:100%;padding-bottom:16px;}
-.sg-tab-heading{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.8);margin-bottom:14px;}
-.sg-section-label{font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);margin-bottom:8px;text-transform:uppercase;}
-.sg-hud{display:flex;gap:7px;margin-bottom:7px;width:100%;max-width:440px;position:relative;z-index:1;}
-.sg-hud-box{flex:1;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 4px;transition:border-color 0.3s;}
-.sg-hud-label{font-size:7px;letter-spacing:0.18em;color:rgba(255,255,255,0.26);margin-bottom:1px;}
-.sg-hud-val{font-family:'Orbitron',monospace;font-size:21px;font-weight:700;transition:color 0.3s,text-shadow 0.3s;}
-.sg-play-header{display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:8px;position:relative;z-index:1;}
-.sg-level-name{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.68);}
-.sg-score-disp{font-family:'Orbitron',monospace;font-size:15px;color:#ffaa00;text-shadow:0 0 10px #ffaa0044;min-width:58px;text-align:right;}
-.sg-warn-banner{background:rgba(255,45,149,0.1);border:1px solid rgba(255,45,149,0.28);border-radius:8px;padding:5px 10px;font-size:10px;color:#ff2d95;letter-spacing:0.1em;text-align:center;margin-bottom:4px;animation:pulse 0.8s ease infinite alternate;}
-@keyframes pulse{from{opacity:0.65;}to{opacity:1;}}
-.sg-toast{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;animation:tpop 0.3s cubic-bezier(0.34,1.56,0.64,1);}
-@keyframes tpop{from{opacity:0;transform:scale(0.72) translateY(4px);}to{opacity:1;transform:scale(1) translateY(0);}}
-.sg-grid-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;}
-.sg-col-btns{display:flex;gap:3px;padding:0 35px;}
-.sg-row{display:flex;gap:3px;align-items:center;}
-.sg-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:6px;color:rgba(255,255,255,0.38);font-size:11px;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;}
-.sg-btn:hover:not(:disabled){background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);}
-.sg-btn:active:not(:disabled){transform:scale(0.85);}
-.sg-btn:disabled{opacity:0.13;cursor:default;}
-.sg-btn.flashed{background:rgba(255,255,255,0.2)!important;color:#fff!important;border-color:rgba(255,255,255,0.35)!important;}
-.sg-tile{border-radius:9px;border:2px solid;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:transform 0.1s,box-shadow 0.12s,background 0.08s,border-color 0.08s;cursor:default;}
-.sg-tile.hi{transform:scale(1.1);animation:tmatch 0.42s cubic-bezier(0.36,0.07,0.19,0.97);z-index:2;}
-@keyframes tmatch{0%{transform:scale(1);}30%{transform:scale(1.22) rotate(4deg);}65%{transform:scale(1.14) rotate(-2deg);}100%{transform:scale(1.1);}}
-.sg-diamond{width:20px;height:20px;border-radius:3px;transform:rotate(45deg);transition:background 0.1s,box-shadow 0.1s;position:relative;z-index:1;}
-.sg-glow{position:absolute;inset:0;pointer-events:none;}
-.sg-bldg-list{width:100%;margin-top:8px;position:relative;z-index:1;}
-.sg-bldg{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:1px solid;transition:all 0.4s;margin-bottom:6px;}
-.sg-bar-track{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;}
-.sg-bar-fill{height:100%;border-radius:3px;transition:width 0.45s ease,box-shadow 0.3s;}
-.sg-hint-text{font-size:10px;color:rgba(255,255,255,0.16);text-align:center;margin:8px 0 4px;line-height:1.5;position:relative;z-index:1;padding:0 8px;}
-.sg-overlay{position:fixed;inset:0;background:rgba(6,6,15,0.9);display:flex;align-items:center;justify-content:center;z-index:200;animation:fadeIn 0.28s;backdrop-filter:blur(8px);}
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.sg-modal{text-align:center;padding:32px 26px;background:rgba(16,16,30,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:20px;max-width:310px;width:90%;animation:mIn 0.35s cubic-bezier(0.34,1.56,0.64,1);}
-@keyframes mIn{from{opacity:0;transform:scale(0.83) translateY(18px);}to{opacity:1;transform:scale(1) translateY(0);}}
-.sg-modal-title{font-family:'Orbitron',monospace;font-size:clamp(15px,4vw,21px);font-weight:900;margin:7px 0 4px;letter-spacing:0.08em;}
-.sg-modal-sub{color:rgba(255,255,255,0.33);font-size:12px;margin-bottom:8px;}
-.sg-modal-rewards{display:flex;gap:8px;justify-content:center;margin:10px 0;}
-.sg-reward-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 14px;font-family:'Orbitron',monospace;font-size:12px;}
-.sg-modal-btn{border:none;border-radius:10px;padding:12px 22px;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:#06060f;cursor:pointer;letter-spacing:0.1em;transition:transform 0.12s,opacity 0.12s;}
-.sg-modal-btn:hover{opacity:0.88;transform:scale(1.04);}
-.sg-modal-outline{background:rgba(255,255,255,0.08)!important;color:#fff!important;border:1px solid rgba(255,255,255,0.15)!important;}
-.sg-district-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:4px;}
-.sg-district-node{border:1px solid;border-radius:12px;padding:12px 8px;text-align:center;transition:all 0.3s;}
-.sg-idle-card{display:flex;align-items:center;justify-content:space-between;background:rgba(255,170,0,0.05);border:1px solid rgba(255,170,0,0.18);border-radius:12px;padding:13px 15px;margin-bottom:10px;}
-.sg-collect-btn{background:linear-gradient(90deg,#ffaa00,#ff7700);border:none;border-radius:8px;padding:10px 14px;font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:#06060f;cursor:pointer;transition:transform 0.12s;}
-.sg-collect-btn:hover:not(:disabled){transform:scale(1.05);}
-.sg-upg-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
-.sg-upg-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:11px 9px;text-align:center;}
-.sg-pips{display:flex;gap:3px;justify-content:center;margin-bottom:7px;}
-.sg-pip{width:13px;height:4px;border-radius:2px;transition:background 0.3s;}
-.sg-upg-btn{border:1px solid rgba(0,229,255,0.3);background:rgba(0,229,255,0.08);color:#00e5ff;border-radius:6px;padding:5px 7px;font-family:'Orbitron',monospace;font-size:8px;cursor:pointer;transition:all 0.12s;width:100%;}
-.sg-upg-btn:hover:not(:disabled){background:rgba(0,229,255,0.18);}
-.sg-daily-card{background:rgba(255,170,0,0.04);border:1px solid rgba(255,170,0,0.14);border-radius:16px;padding:22px 18px;text-align:center;margin-bottom:12px;}
-.sg-spec-row{display:flex;gap:7px;justify-content:center;margin-bottom:14px;}
-.sg-spec-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 13px;font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:rgba(255,255,255,0.8);}
-.sg-daily-done{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.14);border-radius:12px;padding:14px;margin-top:6px;}
-.sg-campaign-card{border:1px solid;border-radius:13px;padding:12px;margin-bottom:7px;transition:all 0.3s;}
-.sg-brush-btn{padding:5px 11px;border-radius:7px;border:1px solid;font-size:10px;font-weight:600;cursor:pointer;font-family:'Rajdhani',sans-serif;transition:all 0.12s;letter-spacing:0.05em;}
-.sg-editor-panel{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px;}
-.sg-setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.sg-setting-row>label{font-size:12px;color:rgba(255,255,255,0.44);min-width:72px;}
-.sg-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:#fff;padding:5px 10px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;outline:none;flex:1;}
-.sg-input:focus{border-color:rgba(0,229,255,0.4);}
-.sg-nav{display:flex;width:100%;max-width:440px;background:rgba(6,6,15,0.96);border-top:1px solid rgba(255,255,255,0.06);padding:7px 0 4px;position:sticky;bottom:0;z-index:100;backdrop-filter:blur(12px);}
-.sg-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 4px;background:none;border:none;color:rgba(255,255,255,0.28);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.12em;transition:color 0.15s;}
-.sg-nav-btn.active{color:#00e5ff;text-shadow:0 0 10px rgba(0,229,255,0.4);}
-.sg-nav-btn:hover:not(.active){color:rgba(255,255,255,0.55);}
-.sg-pill-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:rgba(255,255,255,0.55);padding:6px 11px;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.12s;letter-spacing:0.05em;}
-.sg-pill-btn:hover{background:rgba(255,255,255,0.09);color:#fff;}
+    :root {
+      --cyan:    #00e5ff;
+      --mag:     #ff2d95;
+      --amber:   #ffaa00;
+      --green:   #00ff88;
+      --bg:      #07070f;
+      --bg2:     #0d0d1a;
+      --border:  rgba(255,255,255,0.07);
+      --glass:   rgba(255,255,255,0.04);
+      --sz: 52px;
+      --gap: 4px;
+      --bw: 30px;
+      --slide-dur: 140ms;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); }
+
+```
+/* ── ROOT ── */
+#root { height: 100%; }
+.sg-app {
+  height: 100vh; height: 100dvh;
+  display: flex; flex-direction: column; align-items: center;
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, #0e1428 0%, var(--bg) 65%);
+  font-family: 'Rajdhani', sans-serif;
+  color: #e4e4ff;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Scanlines */
+.sg-app::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 1000;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+}
+
+/* Ambient particles */
+.sg-particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.sg-particle {
+  position: absolute; width: 2px; height: 2px; border-radius: 50%;
+  animation: pfloat linear infinite;
+  opacity: 0;
+}
+@keyframes pfloat {
+  0%   { opacity: 0; transform: translateY(0) scale(1); }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(-120vh) scale(0.5); }
+}
+
+/* ── HEADER ── */
+.sg-header {
+  width: 100%; max-width: 460px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 8px;
+  position: relative; z-index: 10; flex-shrink: 0;
+}
+.sg-logo {
+  font-family: 'Orbitron', monospace; font-weight: 900;
+  font-size: clamp(18px, 4.5vw, 24px); letter-spacing: 0.22em;
+  background: linear-gradient(135deg, var(--cyan) 0%, var(--mag) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 14px rgba(0,229,255,0.35));
+}
+.sg-wallet {
+  display: flex; gap: 12px;
+}
+.sg-coin {
+  display: flex; align-items: center; gap: 4px;
+  font-family: 'Share Tech Mono', monospace; font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+.sg-coin-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+
+/* ── CONTENT AREA ── */
+.sg-content {
+  flex: 1; width: 100%; max-width: 460px;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative; z-index: 10;
+  padding: 0 12px;
+}
+.sg-content::-webkit-scrollbar { display: none; }
+
+/* ── NAV ── */
+.sg-nav {
+  width: 100%; max-width: 460px;
+  display: flex;
+  background: rgba(7,7,15,0.95);
+  border-top: 1px solid var(--border);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  position: relative; z-index: 100;
+  flex-shrink: 0;
+  gap: 4px;
+}
+.sg-nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 7px 4px 5px;
+  background: none; border: none; border-radius: 10px;
+  color: rgba(255,255,255,0.25); cursor: pointer;
+  font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.12em; transition: color 0.2s, background 0.2s;
+  position: relative;
+}
+.sg-nav-btn .nav-icon { font-size: 18px; line-height: 1; }
+.sg-nav-btn.active {
+  color: var(--cyan);
+  background: rgba(0,229,255,0.08);
+}
+.sg-nav-btn.active::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 24px; height: 2px; border-radius: 0 0 2px 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+/* ── SECTION LABELS ── */
+.sg-label {
+  font-size: 9px; letter-spacing: 0.24em; color: rgba(255,255,255,0.2);
+  text-transform: uppercase; margin-bottom: 8px; margin-top: 16px;
+}
+
+/* ── PLAY SCREEN ── */
+.sg-play {
+  height: 100%; display: flex; flex-direction: column;
+  position: relative; z-index: 10;
+}
+
+.sg-play-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px 6px; flex-shrink: 0;
+}
+.sg-back {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  color: rgba(255,255,255,0.5); font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.sg-back:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.sg-lvl-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); text-align: center; }
+.sg-daily-badge { font-size: 8px; color: var(--amber); letter-spacing: 0.18em; margin-bottom: 2px; }
+.sg-score-live {
+  font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700;
+  color: var(--amber); text-shadow: 0 0 12px rgba(255,170,0,0.4);
+  min-width: 64px; text-align: right;
+}
+
+/* ── HUD ── */
+.sg-hud {
+  display: flex; gap: 6px; padding: 0 14px 6px;
+  flex-shrink: 0;
+}
+.sg-stat {
+  flex: 1; background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 7px 6px; text-align: center;
+  transition: border-color 0.3s, background 0.3s;
+}
+.sg-stat-lbl { font-size: 7px; letter-spacing: 0.2em; color: rgba(255,255,255,0.22); margin-bottom: 2px; }
+.sg-stat-val {
+  font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+.sg-stat.danger { border-color: rgba(255,45,149,0.35); background: rgba(255,45,149,0.06); }
+
+/* ── CORRUPTION WARN ── */
+.sg-crpt-warn {
+  margin: 0 14px 4px;
+  background: rgba(255,45,149,0.08);
+  border: 1px solid rgba(255,45,149,0.3);
+  border-radius: 8px; padding: 5px 12px;
+  font-size: 10px; color: var(--mag); text-align: center;
+  letter-spacing: 0.1em; flex-shrink: 0;
+  animation: blink 0.7s ease infinite alternate;
+}
+@keyframes blink { from { opacity: 0.6; } to { opacity: 1; } }
+
+/* ── TOASTS ── */
+.sg-toasts {
+  min-height: 28px; display: flex; align-items: center; justify-content: center;
+  gap: 10px; flex-wrap: wrap; padding: 0 14px 2px; flex-shrink: 0;
+}
+.sg-toast {
+  font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em;
+  animation: toast-in 0.28s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: scale(0.6) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── GRID AREA ── */
+.sg-grid-area {
+  display: flex; flex-direction: column; align-items: center;
+  gap: var(--gap); flex-shrink: 0; padding: 0 14px;
+  /* clip sliding tiles */
+}
+.sg-col-btns { display: flex; gap: var(--gap); padding: 0 calc(var(--bw) + var(--gap)); }
+.sg-grid-row { display: flex; gap: var(--gap); align-items: center; }
+
+/* Arrow shift buttons */
+.sg-shift-btn {
+  width: var(--bw); height: var(--sz);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.25); font-size: 10px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; flex-shrink: 0;
+  font-family: inherit;
+}
+.sg-shift-btn.col-btn { width: var(--sz); height: var(--bw); }
+.sg-shift-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.18);
+}
+.sg-shift-btn:active:not(:disabled) { transform: scale(0.82); }
+.sg-shift-btn:disabled { opacity: 0.1; cursor: default; }
+.sg-shift-btn.flash {
+  background: rgba(255,255,255,0.18) !important;
+  color: #fff !important; border-color: rgba(255,255,255,0.4) !important;
+}
+
+/* Grid row wrapper — clips sliding tiles */
+.sg-row-clip {
+  overflow: hidden; border-radius: 11px;
+  display: flex; gap: var(--gap);
+}
+.sg-col-clip-wrap {
+  /* wraps a single tile, clips vertically */
+  overflow: hidden; border-radius: 11px;
+  display: inline-flex;
+}
+
+/* ── TILE ── */
+.sg-tile {
+  width: var(--sz); height: var(--sz);
+  border-radius: 11px; border: 2px solid;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  transition: box-shadow 0.12s, border-color 0.12s, background 0.08s;
+  cursor: default; flex-shrink: 0;
+  will-change: transform;
+}
+.sg-tile.matched {
+  animation: tile-pop 0.44s cubic-bezier(0.36,0.07,0.19,0.97);
+  z-index: 3;
+}
+@keyframes tile-pop {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.28) rotate(5deg); }
+  55%  { transform: scale(1.18) rotate(-3deg); }
+  100% { transform: scale(1); }
+}
+.sg-tile.corrupt { cursor: default; }
+
+/* Tile inner shapes */
+.sg-node {
+  width: 22px; height: 22px; border-radius: 4px;
+  transform: rotate(45deg);
+  position: relative; z-index: 2;
+  transition: background 0.1s, box-shadow 0.1s;
+}
+.sg-node-ring {
+  position: absolute; inset: -5px; border-radius: 7px;
+  border: 1px solid; opacity: 0;
+  transition: opacity 0.2s;
+  transform: rotate(45deg);
+}
+.sg-tile.matched .sg-node-ring { opacity: 0.5; animation: ring-pulse 0.44s ease; }
+@keyframes ring-pulse { 0%{transform:rotate(45deg) scale(1)} 50%{transform:rotate(45deg) scale(1.6); opacity:0.6} 100%{transform:rotate(45deg) scale(2); opacity:0;} }
+
+.sg-tile-glow {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  transition: opacity 0.12s;
+}
+
+/* Corrupt tile */
+.sg-corrupt-icon { font-size: 18px; z-index: 2; opacity: 0.7; filter: saturate(0.3); }
+.sg-corrupt-overlay {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(150,0,220,0.08) 4px, rgba(150,0,220,0.08) 8px);
+  pointer-events: none;
+}
+
+/* ── SLIDE ANIMATIONS ── */
+.slide-left  { animation: sl-left  var(--slide-dur) ease-out both; }
+.slide-right { animation: sl-right var(--slide-dur) ease-out both; }
+.slide-up    { animation: sl-up    var(--slide-dur) ease-out both; }
+.slide-down  { animation: sl-down  var(--slide-dur) ease-out both; }
+
+@keyframes sl-left  { from{transform:translateX(0)} to{transform:translateX(calc(-1*(var(--sz) + var(--gap))))} }
+@keyframes sl-right { from{transform:translateX(0)} to{transform:translateX(calc(var(--sz) + var(--gap)))} }
+@keyframes sl-up    { from{transform:translateY(0)} to{transform:translateY(calc(-1*(var(--sz) + var(--gap))))} }
+@keyframes sl-down  { from{transform:translateY(0)} to{transform:translateY(calc(var(--sz) + var(--gap)))} }
+
+/* ── BUILDINGS ── */
+.sg-bldg-list { padding: 0 14px 6px; flex-shrink: 0; }
+.sg-bldg-lbl { font-size: 8px; letter-spacing: 0.22em; color: rgba(255,255,255,0.18); margin-bottom: 6px; }
+.sg-bldg {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 12px; border: 1px solid;
+  margin-bottom: 5px; transition: all 0.45s;
+  position: relative; overflow: hidden;
+}
+.sg-bldg::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 100%);
+}
+.sg-bldg-icon { font-size: 20px; flex-shrink: 0; transition: filter 0.4s; }
+.sg-bldg-info { flex: 1; }
+.sg-bldg-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.sg-bldg-name { font-size: 13px; font-weight: 600; transition: color 0.4s; }
+.sg-bldg-count { font-family: 'Share Tech Mono', monospace; font-size: 11px; }
+.sg-bldg-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.sg-bldg-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease, box-shadow 0.4s; }
+.sg-bldg-sub { font-size: 9px; margin-top: 3px; color: rgba(255,255,255,0.2); letter-spacing: 0.08em; }
+
+.sg-bldg.online .sg-bldg-icon::after {
+  content: ''; display: block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); margin: -6px auto 0;
+  box-shadow: 0 0 6px var(--green);
+  animation: dot-pulse 1.2s ease infinite;
+}
+@keyframes dot-pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+.sg-hint { font-size: 10px; color: rgba(255,255,255,0.15); text-align: center; padding: 6px 20px 8px; line-height: 1.5; flex-shrink: 0; }
+
+/* Swipe hint */
+.sg-swipe-hint {
+  text-align: center; font-size: 9px; color: rgba(255,255,255,0.15);
+  letter-spacing: 0.12em; padding: 2px 0 4px; flex-shrink: 0;
+}
+
+/* ── MODALS ── */
+.sg-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(7,7,15,0.88);
+  display: flex; align-items: center; justify-content: center;
+  animation: overlay-in 0.25s ease;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+@keyframes overlay-in { from{opacity:0} to{opacity:1} }
+.sg-modal {
+  background: rgba(13,13,26,0.98);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 36px 28px;
+  max-width: 320px; width: 90%; text-align: center;
+  animation: modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative; overflow: hidden;
+}
+.sg-modal::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,229,255,0.06) 0%, transparent 70%);
+}
+@keyframes modal-in { from{opacity:0;transform:scale(0.85) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.sg-modal-icon { font-size: 52px; margin-bottom: 10px; display: block; }
+.sg-modal-title { font-family: 'Orbitron', monospace; font-size: clamp(15px,4vw,20px); font-weight: 900; letter-spacing: 0.08em; margin-bottom: 4px; }
+.sg-modal-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
+.sg-modal-rewards { display: flex; gap: 8px; justify-content: center; margin: 12px 0 20px; }
+.sg-reward-chip {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 8px 16px;
+  font-family: 'Share Tech Mono', monospace; font-size: 13px;
+}
+.sg-modal-btn {
+  border: none; border-radius: 14px; padding: 14px 28px;
+  font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700;
+  color: #06060f; cursor: pointer; letter-spacing: 0.1em;
+  transition: transform 0.12s, opacity 0.12s; display: inline-block;
+}
+.sg-modal-btn:hover { opacity: 0.88; transform: scale(1.04); }
+.sg-modal-btn:active { transform: scale(0.96); }
+.sg-modal-ghost {
+  background: rgba(255,255,255,0.07) !important; color: rgba(255,255,255,0.7) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+}
+.sg-modal-row { display: flex; gap: 10px; justify-content: center; }
+
+/* ── CITY TAB ── */
+.sg-district-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sg-district-card {
+  border: 1px solid; border-radius: 14px; padding: 14px 10px;
+  text-align: center; transition: all 0.3s;
+}
+.sg-district-emoji { font-size: 26px; margin-bottom: 5px; }
+.sg-district-name { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; }
+.sg-district-status { font-size: 8px; letter-spacing: 0.14em; margin-top: 4px; opacity: 0.5; }
+
+.sg-idle-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,170,0,0.05); border: 1px solid rgba(255,170,0,0.15);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
+}
+.sg-idle-amt { font-family: 'Orbitron', monospace; font-size: 24px; color: var(--amber); font-weight: 700; margin-top: 4px; }
+.sg-idle-note { font-size: 10px; color: rgba(255,255,255,0.22); margin-top: 3px; }
+.sg-collect-btn {
+  background: linear-gradient(135deg, var(--amber), #ff7700);
+  border: none; border-radius: 10px; padding: 11px 16px;
+  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
+  color: #06060f; cursor: pointer; transition: transform 0.12s, opacity 0.12s;
+  white-space: nowrap;
+}
+.sg-collect-btn:hover:not(:disabled) { transform: scale(1.05); }
+.sg-collect-btn:disabled { opacity: 0.3; }
+
+.sg-meta-chips { display: flex; gap: 8px; margin-bottom: 4px; }
+.sg-meta-chip {
+  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px; text-align: center;
+}
+.sg-meta-chip-val { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 700; }
+.sg-meta-chip-lbl { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; margin-top: 2px; }
+
+.sg-upg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.sg-upg-card {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 13px; padding: 12px 8px; text-align: center;
+  transition: border-color 0.3s;
+}
+.sg-upg-card:hover { border-color: rgba(0,229,255,0.2); }
+.sg-upg-icon { font-size: 22px; margin-bottom: 5px; }
+.sg-upg-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.82); margin-bottom: 3px; }
+.sg-upg-desc { font-size: 9px; color: rgba(255,255,255,0.3); line-height: 1.4; margin-bottom: 8px; }
+.sg-upg-pips { display: flex; gap: 3px; justify-content: center; margin-bottom: 8px; }
+.sg-pip { width: 14px; height: 4px; border-radius: 2px; transition: background 0.3s; }
+.sg-upg-cost-btn {
+  border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.07);
+  color: var(--cyan); border-radius: 7px; padding: 5px 8px;
+  font-family: 'Share Tech Mono', monospace; font-size: 9px;
+  cursor: pointer; width: 100%; transition: all 0.12s;
+}
+.sg-upg-cost-btn:hover:not(:disabled) { background: rgba(0,229,255,0.16); }
+.sg-upg-cost-btn:disabled { opacity: 0.3; }
+.sg-upg-max { font-size: 9px; color: var(--green); letter-spacing: 0.12em; margin-top: 4px; }
+
+/* ── DAILY TAB ── */
+.sg-daily-hero {
+  background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.14);
+  border-radius: 18px; padding: 24px 20px; text-align: center; margin-bottom: 12px;
+  position: relative; overflow: hidden;
+}
+.sg-daily-hero::before {
+  content: ''; position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,170,0,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.sg-daily-city { font-size: 52px; margin-bottom: 8px; display: block; }
+.sg-daily-num { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 6px; }
+.sg-daily-desc { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.5; margin-bottom: 16px; }
+.sg-daily-specs { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.sg-spec {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 14px; text-align: center;
+}
+.sg-spec-val { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.85); }
+.sg-spec-lbl { font-size: 8px; letter-spacing: 0.14em; margin-top: 2px; }
+.sg-daily-done {
+  background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.18);
+  border-radius: 12px; padding: 16px; margin-top: 6px;
+}
+.sg-daily-score { font-family: 'Orbitron', monospace; font-size: 22px; color: var(--amber); font-weight: 700; margin: 6px 0; }
+
+.sg-bonus-row { display: flex; gap: 8px; }
+.sg-bonus-card {
+  flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 6px; text-align: center;
+}
+.sg-bonus-icon { font-size: 20px; margin-bottom: 4px; }
+.sg-bonus-val { font-size: 10px; font-weight: 600; }
+
+/* ── EDITOR TAB ── */
+.sg-brush-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.sg-brush {
+  padding: 5px 12px; border-radius: 8px; border: 1px solid;
+  font-size: 10px; font-weight: 700; cursor: pointer;
+  font-family: 'Rajdhani', sans-serif; transition: all 0.12s; letter-spacing: 0.06em;
+}
+.sg-edit-grid { display: flex; flex-direction: column; gap: 3px; align-items: center; margin-bottom: 12px; }
+.sg-edit-row { display: flex; gap: 3px; }
+.sg-edit-tile {
+  width: 46px; height: 46px; border-radius: 9px; border: 2px solid;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: all 0.1s;
+}
+.sg-edit-tile:hover { transform: scale(1.08); }
+.sg-editor-panel {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 11px;
+  margin-bottom: 10px;
+}
+.sg-srow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sg-srow label { font-size: 12px; color: rgba(255,255,255,0.42); min-width: 72px; }
+.sg-input {
+  flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; color: #fff; padding: 6px 10px;
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 600;
+  outline: none; transition: border-color 0.2s;
+}
+.sg-input:focus { border-color: rgba(0,229,255,0.4); }
+.sg-step-btns { display: flex; gap: 8px; align-items: center; }
+.sg-step { width: 30px; height: 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+.sg-step:hover { background: rgba(255,255,255,0.12); }
+.sg-step-val { font-family: 'Orbitron', monospace; font-size: 16px; color: var(--cyan); min-width: 36px; text-align: center; }
+.sg-bld-chips { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
+.sg-bld-chip { font-size: 10px; padding: 4px 9px; border-radius: 7px; border: 1px solid; cursor: pointer; transition: all 0.12s; }
+.sg-action-row { display: flex; gap: 8px; }
+.sg-action-btn {
+  flex: 1; padding: 11px 8px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.06em; text-align: center;
+}
+.sg-action-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.sg-saved-level {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 11px; padding: 10px 12px; margin-bottom: 5px;
+}
+
+/* ── CAMPAIGN ── */
+.sg-campaign-card {
+  border: 1px solid; border-radius: 14px; padding: 13px 14px;
+  margin-bottom: 8px; transition: all 0.3s; cursor: default;
+}
+.sg-campaign-card.playable { cursor: pointer; }
+.sg-campaign-card.playable:active { transform: scale(0.98); }
+.sg-camp-row { display: flex; align-items: center; gap: 12px; }
+.sg-camp-emoji { font-size: 30px; flex-shrink: 0; }
+.sg-camp-info { flex: 1; }
+.sg-camp-num { font-size: 9px; letter-spacing: 0.2em; color: rgba(255,255,255,0.25); margin-bottom: 2px; }
+.sg-camp-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.sg-camp-meta { display: flex; gap: 10px; }
+.sg-camp-tag { font-size: 10px; color: rgba(255,255,255,0.32); }
+.sg-play-btn {
+  border: none; border-radius: 11px; padding: 9px 16px;
+  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.08em; transition: transform 0.12s, opacity 0.12s;
+  flex-shrink: 0;
+}
+.sg-play-btn:hover { opacity: 0.85; transform: scale(1.06); }
+.sg-camp-bids { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+.sg-bid-chip { font-size: 9px; padding: 2px 8px; border-radius: 5px; border: 1px solid; }
+
+/* ── PILL BTN ── */
+.sg-pill {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 9px; color: rgba(255,255,255,0.55); padding: 7px 13px;
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all 0.12s; letter-spacing: 0.06em;
+}
+.sg-pill:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* ── ADJACENT CORRUPTION PREVIEW ── */
+.sg-tile.adj-corrupt {
+  box-shadow: 0 0 0 2px rgba(255,45,149,0.28) !important;
+  animation: adj-pulse 1.5s ease infinite;
+}
+@keyframes adj-pulse {
+  0%,100% { box-shadow: 0 0 0 1px rgba(255,45,149,0.15); }
+  50%      { box-shadow: 0 0 0 2px rgba(255,45,149,0.5), 0 0 10px rgba(255,45,149,0.2); }
+}
+/* ── BUILDING ONLINE FLASH ── */
+@keyframes bldg-flash {
+  0%   { transform:scale(1); }
+  25%  { transform:scale(1.03); }
+  50%  { transform:scale(0.99); }
+  100% { transform:scale(1); }
+}
+.sg-bldg.online { animation: bldg-flash 0.55s ease; }
+/* ── LIVES ── */
+.sg-lives { display:flex; gap:2px; align-items:center; }
+.sg-heart { font-size:12px; transition: opacity 0.3s, filter 0.3s; line-height:1; }
+.sg-heart.empty { opacity:0.18; filter:grayscale(1) brightness(0.5); }
+/* ── BOSS BADGE ── */
+.sg-boss-badge { display:inline-block; background:linear-gradient(135deg,#ffaa00,#ff7700); color:#06060f; font-family:'Orbitron',monospace; font-size:7px; font-weight:900; letter-spacing:0.12em; padding:2px 5px; border-radius:4px; margin-left:5px; vertical-align:middle; }
+/* ── STARS ── */
+.sg-stars { font-size:10px; letter-spacing:0.05em; color:#ffaa00; }
+/* ── DISTRICT PROGRESS BAR ── */
+.dist-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-bottom:8px; overflow:hidden; }
+.dist-bar-fill { height:100%; border-radius:2px; transition:width 0.5s ease; }
+
+
+/* ── XP BAR ── */
+.sg-xp-bar-wrap {
+  width: 100%; max-width: 460px; padding: 0 16px 8px;
+  flex-shrink: 0; position: relative; z-index: 10;
+}
+.sg-xp-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px;
+}
+.sg-xp-lbl {
+  font-family: 'Share Tech Mono', monospace; font-size: 10px;
+  color: rgba(255,255,255,0.4); letter-spacing: 0.1em;
+}
+.sg-xp-track {
+  height: 4px; background: rgba(255,255,255,0.07);
+  border-radius: 2px; overflow: hidden;
+}
+.sg-xp-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, #a855f7, #00e5ff);
+  box-shadow: 0 0 6px rgba(168,85,247,0.5);
+  transition: width 0.6s ease;
+}
+.sg-xp-levelup {
+  animation: xp-flash 0.5s ease;
+}
+@keyframes xp-flash {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); box-shadow: 0 0 20px rgba(168,85,247,0.7); }
+  100% { transform: scale(1); }
+}
+
+/* ── STREAK ── */
+.sg-streak-banner {
+  background: linear-gradient(90deg, rgba(255,170,0,0.12), rgba(255,120,0,0.08));
+  border: 1px solid rgba(255,170,0,0.25); border-radius: 14px;
+  padding: 12px 14px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sg-streak-fire { font-size: 28px; }
+.sg-streak-val {
+  font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900;
+  color: #ffaa00; text-shadow: 0 0 14px rgba(255,170,0,0.5);
+}
+.sg-streak-lbl { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; margin-top: 1px; }
+.sg-streak-days {
+  display: flex; gap: 4px;
+}
+.sg-streak-day {
+  width: 28px; height: 28px; border-radius: 8px; border: 1px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; transition: all 0.3s;
+}
+.sg-streak-day.done {
+  background: rgba(255,170,0,0.2); border-color: #ffaa00;
+  box-shadow: 0 0 8px rgba(255,170,0,0.3);
+}
+.sg-streak-day.today {
+  background: rgba(255,170,0,0.35); border-color: #ffaa00;
+  animation: today-pulse 1.2s ease infinite;
+}
+.sg-streak-day.pending {
+  background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);
+}
+@keyframes today-pulse {
+  0%,100% { box-shadow: 0 0 6px rgba(255,170,0,0.3); }
+  50%      { box-shadow: 0 0 14px rgba(255,170,0,0.6); }
+}
+
+/* ── REWARD CALENDAR ── */
+.sg-calendar {
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 5px;
+  margin-bottom: 8px;
+}
+.sg-cal-day {
+  border: 1px solid; border-radius: 10px; padding: 8px 4px;
+  text-align: center; transition: all 0.3s;
+}
+.sg-cal-day.claimed  { background: rgba(0,255,136,0.1);  border-color: rgba(0,255,136,0.4); }
+.sg-cal-day.today    { background: rgba(255,170,0,0.12); border-color: rgba(255,170,0,0.5); animation: today-pulse 1.2s ease infinite; }
+.sg-cal-day.future   { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06); }
+.sg-cal-day .day-num { font-size: 8px; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+.sg-cal-day .day-ico { font-size: 16px; }
+.sg-cal-day .day-val { font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.sg-cal-day.milestone { border-color: rgba(255,170,0,0.5); background: rgba(255,170,0,0.06); }
+.sg-cal-day.milestone .day-ico { filter: drop-shadow(0 0 4px #ffaa00); }
+
+/* ── DAILY CHALLENGES ── */
+.sg-challenge-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 13px; padding: 11px 13px; margin-bottom: 7px;
+  display: flex; align-items: center; gap: 11px;
+  transition: all 0.3s;
+}
+.sg-challenge-card.complete {
+  border-color: rgba(0,255,136,0.35); background: rgba(0,255,136,0.05);
+}
+.sg-challenge-icon { font-size: 22px; flex-shrink: 0; }
+.sg-challenge-info { flex: 1; }
+.sg-challenge-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 3px; }
+.sg-challenge-prog { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 5px; }
+.sg-challenge-bar-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.sg-challenge-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.sg-challenge-check { font-size: 20px; flex-shrink: 0; }
+.sg-chest-card {
+  background: linear-gradient(135deg, rgba(255,170,0,0.12), rgba(255,100,0,0.06));
+  border: 1px solid rgba(255,170,0,0.3); border-radius: 16px;
+  padding: 18px; text-align: center; margin-bottom: 10px;
+  position: relative; overflow: hidden;
+}
+.sg-chest-card.unlocked {
+  border-color: rgba(0,255,136,0.5); background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,229,255,0.06));
+  animation: chest-glow 1.5s ease infinite;
+}
+@keyframes chest-glow {
+  0%,100% { box-shadow: 0 0 12px rgba(0,255,136,0.2); }
+  50%      { box-shadow: 0 0 24px rgba(0,255,136,0.4); }
+}
+.sg-chest-icon { font-size: 44px; margin-bottom: 6px; display: block; }
+.sg-chest-title { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 4px; }
+.sg-chest-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+/* ── CITY OVERVIEW ── */
+.sg-city-overview {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 12px; position: relative;
+  background: rgba(13,13,26,0.9);
+  min-height: 180px;
+}
+.sg-city-skyline {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 6px; padding: 16px 12px 0; height: 140px;
+}
+.sg-city-building {
+  border-radius: 4px 4px 0 0; transition: all 0.6s ease;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-start;
+  align-items: center; padding-top: 6px;
+}
+.sg-city-building::after {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(255,255,255,0.04) 8px, rgba(255,255,255,0.04) 9px);
+}
+.sg-city-building.lit .window {
+  animation: window-flicker 3s ease infinite;
+}
+@keyframes window-flicker {
+  0%,95%,100% { opacity: 1; }
+  96%          { opacity: 0.3; }
+}
+.sg-building-windows {
+  display: grid; gap: 2px; position: relative; z-index: 2;
+}
+.sg-window {
+  width: 6px; height: 4px; border-radius: 1px;
+  transition: background 0.8s ease, box-shadow 0.8s;
+}
+.sg-city-label {
+  text-align: center; padding: 8px 0 10px;
+  font-size: 9px; letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.3);
+}
+.sg-city-stats {
+  display: flex; gap: 8px; padding: 0 12px 12px;
+}
+.sg-city-stat {
+  flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px; padding: 8px; text-align: center;
+}
+.sg-city-stat-val { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; }
+.sg-city-stat-lbl { font-size: 8px; color: rgba(255,255,255,0.28); letter-spacing: 0.1em; margin-top: 2px; }
+
+/* ── WEEKLY EVENT ── */
+.sg-event-hero {
+  border-radius: 18px; padding: 0; margin-bottom: 12px;
+  overflow: hidden; position: relative; border: 1px solid;
+}
+.sg-event-banner {
+  padding: 20px 18px 16px; text-align: center; position: relative; z-index: 2;
+}
+.sg-event-icon { font-size: 48px; display: block; margin-bottom: 8px; }
+.sg-event-title { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 4px; }
+.sg-event-timer-label { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.14em; margin-bottom: 6px; }
+.sg-event-timer { font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: 700; }
+.sg-event-desc { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.55; margin: 10px 0; }
+.sg-event-modifiers {
+  display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px;
+}
+.sg-event-mod {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 5px 10px; font-size: 10px; font-weight: 600;
+}
+.sg-leaderboard {
+  background: rgba(7,7,15,0.7); border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 12px 14px;
+}
+.sg-lb-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.sg-lb-row:last-child { border-bottom: none; }
+.sg-lb-rank { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; min-width: 22px; }
+.sg-lb-name { flex: 1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); }
+.sg-lb-score { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.55); }
+.sg-lb-row.you .sg-lb-name { color: #00e5ff; }
+.sg-lb-row.you .sg-lb-score { color: #00e5ff; }
+```
+
   </style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="root"></div>
 
-  <!-- React 18 + Babel CDN — no build step needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef, useCallback } = React;
-
-
-/* ─── CONSTANTS ─────────────────────────────────────────────────── */
 const ROWS = 5, COLS = 5;
-const COLORS = ["cyan", "magenta", "amber", "green"];
-const HEX = { cyan: "#00e5ff", magenta: "#ff2d95", amber: "#ffaa00", green: "#00ff88" };
-const LABEL = { cyan: "CYAN", magenta: "MAG", amber: "AMB", green: "GRN" };
+const COLORS = ["cyan","magenta","amber","green"];
+const HEX = { cyan:"#00e5ff", magenta:"#ff2d95", amber:"#ffaa00", green:"#00ff88" };
+const LABEL = { cyan:"CYAN", magenta:"MAG", amber:"AMB", green:"GRN" };
+const SLIDE_MS = 140;
+const MAX_LIVES = 5;
+const LIFE_REGEN_MS = 30 * 60 * 1000;
+const LIVES_KEY = "sg_lives_v3";
+const STORE_KEY = "sg_v4_meta";
 
 const BLDG_DEFS = [
-  { id: "apt",     label: "Apartments", color: "cyan",    cap: 12, icon: "🏢" },
-  { id: "factory", label: "Factory",    color: "amber",   cap: 12, icon: "🏭" },
-  { id: "lab",     label: "Neon Lab",   color: "green",   cap: 10, icon: "🔬" },
-  { id: "power",   label: "Power Core", color: "magenta", cap: 14, icon: "⚡" },
+  { id:"apt",     label:"Apartments", color:"cyan",    cap:12, icon:"🏢" },
+  { id:"factory", label:"Factory",    color:"amber",   cap:12, icon:"🏭" },
+  { id:"lab",     label:"Neon Lab",   color:"green",   cap:10, icon:"🔬" },
+  { id:"power",   label:"Power Core", color:"magenta", cap:14, icon:"⚡" },
 ];
 
 const UPGRADE_DEFS = [
-  { id: "comboBoost",  label: "Combo Amp",     icon: "⚡", desc: "+30% chain bonus",         cost: [80, 200, 500] },
-  { id: "hazardSlow",  label: "Hazard Shield", icon: "🛡", desc: "Corruption spreads slower", cost: [100, 250, 600] },
-  { id: "extraMoves",  label: "Move Extender", icon: "🎯", desc: "15% free move chance",      cost: [120, 300, 700] },
-  { id: "idleBoost",   label: "Idle Generator",icon: "⏰", desc: "Coins/hr while away",        cost: [60, 150, 400] },
-  { id: "capReduce",   label: "Power Saver",   icon: "🔋", desc: "-2 charge per building",    cost: [150, 350, 800] },
-  { id: "specialRate", label: "Node Enhancer", icon: "🌀", desc: "More shape combos",          cost: [90, 220, 550] },
+  { id:"comboBoost",  label:"Combo Amp",      icon:"⚡", desc:"+30% chain bonus",         cost:[80,200,500] },
+  { id:"hazardSlow",  label:"Hazard Shield",  icon:"🛡", desc:"Corruption spreads slower", cost:[100,250,600] },
+  { id:"extraMoves",  label:"Move Extender",  icon:"🎯", desc:"15% free move chance",      cost:[120,300,700] },
+  { id:"idleBoost",   label:"Idle Generator", icon:"⏰", desc:"Coins/hr while away",        cost:[60,150,400] },
+  { id:"capReduce",   label:"Power Saver",    icon:"🔋", desc:"-2 charge per building",    cost:[150,350,800] },
+  { id:"specialRate", label:"Node Enhancer",  icon:"🌀", desc:"More shape combos",          cost:[90,220,550] },
+];
+
+const DISTRICTS = [
+  { num:"DISTRICT 1", label:"Blackout Block",   theme:"#00e5ff", ids:[0,1,2,3,4,5,6,7,8,9]      },
+  { num:"DISTRICT 2", label:"Industrial Row",   theme:"#ffaa00", ids:[10,11,12,13,14,15,16,17,18,19] },
+  { num:"DISTRICT 3", label:"Skyline Sector",   theme:"#ff2d95", ids:[20,21,22,23,24,25,26,27,28,29] },
+  { num:"DISTRICT 4", label:"Underground Grid", theme:"#a855f7", ids:[30,31,32,33,34,35,36,37,38,39] },
+  { num:"DISTRICT 5", label:"Core City",        theme:"#00ff88", ids:[40,41,42,43,44,45,46,47,48,49] },
 ];
 
 const CAMPAIGN_LEVELS = [
-  { id: 0, name: "BLACKOUT BLOCK",   moves: 25, bids: ["apt","factory"],               hazards: 0, hint: "Slide rows & columns — board wraps! Line up 3+ same-color nodes to score." },
-  { id: 1, name: "INDUSTRIAL ROW",   moves: 22, bids: ["apt","factory","lab"],          hazards: 2, hint: "Corrupted tiles block matches. Adjacent combos clear the rot!" },
-  { id: 2, name: "SKYLINE SECTOR",   moves: 20, bids: ["apt","factory","lab","power"],  hazards: 3, hint: "Shape combos: 2x2=Battery  Plus=Pulse Blast  Line-5=Wild Core" },
-  { id: 3, name: "UNDERGROUND GRID", moves: 18, bids: ["apt","lab","power"],            hazards: 5, hint: "Heavy corruption. Contain it fast or lose the board." },
+  {id:0,  dist:"DISTRICT 1",boss:false,moves:35,bids:["apt","factory"],              hazards:0,  hint:"Swipe any row or column — the board wraps around the edges!"},
+  {id:1,  dist:"DISTRICT 1",boss:false,moves:33,bids:["apt","factory"],              hazards:0,  hint:"Match 3 or more same-color nodes in a line to charge buildings."},
+  {id:2,  dist:"DISTRICT 1",boss:false,moves:31,bids:["apt","factory","lab"],        hazards:0,  hint:"A cascade — one match triggering another — is worth double points."},
+  {id:3,  dist:"DISTRICT 1",boss:false,moves:30,bids:["apt","factory","lab"],        hazards:1,  hint:"First corrupted tile. Match the tiles right next to it to clear the rot."},
+  {id:4,  dist:"DISTRICT 1",boss:false,moves:28,bids:["apt","factory","lab"],        hazards:1,  hint:"Corruption spreads every few moves. Clear it before it blocks your chains."},
+  {id:5,  dist:"DISTRICT 1",boss:false,moves:27,bids:["apt","factory","lab"],        hazards:1,  hint:"Wrapping a tile around the edge can unlock chains you couldn't see before."},
+  {id:6,  dist:"DISTRICT 1",boss:false,moves:26,bids:["apt","factory","lab"],        hazards:2,  hint:"Look for shifts that match two different colors in one move."},
+  {id:7,  dist:"DISTRICT 1",boss:false,moves:25,bids:["apt","factory","lab"],        hazards:2,  hint:"Every shift should charge at least one building. No moves to waste."},
+  {id:8,  dist:"DISTRICT 1",boss:false,moves:24,bids:["apt","factory","lab"],        hazards:2,  hint:"A 2x2 square match fires a Battery — double charge to all buildings!"},
+  {id:9,  dist:"DISTRICT 1",boss:true, moves:28,bids:["apt","factory","lab","power"],hazards:2,  hint:"BOSS — all four buildings need power. You have enough moves. Trust your instincts."},
+  {id:10, dist:"DISTRICT 2",boss:false,moves:23,bids:["apt","factory","lab"],        hazards:3,  hint:"Three hazards. Clear at least one early before planning your main chain."},
+  {id:11, dist:"DISTRICT 2",boss:false,moves:22,bids:["apt","factory","lab","power"],hazards:3,  hint:"Four buildings now. Decide which color you need most before your first shift."},
+  {id:12, dist:"DISTRICT 2",boss:false,moves:21,bids:["apt","factory","lab","power"],hazards:3,  hint:"A plus-shape match triggers Pulse Blast — clears a full 3x3 area!"},
+  {id:13, dist:"DISTRICT 2",boss:false,moves:20,bids:["apt","factory","lab","power"],hazards:4,  hint:"Four hazards. Cluster them to one corner rather than chasing each one."},
+  {id:14, dist:"DISTRICT 2",boss:false,moves:20,bids:["factory","lab","power"],      hazards:4,  hint:"Three buildings gives breathing room. Use extra moves to clear corruption first."},
+  {id:15, dist:"DISTRICT 2",boss:false,moves:19,bids:["apt","factory","lab","power"],hazards:4,  hint:"You need cascades to win this. Set up a match that triggers two more."},
+  {id:16, dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","factory","lab","power"],hazards:5,  hint:"Five hazards spreading every 3 moves. Contain the rot before charging."},
+  {id:17, dist:"DISTRICT 2",boss:false,moves:18,bids:["apt","lab","power"],          hazards:5,  hint:"Three buildings but tight on moves. Speed matters more than perfection."},
+  {id:18, dist:"DISTRICT 2",boss:false,moves:17,bids:["apt","factory","lab","power"],hazards:5,  hint:"Every single shift must trigger a match. Zero wasted moves from here."},
+  {id:19, dist:"DISTRICT 2",boss:true, moves:22,bids:["apt","factory","lab","power"],hazards:5,  hint:"BOSS — five hazards, four buildings. One perfect chain changes everything."},
+  {id:20, dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"Six corrupted tiles. Clear the clusters before planning long chains."},
+  {id:21, dist:"DISTRICT 3",boss:false,moves:16,bids:["apt","factory","lab","power"],hazards:6,  hint:"No exploration moves. Plan your entire route before the first swipe."},
+  {id:22, dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","power"],      hazards:6,  hint:"Three buildings helps. Save the freed moves for the toughest color."},
+  {id:23, dist:"DISTRICT 3",boss:false,moves:15,bids:["apt","factory","lab","power"],hazards:7,  hint:"Seven hazards on a 5x5 board. Every clean tile is precious now."},
+  {id:24, dist:"DISTRICT 3",boss:false,moves:14,bids:["factory","lab","power"],      hazards:7,  hint:"Fourteen moves means cascades on almost every single shift."},
+  {id:25, dist:"DISTRICT 3",boss:false,moves:14,bids:["apt","factory","lab","power"],hazards:7,  hint:"Contain the rot to one side of the board. Don't let it split your color lines."},
+  {id:26, dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","factory","lab","power"],hazards:8,  hint:"Eight corrupted tiles. The board barely has room to breathe."},
+  {id:27, dist:"DISTRICT 3",boss:false,moves:13,bids:["apt","lab","power"],          hazards:8,  hint:"Fewer buildings means you can specialize your chains on two colors."},
+  {id:28, dist:"DISTRICT 3",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Twelve moves, four buildings, heavy rot. Near-perfect play required."},
+  {id:29, dist:"DISTRICT 3",boss:true, moves:17,bids:["apt","factory","lab","power"],hazards:8,  hint:"BOSS — eight hazards, seventeen moves. Chain every shift or fail."},
+  {id:30, dist:"DISTRICT 4",boss:false,moves:12,bids:["apt","factory","lab","power"],hazards:8,  hint:"Welcome to the Underground. Nothing comes easy from here."},
+  {id:31, dist:"DISTRICT 4",boss:false,moves:11,bids:["apt","factory","lab","power"],hazards:9,  hint:"Nine corrupted tiles. Clear the cluster — don't chase the stragglers."},
+  {id:32, dist:"DISTRICT 4",boss:false,moves:11,bids:["factory","lab","power"],      hazards:9,  hint:"Three buildings still. Nine rot tiles nearly fill an entire row."},
+  {id:33, dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","factory","lab","power"],hazards:9,  hint:"Ten moves means chain reactions on every single shift. No exceptions."},
+  {id:34, dist:"DISTRICT 4",boss:false,moves:10,bids:["apt","lab","power"],          hazards:9,  hint:"Two-fifths of the board is blocked. Find the clean diagonal lines."},
+  {id:35, dist:"DISTRICT 4",boss:false,moves:9, bids:["apt","factory","lab","power"],hazards:10, hint:"Nine moves. If you're not cascading every turn, restart and rethink your approach."},
+  {id:36, dist:"DISTRICT 4",boss:false,moves:9, bids:["factory","lab","power"],      hazards:10, hint:"Ten rot tiles, nine moves. Maximum chain efficiency. Every shift counts."},
+  {id:37, dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Eight moves. Upgrades aren't optional anymore — they're essential."},
+  {id:38, dist:"DISTRICT 4",boss:false,moves:8, bids:["apt","factory","power"],      hazards:10, hint:"Three buildings but ten rot tiles. The clean tiles are your only path."},
+  {id:39, dist:"DISTRICT 4",boss:true, moves:14,bids:["apt","factory","lab","power"],hazards:10, hint:"BOSS — hardest the Underground has. Maximum performance. You know what to do."},
+  {id:40, dist:"DISTRICT 5",boss:false,moves:8, bids:["apt","factory","lab","power"],hazards:10, hint:"Core City. Only the best make it here. Show everything you know."},
+  {id:41, dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Seven moves, eleven rot tiles. Every shift must be a multi-match."},
+  {id:42, dist:"DISTRICT 5",boss:false,moves:7, bids:["factory","lab","power"],      hazards:11, hint:"Eleven corrupted tiles on a 5x5. Work with what the board gives you."},
+  {id:43, dist:"DISTRICT 5",boss:false,moves:7, bids:["apt","factory","lab","power"],hazards:11, hint:"Find the clean lines. They're there — you just have to see them."},
+  {id:44, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","lab","power"],          hazards:11, hint:"Six moves. This is solved, not played. Think before every swipe."},
+  {id:45, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:11, hint:"Six moves, four buildings. Every bit of board knowledge you have matters now."},
+  {id:46, dist:"DISTRICT 5",boss:false,moves:6, bids:["factory","lab","power"],      hazards:12, hint:"Twelve corrupted tiles. Half the board is dead. Find the other half."},
+  {id:47, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"The most unforgiving board. Maxed upgrades and perfect play — both required."},
+  {id:48, dist:"DISTRICT 5",boss:false,moves:6, bids:["apt","factory","lab","power"],hazards:12, hint:"One level away from the final boss. No mistakes. No wasted moves."},
+  {id:49, dist:"DISTRICT 5",boss:true, moves:12,bids:["apt","factory","lab","power"],hazards:12, hint:"FINAL BOSS — twelve corrupted tiles, twelve moves, full city power. Become a legend."},
 ];
 
 const IDLE_RATES = [0, 5, 12, 25];
-const STORE_KEY = "sg_v2_meta";
 const DEF_META = {
-  coins: 0, parts: 0,
-  upgrades: { comboBoost: 0, hazardSlow: 0, extraMoves: 0, idleBoost: 0, capReduce: 0, specialRate: 0 },
-  levelsCleared: [], lastCollect: Date.now(), dailyDate: "", dailyScore: 0, customLevels: [],
+  coins:0, parts:0,
+  upgrades:{comboBoost:0,hazardSlow:0,extraMoves:0,idleBoost:0,capReduce:0,specialRate:0},
+  levelsCleared:[], stars:{}, lastCollect:Date.now(),
+  dailyDate:"", dailyScore:0, customLevels:[], starterPackShown:false,
 };
 
+
 /* ─── META ──────────────────────────────────────────────────────── */
-function loadMeta() {
-  try { const s = localStorage.getItem(STORE_KEY); return s ? { ...DEF_META, ...JSON.parse(s) } : { ...DEF_META }; }
-  catch { return { ...DEF_META }; }
+function loadMeta(){
+  try{ const s=localStorage.getItem(STORE_KEY); return s?Object.assign({},DEF_META,JSON.parse(s)):Object.assign({},DEF_META); }
+  catch{ return Object.assign({},DEF_META); }
 }
-function saveMeta(m) { try { localStorage.setItem(STORE_KEY, JSON.stringify(m)); } catch {} }
-function calcIdle(meta) {
-  const lvl = meta.upgrades && meta.upgrades.idleBoost ? meta.upgrades.idleBoost : 0;
-  if (!lvl) return 0;
-  const hrs = Math.min(8, (Date.now() - (meta.lastCollect || Date.now())) / 3600000);
-  return Math.floor(hrs * IDLE_RATES[lvl]);
+function saveMeta(m){ try{ localStorage.setItem(STORE_KEY,JSON.stringify(m)); }catch{} }
+function calcIdle(meta){
+  const lvl=meta.upgrades&&meta.upgrades.idleBoost?meta.upgrades.idleBoost:0;
+  if(!lvl) return 0;
+  const hrs=Math.min(8,(Date.now()-(meta.lastCollect||Date.now()))/3600000);
+  return Math.floor(hrs*IDLE_RATES[lvl]);
 }
 
-/* ─── GRID UTILS ────────────────────────────────────────────────── */
-let _uid = 0;
+/* ─── LIVES ─────────────────────────────────────────────────────── */
+function loadLives(){
+  try{
+    const s=localStorage.getItem(LIVES_KEY);
+    if(!s) return {count:MAX_LIVES,lastRegen:Date.now()};
+    const d=JSON.parse(s);
+    const elapsed=Date.now()-d.lastRegen;
+    const regenCount=Math.floor(elapsed/LIFE_REGEN_MS);
+    if(regenCount>0){
+      d.count=Math.min(MAX_LIVES,d.count+regenCount);
+      d.lastRegen=d.lastRegen+regenCount*LIFE_REGEN_MS;
+    }
+    return d;
+  }catch{ return {count:MAX_LIVES,lastRegen:Date.now()}; }
+}
+function saveLives(l){ try{ localStorage.setItem(LIVES_KEY,JSON.stringify(l)); }catch{} }
+function msToNextLife(l){
+  if(l.count>=MAX_LIVES) return 0;
+  return Math.max(0,LIFE_REGEN_MS-(Date.now()-l.lastRegen));
+}
+function fmtTime(ms){
+  const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+  return m+":"+String(s).padStart(2,"0");
+}
+
+/* ─── AUDIO ENGINE ──────────────────────────────────────────────── */
+const Audio = (function(){
+  var ctx=null;
+  function getCtx(){ if(!ctx){ try{ ctx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return ctx; }
+  function tone(freq,type,dur,gain,delay){
+    var c=getCtx(); if(!c) return;
+    try{
+      var osc=c.createOscillator(), g=c.createGain();
+      osc.connect(g); g.connect(c.destination);
+      osc.frequency.value=freq; osc.type=type||"sine";
+      var t=c.currentTime+(delay||0);
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(gain||0.25,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+      osc.start(t); osc.stop(t+dur+0.05);
+    }catch(e){}
+  }
+  return {
+    shift:   function(){ tone(160,"sine",0.07,0.15); },
+    match:   function(){ tone(520,"sine",0.1,0.2); tone(660,"sine",0.15,0.15,0.05); },
+    cascade: function(n){ tone(100*(1+n*0.8),"sawtooth",0.22,0.25); tone(200*(1+n*0.5),"sine",0.18,0.16,0.04); },
+    powerOn: function(){ [262,330,392,523].forEach(function(f,i){ tone(f,"sine",0.4,0.28,i*0.06); }); },
+    chain:   function(n){ for(var i=0;i<Math.min(n,5);i++){ (function(j){ tone(280+j*110,"sine",0.1,0.18,j*0.055); })(i); } },
+    win:     function(){ [523,659,784,1047,1319].forEach(function(f,i){ tone(f,"sine",0.5,0.3,i*0.08); }); },
+    bossWin: function(){ [262,330,392,523,659,784,1047].forEach(function(f,i){ tone(f,"sine",0.55,0.32,i*0.075); }); },
+    lose:    function(){ tone(200,"sawtooth",0.25,0.28); tone(150,"sawtooth",0.35,0.22,0.12); tone(100,"sawtooth",0.28,0.18,0.28); },
+    tap:     function(){ tone(800,"sine",0.04,0.08); },
+  };
+})();
+
+/* ─── STARS ─────────────────────────────────────────────────────── */
+function calcStars(movesUsed,movesTotal){
+  var pct=movesUsed/movesTotal;
+  if(pct<=0.35) return 3;
+  if(pct<=0.65) return 2;
+  return 1;
+}
+function renderStars(n){
+  var s=""; for(var i=0;i<3;i++) s+=(i<n?"★":"☆"); return s;
+}
+
+/* ─── TUTORIAL ──────────────────────────────────────────────────── */
+var TUTO_KEY="sg_tuto_v3";
+function isTutoDone(){ try{ return localStorage.getItem(TUTO_KEY)==="1"; }catch{ return false; } }
+function markTutoDone(){ try{ localStorage.setItem(TUTO_KEY,"1"); }catch{} }
+
+function TutorialOverlay(props){
+  var step=props.step, onNext=props.onNext, onSkip=props.onSkip;
+  var steps=[
+    {icon:"👆",title:"SWIPE TO SHIFT",body:"Swipe any row left or right, or any column up or down. The board wraps — tiles pushed off one side reappear on the other.",btn:"NEXT"},
+    {icon:"⚡",title:"MATCH NODES",body:"Line up 3 or more same-color energy nodes after a shift. Longer chains and cascades charge buildings much faster.",btn:"NEXT"},
+    {icon:"🏙️",title:"POWER THE CITY",body:"Every match charges the target buildings shown below the grid. Fill all power bars to win the level. Let's go!",btn:"LET'S GO!"},
+  ];
+  var s=steps[step];
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:900,background:"rgba(7,7,15,0.92)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
+      <div style={{background:"rgba(13,13,26,0.98)",border:"1px solid rgba(0,229,255,0.2)",borderRadius:24,padding:"36px 28px",maxWidth:320,width:"90%",textAlign:"center",animation:"modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1)"}}>
+        <div style={{fontSize:52,marginBottom:12}}>{s.icon}</div>
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:900,letterSpacing:"0.1em",marginBottom:10,color:"#00e5ff",textShadow:"0 0 14px rgba(0,229,255,0.4)"}}>{s.title}</div>
+        <div style={{fontSize:13,color:"rgba(255,255,255,0.52)",lineHeight:1.65,marginBottom:24}}>{s.body}</div>
+        <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+          {step<2&&<button onClick={onSkip} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"10px 18px",color:"rgba(255,255,255,0.38)",fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em"}}>SKIP</button>}
+          <button onClick={onNext} style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)",border:"none",borderRadius:10,padding:"12px 28px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>{s.btn}</button>
+        </div>
+        <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:16}}>
+          {steps.map(function(_,i){ return <div key={i} style={{width:6,height:6,borderRadius:"50%",background:i===step?"#00e5ff":"rgba(255,255,255,0.15)",transition:"background 0.3s"}}/>; })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LivesGate(props){
+  var lives=props.lives, onBack=props.onBack, onWatchAd=props.onWatchAd;
+  var _tl = React.useState(msToNextLife(lives));
+  var timeLeft=_tl[0], setTimeLeft=_tl[1];
+  React.useEffect(function(){
+    var t=setInterval(function(){ setTimeLeft(msToNextLife(loadLives())); },1000);
+    return function(){ clearInterval(t); };
+  },[]);
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:900,background:"rgba(7,7,15,0.94)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
+      <div style={{background:"rgba(13,13,26,0.98)",border:"1px solid rgba(255,45,149,0.25)",borderRadius:24,padding:"36px 28px",maxWidth:320,width:"90%",textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:10}}>💔</div>
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:900,color:"#ff2d95",marginBottom:6}}>NO LIVES LEFT</div>
+        <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:16,lineHeight:1.55}}>Your city needs a moment to recover.</div>
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:32,color:"#ffaa00",fontWeight:700,textShadow:"0 0 14px rgba(255,170,0,0.4)",marginBottom:22}}>{fmtTime(timeLeft)}</div>
+        <button onClick={onWatchAd} style={{display:"block",width:"100%",background:"linear-gradient(135deg,#ff2d95,#ffaa00)",border:"none",borderRadius:12,padding:"14px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",marginBottom:10}}>WATCH AD · GET +1 LIFE FREE</button>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"10px 20px",color:"rgba(255,255,255,0.38)",fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700,cursor:"pointer"}}>BACK</button>
+        <div style={{fontSize:9,color:"rgba(255,255,255,0.18)",marginTop:14,letterSpacing:"0.05em"}}>Lives refill automatically every 30 minutes</div>
+      </div>
+    </div>
+  );
+}
+
+function StarterPack(props){
+  var onClose=props.onClose, onBuy=props.onBuy;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:950,background:"rgba(7,7,15,0.93)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(10px)"}}>
+      <div style={{background:"rgba(13,13,26,0.98)",border:"1px solid rgba(255,170,0,0.3)",borderRadius:24,padding:"32px 26px",maxWidth:320,width:"90%",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#ffaa00,#ff2d95,#00e5ff)"}}/>
+        <div style={{fontSize:44,marginBottom:8}}>🎁</div>
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,letterSpacing:"0.1em",marginBottom:4,color:"#ffaa00"}}>STARTER PACK</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.38)",marginBottom:18}}>One-time offer</div>
+        <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:20}}>
+          {[{icon:"❤️",text:"5 instant lives"},{icon:"🚫",text:"No more interstitial ads"},{icon:"⬡",text:"200 coins to start"},{icon:"🎯",text:"3 free Move Extender uses"}].map(function(r,i){
+            return <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"10px 14px"}}><span style={{fontSize:18}}>{r.icon}</span><span style={{fontSize:13,color:"rgba(255,255,255,0.7)",fontWeight:600}}>{r.text}</span></div>;
+          })}
+        </div>
+        <button onClick={onBuy} style={{display:"block",width:"100%",background:"linear-gradient(135deg,#ffaa00,#ff7700)",border:"none",borderRadius:14,padding:"15px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:12,fontWeight:900,cursor:"pointer",letterSpacing:"0.1em",marginBottom:10}}>GET IT FOR $1.99</button>
+        <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.25)",fontFamily:"'Rajdhani',sans-serif",fontSize:11,cursor:"pointer"}}>No thanks, I like losing lives</button>
+        <div style={{fontSize:8,color:"rgba(255,255,255,0.14)",marginTop:12}}>Payment via App Store / Google Play. Non-recurring.</div>
+      </div>
+    </div>
+  );
+}
+
+
+
+/* ─── XP SYSTEM ─────────────────────────────────────────────────── */
+const XP_PER_LEVEL = 200;
+const XP_KEY = "sg_xp_v1";
+
+function loadXP() {
+  try { const s = localStorage.getItem(XP_KEY); return s ? JSON.parse(s) : {xp:0,level:1}; }
+  catch { return {xp:0,level:1}; }
+}
+function saveXP(d) { try { localStorage.setItem(XP_KEY, JSON.stringify(d)); } catch {} }
+function calcXP(score, stars, isBoss) {
+  return Math.floor(score / 5) + stars * 15 + (isBoss ? 50 : 0);
+}
+function addXP(d, amount) {
+  var newXP = d.xp + amount;
+  var newLevel = d.level;
+  while (newXP >= XP_PER_LEVEL) { newXP -= XP_PER_LEVEL; newLevel++; }
+  return { xp: newXP, level: newLevel };
+}
+function xpToNextLevel(d) { return XP_PER_LEVEL - d.xp; }
+
+/* ─── STREAK SYSTEM ─────────────────────────────────────────────── */
+const STREAK_KEY = "sg_streak_v1";
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function loadStreak() {
+  try {
+    var s = localStorage.getItem(STREAK_KEY);
+    if (!s) return { count: 0, lastDay: "", claimed: [] };
+    return JSON.parse(s);
+  } catch { return { count: 0, lastDay: "", claimed: [] }; }
+}
+function saveStreak(d) { try { localStorage.setItem(STREAK_KEY, JSON.stringify(d)); } catch {} }
+function checkAndUpdateStreak(st) {
+  var today = todayStr();
+  if (st.lastDay === today) return st;
+  var d = new Date(), prev = new Date(d); prev.setDate(prev.getDate()-1);
+  var prevStr = prev.getFullYear() + "-" + String(prev.getMonth()+1).padStart(2,"0") + "-" + String(prev.getDate()).padStart(2,"0");
+  var newCount = (st.lastDay === prevStr) ? st.count + 1 : 1;
+  var newSt = { count: newCount, lastDay: today, claimed: st.claimed || [] };
+  saveStreak(newSt);
+  return newSt;
+}
+function getStreakReward(day) {
+  if (day === 7)  return { icon: "🎨", label: "Grid Skin",    coins: 0,   special: "skin" };
+  if (day === 14) return { icon: "⚡", label: "Charge Boost", coins: 0,   special: "boost" };
+  if (day === 30) return { icon: "🏆", label: "Legend Title", coins: 0,   special: "title" };
+  if (day % 7 === 0) return { icon: "💎", label: "Gem Pack",   coins: 100, special: null };
+  return { icon: "⬡",  label: "Coins",       coins: 10 + day * 3, special: null };
+}
+
+/* ─── DAILY CHALLENGES ──────────────────────────────────────────── */
+const CHALLENGES_KEY = "sg_challenges_v1";
+const CHALLENGE_DEFS = [
+  { id:"c1", icon:"⚡", name:"Chain Reaction",    desc:"Trigger a 3+ cascade",       goal:1,  type:"cascade",  reward:{coins:30} },
+  { id:"c2", icon:"🏙️", name:"District Power",    desc:"Complete any level",          goal:1,  type:"complete", reward:{coins:20} },
+  { id:"c3", icon:"🌀", name:"Efficiency Expert", desc:"Win a level with 3 stars",    goal:1,  type:"stars3",   reward:{coins:50} },
+  { id:"c4", icon:"☠",  name:"Rot Cleaner",       desc:"Clear 10 corrupted tiles",    goal:10, type:"corrupt",  reward:{coins:35} },
+  { id:"c5", icon:"🔋", name:"Battery Master",    desc:"Trigger a Battery combo",     goal:1,  type:"battery",  reward:{coins:40} },
+  { id:"c6", icon:"💥", name:"Pulse Bringer",     desc:"Trigger a Pulse Blast",       goal:1,  type:"pulse",    reward:{coins:40} },
+  { id:"c7", icon:"🎯", name:"Perfect Shift",     desc:"Complete a level ≤ 5 moves",  goal:1,  type:"moves5",   reward:{coins:60} },
+  { id:"c8", icon:"🔥", name:"On Fire",           desc:"Win 3 levels in one session", goal:3,  type:"session",  reward:{coins:45} },
+];
+function getDailyChallenges(seed) {
+  var rng = mkSeededRng(seed);
+  var shuffled = CHALLENGE_DEFS.slice().sort(function() { return rng() - 0.5; });
+  return [shuffled[0], shuffled[1], shuffled[2]];
+}
+function loadChallenges() {
+  try {
+    var s = localStorage.getItem(CHALLENGES_KEY);
+    var today = todayStr();
+    if (!s) return null;
+    var d = JSON.parse(s);
+    if (d.date !== today) return null;
+    return d;
+  } catch { return null; }
+}
+function saveChallenges(d) { try { localStorage.setItem(CHALLENGES_KEY, JSON.stringify(d)); } catch {} }
+function initChallenges() {
+  var today = todayStr();
+  var seed = parseInt(today.replace(/-/g,""));
+  var defs = getDailyChallenges(seed);
+  var d = {
+    date: today,
+    challenges: defs.map(function(c) { return { id:c.id, progress:0, done:false }; }),
+    chestClaimed: false,
+  };
+  saveChallenges(d); return d;
+}
+
+/* ─── WEEKLY EVENT ──────────────────────────────────────────────── */
+const EVENTS = [
+  {
+    id:"neon_storm", name:"NEON STORM", icon:"⚡",
+    color:"#00e5ff", glow:"rgba(0,229,255,0.2)",
+    desc:"Corruption spreads twice as fast — but every match is worth triple points. Speed is survival.",
+    modifiers:["2× Corruption Speed","3× Points","Limited Lives"],
+    duration: 3 * 24 * 60 * 60 * 1000,
+  },
+  {
+    id:"void_wave", name:"VOID WAVE", icon:"🌑",
+    color:"#a855f7", glow:"rgba(168,85,247,0.2)",
+    desc:"Half the board starts corrupted. Your chain instincts are the only thing standing between the city and total blackout.",
+    modifiers:["12 Pre-Corrupted Tiles","2× Rewards","Power Saver Active"],
+    duration: 3 * 24 * 60 * 60 * 1000,
+  },
+  {
+    id:"blitz_mode", name:"BLITZ RUSH", icon:"🔥",
+    color:"#ffaa00", glow:"rgba(255,170,0,0.2)",
+    desc:"10 moves only, every level. No exceptions. Cascade or fail.",
+    modifiers:["Max 10 Moves","No Hazards","5× Combo Bonus"],
+    duration: 3 * 24 * 60 * 60 * 1000,
+  },
+];
+const WEEKLY_KEY = "sg_weekly_v1";
+const MOCK_LEADERBOARD = [
+  {name:"ByteKing_99",   score:18450, you:false},
+  {name:"NeonHunter",    score:16200, you:false},
+  {name:"GridMaster7",   score:15800, you:false},
+  {name:"VoidSlayer",    score:14300, you:false},
+  {name:"You",           score:0,     you:true },
+  {name:"ChainZero",     score:12100, you:false},
+  {name:"SlimeBy",       score:11500, you:false},
+];
+function getWeeklyEvent() {
+  var weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  return EVENTS[weekNum % EVENTS.length];
+}
+function msToEventEnd() {
+  var now = Date.now();
+  var weekStart = Math.floor(now / (7*24*60*60*1000)) * (7*24*60*60*1000);
+  return weekStart + 7*24*60*60*1000 - now;
+}
+function loadWeekly() {
+  try { var s = localStorage.getItem(WEEKLY_KEY); return s ? JSON.parse(s) : {score:0,played:false}; }
+  catch { return {score:0,played:false}; }
+}
+function saveWeekly(d) { try { localStorage.setItem(WEEKLY_KEY, JSON.stringify(d)); } catch {} }
+
 function nextId() { return ++_uid; }
 function rndColor() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
 function makeTile(color, corrupted) {
   return { id: nextId(), color: color || rndColor(), corrupted: corrupted === true };
 }
-
 function mkSeededRng(seed) {
   let s = ((seed ^ 0x9e3779b9) >>> 0) || 1;
-  return function() {
-    s = ((s ^ (s << 13)) >>> 0);
-    s = ((s ^ (s >> 17)) >>> 0);
-    s = ((s ^ (s << 5)) >>> 0);
-    return s / 4294967296;
-  };
+  return function() { s=((s^(s<<13))>>>0); s=((s^(s>>17))>>>0); s=((s^(s<<5))>>>0); return s/4294967296; };
 }
-function todaySeed() {
-  const d = new Date();
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-}
-
+function todaySeed() { const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
 function makeGrid(rng) {
-  const fn = rng || Math.random;
-  const rc = function() { return COLORS[Math.floor(fn() * COLORS.length)]; };
-  const g = [];
-  for (let r = 0; r < ROWS; r++) {
-    const row = [];
-    for (let c = 0; c < COLS; c++) {
-      let col, tries = 0;
-      do {
-        col = rc(); tries++;
-      } while (
-        tries < 10 &&
-        ((c >= 2 && row[c-1] && row[c-1].color === col && row[c-2] && row[c-2].color === col) ||
-         (r >= 2 && g[r-1] && g[r-1][c] && g[r-1][c].color === col && g[r-2] && g[r-2][c] && g[r-2][c].color === col))
-      );
+  const fn=rng||Math.random, rc=function(){ return COLORS[Math.floor(fn()*COLORS.length)]; }, g=[];
+  for(let r=0;r<ROWS;r++){
+    const row=[];
+    for(let c=0;c<COLS;c++){
+      let col,tries=0;
+      do{ col=rc(); tries++; } while(tries<10&&((c>=2&&row[c-1]&&row[c-1].color===col&&row[c-2]&&row[c-2].color===col)||(r>=2&&g[r-1]&&g[r-1][c]&&g[r-1][c].color===col&&g[r-2]&&g[r-2][c]&&g[r-2][c].color===col)));
       row.push(makeTile(col));
     }
     g.push(row);
   }
   return g;
 }
-
-function addCorruption(grid, count, rng) {
-  const fn = rng || Math.random;
-  const g = grid.map(function(row) { return row.map(function(t) { return Object.assign({}, t); }); });
-  let n = 0, tries = 0;
-  while (n < count && tries < 100) {
-    tries++;
-    const r = Math.floor(fn() * ROWS), c = Math.floor(fn() * COLS);
-    if (!g[r][c].corrupted) { g[r][c].corrupted = true; n++; }
-  }
+function addCorruption(grid,count,rng){
+  const fn=rng||Math.random, g=grid.map(function(row){ return row.map(function(t){ return Object.assign({},t); }); });
+  let n=0,tries=0;
+  while(n<count&&tries<100){ tries++; const r=Math.floor(fn()*ROWS),c=Math.floor(fn()*COLS); if(!g[r][c].corrupted){g[r][c].corrupted=true;n++;} }
   return g;
 }
-
-function doShift(grid, type, idx, dir) {
-  const g = grid.map(function(row) { return row.slice(); });
-  if (type === "row") {
-    if (dir === "left") {
-      g[idx] = grid[idx].slice(1).concat([grid[idx][0]]);
-    } else {
-      g[idx] = [grid[idx][COLS - 1]].concat(grid[idx].slice(0, -1));
-    }
-  } else {
-    const col = grid.map(function(row) { return row[idx]; });
-    const s = dir === "up" ? col.slice(1).concat([col[0]]) : [col[ROWS - 1]].concat(col.slice(0, -1));
-    s.forEach(function(t, r) { g[r][idx] = t; });
-  }
+function doShift(grid,type,idx,dir){
+  const g=grid.map(function(row){ return row.slice(); });
+  if(type==="row"){ if(dir==="left"){ g[idx]=grid[idx].slice(1).concat([grid[idx][0]]); } else { g[idx]=[grid[idx][COLS-1]].concat(grid[idx].slice(0,-1)); } }
+  else { const col=grid.map(function(row){ return row[idx]; }); const s=dir==="up"?col.slice(1).concat([col[0]]):[col[ROWS-1]].concat(col.slice(0,-1)); s.forEach(function(t,r){ g[r][idx]=t; }); }
   return g;
 }
-
-function findMatches(grid) {
-  const m = new Set();
-  for (let r = 0; r < ROWS; r++) {
-    let s = 0;
-    for (let c = 1; c <= COLS; c++) {
-      const ok = c < COLS && !grid[r][c].corrupted && !grid[r][c-1].corrupted && grid[r][c].color === grid[r][c-1].color;
-      if (!ok) { if (c - s >= 3) { for (let i = s; i < c; i++) m.add(r + "," + i); } s = c; }
-    }
-  }
-  for (let c = 0; c < COLS; c++) {
-    let s = 0;
-    for (let r = 1; r <= ROWS; r++) {
-      const ok = r < ROWS && !grid[r][c].corrupted && !grid[r-1][c].corrupted && grid[r][c].color === grid[r-1][c].color;
-      if (!ok) { if (r - s >= 3) { for (let i = s; i < r; i++) m.add(i + "," + c); } s = r; }
-    }
-  }
+function findMatches(grid){
+  const m=new Set();
+  for(let r=0;r<ROWS;r++){ let s=0; for(let c=1;c<=COLS;c++){ const ok=c<COLS&&!grid[r][c].corrupted&&!grid[r][c-1].corrupted&&grid[r][c].color===grid[r][c-1].color; if(!ok){ if(c-s>=3){ for(let i=s;i<c;i++) m.add(r+","+i); } s=c; } } }
+  for(let c=0;c<COLS;c++){ let s=0; for(let r=1;r<=ROWS;r++){ const ok=r<ROWS&&!grid[r][c].corrupted&&!grid[r-1][c].corrupted&&grid[r][c].color===grid[r-1][c].color; if(!ok){ if(r-s>=3){ for(let i=s;i<r;i++) m.add(i+","+c); } s=r; } } }
   return m;
 }
-
-function detectShapes(grid, matched) {
-  const shapes = [];
-  for (let r = 0; r < ROWS - 1; r++) {
-    for (let c = 0; c < COLS - 1; c++) {
-      const cells = [r+","+c, r+","+(c+1), (r+1)+","+c, (r+1)+","+(c+1)];
-      if (cells.every(function(k) { return matched.has(k); })) {
-        const col = grid[r][c].color;
-        const allSame = cells.every(function(k) {
-          const p = k.split(","); return grid[+p[0]][+p[1]].color === col && !grid[+p[0]][+p[1]].corrupted;
-        });
-        if (allSame) shapes.push({ type: "battery", label: "BATTERY ACTIVATED", bonus: 2 });
-      }
-    }
+function detectShapes(grid,matched){
+  const shapes=[];
+  for(let r=0;r<ROWS-1;r++) for(let c=0;c<COLS-1;c++){
+    const cells=[r+","+c,r+","+(c+1),(r+1)+","+c,(r+1)+","+(c+1)];
+    if(cells.every(function(k){ return matched.has(k); })){ const col=grid[r][c].color; const allSame=cells.every(function(k){ const p=k.split(","); return grid[+p[0]][+p[1]].color===col&&!grid[+p[0]][+p[1]].corrupted; }); if(allSame) shapes.push({type:"battery",label:"BATTERY",bonus:2}); }
   }
-  for (let r = 1; r < ROWS - 1; r++) {
-    for (let c = 1; c < COLS - 1; c++) {
-      const cells = [r+","+c, (r-1)+","+c, (r+1)+","+c, r+","+(c-1), r+","+(c+1)];
-      if (cells.every(function(k) { return matched.has(k); })) {
-        const col = grid[r][c].color;
-        const allSame = cells.every(function(k) {
-          const p = k.split(","); return grid[+p[0]][+p[1]].color === col && !grid[+p[0]][+p[1]].corrupted;
-        });
-        if (allSame) shapes.push({ type: "pulse", pos: [r, c], label: "PULSE BLAST" });
-      }
-    }
+  for(let r=1;r<ROWS-1;r++) for(let c=1;c<COLS-1;c++){
+    const cells=[r+","+c,(r-1)+","+c,(r+1)+","+c,r+","+(c-1),r+","+(c+1)];
+    if(cells.every(function(k){ return matched.has(k); })){ const col=grid[r][c].color; const allSame=cells.every(function(k){ const p=k.split(","); return grid[+p[0]][+p[1]].color===col&&!grid[+p[0]][+p[1]].corrupted; }); if(allSame) shapes.push({type:"pulse",pos:[r,c],label:"PULSE BLAST"}); }
   }
-  let wildAdded = false;
-  for (let r = 0; r < ROWS && !wildAdded; r++) {
-    let allIn = true;
-    for (let c = 0; c < COLS; c++) { if (!matched.has(r+","+c) || grid[r][c].corrupted) { allIn = false; break; } }
-    if (allIn) { shapes.push({ type: "wild", label: "WILD CORE" }); wildAdded = true; }
-  }
-  for (let c = 0; c < COLS && !wildAdded; c++) {
-    let allIn = true;
-    for (let r = 0; r < ROWS; r++) { if (!matched.has(r+","+c) || grid[r][c].corrupted) { allIn = false; break; } }
-    if (allIn) { shapes.push({ type: "wild", label: "WILD CORE" }); wildAdded = true; }
-  }
+  let wa=false;
+  for(let r=0;r<ROWS&&!wa;r++){ let ok=true; for(let c=0;c<COLS;c++){ if(!matched.has(r+","+c)||grid[r][c].corrupted){ok=false;break;} } if(ok){shapes.push({type:"wild",label:"WILD CORE"});wa=true;} }
+  for(let c=0;c<COLS&&!wa;c++){ let ok=true; for(let r=0;r<ROWS;r++){ if(!matched.has(r+","+c)||grid[r][c].corrupted){ok=false;break;} } if(ok){shapes.push({type:"wild",label:"WILD CORE"});wa=true;} }
   return shapes;
 }
-
-function expandPulse(matched, pos) {
-  const m = new Set(matched);
-  const pr = pos[0], pc = pos[1];
-  for (let r = Math.max(0, pr-1); r <= Math.min(ROWS-1, pr+1); r++)
-    for (let c = Math.max(0, pc-1); c <= Math.min(COLS-1, pc+1); c++)
-      m.add(r + "," + c);
+function expandPulse(matched,pos){
+  const m=new Set(matched); const pr=pos[0],pc=pos[1];
+  for(let r=Math.max(0,pr-1);r<=Math.min(ROWS-1,pr+1);r++) for(let c=Math.max(0,pc-1);c<=Math.min(COLS-1,pc+1);c++) m.add(r+","+c);
   return m;
 }
-
-function clearNearCorruption(grid, matched) {
-  const x = new Set();
-  matched.forEach(function(k) {
-    const p = k.split(","); const r = +p[0], c = +p[1];
-    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
-    dirs.forEach(function(d) {
-      const nr = r + d[0], nc = c + d[1];
-      if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && grid[nr][nc] && grid[nr][nc].corrupted) x.add(nr+","+nc);
-    });
-  });
+function clearNearCorruption(grid,matched){
+  const x=new Set();
+  matched.forEach(function(k){ const p=k.split(","); const r=+p[0],c=+p[1]; [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){ const nr=r+d[0],nc=c+d[1]; if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&grid[nr][nc]&&grid[nr][nc].corrupted) x.add(nr+","+nc); }); });
   return x;
 }
-
-function applyGravity(grid, matched) {
-  const g = grid.map(function(row) { return row.slice(); });
-  const cleared = {};
-  matched.forEach(function(k) {
-    const p = k.split(","); const r = +p[0], c = +p[1];
-    const t = g[r][c];
-    if (t && !t.corrupted) cleared[t.color] = (cleared[t.color] || 0) + 1;
-    g[r][c] = null;
-  });
-  for (let c = 0; c < COLS; c++) {
-    const col = [];
-    for (let r = 0; r < ROWS; r++) { if (g[r][c]) col.push(g[r][c]); }
-    while (col.length < ROWS) col.unshift(makeTile());
-    for (let r = 0; r < ROWS; r++) g[r][c] = col[r];
-  }
-  return { g: g, cleared: cleared };
+function applyGravity(grid,matched){
+  const g=grid.map(function(row){ return row.slice(); }), cleared={};
+  matched.forEach(function(k){ const p=k.split(","); const r=+p[0],c=+p[1]; const t=g[r][c]; if(t&&!t.corrupted) cleared[t.color]=(cleared[t.color]||0)+1; g[r][c]=null; });
+  for(let c=0;c<COLS;c++){ const col=[]; for(let r=0;r<ROWS;r++){ if(g[r][c]) col.push(g[r][c]); } while(col.length<ROWS) col.unshift(makeTile()); for(let r=0;r<ROWS;r++) g[r][c]=col[r]; }
+  return {g:g,cleared:cleared};
 }
-
-function spreadCorruption(grid, slow) {
-  if (slow && Math.random() < slow * 0.25) return grid;
-  const g = grid.map(function(row) { return row.map(function(t) { return Object.assign({}, t); }); });
-  const sources = [];
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (g[r][c] && g[r][c].corrupted) sources.push([r, c]);
-  if (!sources.length) return g;
-  const src = sources[Math.floor(Math.random() * sources.length)];
-  const sr = src[0], sc = src[1];
-  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
-  const nbrs = dirs.map(function(d) { return [sr+d[0], sc+d[1]]; }).filter(function(pos) {
-    return pos[0] >= 0 && pos[0] < ROWS && pos[1] >= 0 && pos[1] < COLS && g[pos[0]][pos[1]] && !g[pos[0]][pos[1]].corrupted;
-  });
-  if (nbrs.length) {
-    const pick = nbrs[Math.floor(Math.random() * nbrs.length)];
-    g[pick[0]][pick[1]] = Object.assign({}, g[pick[0]][pick[1]], { corrupted: true });
-  }
+function spreadCorruption(grid,slow){
+  if(slow&&Math.random()<slow*0.25) return grid;
+  const g=grid.map(function(row){ return row.map(function(t){ return Object.assign({},t); }); });
+  const sources=[]; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(g[r][c]&&g[r][c].corrupted) sources.push([r,c]);
+  if(!sources.length) return g;
+  const src=sources[Math.floor(Math.random()*sources.length)]; const sr=src[0],sc=src[1];
+  const nbrs=[[-1,0],[1,0],[0,-1],[0,1]].map(function(d){ return [sr+d[0],sc+d[1]]; }).filter(function(pos){ return pos[0]>=0&&pos[0]<ROWS&&pos[1]>=0&&pos[1]<COLS&&g[pos[0]][pos[1]]&&!g[pos[0]][pos[1]].corrupted; });
+  if(nbrs.length){ const pick=nbrs[Math.floor(Math.random()*nbrs.length)]; g[pick[0]][pick[1]]=Object.assign({},g[pick[0]][pick[1]],{corrupted:true}); }
   return g;
 }
+function countCorruption(grid){ let n=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].corrupted) n++; return n; }
 
-function countCorruption(grid) {
-  let n = 0;
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (grid[r][c] && grid[r][c].corrupted) n++;
-  return n;
-}
 
-/* ─── TILE ──────────────────────────────────────────────────────── */
+
+/* ─── TILE COMPONENT ────────────────────────────────────────────── */
 function Tile(props) {
-  const tile = props.tile, isHi = props.isHi, size = props.size;
+  const tile = props.tile, isHi = props.isHi, size = props.size, slideClass = props.slideClass || "", adjacentCorrupt = props.adjacentCorrupt;
   const isCr = tile && tile.corrupted;
   const color = (!isCr && tile && tile.color) ? tile.color : null;
   const hex = color ? HEX[color] : null;
 
-  const borderColor = isCr ? "rgba(160,0,240,0.45)" : (hex ? (isHi ? hex : hex + "66") : "rgba(255,255,255,0.07)");
-  const bg = isCr ? "rgba(38,0,55,0.92)" : (hex ? (isHi ? hex + "55" : hex + "1c") : "rgba(255,255,255,0.03)");
-  const shadow = (isHi && hex) ? ("0 0 16px " + hex + ",0 0 32px " + hex + "55") : (isCr ? "inset 0 0 18px rgba(150,0,220,0.3)" : (hex ? ("0 0 5px " + hex + "22") : "none"));
+  const borderColor = isCr ? "rgba(170,0,255,0.4)" : hex ? (isHi ? hex : hex+"55") : "rgba(255,255,255,0.06)";
+  const bg = isCr ? "rgba(30,0,50,0.95)" : hex ? (isHi ? hex+"44" : hex+"15") : "rgba(255,255,255,0.025)";
+  const outerShadow = isHi && hex ? ("0 0 20px "+hex+",0 0 40px "+hex+"44") : isCr ? "inset 0 0 20px rgba(170,0,255,0.2)" : hex ? "0 0 6px "+hex+"22" : "none";
 
-  const cls = "sg-tile" + (isHi ? " hi" : "") + (isCr ? " sg-corrupt" : "");
+  const cls = "sg-tile" + (isHi ? " matched" : "") + (isCr ? " corrupt" : "") + (adjacentCorrupt&&!isCr ? " adj-corrupt" : "") + (slideClass ? " "+slideClass : "");
 
   return (
-    <div className={cls} style={{ width: size, height: size, background: bg, borderColor: borderColor, boxShadow: shadow }}>
-      {isCr && <span style={{ fontSize: 17, filter: "saturate(0.5) brightness(0.7)" }}>☠</span>}
-      {!isCr && hex && <div className="sg-diamond" style={{ background: isHi ? hex : (hex + "99"), boxShadow: isHi ? ("0 0 10px " + hex) : "none" }} />}
-      {!isCr && hex && isHi && <div className="sg-glow" style={{ background: "radial-gradient(circle," + hex + "44 0%,transparent 70%)" }} />}
+    <div className={cls} style={{width: size+"px", height: size+"px", background: bg, borderColor: borderColor, boxShadow: outerShadow}}>
+      {isCr && <span className="sg-corrupt-icon">☠</span>}
+      {isCr && <div className="sg-corrupt-overlay"/>}
+      {!isCr && hex && (
+        <div className="sg-node" style={{background: isHi ? hex : hex+"88", boxShadow: isHi ? "0 0 12px "+hex+",0 0 24px "+hex+"55" : "none"}}>
+          {isHi && <div className="sg-node-ring" style={{borderColor: hex}}/>}
+        </div>
+      )}
+      {!isCr && hex && isHi && <div className="sg-tile-glow" style={{background: "radial-gradient(circle, "+hex+"33 0%, transparent 65%)"}}/>}
     </div>
   );
 }
 
+
+ ─────────────────────────────────────────────────── */
+function Particles() {
+  const particles = [];
+  const cols = ["#00e5ff","#ff2d95","#ffaa00","#00ff88","#a855f7"];
+  for (let i = 0; i < 18; i++) {
+    const col = cols[i % cols.length];
+    const left = (i * 17 + 3) % 97;
+    const dur = 8 + (i * 3.7) % 14;
+    const delay = -(i * 2.1) % dur;
+    const size = 1.5 + (i % 3);
+    particles.push(
+      <div key={i} className="sg-particle" style={{left: left+"%", bottom: "-4px", width: size+"px", height: size+"px", background: col, boxShadow: "0 0 6px "+col, animationDuration: dur+"s", animationDelay: delay+"s"}}/>
+    );
+  }
+  return <div className="sg-particles">{particles}</div>;
+}
+
+
+
+/* ─── PARTICLES ─────────────────────────────────────────────────── */
+function Particles() {
+  var particles = [];
+  var cols = ["#00e5ff","#ff2d95","#ffaa00","#00ff88","#a855f7"];
+  for (var i = 0; i < 18; i++) {
+    var col = cols[i % cols.length];
+    var left = (i * 17 + 3) % 97;
+    var dur = 8 + (i * 3.7) % 14;
+    var delay = -(i * 2.1) % dur;
+    var size = 1.5 + (i % 3);
+    particles.push(
+      <div key={i} className="sg-particle" style={{left: left+"%", bottom: "-4px", width: size+"px", height: size+"px", background: col, boxShadow: "0 0 6px "+col, animationDuration: dur+"s", animationDelay: delay+"s"}}/>
+    );
+  }
+  return <div className="sg-particles">{particles}</div>;
+}
+
 /* ─── GAME BOARD ────────────────────────────────────────────────── */
 function GameBoard(props) {
-  const levelDef = props.levelDef, meta = props.meta, onComplete = props.onComplete, onBack = props.onBack;
-  const upg = (meta && meta.upgrades) ? meta.upgrades : DEF_META.upgrades;
-  const capBonus = (upg.capReduce || 0) * 2;
-  const hazardSlow = upg.hazardSlow || 0;
-  const comboAmp = 1 + (upg.comboBoost || 0) * 0.3;
-  const freeChance = (upg.extraMoves || 0) * 0.15;
-  const spreadEvery = 3 + hazardSlow;
+  const levelDef=props.levelDef, meta=props.meta, onComplete=props.onComplete, onBack=props.onBack, onLose=props.onLose||function(){};
+  const upg=(meta&&meta.upgrades)?meta.upgrades:DEF_META.upgrades;
+  const capBonus=(upg.capReduce||0)*2, hazardSlow=upg.hazardSlow||0;
+  const comboAmp=1+(upg.comboBoost||0)*0.3, freeChance=(upg.extraMoves||0)*0.15;
+  const spreadEvery=3+hazardSlow;
 
-  const buildInitGrid = useCallback(function() {
-    if (levelDef.boardData) {
-      return levelDef.boardData.map(function(row) { return row.map(function(t) { return Object.assign({}, t, { id: nextId() }); }); });
-    }
-    const rng = levelDef.rngSeed ? mkSeededRng(levelDef.rngSeed) : null;
-    const g = makeGrid(rng);
-    return (levelDef.hazards || 0) > 0 ? addCorruption(g, levelDef.hazards, rng) : g;
-  }, [levelDef]);
+  const buildInitGrid=useCallback(function(){
+    if(levelDef.boardData) return levelDef.boardData.map(function(row){ return row.map(function(t){ return Object.assign({},t,{id:nextId()}); }); });
+    const rng=levelDef.rngSeed?mkSeededRng(levelDef.rngSeed):null;
+    const g=makeGrid(rng);
+    return(levelDef.hazards||0)>0?addCorruption(g,levelDef.hazards,rng):g;
+  },[levelDef]);
 
-  const [grid, setGrid] = useState(buildInitGrid);
-  const [moves, setMoves] = useState(levelDef.moves);
-  const [bldgs, setBldgs] = useState(function() {
-    return BLDG_DEFS.filter(function(b) { return levelDef.bids.includes(b.id); }).map(function(b) {
-      return Object.assign({}, b, { max: Math.max(4, b.cap - capBonus), ch: 0, on: false });
+  const [grid,setGrid]=useState(buildInitGrid);
+  const [moves,setMoves]=useState(levelDef.moves);
+  const [bldgs,setBldgs]=useState(function(){
+    return BLDG_DEFS.filter(function(b){ return levelDef.bids.includes(b.id); }).map(function(b){
+      return Object.assign({},b,{max:Math.max(4,b.cap-capBonus),ch:0,on:false});
     });
   });
-  const [score, setScore] = useState(0);
-  const [hi, setHi] = useState(new Set());
-  const [phase, setPhase] = useState("idle");
-  const [toasts, setToasts] = useState([]);
-  const [btnFlash, setBtnFlash] = useState(null);
-  const [moveCount, setMoveCount] = useState(0);
-  const timers = useRef([]);
+  const [score,setScore]=useState(0);
+  const [hi,setHi]=useState(new Set());
+  const [phase,setPhase]=useState("idle");
+  const [toasts,setToasts]=useState([]);
+  const [slideAnim,setSlideAnim]=useState(null);
+  const [moveCount,setMoveCount]=useState(0);
+  const [showAd,setShowAd]=useState(false);
+  const [showPack,setShowPack]=useState(false);
+  const timers=useRef([]);
+  const gridRef=useRef(null);
+  const touchRef=useRef({startX:0,startY:0,startRow:-1,startCol:-1,moved:false});
+  const SZ=52,GAP=4;
 
-  useEffect(function() { return function() { timers.current.forEach(clearTimeout); }; }, []);
+  useEffect(function(){ return function(){ timers.current.forEach(clearTimeout); }; },[]);
 
-  function later(fn, ms) { const t = setTimeout(fn, ms); timers.current.push(t); }
-  function addToast(text, color) {
-    const id = nextId();
-    setToasts(function(prev) { return prev.filter(function(x) { return x.text !== text; }).concat([{ id: id, text: text, color: color || "#ffaa00" }]); });
-    setTimeout(function() { setToasts(function(prev) { return prev.filter(function(x) { return x.id !== id; }); }); }, 2200);
+  function later(fn,ms){ const t=setTimeout(fn,ms); timers.current.push(t); }
+  function addToast(text,color){
+    const id=nextId();
+    setToasts(function(prev){ return prev.filter(function(x){ return x.text!==text; }).concat([{id:id,text:text,color:color||"#ffaa00"}]); });
+    setTimeout(function(){ setToasts(function(prev){ return prev.filter(function(x){ return x.id!==id; }); }); },2200);
   }
 
-  const handleShift = useCallback(function(type, idx, dir) {
-    if (phase !== "idle") return;
-    timers.current.forEach(clearTimeout); timers.current = [];
-    setBtnFlash({ type: type, idx: idx, dir: dir });
-    setTimeout(function() { setBtnFlash(null); }, 280);
+  const handleShift=useCallback(function(type,idx,dir){
+    if(phase!=="idle") return;
+    timers.current.forEach(clearTimeout); timers.current=[];
 
-    let g = doShift(grid, type, idx, dir);
-    const frames = [], totCleared = {};
-    let pts = 0, cascades = 0, chargeBoost = 1;
-    const toastQueue = [];
+    /* 1 — start slide animation, lock phase */
+    setSlideAnim({type:type,idx:idx,dir:dir});
+    setPhase("busy");
+    Audio.shift();
+    Audio.shift();
 
-    while (true) {
-      let m = findMatches(g);
-      if (!m.size) break;
-      const shapes = detectShapes(g, m);
-      shapes.forEach(function(sh) {
-        if (!toastQueue.find(function(x) { return x.text === sh.label; })) toastQueue.push({ text: sh.label, color: "#ffaa00" });
-        if (sh.type === "battery") chargeBoost = 2;
-        if (sh.type === "pulse" && sh.pos) m = expandPulse(m, sh.pos);
+    later(function(){
+      /* 2 — after slide completes: run game logic with captured closure values */
+      setSlideAnim(null);
+
+      let g=doShift(grid,type,idx,dir);
+      const frames=[],totCleared={};
+      let pts=0,cascades=0,chargeBoost=1;
+      const toastQueue=[];
+
+      while(true){
+        let m=findMatches(g);
+        if(!m.size) break;
+        const shapes=detectShapes(g,m);
+        shapes.forEach(function(sh){
+          if(!toastQueue.find(function(x){ return x.text===sh.label; })) toastQueue.push({text:sh.label,color:"#ffaa00"});
+          if(sh.type==="battery") chargeBoost=2;
+          if(sh.type==="pulse"&&sh.pos) m=expandPulse(m,sh.pos);
+        });
+        clearNearCorruption(g,m).forEach(function(k){ m.add(k); });
+        frames.push({g:g,m:new Set(m)});
+        const res=applyGravity(g,m);
+        Object.keys(res.cleared).forEach(function(col){ totCleared[col]=(totCleared[col]||0)+res.cleared[col]; });
+        pts+=m.size*10*(1+cascades*0.5)*comboAmp;
+        cascades++;
+        frames.push({g:res.g,m:new Set()});
+        g=res.g;
+      }
+
+      const newMC=moveCount+1;
+      let finalG=g;
+      if((levelDef.hazards||0)>0&&newMC%spreadEvery===0) finalG=spreadCorruption(g,hazardSlow);
+      const free=Math.random()<freeChance;
+      const newMoves=free?moves:moves-1;
+      if(free) addToast("FREE MOVE!","#00ff88");
+
+      const newBldgs=bldgs.map(function(b){
+        const add=(totCleared[b.color]||0)*chargeBoost;
+        const ch=Math.min(b.max,b.ch+add);
+        return Object.assign({},b,{ch:ch,on:ch>=b.max});
       });
-      clearNearCorruption(g, m).forEach(function(k) { m.add(k); });
-      frames.push({ g: g, m: new Set(m) });
-      const res = applyGravity(g, m);
-      Object.keys(res.cleared).forEach(function(col) { totCleared[col] = (totCleared[col] || 0) + res.cleared[col]; });
-      pts += m.size * 10 * (1 + cascades * 0.5) * comboAmp;
-      cascades++;
-      frames.push({ g: res.g, m: new Set() });
-      g = res.g;
+
+      setMoveCount(newMC); setMoves(newMoves);
+
+      function finish(){
+        setGrid(finalG); setHi(new Set()); setBldgs(newBldgs); setScore(function(s){ return s+Math.round(pts); });
+        toastQueue.forEach(function(t,i){ setTimeout(function(){ addToast(t.text,t.color); },i*320); });
+        if(cascades>1){ setTimeout(function(){ addToast("CHAIN x"+cascades,"#ffaa00"); },toastQueue.length*320); Audio.chain(cascades); }
+        if(cascades>=1) Audio.cascade(cascades-1);
+        if(newBldgs.every(function(b){ return b.on; })){ setPhase("win"); setTimeout(function(){ if(levelDef.boss) Audio.bossWin(); else Audio.win(); },100); return; }
+        if(newMoves<=0){ setPhase("lose"); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return; }
+        setPhase("idle");
+      }
+
+      if(!frames.length){ setGrid(finalG); if(newMoves<=0) setPhase("lose"); else setPhase("idle"); return; }
+      let fi=0;
+      function step(){
+        if(fi>=frames.length){ finish(); return; }
+        const fr=frames[fi++]; setGrid(fr.g); setHi(fr.m);
+        later(step,fr.m.size>0?400:170);
+      }
+      setGrid(frames[0].g); setHi(frames[0].m); fi=1; later(step,400);
+
+    }, SLIDE_MS);
+
+  },[grid,phase,moves,bldgs,moveCount,hazardSlow,comboAmp,freeChance,spreadEvery,levelDef]);
+
+  /* ── SWIPE HANDLING ── */
+  function onTouchStart(e){
+    if(phase!=="idle") return;
+    const touch=e.touches[0];
+    const rect=gridRef.current.getBoundingClientRect();
+    const relX=touch.clientX-rect.left-(SZ+GAP); /* offset for left arrow col */
+    const relY=touch.clientY-rect.top-(SZ+GAP);  /* offset for top arrow row */
+    touchRef.current={
+      startX:touch.clientX, startY:touch.clientY,
+      startRow:Math.floor(relY/(SZ+GAP)),
+      startCol:Math.floor(relX/(SZ+GAP)),
+      moved:false
+    };
+  }
+  function onTouchMove(e){
+    const t=touchRef.current;
+    const dx=Math.abs(e.touches[0].clientX-t.startX);
+    const dy=Math.abs(e.touches[0].clientY-t.startY);
+    if(dx>8||dy>8){ t.moved=true; e.preventDefault(); }
+  }
+  function onTouchEnd(e){
+    const t=touchRef.current;
+    if(!t.moved) return;
+    const touch=e.changedTouches[0];
+    const dx=touch.clientX-t.startX, dy=touch.clientY-t.startY;
+    const absDx=Math.abs(dx), absDy=Math.abs(dy);
+    const THRESH=32;
+    if(absDx<THRESH&&absDy<THRESH) return;
+    if(absDx>absDy){
+      /* horizontal → row */
+      if(t.startRow>=0&&t.startRow<ROWS) handleShift("row",t.startRow,dx>0?"right":"left");
+    } else {
+      /* vertical → col */
+      if(t.startCol>=0&&t.startCol<COLS) handleShift("col",t.startCol,dy>0?"down":"up");
     }
-
-    const newMC = moveCount + 1;
-    let finalG = g;
-    if ((levelDef.hazards || 0) > 0 && newMC % spreadEvery === 0) finalG = spreadCorruption(g, hazardSlow);
-
-    const free = Math.random() < freeChance;
-    const newMoves = free ? moves : moves - 1;
-    if (free) addToast("FREE MOVE!", "#00ff88");
-
-    const newBldgs = bldgs.map(function(b) {
-      const add = (totCleared[b.color] || 0) * chargeBoost;
-      const ch = Math.min(b.max, b.ch + add);
-      return Object.assign({}, b, { ch: ch, on: ch >= b.max });
-    });
-
-    setMoveCount(newMC); setMoves(newMoves); setPhase("busy");
-
-    function finish() {
-      setGrid(finalG); setHi(new Set()); setBldgs(newBldgs); setScore(function(s) { return s + Math.round(pts); });
-      toastQueue.forEach(function(t, i) { setTimeout(function() { addToast(t.text, t.color); }, i * 340); });
-      if (cascades > 1) setTimeout(function() { addToast("CHAIN x" + cascades, "#ffaa00"); }, toastQueue.length * 340);
-      if (newBldgs.every(function(b) { return b.on; })) { setPhase("win"); return; }
-      if (newMoves <= 0) { setPhase("lose"); return; }
-      setPhase("idle");
-    }
-
-    if (!frames.length) { setGrid(finalG); if (newMoves <= 0) setPhase("lose"); else setPhase("idle"); return; }
-    let fi = 0;
-    function step() {
-      if (fi >= frames.length) { finish(); return; }
-      const fr = frames[fi++]; setGrid(fr.g); setHi(fr.m);
-      later(step, fr.m.size > 0 ? 420 : 180);
-    }
-    setGrid(frames[0].g); setHi(frames[0].m); fi = 1; later(step, 420);
-  }, [grid, phase, moves, bldgs, moveCount, hazardSlow, comboAmp, freeChance, spreadEvery, levelDef]);
-
-  const SZ = 52, BW = 32;
-  const corr = countCorruption(grid);
-  const spreadWarn = (levelDef.hazards || 0) > 0 && ((moveCount + 1) % spreadEvery === 0);
-  const winCoins = Math.floor(score / 10) + 25;
-  const winParts = Math.floor(score / 60) + 3;
-
-  function retry() {
-    setGrid(buildInitGrid()); setMoves(levelDef.moves);
-    setBldgs(function(b) { return b.map(function(x) { return Object.assign({}, x, { ch: 0, on: false }); }); });
-    setScore(0); setHi(new Set()); setPhase("idle"); setMoveCount(0);
   }
 
-  function ShiftBtn(p) {
-    const fl = btnFlash && btnFlash.type === p.type && btnFlash.idx === p.idx && btnFlash.dir === p.dir;
+  function retry(){
+    setGrid(buildInitGrid()); setMoves(levelDef.moves);
+    setBldgs(function(b){ return b.map(function(x){ return Object.assign({},x,{ch:0,on:false}); }); });
+    setScore(0); setHi(new Set()); setPhase("idle"); setMoveCount(0); setSlideAnim(null);
+  }
+
+  function ShiftBtn(p){
     return (
-      <button className={"sg-btn" + (fl ? " flashed" : "")} style={{ width: p.type === "row" ? BW : SZ, height: p.type === "row" ? SZ : BW }}
-        onClick={function() { handleShift(p.type, p.idx, p.dir); }} disabled={phase !== "idle"}>
+      <button className={"sg-shift-btn"+(p.col?" col-btn":"")} style={{width:(p.col?SZ:30)+"px",height:(p.col?30:SZ)+"px"}}
+        onClick={function(){ handleShift(p.type,p.idx,p.dir); }} disabled={phase!=="idle"}>
         {p.label}
       </button>
     );
   }
 
+  const corr=countCorruption(grid);
+  const spreadWarn=(levelDef.hazards||0)>0&&((moveCount+1)%spreadEvery===0);
+  const winCoins=Math.floor(score/10)+25, winParts=Math.floor(score/60)+3;
+  const movesUsed=levelDef.moves-moves;
+  const stars=calcStars(movesUsed,levelDef.moves);
+
   return (
-    <div className="sg-screen">
-      <div className="sg-play-header">
-        <button className="sg-pill-btn" onClick={onBack}>Back</button>
-        <div style={{ textAlign: "center" }}>
-          {levelDef.isDaily && <div style={{ fontSize: 8, color: "#ffaa00", letterSpacing: "0.2em", marginBottom: 2 }}>DAILY</div>}
-          <div className="sg-level-name">{levelDef.name}</div>
+    <div className="sg-play">
+      <div className="sg-play-top">
+        <button className="sg-back" onClick={onBack}>←</button>
+        <div style={{textAlign:"center"}}>
+          {levelDef.isDaily&&<div className="sg-daily-badge">DAILY CHALLENGE</div>}
+          <div className="sg-lvl-label">{levelDef.name}</div>
         </div>
-        <div className="sg-score-disp">{score.toLocaleString()}</div>
+        <div className="sg-score-live">{score.toLocaleString()}</div>
       </div>
 
       <div className="sg-hud">
-        <div className="sg-hud-box">
-          <div className="sg-hud-label">MOVES</div>
-          <div className="sg-hud-val" style={{ color: moves <= 5 ? "#ff2d95" : "#00e5ff", textShadow: moves <= 5 ? "0 0 14px #ff2d95" : "none" }}>{moves}</div>
+        <div className={"sg-stat"+(moves<=5?" danger":"")}>
+          <div className="sg-stat-lbl">MOVES</div>
+          <div className="sg-stat-val" style={{color:moves<=5?"#ff2d95":"#00e5ff",textShadow:moves<=5?"0 0 14px #ff2d95":"none"}}>{moves}</div>
         </div>
-        <div className="sg-hud-box">
-          <div className="sg-hud-label">POWERED</div>
-          <div className="sg-hud-val" style={{ color: "#00ff88" }}>
-            {bldgs.filter(function(b) { return b.on; }).length}
-            <span style={{ fontSize: 14, opacity: 0.4 }}>/{bldgs.length}</span>
+        <div className="sg-stat">
+          <div className="sg-stat-lbl">POWERED</div>
+          <div className="sg-stat-val" style={{color:"#00ff88"}}>
+            {bldgs.filter(function(b){ return b.on; }).length}
+            <span style={{fontSize:13,opacity:0.35}}>/{bldgs.length}</span>
           </div>
         </div>
-        {(levelDef.hazards || 0) > 0 && (
-          <div className="sg-hud-box" style={{ borderColor: corr > 0 ? "rgba(255,45,149,0.35)" : "rgba(255,255,255,0.08)" }}>
-            <div className="sg-hud-label">CORRUPT</div>
-            <div className="sg-hud-val" style={{ color: corr > 4 ? "#ff2d95" : corr > 0 ? "#ffaa00" : "rgba(255,255,255,0.2)", fontSize: 20 }}>{corr}</div>
+        {(levelDef.hazards||0)>0&&(
+          <div className={"sg-stat"+(corr>0?" danger":"")}>
+            <div className="sg-stat-lbl">CORRUPT</div>
+            <div className="sg-stat-val" style={{color:corr>4?"#ff2d95":corr>0?"#ffaa00":"rgba(255,255,255,0.2)",fontSize:20}}>{corr}</div>
           </div>
         )}
       </div>
 
-      {spreadWarn && (levelDef.hazards || 0) > 0 && (
-        <div className="sg-warn-banner">CORRUPTION SPREADS THIS MOVE</div>
-      )}
+      {spreadWarn&&(levelDef.hazards||0)>0&&<div className="sg-crpt-warn">⚠ CORRUPTION SPREADS THIS MOVE</div>}
 
-      <div style={{ minHeight: 30, display: "flex", gap: 8, alignItems: "center", justifyContent: "center", flexWrap: "wrap", margin: "2px 0" }}>
-        {toasts.map(function(t) {
-          return <div key={t.id} className="sg-toast" style={{ color: t.color, textShadow: "0 0 12px " + t.color }}>{t.text}</div>;
-        })}
+      <div className="sg-toasts">
+        {toasts.map(function(t){ return <span key={t.id} className="sg-toast" style={{color:t.color,textShadow:"0 0 10px "+t.color}}>{t.text}</span>; })}
       </div>
 
-      <div className="sg-grid-wrap">
+      {/* ── GRID ── */}
+      <div className="sg-grid-area"
+        ref={gridRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{touchAction:"none"}}
+      >
+        {/* Col UP buttons */}
         <div className="sg-col-btns">
-          {[0,1,2,3,4].map(function(c) { return <ShiftBtn key={c} type="col" idx={c} dir="up" label="▲" />; })}
+          {[0,1,2,3,4].map(function(c){ return <ShiftBtn key={c} type="col" idx={c} dir="up" label="▲" col={true}/>; })}
         </div>
-        {grid.map(function(row, r) {
+
+        {/* Rows */}
+        {grid.map(function(row,r){
+          /* Determine slide class for this row */
+          const rowSlide = slideAnim&&slideAnim.type==="row"&&slideAnim.idx===r ? ("slide-"+(slideAnim.dir==="left"?"left":"right")) : "";
           return (
-            <div key={r} className="sg-row">
-              <ShiftBtn type="row" idx={r} dir="left" label="◀" />
-              {row.map(function(tile, c) {
-                return <Tile key={tile ? tile.id : (r+"-"+c)} tile={tile} isHi={hi.has(r+","+c)} size={SZ} />;
-              })}
-              <ShiftBtn type="row" idx={r} dir="right" label="▶" />
+            <div key={r} className="sg-grid-row">
+              <ShiftBtn type="row" idx={r} dir="left" label="◀"/>
+              <div className="sg-row-clip" style={{gap:GAP+"px"}}>
+                {row.map(function(tile,c){
+                  const colSlide = slideAnim&&slideAnim.type==="col"&&slideAnim.idx===c ? ("slide-"+(slideAnim.dir==="up"?"up":"down")) : "";
+                  const slideClass = rowSlide || colSlide;
+                  var isAdjacentCorrupt=false;
+                  if(tile&&!tile.corrupted){ [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){ var nr=r+d[0],nc=c+d[1]; if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&grid[nr][nc]&&grid[nr][nc].corrupted) isAdjacentCorrupt=true; }); }
+                  return <Tile key={tile?tile.id:(r+"-"+c)} tile={tile} isHi={hi.has(r+","+c)} size={SZ} slideClass={slideClass} adjacentCorrupt={isAdjacentCorrupt}/>;
+                })}
+              </div>
+              <ShiftBtn type="row" idx={r} dir="right" label="▶"/>
             </div>
           );
         })}
+
+        {/* Col DOWN buttons */}
         <div className="sg-col-btns">
-          {[0,1,2,3,4].map(function(c) { return <ShiftBtn key={c} type="col" idx={c} dir="down" label="▼" />; })}
+          {[0,1,2,3,4].map(function(c){ return <ShiftBtn key={c} type="col" idx={c} dir="down" label="▼" col={true}/>; })}
         </div>
       </div>
 
+      <div className="sg-swipe-hint">SWIPE TILES TO SHIFT • WRAPS AROUND</div>
+
+      {/* Buildings */}
       <div className="sg-bldg-list">
-        <div className="sg-section-label">BUILDINGS</div>
-        {bldgs.map(function(b) {
-          const hex = HEX[b.color];
+        <div className="sg-bldg-lbl">BUILDINGS — RESTORATION STATUS</div>
+        {bldgs.map(function(b){
+          const hex=HEX[b.color];
           return (
-            <div key={b.id} className="sg-bldg" style={{ borderColor: b.on ? hex : "rgba(255,255,255,0.07)", background: b.on ? hex + "10" : "rgba(255,255,255,0.025)", boxShadow: b.on ? "0 0 18px " + hex + "33" : "none" }}>
-              <div style={{ fontSize: 18, filter: b.on ? "none" : "grayscale(0.6) brightness(0.55)" }}>{b.icon}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: b.on ? hex : "rgba(255,255,255,0.55)" }}>{b.label}</span>
-                  <span style={{ fontFamily: "'Orbitron',monospace", fontSize: 10, color: hex }}>{b.on ? "ONLINE" : (b.ch + "/" + b.max)}</span>
+            <div key={b.id} className={"sg-bldg"+(b.on?" online":"")} style={{borderColor:b.on?hex:"rgba(255,255,255,0.07)",background:b.on?hex+"0e":"rgba(255,255,255,0.025)",boxShadow:b.on?"0 0 20px "+hex+"28":"none"}}>
+              <div className="sg-bldg-icon" style={{filter:b.on?"none":"grayscale(0.7) brightness(0.5)"}}>{b.icon}</div>
+              <div className="sg-bldg-info">
+                <div className="sg-bldg-row">
+                  <span className="sg-bldg-name" style={{color:b.on?hex:"rgba(255,255,255,0.6)"}}>{b.label}</span>
+                  <span className="sg-bldg-count" style={{color:hex}}>{b.on?"ONLINE":b.ch+"/"+b.max}</span>
                 </div>
-                <div className="sg-bar-track">
-                  <div className="sg-bar-fill" style={{ width: Math.min(100, (b.ch / b.max) * 100) + "%", background: b.on ? ("linear-gradient(90deg," + hex + ",#fff)") : ("linear-gradient(90deg," + hex + "66," + hex + ")"), boxShadow: b.on ? ("0 0 8px " + hex) : "none" }} />
+                <div className="sg-bldg-track">
+                  <div className="sg-bldg-fill" style={{width:Math.min(100,(b.ch/b.max)*100)+"%",background:b.on?"linear-gradient(90deg,"+hex+",#fff)":"linear-gradient(90deg,"+hex+"55,"+hex+")",boxShadow:b.on?"0 0 8px "+hex:"none"}}/>
                 </div>
-                <div style={{ fontSize: 9, marginTop: 3, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em" }}>{"MATCH " + LABEL[b.color]}</div>
+                <div className="sg-bldg-sub">{"MATCH "+LABEL[b.color]+" TILES"}</div>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="sg-hint-text">{levelDef.hint}</div>
+      <div className="sg-hint">{levelDef.hint}</div>
 
-      {phase === "win" && (
+      {/* WIN */}
+      {phase==="win"&&(
         <div className="sg-overlay">
           <div className="sg-modal">
-            <div style={{ fontSize: 50 }}>⚡</div>
-            <div className="sg-modal-title" style={{ background: "linear-gradient(90deg,#ffaa00,#00ff88)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>DISTRICT POWERED!</div>
+            <span className="sg-modal-icon">⚡</span>
+            <div className="sg-modal-title" style={{background:"linear-gradient(135deg,#ffaa00,#00ff88)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>DISTRICT POWERED!</div>
             <div className="sg-modal-sub">{levelDef.name}</div>
+            <div style={{fontSize:22,color:"#ffaa00",letterSpacing:"0.12em",margin:"6px 0"}}>{renderStars(stars)}</div>
             <div className="sg-modal-rewards">
-              <div className="sg-reward-chip">{"+" + winCoins} <span style={{ color: "#ffaa00" }}>coins</span></div>
-              <div className="sg-reward-chip">{"+" + winParts} <span style={{ color: "#00e5ff" }}>parts</span></div>
+              <div className="sg-reward-chip">{"+" + winCoins} <span style={{color:"#ffaa00"}}>coins</span></div>
+              <div className="sg-reward-chip">{"+" + winParts} <span style={{color:"#00e5ff"}}>parts</span></div>
             </div>
-            <button className="sg-modal-btn" style={{ background: "linear-gradient(90deg,#00e5ff,#00ff88)" }} onClick={function() { onComplete({ score: score, coins: winCoins, parts: winParts }); }}>COLLECT</button>
+            <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)"}} onClick={function(){ onComplete({score:score,coins:winCoins,parts:winParts,movesLeft:moves}); }}>COLLECT</button>
           </div>
         </div>
       )}
 
-      {phase === "lose" && (
+      {/* LOSE */}
+      {phase==="lose"&&(
         <div className="sg-overlay">
           <div className="sg-modal">
-            <div style={{ fontSize: 50 }}>💀</div>
-            <div className="sg-modal-title" style={{ color: "#ff2d95", textShadow: "0 0 20px #ff2d9555" }}>BLACKOUT</div>
-            <div className="sg-modal-sub">Out of moves</div>
-            <div style={{ display: "flex", gap: 10, marginTop: 18, justifyContent: "center" }}>
-              <button className="sg-modal-btn sg-modal-outline" onClick={onBack}>EXIT</button>
-              <button className="sg-modal-btn" style={{ background: "linear-gradient(90deg,#ff2d95,#ffaa00)" }} onClick={retry}>RETRY</button>
+            <span className="sg-modal-icon">💀</span>
+            <div className="sg-modal-title" style={{color:"#ff2d95",textShadow:"0 0 20px #ff2d9566"}}>BLACKOUT</div>
+            <div className="sg-modal-sub">Out of moves — district stays dark</div>
+            <button onClick={function(){ setShowAd(true); }} style={{display:"block",width:"100%",background:"linear-gradient(135deg,#ff2d95,#ffaa00)",border:"none",borderRadius:12,padding:"13px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",marginTop:16,marginBottom:8}}>WATCH AD · CONTINUE FREE</button>
+            <div className="sg-modal-row">
+              <button className="sg-modal-btn sg-modal-ghost" onClick={onBack}>EXIT</button>
+              <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)"}} onClick={retry}>RETRY</button>
             </div>
           </div>
         </div>
@@ -623,76 +1687,343 @@ function GameBoard(props) {
   );
 }
 
-/* ─── CITY TAB ──────────────────────────────────────────────────── */
-function CityTab(props) {
-  const meta = props.meta, setMeta = props.setMeta;
-  const idle = calcIdle(meta);
 
-  function collect() {
-    setMeta(function(m) { const n = Object.assign({}, m, { coins: m.coins + calcIdle(m), lastCollect: Date.now() }); saveMeta(n); return n; });
-  }
 
-  function buyUpgrade(id, curLvl, cost) {
-    if (meta.coins < cost) return;
-    setMeta(function(m) {
-      const newUpg = Object.assign({}, m.upgrades, { [id]: curLvl + 1 });
-      const n = Object.assign({}, m, { coins: m.coins - cost, upgrades: newUpg });
-      saveMeta(n); return n;
-    });
-  }
+
+/* ─── XP BAR COMPONENT ──────────────────────────────────────────── */
+function XPBar(props) {
+  var xpData = props.xpData;
+  var pct = (xpData.xp / XP_PER_LEVEL) * 100;
+  return (
+    <div className="sg-xp-bar-wrap">
+      <div className="sg-xp-row">
+        <span className="sg-xp-lbl">{"LVL " + xpData.level}</span>
+        <span className="sg-xp-lbl">{xpData.xp + " / " + XP_PER_LEVEL + " XP"}</span>
+      </div>
+      <div className="sg-xp-track">
+        <div className="sg-xp-fill" style={{width: pct + "%"}} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── CITY OVERVIEW ──────────────────────────────────────────────── */
+function CityOverview(props) {
+  var levelsCleared = props.levelsCleared || [];
+  var totalLevels = 50;
+  var totalStars = Object.values(props.stars || {}).reduce(function(a,b){return a+b;},0);
+  var totalPossible = levelsCleared.length * 3;
+
+  var buildings = [
+    {color:"#00e5ff",  h:90, w:18, windows:[3,3,3,3]},
+    {color:"#a855f7",  h:120,w:14, windows:[2,2,2,2,2,2]},
+    {color:"#ffaa00",  h:75, w:22, windows:[4,4,3,3]},
+    {color:"#ff2d95",  h:100,w:16, windows:[3,3,3,3,3]},
+    {color:"#00ff88",  h:55, w:20, windows:[3,3,2]},
+    {color:"#00e5ff",  h:80, w:12, windows:[2,2,2,2]},
+    {color:"#a855f7",  h:110,w:18, windows:[3,3,3,3,3]},
+    {color:"#ffaa00",  h:65, w:14, windows:[2,2,2,2]},
+  ];
+
+  var pctCleared = levelsCleared.length / totalLevels;
+  var litCount = Math.floor(pctCleared * buildings.length);
 
   return (
-    <div className="sg-tab-content">
-      <div className="sg-tab-heading">CITY COMMAND</div>
-      <div className="sg-section-label">DISTRICT MAP</div>
-      <div className="sg-district-grid">
-        {CAMPAIGN_LEVELS.map(function(lvl, i) {
-          const done = (meta.levelsCleared || []).includes(lvl.id);
-          const locked = i > 0 && !(meta.levelsCleared || []).includes(CAMPAIGN_LEVELS[i-1].id);
+    <div className="sg-city-overview">
+      <div className="sg-city-skyline">
+        {buildings.map(function(b, i) {
+          var lit = i < litCount;
           return (
-            <div key={lvl.id} className="sg-district-node" style={{ borderColor: done ? "#00ff88" : (locked ? "rgba(255,255,255,0.05)" : "rgba(0,229,255,0.25)"), background: done ? "rgba(0,255,136,0.07)" : (locked ? "rgba(255,255,255,0.01)" : "rgba(0,229,255,0.04)"), opacity: locked ? 0.5 : 1 }}>
-              <div style={{ fontSize: 24, marginBottom: 4 }}>{done ? "🏙️" : (locked ? "🔒" : "🌑")}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: done ? "#00ff88" : (locked ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.7)") }}>{lvl.name}</div>
-              {done && <div style={{ fontSize: 8, color: "#00ff8866", marginTop: 3 }}>POWERED</div>}
+            <div key={i} className={"sg-city-building" + (lit ? " lit" : "")}
+              style={{height: b.h + "px", width: b.w + "px",
+                background: lit ? b.color + "22" : "rgba(255,255,255,0.04)",
+                borderTop: "2px solid " + (lit ? b.color : "rgba(255,255,255,0.1)"),
+                borderLeft: "1px solid " + (lit ? b.color + "55" : "rgba(255,255,255,0.06)"),
+                borderRight: "1px solid " + (lit ? b.color + "55" : "rgba(255,255,255,0.06)"),
+                boxShadow: lit ? ("0 0 20px " + b.color + "33, 0 -4px 12px " + b.color + "44") : "none",
+              }}>
+              <div className="sg-building-windows" style={{gridTemplateColumns: "repeat(" + b.windows[0] + ", 1fr)", gap: "2px", padding: "4px 3px"}}>
+                {b.windows.reduce(function(a,c){return a+c;},0) > 0 && b.windows.map(function(rowCount, ri) {
+                  return Array.from({length: rowCount}).map(function(_, ci) {
+                    return (
+                      <div key={ri+"-"+ci} className="sg-window" style={{
+                        background: lit ? b.color + "cc" : "rgba(255,255,255,0.06)",
+                        boxShadow: lit ? ("0 0 4px " + b.color) : "none",
+                      }}/>
+                    );
+                  });
+                })}
+              </div>
             </div>
           );
         })}
       </div>
+      <div className="sg-city-label">
+        {levelsCleared.length === 0 ? "CITY IN DARKNESS — RESTORE POWER TO LIGHT IT UP" :
+         levelsCleared.length < 25 ? "PARTIAL RESTORATION — KEEP GOING" :
+         levelsCleared.length < 50 ? "CITY AWAKENING — ALMOST THERE" : "CITY FULLY RESTORED — LEGEND"}
+      </div>
+      <div className="sg-city-stats">
+        <div className="sg-city-stat">
+          <div className="sg-city-stat-val" style={{color:"#00e5ff"}}>{levelsCleared.length}</div>
+          <div className="sg-city-stat-lbl">LEVELS</div>
+        </div>
+        <div className="sg-city-stat">
+          <div className="sg-city-stat-val" style={{color:"#ffaa00"}}>{totalStars}</div>
+          <div className="sg-city-stat-lbl">STARS</div>
+        </div>
+        <div className="sg-city-stat">
+          <div className="sg-city-stat-val" style={{color:"#00ff88"}}>{Math.round(pctCleared*100)+"%"}</div>
+          <div className="sg-city-stat-lbl">RESTORED</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      <div className="sg-section-label" style={{ marginTop: 16 }}>IDLE INCOME</div>
+/* ─── STREAK CALENDAR ────────────────────────────────────────────── */
+function StreakCalendar(props) {
+  var streak = props.streak, setMeta = props.setMeta, meta = props.meta;
+  var today = todayStr();
+  var todayClaimed = streak.claimed && streak.claimed.includes(today);
+
+  function claimToday() {
+    if (todayClaimed) return;
+    var day = streak.count;
+    var reward = getStreakReward(day);
+    var newClaimed = (streak.claimed || []).concat([today]);
+    var newStreak = Object.assign({}, streak, {claimed: newClaimed});
+    saveStreak(newStreak);
+    props.onStreakUpdate(newStreak);
+    if (reward.coins > 0) {
+      setMeta(function(m) { var n = Object.assign({}, m, {coins: m.coins + reward.coins}); saveMeta(n); return n; });
+    }
+    Audio.win();
+  }
+
+  var days = [];
+  for (var i = 1; i <= 7; i++) {
+    var daysClaimed = streak.count >= i;
+    var isToday = streak.count === i || (streak.count === 0 && i === 1);
+    var r = getStreakReward(i);
+    var cls = daysClaimed ? "done" : (isToday ? "today" : "pending");
+    if (i === 7) cls += " milestone";
+    days.push({i: i, cls: cls, reward: r, daysClaimed: daysClaimed});
+  }
+
+  return (
+    <div>
+      <div className="sg-streak-banner">
+        <div>
+          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",letterSpacing:"0.14em",marginBottom:4}}>DAILY STREAK</div>
+          <div style={{display:"flex",alignItems:"baseline",gap:6}}>
+            <div className="sg-streak-val">{streak.count}</div>
+            <div className="sg-streak-lbl">DAYS</div>
+          </div>
+        </div>
+        <div className="sg-streak-fire">🔥</div>
+        {!todayClaimed && streak.count > 0 && (
+          <button onClick={claimToday} style={{background:"linear-gradient(135deg,#ffaa00,#ff7700)",border:"none",borderRadius:10,padding:"10px 14px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em"}}>
+            CLAIM
+          </button>
+        )}
+      </div>
+      <div className="sg-calendar">
+        {days.map(function(d) {
+          return (
+            <div key={d.i} className={"sg-cal-day " + d.cls}>
+              <div className="day-num">{"D"+d.i}</div>
+              <div className="day-ico">{d.reward.icon}</div>
+              <div className="day-val">{d.reward.coins > 0 ? "+"+d.reward.coins : d.reward.label.substring(0,4)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── DAILY CHALLENGES TAB ───────────────────────────────────────── */
+function ChallengesTab(props) {
+  var meta = props.meta, setMeta = props.setMeta;
+  var challengeData = props.challengeData, setChallengeData = props.setChallengeData;
+  var streak = props.streak, onStreakUpdate = props.onStreakUpdate;
+
+  var today = todayStr();
+  var seed = parseInt(today.replace(/-/g,""));
+  var defs = getDailyChallenges(seed);
+  var allDone = challengeData && challengeData.challenges.every(function(c) { return c.done; });
+  var chestReady = allDone && !challengeData.chestClaimed;
+
+  function claimChest() {
+    if (!chestReady) return;
+    var newData = Object.assign({}, challengeData, {chestClaimed: true});
+    saveChallenges(newData); setChallengeData(newData);
+    setMeta(function(m) { var n = Object.assign({}, m, {coins: m.coins + 100, parts: m.parts + 5}); saveMeta(n); return n; });
+    Audio.win();
+  }
+
+  return (
+    <div style={{paddingBottom:16}}>
+      <div className="sg-label" style={{marginTop:8}}>DAILY STREAK</div>
+      <StreakCalendar streak={streak} meta={meta} setMeta={setMeta} onStreakUpdate={onStreakUpdate}/>
+
+      <div className="sg-label" style={{marginTop:14}}>TODAY'S CHALLENGES</div>
+      <div className={"sg-chest-card" + (chestReady ? " unlocked" : "")}>
+        <span className="sg-chest-icon">{challengeData && challengeData.chestClaimed ? "✅" : chestReady ? "🎁" : "📦"}</span>
+        <div className="sg-chest-title" style={{color: chestReady ? "#00ff88" : "rgba(255,255,255,0.7)"}}>
+          {challengeData && challengeData.chestClaimed ? "CHEST CLAIMED" : chestReady ? "CHEST READY!" : "DAILY CHEST"}
+        </div>
+        <div className="sg-chest-sub">Complete all 3 challenges · +100 coins · +5 parts</div>
+        {chestReady && (
+          <button onClick={claimChest} style={{marginTop:12,background:"linear-gradient(135deg,#00ff88,#00e5ff)",border:"none",borderRadius:12,padding:"12px 28px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>
+            OPEN CHEST
+          </button>
+        )}
+      </div>
+
+      {defs.map(function(def, i) {
+        var prog = challengeData ? challengeData.challenges[i] : null;
+        var progVal = prog ? prog.progress : 0;
+        var isDone = prog ? prog.done : false;
+        var pct = Math.min(100, (progVal / def.goal) * 100);
+        return (
+          <div key={def.id} className={"sg-challenge-card" + (isDone ? " complete" : "")}>
+            <div className="sg-challenge-icon">{def.icon}</div>
+            <div className="sg-challenge-info">
+              <div className="sg-challenge-name">{def.name}</div>
+              <div className="sg-challenge-prog">{def.desc + " · " + progVal + "/" + def.goal}</div>
+              <div className="sg-challenge-bar-track">
+                <div className="sg-challenge-bar-fill" style={{width:pct+"%",background:isDone?"#00ff88":"linear-gradient(90deg,#00e5ff,#a855f7)"}}/>
+              </div>
+            </div>
+            <div className="sg-challenge-check">{isDone ? "✅" : "⬜"}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── WEEKLY EVENT TAB ───────────────────────────────────────────── */
+function WeeklyTab(props) {
+  var meta = props.meta, setMeta = props.setMeta, onPlay = props.onPlay;
+  var event = getWeeklyEvent();
+  var weeklyData = loadWeekly();
+  var _timer = React.useState(msToEventEnd());
+  var timer = _timer[0]; var setTimer = _timer[1];
+
+  React.useEffect(function() {
+    var t = setInterval(function() { setTimer(msToEventEnd()); }, 1000);
+    return function() { clearInterval(t); };
+  }, []);
+
+  function fmtEventTimer(ms) {
+    var d = Math.floor(ms / 86400000);
+    var h = Math.floor((ms % 86400000) / 3600000);
+    var m = Math.floor((ms % 3600000) / 60000);
+    var s = Math.floor((ms % 60000) / 1000);
+    if (d > 0) return d + "d " + h + "h " + m + "m";
+    return h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  }
+
+  var eventDef = {
+    id: "event_" + event.id, name: "EVENT: " + event.name,
+    moves: 15, bids: ["apt","factory","lab","power"],
+    hazards: event.id === "void_wave" ? 12 : event.id === "neon_storm" ? 4 : 0,
+    hint: event.desc, isDaily: true,
+    comboMult: event.id === "neon_storm" ? 3 : event.id === "blitz_mode" ? 5 : 1,
+  };
+
+  var lb = MOCK_LEADERBOARD.map(function(r) {
+    if (r.you) return Object.assign({}, r, {score: weeklyData.score || 0});
+    return r;
+  }).sort(function(a,b) { return b.score - a.score; });
+
+  return (
+    <div style={{paddingBottom:16}}>
+      <div className="sg-event-hero" style={{borderColor: event.color + "44", background: "linear-gradient(180deg, " + event.glow + " 0%, rgba(7,7,15,0.95) 100%)"}}>
+        <div className="sg-event-banner">
+          <span className="sg-event-icon">{event.icon}</span>
+          <div className="sg-event-title" style={{color: event.color, textShadow: "0 0 16px " + event.color + "66"}}>{event.name}</div>
+          <div className="sg-event-timer-label">ENDS IN</div>
+          <div className="sg-event-timer" style={{color: event.color}}>{fmtEventTimer(timer)}</div>
+          <div className="sg-event-desc">{event.desc}</div>
+          <div className="sg-event-modifiers">
+            {event.modifiers.map(function(m, i) {
+              return <span key={i} className="sg-event-mod" style={{borderColor: event.color + "44", color: event.color}}>{m}</span>;
+            })}
+          </div>
+          <button onClick={function() { onPlay(eventDef, function(){}); }}
+            style={{background:"linear-gradient(135deg,"+event.color+","+event.color+"99)",border:"none",borderRadius:14,padding:"14px 32px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>
+            ENTER EVENT
+          </button>
+        </div>
+        <div className="sg-leaderboard">
+          <div style={{fontSize:9,letterSpacing:"0.2em",color:"rgba(255,255,255,0.25)",marginBottom:8}}>LEADERBOARD — THIS WEEK</div>
+          {lb.slice(0,7).map(function(row, i) {
+            var rankColor = i===0?"#ffaa00":i===1?"rgba(255,255,255,0.6)":i===2?"#ff7700":"rgba(255,255,255,0.3)";
+            var medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
+            return (
+              <div key={i} className={"sg-lb-row" + (row.you ? " you" : "")}>
+                <div className="sg-lb-rank" style={{color:rankColor}}>{medal||("#"+(i+1))}</div>
+                <div className="sg-lb-name">{row.name}{row.you?" (You)":""}</div>
+                <div className="sg-lb-score">{row.score.toLocaleString()}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── UPDATED CITY TAB (with City Overview + Streak) ────────────── */
+
+/* ─── CITY TAB ──────────────────────────────────────────────────── */
+function CityTab(props) {
+  var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData;
+  var idle=calcIdle(meta);
+  function collect(){ setMeta(function(m){ var n=Object.assign({},m,{coins:m.coins+calcIdle(m),lastCollect:Date.now()}); saveMeta(n); return n; }); }
+  function buyUpgrade(id,cur,cost){
+    if(meta.coins<cost) return;
+    setMeta(function(m){ var newUpg=Object.assign({},m.upgrades,{[id]:cur+1}); var n=Object.assign({},m,{coins:m.coins-cost,upgrades:newUpg}); saveMeta(n); return n; });
+  }
+  return (
+    <div style={{paddingBottom:16}}>
+      <div className="sg-label" style={{marginTop:8}}>CITY RESTORATION</div>
+      <CityOverview levelsCleared={meta.levelsCleared||[]} stars={meta.stars||{}}/>
+
+      <div className="sg-label">IDLE INCOME</div>
       <div className="sg-idle-card">
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.65)" }}>Accumulated</div>
-          <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 22, color: "#ffaa00", marginTop: 4 }}>{idle}<span style={{ fontSize: 12, color: "rgba(255,255,255,0.28)", marginLeft: 6 }}>coins</span></div>
-          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.22)", marginTop: 3 }}>{(meta.upgrades && meta.upgrades.idleBoost) ? "Collecting since last visit" : "Upgrade Idle Generator to earn"}</div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>Accumulated</div>
+          <div className="sg-idle-amt">{idle}<span style={{fontSize:12,color:"rgba(255,255,255,0.28)",marginLeft:6}}>coins</span></div>
+          <div className="sg-idle-note">{(meta.upgrades&&meta.upgrades.idleBoost)?"Earning while you play":"Upgrade Idle Generator to earn"}</div>
         </div>
-        <button className="sg-collect-btn" onClick={collect} disabled={idle === 0} style={{ opacity: idle === 0 ? 0.35 : 1 }}>COLLECT</button>
+        <button className="sg-collect-btn" onClick={collect} disabled={idle===0} style={{opacity:idle===0?0.3:1}}>COLLECT</button>
       </div>
 
-      <div className="sg-wallet-row" style={{ margin: "8px 0" }}>
-        <div className="sg-wallet-chip"><span style={{ color: "#ffaa00" }}>Coins</span> {meta.coins}</div>
-        <div className="sg-wallet-chip"><span style={{ color: "#00e5ff" }}>Parts</span> {meta.parts}</div>
+      <div className="sg-meta-chips">
+        <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#ffaa00"}}>{meta.coins}</div><div className="sg-meta-chip-lbl">COINS</div></div>
+        <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#00e5ff"}}>{meta.parts}</div><div className="sg-meta-chip-lbl">PARTS</div></div>
+        <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#a855f7"}}>{xpData?xpData.level:1}</div><div className="sg-meta-chip-lbl">PLAYER LVL</div></div>
+        <div className="sg-meta-chip"><div className="sg-meta-chip-val" style={{color:"#00ff88"}}>{(meta.levelsCleared||[]).length+"/50"}</div><div className="sg-meta-chip-lbl">LEVELS</div></div>
       </div>
 
-      <div className="sg-section-label" style={{ marginTop: 14 }}>UPGRADES</div>
+      <div className="sg-label" style={{marginTop:14}}>UPGRADES</div>
       <div className="sg-upg-grid">
-        {UPGRADE_DEFS.map(function(upg) {
-          const cur = (meta.upgrades && meta.upgrades[upg.id]) ? meta.upgrades[upg.id] : 0;
-          const maxed = cur >= upg.cost.length;
-          const cost = maxed ? 0 : upg.cost[cur];
-          const can = !maxed && meta.coins >= cost;
+        {UPGRADE_DEFS.map(function(upg){
+          var cur=(meta.upgrades&&meta.upgrades[upg.id])?meta.upgrades[upg.id]:0;
+          var maxed=cur>=upg.cost.length, cost=maxed?0:upg.cost[cur];
+          var can=!maxed&&meta.coins>=cost;
           return (
             <div key={upg.id} className="sg-upg-card">
-              <div style={{ fontSize: 20, marginBottom: 5 }}>{upg.icon}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.85)", marginBottom: 3 }}>{upg.label}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.32)", marginBottom: 8, lineHeight: 1.4 }}>{upg.desc}</div>
-              <div className="sg-pips">
-                {upg.cost.map(function(_, i) { return <div key={i} className="sg-pip" style={{ background: i < cur ? "#00e5ff" : "rgba(255,255,255,0.1)" }} />; })}
-              </div>
-              {maxed
-                ? <div style={{ fontSize: 8, color: "#00ff88", letterSpacing: "0.12em", marginTop: 6 }}>MAX</div>
-                : <button className="sg-upg-btn" disabled={!can} style={{ opacity: can ? 1 : 0.35 }} onClick={function() { buyUpgrade(upg.id, cur, cost); }}>{cost} coins</button>
-              }
+              <div className="sg-upg-icon">{upg.icon}</div>
+              <div className="sg-upg-name">{upg.label}</div>
+              <div className="sg-upg-desc">{upg.desc}</div>
+              <div className="sg-upg-pips">{upg.cost.map(function(_,i){ return <div key={i} className="sg-pip" style={{background:i<cur?"#00e5ff":"rgba(255,255,255,0.1)"}}/>; })}</div>
+              {maxed?<div className="sg-upg-max">MAX</div>:<button className="sg-upg-cost-btn" disabled={!can} style={{opacity:can?1:0.35}} onClick={function(){ buyUpgrade(upg.id,cur,cost); }}>{cost} coins</button>}
             </div>
           );
         })}
@@ -703,59 +2034,39 @@ function CityTab(props) {
 
 /* ─── DAILY TAB ─────────────────────────────────────────────────── */
 function DailyTab(props) {
-  const meta = props.meta, setMeta = props.setMeta, onPlay = props.onPlay;
-  const seed = todaySeed();
-  const today = String(seed);
-  const played = meta.dailyDate === today;
-
-  const dailyDef = {
-    id: "daily", name: "DAILY POWER CRISIS", moves: 18,
-    bids: ["apt","factory","lab","power"], hazards: 3, rngSeed: seed, isDaily: true,
-    hint: "Same board for everyone today — score big, use fewer moves!",
-  };
-
-  function handleComplete(rewards) {
-    setMeta(function(m) {
-      const n = Object.assign({}, m, { dailyDate: today, dailyScore: rewards.score, coins: m.coins + rewards.coins + 20, parts: m.parts + rewards.parts + 2 });
-      saveMeta(n); return n;
-    });
-  }
-
+  const meta=props.meta, setMeta=props.setMeta, onPlay=props.onPlay;
+  const seed=todaySeed(), today=String(seed), played=meta.dailyDate===today;
+  const dailyDef={id:"daily",name:"DAILY POWER CRISIS",moves:16,bids:["apt","factory","lab","power"],hazards:5,rngSeed:seed,isDaily:true,hint:"Same board for everyone today — fewest moves wins!"};
+  function handleComplete(r){ setMeta(function(m){ const n=Object.assign({},m,{dailyDate:today,dailyScore:r.score,coins:m.coins+r.coins+20,parts:m.parts+r.parts+2}); saveMeta(n); return n; }); }
   return (
-    <div className="sg-tab-content">
-      <div className="sg-tab-heading">DAILY CHALLENGE</div>
-      <div className="sg-daily-card">
-        <div style={{ fontSize: 44, marginBottom: 8 }}>🌆</div>
-        <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 6 }}>{"CRISIS #" + (seed % 1000)}</div>
-        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", marginBottom: 14, lineHeight: 1.5 }}>Same board for everyone today. Score big and use fewer moves to climb the board.</div>
-        <div className="sg-spec-row">
-          <div className="sg-spec-box"><span style={{ color: "#00e5ff", display: "block", fontSize: 8, letterSpacing: "0.14em", marginBottom: 3 }}>MOVES</span>{dailyDef.moves}</div>
-          <div className="sg-spec-box"><span style={{ color: "#ff2d95", display: "block", fontSize: 8, letterSpacing: "0.14em", marginBottom: 3 }}>HAZARDS</span>{dailyDef.hazards}</div>
-          <div className="sg-spec-box"><span style={{ color: "#ffaa00", display: "block", fontSize: 8, letterSpacing: "0.14em", marginBottom: 3 }}>BUILDINGS</span>{dailyDef.bids.length}</div>
+    <div style={{paddingBottom:16}}>
+      <div className="sg-daily-hero">
+        <span className="sg-daily-city">🌆</span>
+        <div className="sg-daily-num">{"CRISIS #"+(seed%1000)}</div>
+        <div className="sg-daily-desc">Same broken district for everyone today. Score big and use fewer moves to rank higher.</div>
+        <div className="sg-daily-specs">
+          <div className="sg-spec"><div className="sg-spec-val">{dailyDef.moves}</div><div className="sg-spec-lbl" style={{color:"#00e5ff"}}>MOVES</div></div>
+          <div className="sg-spec"><div className="sg-spec-val">{dailyDef.hazards}</div><div className="sg-spec-lbl" style={{color:"#ff2d95"}}>HAZARDS</div></div>
+          <div className="sg-spec"><div className="sg-spec-val">{dailyDef.bids.length}</div><div className="sg-spec-lbl" style={{color:"#ffaa00"}}>BUILDINGS</div></div>
         </div>
-        {played
-          ? (
-            <div className="sg-daily-done">
-              <div style={{ fontSize: 26, marginBottom: 4 }}>✅</div>
-              <div style={{ fontSize: 12, color: "#00ff88", fontWeight: 600 }}>Complete!</div>
-              <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 20, color: "#ffaa00", margin: "6px 0 4px" }}>{(meta.dailyScore || 0).toLocaleString()}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.28)" }}>New board tomorrow</div>
-            </div>
-          )
-          : (
-            <button className="sg-modal-btn" style={{ background: "linear-gradient(90deg,#ff2d95,#ffaa00)", marginTop: 4 }} onClick={function() { onPlay(dailyDef, handleComplete); }}>
-              PLAY TODAY
-            </button>
-          )
-        }
+        {played?(
+          <div className="sg-daily-done">
+            <div style={{fontSize:28,marginBottom:4}}>✅</div>
+            <div style={{fontSize:13,color:"#00ff88",fontWeight:700}}>Challenge Complete!</div>
+            <div className="sg-daily-score">{(meta.dailyScore||0).toLocaleString()}</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.3)"}}>New board tomorrow</div>
+          </div>
+        ):(
+          <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)",marginTop:4}} onClick={function(){ onPlay(dailyDef,handleComplete); }}>PLAY TODAY</button>
+        )}
       </div>
-      <div className="sg-section-label" style={{ marginTop: 14 }}>BONUS ON COMPLETE</div>
-      <div style={{ display: "flex", gap: 8 }}>
-        {[{ icon: "⬡", val: "+20 coins", col: "#ffaa00" }, { icon: "◈", val: "+2 parts", col: "#00e5ff" }, { icon: "⭐", val: "District Star", col: "#00ff88" }].map(function(r, i) {
+      <div className="sg-label">COMPLETION BONUS</div>
+      <div className="sg-bonus-row">
+        {[{icon:"⬡",val:"+20 coins",col:"#ffaa00"},{icon:"◈",val:"+2 parts",col:"#00e5ff"},{icon:"⭐",val:"District Star",col:"#00ff88"}].map(function(r,i){
           return (
-            <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "10px 6px", textAlign: "center" }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}>{r.icon}</div>
-              <div style={{ fontSize: 9, color: r.col }}>{r.val}</div>
+            <div key={i} className="sg-bonus-card">
+              <div className="sg-bonus-icon">{r.icon}</div>
+              <div className="sg-bonus-val" style={{color:r.col}}>{r.val}</div>
             </div>
           );
         })}
@@ -764,89 +2075,59 @@ function DailyTab(props) {
   );
 }
 
+
 /* ─── EDITOR TAB ────────────────────────────────────────────────── */
 function EditorTab(props) {
-  const meta = props.meta, setMeta = props.setMeta, onPlay = props.onPlay;
-  const [brushColor, setBrushColor] = useState("cyan");
-  const [brushMode, setBrushMode] = useState("color");
-  const [board, setBoard] = useState(function() { return makeGrid(); });
-  const [levelName, setLevelName] = useState("MY LEVEL");
-  const [levelMoves, setLevelMoves] = useState(20);
-  const [levelBids, setLevelBids] = useState(["apt", "factory"]);
-  const [saved, setSaved] = useState(false);
+  const meta=props.meta, setMeta=props.setMeta, onPlay=props.onPlay;
+  const [brushColor,setBrushColor]=useState("cyan");
+  const [brushMode,setBrushMode]=useState("color");
+  const [board,setBoard]=useState(function(){ return makeGrid(); });
+  const [levelName,setLevelName]=useState("MY LEVEL");
+  const [levelMoves,setLevelMoves]=useState(20);
+  const [levelBids,setLevelBids]=useState(["apt","factory"]);
+  const [saved,setSaved]=useState(false);
 
-  function paint(r, c) {
-    setBoard(function(prev) {
-      const g = prev.map(function(row) { return row.slice(); });
-      if (brushMode === "corrupt") {
-        g[r][c] = Object.assign({}, g[r][c], { corrupted: true });
-      } else if (brushMode === "erase") {
-        g[r][c] = Object.assign({}, g[r][c], { corrupted: false });
-      } else {
-        g[r][c] = Object.assign({}, g[r][c], { color: brushColor, corrupted: false });
-      }
+  function paint(r,c){
+    setBoard(function(prev){
+      const g=prev.map(function(row){ return row.slice(); });
+      if(brushMode==="corrupt") g[r][c]=Object.assign({},g[r][c],{corrupted:true});
+      else if(brushMode==="erase") g[r][c]=Object.assign({},g[r][c],{corrupted:false});
+      else g[r][c]=Object.assign({},g[r][c],{color:brushColor,corrupted:false});
       return g;
     });
   }
-
-  function buildTestDef() {
-    return {
-      id: "test", name: levelName || "MY LEVEL", moves: levelMoves, hazards: 0,
-      bids: levelBids.length > 0 ? levelBids : ["apt"],
-      boardData: board.map(function(row) { return row.map(function(t) { return Object.assign({}, t); }); }),
-      hint: "Your custom level!",
-    };
+  function buildTestDef(){
+    return {id:"test",name:levelName||"MY LEVEL",moves:levelMoves,hazards:0,bids:levelBids.length>0?levelBids:["apt"],boardData:board.map(function(row){ return row.map(function(t){ return Object.assign({},t); }); }),hint:"Your custom level!"};
   }
-
-  function saveLevel() {
-    const lvl = Object.assign({}, buildTestDef(), { id: "custom_" + Date.now(), isCustom: true });
-    setMeta(function(m) { const n = Object.assign({}, m, { customLevels: (m.customLevels || []).concat([lvl]) }); saveMeta(n); return n; });
-    setSaved(true); setTimeout(function() { setSaved(false); }, 2000);
+  function saveLevel(){
+    const lvl=Object.assign({},buildTestDef(),{id:"custom_"+Date.now(),isCustom:true});
+    setMeta(function(m){ const n=Object.assign({},m,{customLevels:(m.customLevels||[]).concat([lvl])}); saveMeta(n); return n; });
+    setSaved(true); setTimeout(function(){ setSaved(false); },2000);
   }
-
-  const SZ = 44;
 
   return (
-    <div className="sg-tab-content">
-      <div className="sg-tab-heading">LEVEL EDITOR</div>
-      <div className="sg-section-label">PAINT BRUSH</div>
-      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
-        {COLORS.map(function(col) {
-          const active = brushMode === "color" && brushColor === col;
-          return (
-            <button key={col} className="sg-brush-btn"
-              style={{ background: active ? HEX[col] : HEX[col]+"25", borderColor: HEX[col], color: active ? "#06060f" : HEX[col] }}
-              onClick={function() { setBrushColor(col); setBrushMode("color"); }}>
-              {LABEL[col]}
-            </button>
-          );
+    <div style={{paddingBottom:16}}>
+      <div className="sg-label" style={{marginTop:8}}>PAINT BRUSH</div>
+      <div className="sg-brush-row">
+        {COLORS.map(function(col){
+          const active=brushMode==="color"&&brushColor===col;
+          return <button key={col} className="sg-brush" style={{background:active?HEX[col]:HEX[col]+"20",borderColor:HEX[col],color:active?"#06060f":HEX[col]}} onClick={function(){ setBrushColor(col); setBrushMode("color"); }}>{LABEL[col]}</button>;
         })}
-        <button className="sg-brush-btn"
-          style={{ background: brushMode === "corrupt" ? "rgba(160,0,240,0.3)" : "rgba(160,0,240,0.1)", borderColor: "#cc44ff", color: brushMode === "corrupt" ? "#fff" : "#cc44ff" }}
-          onClick={function() { setBrushMode("corrupt"); }}>
-          CORRUPT
-        </button>
-        <button className="sg-brush-btn"
-          style={{ background: brushMode === "erase" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.7)" }}
-          onClick={function() { setBrushMode("erase"); }}>
-          CLEAR
-        </button>
+        <button className="sg-brush" style={{background:brushMode==="corrupt"?"rgba(160,0,240,0.3)":"rgba(160,0,240,0.08)",borderColor:"#cc44ff",color:brushMode==="corrupt"?"#fff":"#cc44ff"}} onClick={function(){ setBrushMode("corrupt"); }}>ROT</button>
+        <button className="sg-brush" style={{background:brushMode==="erase"?"rgba(255,255,255,0.18)":"rgba(255,255,255,0.05)",borderColor:"rgba(255,255,255,0.3)",color:"rgba(255,255,255,0.7)"}} onClick={function(){ setBrushMode("erase"); }}>CLR</button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center", marginBottom: 12 }}>
-        {board.map(function(row, r) {
+      <div className="sg-edit-grid">
+        {board.map(function(row,r){
           return (
-            <div key={r} style={{ display: "flex", gap: 3 }}>
-              {row.map(function(tile, c) {
-                const isCr = tile && tile.corrupted;
-                const hex = isCr ? null : (tile && tile.color ? HEX[tile.color] : null);
+            <div key={r} className="sg-edit-row">
+              {row.map(function(tile,c){
+                const isCr=tile&&tile.corrupted, hex=isCr?null:(tile&&tile.color?HEX[tile.color]:null);
                 return (
-                  <div key={tile ? tile.id : (r+"-"+c)} onClick={function() { paint(r, c); }}
-                    style={{ width: SZ, height: SZ, borderRadius: 8, cursor: "pointer", border: "2px solid " + (isCr ? "rgba(160,0,240,0.5)" : (hex ? hex+"77" : "rgba(255,255,255,0.1)")), background: isCr ? "rgba(38,0,55,0.9)" : (hex ? hex+"2e" : "rgba(255,255,255,0.04)"), display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.1s" }}>
-                    {isCr
-                      ? <span style={{ fontSize: 16 }}>☠</span>
-                      : <div style={{ width: 18, height: 18, borderRadius: 3, transform: "rotate(45deg)", background: hex || "transparent" }} />
-                    }
+                  <div key={tile?tile.id:(r+"-"+c)} className="sg-edit-tile"
+                    style={{borderColor:isCr?"rgba(160,0,240,0.5)":(hex?hex+"77":"rgba(255,255,255,0.1)"),background:isCr?"rgba(38,0,55,0.9)":(hex?hex+"2a":"rgba(255,255,255,0.04)")}}
+                    onClick={function(){ paint(r,c); }}>
+                    {isCr?<span style={{fontSize:16}}>☠</span>:<div style={{width:18,height:18,borderRadius:3,transform:"rotate(45deg)",background:hex||"transparent"}}/>}
                   </div>
                 );
               })}
@@ -855,55 +2136,46 @@ function EditorTab(props) {
         })}
       </div>
 
-      <div className="sg-section-label">SETTINGS</div>
+      <div className="sg-label">LEVEL SETTINGS</div>
       <div className="sg-editor-panel">
-        <div className="sg-setting-row">
-          <label>Name</label>
-          <input className="sg-input" value={levelName} onChange={function(e) { setLevelName(e.target.value); }} maxLength={24} />
-        </div>
-        <div className="sg-setting-row">
+        <div className="sg-srow"><label>Name</label><input className="sg-input" value={levelName} onChange={function(e){ setLevelName(e.target.value); }} maxLength={24}/></div>
+        <div className="sg-srow">
           <label>Moves</label>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button className="sg-pill-btn" onClick={function() { setLevelMoves(function(m) { return Math.max(10, m - 2); }); }}>−</button>
-            <span style={{ fontFamily: "'Orbitron',monospace", fontSize: 16, color: "#00e5ff", minWidth: 32, textAlign: "center" }}>{levelMoves}</span>
-            <button className="sg-pill-btn" onClick={function() { setLevelMoves(function(m) { return Math.min(40, m + 2); }); }}>+</button>
+          <div className="sg-step-btns">
+            <button className="sg-step" onClick={function(){ setLevelMoves(function(m){ return Math.max(10,m-2); }); }}>−</button>
+            <span className="sg-step-val">{levelMoves}</span>
+            <button className="sg-step" onClick={function(){ setLevelMoves(function(m){ return Math.min(40,m+2); }); }}>+</button>
           </div>
         </div>
-        <div className="sg-setting-row" style={{ alignItems: "flex-start" }}>
+        <div className="sg-srow" style={{alignItems:"flex-start"}}>
           <label>Buildings</label>
-          <div style={{ display: "flex", gap: 5, flexWrap: "wrap", flex: 1 }}>
-            {BLDG_DEFS.map(function(b) {
-              const on = levelBids.includes(b.id);
-              return (
-                <button key={b.id}
-                  style={{ fontSize: 10, padding: "4px 8px", borderRadius: 6, border: "1px solid " + (on ? HEX[b.color] : "rgba(255,255,255,0.13)"), background: on ? HEX[b.color]+"22" : "rgba(255,255,255,0.04)", color: on ? HEX[b.color] : "rgba(255,255,255,0.38)", cursor: "pointer" }}
-                  onClick={function() { setLevelBids(function(prev) { return on ? prev.filter(function(x) { return x !== b.id; }) : prev.concat([b.id]); }); }}>
-                  {b.icon} {b.label}
-                </button>
-              );
+          <div className="sg-bld-chips">
+            {BLDG_DEFS.map(function(b){
+              const on=levelBids.includes(b.id);
+              return <button key={b.id} className="sg-bld-chip" style={{borderColor:on?HEX[b.color]:"rgba(255,255,255,0.13)",background:on?HEX[b.color]+"22":"rgba(255,255,255,0.04)",color:on?HEX[b.color]:"rgba(255,255,255,0.38)"}} onClick={function(){ setLevelBids(function(prev){ return on?prev.filter(function(x){ return x!==b.id; }):prev.concat([b.id]); }); }}>{b.icon+" "+b.label}</button>;
             })}
           </div>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button className="sg-pill-btn" style={{ flex: 1 }} onClick={function() { setBoard(makeGrid()); }}>RESET</button>
-        <button className="sg-pill-btn" style={{ flex: 1, borderColor: "#ffaa00", color: "#ffaa00" }} onClick={function() { onPlay(buildTestDef(), function() {}); }}>TEST</button>
-        <button className="sg-pill-btn" style={{ flex: 1, borderColor: saved ? "#00ff88" : "#00e5ff", color: saved ? "#00ff88" : "#00e5ff", background: saved ? "rgba(0,255,136,0.1)" : "rgba(0,229,255,0.08)" }} onClick={saveLevel}>{saved ? "SAVED" : "SAVE"}</button>
+      <div className="sg-action-row">
+        <button className="sg-action-btn" onClick={function(){ setBoard(makeGrid()); }}>🔄 RESET</button>
+        <button className="sg-action-btn" style={{borderColor:"#ffaa00",color:"#ffaa00"}} onClick={function(){ onPlay(buildTestDef(),function(){}); }}>▶ TEST</button>
+        <button className="sg-action-btn" style={{borderColor:saved?"#00ff88":"#00e5ff",color:saved?"#00ff88":"#00e5ff",background:saved?"rgba(0,255,136,0.08)":"rgba(0,229,255,0.06)"}} onClick={saveLevel}>{saved?"✓ SAVED":"💾 SAVE"}</button>
       </div>
 
-      {(meta.customLevels || []).length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <div className="sg-section-label">SAVED LEVELS</div>
-          {(meta.customLevels || []).map(function(lvl, i) {
+      {(meta.customLevels||[]).length>0&&(
+        <div style={{marginTop:14}}>
+          <div className="sg-label">SAVED LEVELS</div>
+          {(meta.customLevels||[]).map(function(lvl,i){
             return (
-              <div key={lvl.id} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "10px 12px", marginBottom: 6 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{lvl.name}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.28)" }}>{lvl.moves} moves</div>
+              <div key={lvl.id} className="sg-saved-level">
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:700,color:"rgba(255,255,255,0.8)"}}>{lvl.name}</div>
+                  <div style={{fontSize:10,color:"rgba(255,255,255,0.28)"}}>{lvl.moves+" moves"}</div>
                 </div>
-                <button className="sg-pill-btn" style={{ fontSize: 10 }} onClick={function() { onPlay(lvl, function() {}); }}>PLAY</button>
-                <button className="sg-pill-btn" style={{ fontSize: 10, borderColor: "#ff2d95", color: "#ff2d95" }} onClick={function() { setMeta(function(m) { const n = Object.assign({}, m, { customLevels: m.customLevels.filter(function(_, j) { return j !== i; }) }); saveMeta(n); return n; }); }}>X</button>
+                <button className="sg-pill" style={{fontSize:10}} onClick={function(){ onPlay(lvl,function(){}); }}>PLAY</button>
+                <button className="sg-pill" style={{fontSize:10,borderColor:"#ff2d95",color:"#ff2d95"}} onClick={function(){ setMeta(function(m){ const n=Object.assign({},m,{customLevels:m.customLevels.filter(function(_,j){ return j!==i; })}); saveMeta(n); return n; }); }}>✕</button>
               </div>
             );
           })}
@@ -913,43 +2185,68 @@ function EditorTab(props) {
   );
 }
 
+
+
 /* ─── CAMPAIGN TAB ──────────────────────────────────────────────── */
 function CampaignTab(props) {
-  const meta = props.meta, onPlay = props.onPlay;
+  var meta=props.meta, onPlay=props.onPlay;
+  var cleared=meta.levelsCleared||[];
+  var starsMap=meta.stars||{};
   return (
-    <div className="sg-tab-content">
-      <div className="sg-tab-heading">CAMPAIGN</div>
-      <div className="sg-section-label">{(meta.levelsCleared || []).length + "/" + CAMPAIGN_LEVELS.length + " DISTRICTS POWERED"}</div>
-      {CAMPAIGN_LEVELS.map(function(lvl, i) {
-        const done = (meta.levelsCleared || []).includes(lvl.id);
-        const locked = i > 0 && !(meta.levelsCleared || []).includes(CAMPAIGN_LEVELS[i-1].id);
+    <div style={{paddingBottom:20}}>
+      <div className="sg-label" style={{marginTop:8}}>{cleared.length+"/50 LEVELS CLEARED"}</div>
+      {DISTRICTS.map(function(dist){
+        var distCleared=dist.ids.filter(function(id){ return cleared.includes(id); }).length;
+        var distDone=distCleared===10;
+        var distLocked=dist.ids[0]>0&&!cleared.includes(dist.ids[0]-1)&&distCleared===0;
         return (
-          <div key={lvl.id} className="sg-campaign-card" style={{ borderColor: done ? "#00ff8855" : (locked ? "rgba(255,255,255,0.04)" : "rgba(0,229,255,0.22)"), background: done ? "rgba(0,255,136,0.05)" : (locked ? "rgba(255,255,255,0.01)" : "rgba(0,229,255,0.03)"), opacity: locked ? 0.45 : 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ fontSize: 28 }}>{done ? "🏙️" : (locked ? "🔒" : "🌑")}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: done ? "#00ff88" : (locked ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.85)"), marginBottom: 3 }}>{"0" + (i+1) + " · " + lvl.name}</div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.33)" }}>{lvl.moves + " moves"}</span>
-                  {lvl.hazards > 0 && <span style={{ fontSize: 10, color: "#ff2d9577" }}>{"☠ " + lvl.hazards}</span>}
-                </div>
+          <div key={dist.num} style={{marginBottom:18,opacity:distLocked?0.35:1}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:3,height:18,borderRadius:2,background:distDone?dist.theme:distLocked?"rgba(255,255,255,0.1)":dist.theme+"55"}}/>
+                <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:11,letterSpacing:"0.13em",color:distDone?dist.theme:"rgba(255,255,255,0.42)"}}>{dist.num}</span>
+                <span style={{fontSize:11,color:"rgba(255,255,255,0.22)"}}>{dist.label}</span>
               </div>
-              {!locked && (
-                <button className="sg-modal-btn"
-                  style={{ background: done ? "rgba(0,255,136,0.18)" : "linear-gradient(90deg,#00e5ff,#00ff88)", color: done ? "#00ff88" : "#06060f", border: done ? "1px solid #00ff8844" : "none", fontSize: 10, padding: "8px 14px" }}
-                  onClick={function() { onPlay(lvl, null); }}>
-                  {done ? "REPLAY" : "PLAY"}
-                </button>
-              )}
+              <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:distDone?dist.theme:"rgba(255,255,255,0.25)"}}>{distCleared+"/10"+(distDone?" ✓":"")}</span>
             </div>
-            {!locked && (
-              <div style={{ marginTop: 8, display: "flex", gap: 4, flexWrap: "wrap" }}>
-                {lvl.bids.map(function(bid) {
-                  const b = BLDG_DEFS.find(function(x) { return x.id === bid; });
-                  return <span key={bid} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 4, background: HEX[b.color]+"20", color: HEX[b.color], border: "1px solid " + HEX[b.color]+"40" }}>{b.icon + " " + b.label}</span>;
-                })}
-              </div>
-            )}
+            <div className="dist-bar">
+              <div className="dist-bar-fill" style={{width:(distCleared/10*100)+"%",background:dist.theme,boxShadow:"0 0 6px "+dist.theme}}/>
+            </div>
+            {dist.ids.map(function(id){
+              var lvl=CAMPAIGN_LEVELS[id];
+              var done=cleared.includes(id);
+              var unlocked=id===0||cleared.includes(id-1)||done;
+              var locked=!unlocked;
+              var lvlStars=starsMap[id]||0;
+              return (
+                <div key={id} className={"sg-campaign-card"+(unlocked?" playable":"")}
+                  style={{borderColor:lvl.boss?(done?"rgba(255,170,0,0.55)":"rgba(255,170,0,0.22)"):(done?dist.theme+"44":locked?"rgba(255,255,255,0.04)":dist.theme+"20"),background:lvl.boss?(done?"rgba(255,170,0,0.08)":"rgba(255,170,0,0.03)"):(done?dist.theme+"06":locked?"rgba(255,255,255,0.01)":dist.theme+"03"),opacity:locked?0.28:1,marginBottom:4}}
+                  onClick={function(){ if(unlocked) onPlay(lvl,null); }}>
+                  <div className="sg-camp-row">
+                    <div className="sg-camp-emoji" style={{fontSize:18}}>{done?(lvl.boss?"👑":"✅"):locked?"🔒":"▶"}</div>
+                    <div className="sg-camp-info">
+                      <div className="sg-camp-num">{"LVL "+(id+1)}</div>
+                      <div className="sg-camp-name" style={{color:lvl.boss?(done?"#ffaa00":"rgba(255,170,0,0.75)"):(done?dist.theme:locked?"rgba(255,255,255,0.18)":"rgba(255,255,255,0.88)"),fontSize:12}}>
+                        {lvl.name}
+                        {lvl.boss&&<span className="sg-boss-badge">BOSS</span>}
+                      </div>
+                      <div className="sg-camp-meta">
+                        <span className="sg-camp-tag">{lvl.moves+" moves"}</span>
+                        {lvl.hazards>0&&<span className="sg-camp-tag" style={{color:"#ff2d9566"}}>{"☠ "+lvl.hazards}</span>}
+                        {done&&<span className="sg-stars" style={{marginLeft:4}}>{renderStars(lvlStars)}</span>}
+                      </div>
+                    </div>
+                    {unlocked&&(
+                      <button className="sg-play-btn"
+                        style={{background:done?(lvl.boss?"rgba(255,170,0,0.14)":"rgba(255,255,255,0.07)"):"linear-gradient(135deg,"+dist.theme+"bb,"+dist.theme+"77)",color:done?(lvl.boss?"#ffaa00":"rgba(255,255,255,0.55)"):"#06060f",border:done?"1px solid rgba(255,255,255,0.1)":"none",fontSize:9,padding:"7px 11px"}}
+                        onClick={function(e){ e.stopPropagation(); onPlay(lvl,null); }}>
+                        {done?"REPLAY":"PLAY"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         );
       })}
@@ -957,63 +2254,175 @@ function CampaignTab(props) {
   );
 }
 
+
 /* ─── ROOT APP ──────────────────────────────────────────────────── */
 function Shiftgrid() {
-  const [meta, setMeta] = useState(loadMeta);
-  const [tab, setTab] = useState("campaign");
-  const [playing, setPlaying] = useState(null);
+  var _m=React.useState(loadMeta); var meta=_m[0]; var setMeta=_m[1];
+  var _t=React.useState("campaign"); var tab=_t[0]; var setTab=_t[1];
+  var _p=React.useState(null); var playing=_p[0]; var setPlaying=_p[1];
+  var _l=React.useState(loadLives); var lives=_l[0]; var setLives=_l[1];
+  var _st=React.useState(false); var showTuto=_st[0]; var setShowTuto=_st[1];
+  var _ts=React.useState(0); var tutoStep=_ts[0]; var setTutoStep=_ts[1];
+  var _pl=React.useState(null); var pendingLevel=_pl[0]; var setPendingLevel=_pl[1];
+  var _sp=React.useState(false); var showStarterPack=_sp[0]; var setShowStarterPack=_sp[1];
+  var _lg=React.useState(false); var livesGate=_lg[0]; var setLivesGate=_lg[1];
+  var _xp=React.useState(loadXP); var xpData=_xp[0]; var setXpData=_xp[1];
+  var _sk=React.useState(function(){ return checkAndUpdateStreak(loadStreak()); });
+  var streak=_sk[0]; var setStreak=_sk[1];
+  var _cd=React.useState(function(){ return loadChallenges()||initChallenges(); });
+  var challengeData=_cd[0]; var setChallengeData=_cd[1];
+  var _su=React.useState(false); var showXPUp=_su[0]; var setShowXPUp=_su[1];
 
-  function handlePlay(levelDef, cb) { setPlaying({ levelDef: levelDef, cb: cb || function() {} }); }
+  React.useEffect(function(){
+    var t=setInterval(function(){ setLives(loadLives()); },30000);
+    return function(){ clearInterval(t); };
+  },[]);
 
-  function handleComplete(rewards) {
-    const lvl = playing.levelDef;
-    if (playing.cb) playing.cb(rewards);
-    setMeta(function(m) {
-      const cleared = Array.from(new Set((m.levelsCleared || []).concat([lvl.id])));
-      const n = Object.assign({}, m, { coins: m.coins + (rewards.coins || 0), parts: m.parts + (rewards.parts || 0), levelsCleared: cleared });
+  function handlePlay(levelDef,cb){
+    if(levelDef.isDaily||levelDef.id&&levelDef.id.toString().startsWith("event")){
+      setPlaying({levelDef:levelDef,cb:cb||function(){}}); return;
+    }
+    var fresh=loadLives();
+    if(fresh.count<=0){ setLivesGate(true); setPendingLevel({levelDef:levelDef,cb:cb}); return; }
+    if(!isTutoDone()&&levelDef.id===0){
+      setPendingLevel({levelDef:levelDef,cb:cb||function(){}});
+      setShowTuto(true); setTutoStep(0); return;
+    }
+    setPlaying({levelDef:levelDef,cb:cb||function(){}});
+  }
+
+  function startPending(){ if(pendingLevel){ setPlaying(pendingLevel); setPendingLevel(null); } }
+  function handleTutoNext(){ Audio.tap(); if(tutoStep>=2){ markTutoDone(); setShowTuto(false); startPending(); } else setTutoStep(tutoStep+1); }
+  function handleTutoSkip(){ markTutoDone(); setShowTuto(false); startPending(); }
+
+  function handleComplete(rewards){
+    var lvl=playing.levelDef;
+    if(playing.cb) playing.cb(rewards);
+    var movesUsed=lvl.moves-(rewards.movesLeft||0);
+    var stars=calcStars(movesUsed,lvl.moves);
+
+    /* XP */
+    var gained=calcXP(rewards.score||0, stars, lvl.boss);
+    var newXP=addXP(xpData, gained);
+    var leveledUp=newXP.level>xpData.level;
+    saveXP(newXP); setXpData(newXP);
+    if(leveledUp){ setShowXPUp(true); setTimeout(function(){ setShowXPUp(false); },2500); }
+
+    /* Streak — mark today as played */
+    var newStreak=checkAndUpdateStreak(streak);
+    setStreak(newStreak);
+
+    /* Challenges — update progress */
+    if(challengeData){
+      var today=todayStr();
+      var seed=parseInt(today.replace(/-/g,""));
+      var defs=getDailyChallenges(seed);
+      var updated=challengeData.challenges.map(function(c,i){
+        var def=defs[i]; if(c.done) return c;
+        var prog=c.progress;
+        if(def.type==="complete") prog=Math.min(def.goal,prog+1);
+        if(def.type==="stars3"&&stars===3) prog=Math.min(def.goal,prog+1);
+        if(def.type==="session") prog=Math.min(def.goal,prog+1);
+        return Object.assign({},c,{progress:prog,done:prog>=def.goal});
+      });
+      var newCD=Object.assign({},challengeData,{challenges:updated});
+      saveChallenges(newCD); setChallengeData(newCD);
+    }
+
+    /* Meta */
+    setMeta(function(m){
+      var cleared=Array.from(new Set((m.levelsCleared||[]).concat([lvl.id])));
+      var newStars=Object.assign({},m.stars||{});
+      if((newStars[lvl.id]||0)<stars) newStars[lvl.id]=stars;
+      var n=Object.assign({},m,{coins:m.coins+(rewards.coins||0),parts:m.parts+(rewards.parts||0),levelsCleared:cleared,stars:newStars});
       saveMeta(n); return n;
     });
     setPlaying(null);
+    if(lvl.id>=4&&!meta.starterPackShown&&Math.random()<0.25){
+      setMeta(function(m){ var n=Object.assign({},m,{starterPackShown:true}); saveMeta(n); return n; });
+      setTimeout(function(){ setShowStarterPack(true); },700);
+    }
   }
 
-  const TABS = [
-    { id: "campaign", icon: "🗺", label: "PLAY" },
-    { id: "city",     icon: "🌆", label: "CITY" },
-    { id: "daily",    icon: "📅", label: "DAILY" },
-    { id: "editor",   icon: "🛠", label: "EDITOR" },
+  function handleLose(){
+    var fresh=loadLives();
+    var updated={count:Math.max(0,fresh.count-1),lastRegen:fresh.count===MAX_LIVES?Date.now():fresh.lastRegen};
+    saveLives(updated); setLives(updated);
+  }
+
+  function watchAdForLife(){
+    var fresh=loadLives();
+    var updated={count:Math.min(MAX_LIVES,fresh.count+1),lastRegen:fresh.lastRegen};
+    saveLives(updated); setLives(updated); setLivesGate(false);
+    if(pendingLevel){ setPlaying(pendingLevel); setPendingLevel(null); }
+  }
+
+  var TABS=[
+    {id:"campaign",  icon:"🗺", label:"PLAY"},
+    {id:"challenges",icon:"🎯", label:"QUESTS"},
+    {id:"event",     icon:"⚡", label:"EVENT"},
+    {id:"city",      icon:"🌆", label:"CITY"},
+    {id:"editor",    icon:"🛠", label:"BUILD"},
   ];
 
-  if (playing) {
+  if(playing){
     return (
-      <div className="sg-root">
-        <GameBoard levelDef={playing.levelDef} meta={meta} onComplete={handleComplete} onBack={function() { setPlaying(null); }} />
+      <div className="sg-app">
+        <Particles/>
+        {showTuto&&<TutorialOverlay step={tutoStep} onNext={handleTutoNext} onSkip={handleTutoSkip}/>}
+        <GameBoard levelDef={playing.levelDef} meta={meta} lives={lives}
+          onComplete={handleComplete} onLose={handleLose}
+          onBack={function(){ setPlaying(null); }}/>
       </div>
     );
   }
 
+  var allChallengesDone = challengeData && challengeData.challenges.every(function(c){ return c.done; });
+  var chestUnclaimed = allChallengesDone && !challengeData.chestClaimed;
+
   return (
-    <div className="sg-root">
-      <header style={{ textAlign: "center", marginBottom: 12, position: "relative", zIndex: 1, flexShrink: 0 }}>
-        <h1 className="sg-title">SHIFTGRID</h1>
-        <div className="sg-subtitle">NEON CITY RESTORATION ENGINE</div>
-      </header>
-      <div className="sg-wallet-row" style={{ marginBottom: 10, flexShrink: 0 }}>
-        <div className="sg-wallet-chip"><span style={{ color: "#ffaa00" }}>Coins</span> {meta.coins}</div>
-        <div className="sg-wallet-chip"><span style={{ color: "#00e5ff" }}>Parts</span> {meta.parts}</div>
-        <div className="sg-wallet-chip"><span style={{ color: "#00ff88" }}>Districts</span> {(meta.levelsCleared || []).length + "/" + CAMPAIGN_LEVELS.length}</div>
+    <div className="sg-app">
+      <Particles/>
+      {showTuto&&<TutorialOverlay step={tutoStep} onNext={handleTutoNext} onSkip={handleTutoSkip}/>}
+      {livesGate&&<LivesGate lives={lives} onBack={function(){ setLivesGate(false); setPendingLevel(null); }} onWatchAd={watchAdForLife}/>}
+      {showStarterPack&&<StarterPack onClose={function(){ setShowStarterPack(false); }} onBuy={function(){ setShowStarterPack(false); }}/>}
+
+      {/* XP Level Up toast */}
+      {showXPUp&&(
+        <div style={{position:"fixed",top:80,left:"50%",transform:"translateX(-50%)",zIndex:800,background:"linear-gradient(135deg,#a855f7,#00e5ff)",borderRadius:12,padding:"10px 20px",fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,color:"#fff",letterSpacing:"0.1em",boxShadow:"0 0 24px rgba(168,85,247,0.5)",animation:"toast-in 0.3s ease",whiteSpace:"nowrap"}}>
+          ⬆ LEVEL UP! LVL {xpData.level}
+        </div>
+      )}
+
+      <div className="sg-header">
+        <div className="sg-logo">SHIFTGRID</div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <div className="sg-lives">
+            {[0,1,2,3,4].map(function(i){ return <span key={i} className={"sg-heart"+(i<lives.count?"":" empty")}>❤️</span>; })}
+          </div>
+          <div className="sg-coin">
+            <div className="sg-coin-dot" style={{background:"#ffaa00",boxShadow:"0 0 5px #ffaa00"}}></div>
+            <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:12,color:"rgba(255,255,255,0.6)"}}>{meta.coins}</span>
+          </div>
+          <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:"rgba(168,85,247,0.8)",letterSpacing:"0.06em"}}>{"LV"+xpData.level}</div>
+        </div>
       </div>
-      <div style={{ flex: 1, width: "100%", maxWidth: 440, overflowY: "auto", position: "relative", zIndex: 1 }}>
-        {tab === "campaign" && <CampaignTab meta={meta} onPlay={handlePlay} />}
-        {tab === "city"     && <CityTab meta={meta} setMeta={setMeta} />}
-        {tab === "daily"    && <DailyTab meta={meta} setMeta={setMeta} onPlay={handlePlay} />}
-        {tab === "editor"   && <EditorTab meta={meta} setMeta={setMeta} onPlay={handlePlay} />}
+      <XPBar xpData={xpData}/>
+      <div className="sg-content">
+        {tab==="campaign"   &&<CampaignTab meta={meta} onPlay={handlePlay}/>}
+        {tab==="challenges" &&<ChallengesTab meta={meta} setMeta={setMeta} challengeData={challengeData} setChallengeData={setChallengeData} streak={streak} onStreakUpdate={setStreak}/>}
+        {tab==="event"      &&<WeeklyTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
+        {tab==="city"       &&<CityTab meta={meta} setMeta={setMeta} xpData={xpData}/>}
+        {tab==="editor"     &&<EditorTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
       </div>
-      <nav className="sg-nav" style={{ flexShrink: 0 }}>
-        {TABS.map(function(t) {
+      <nav className="sg-nav">
+        {TABS.map(function(t){
+          var hasDot = (t.id==="challenges"&&chestUnclaimed) || (t.id==="event"&&true);
           return (
-            <button key={t.id} className={"sg-nav-btn" + (tab === t.id ? " active" : "")} onClick={function() { setTab(t.id); }}>
-              <span style={{ fontSize: 16 }}>{t.icon}</span>
+            <button key={t.id} className={"sg-nav-btn"+(tab===t.id?" active":"")} onClick={function(){ Audio.tap(); setTab(t.id); }} style={{position:"relative"}}>
+              <span className="nav-icon">{t.icon}</span>
               <span>{t.label}</span>
+              {hasDot&&tab!==t.id&&<div style={{position:"absolute",top:5,right:"50%",marginRight:-16,width:7,height:7,borderRadius:"50%",background:t.id==="challenges"?"#00ff88":"#ffaa00",boxShadow:"0 0 6px currentColor"}}/>}
             </button>
           );
         })}
@@ -1022,9 +2431,10 @@ function Shiftgrid() {
   );
 }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<Shiftgrid />);
-  </script>
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<Shiftgrid/>);
+
+</script>
 
 </body>
 </html>
