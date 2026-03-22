@@ -199,6 +199,246 @@
 }
 .sg-stat.danger { border-color: rgba(255,45,149,0.35); background: rgba(255,45,149,0.06); }
 
+/* ── KINGDOM RANK TITLE ── */
+.sg-kingdom-rank {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 0.14em;
+  padding: 2px 7px; border-radius: 5px;
+  border: 1px solid; font-weight: 700;
+  transition: all 0.4s;
+}
+
+/* ── DAILY LOGIN CHEST POPUP ── */
+.sg-login-overlay {
+  position: fixed; inset: 0; z-index: 950;
+  background: rgba(7,7,15,0.92);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  animation: overlay-in 0.3s ease;
+}
+.sg-login-modal {
+  background: rgba(13,13,26,0.98);
+  border-radius: 28px; padding: 36px 28px;
+  max-width: 310px; width: 90%; text-align: center;
+  animation: modal-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative; overflow: hidden;
+}
+.sg-login-modal::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 70% 40% at 50% 0%, var(--chest-glow,rgba(255,170,0,0.1)) 0%, transparent 65%);
+}
+.sg-chest-anim {
+  font-size: 72px; display: block; margin-bottom: 4px;
+  animation: chest-bounce 0.7s cubic-bezier(0.34,1.56,0.64,1);
+  cursor: pointer; transition: transform 0.15s;
+  line-height: 1;
+}
+.sg-chest-anim:hover { transform: scale(1.1) rotate(-3deg); }
+.sg-chest-anim.opening {
+  animation: chest-open 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes chest-bounce {
+  0%   { transform: scale(0.3) translateY(30px); opacity: 0; }
+  70%  { transform: scale(1.15) translateY(-8px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes chest-open {
+  0%   { transform: scale(1) rotate(0deg); }
+  30%  { transform: scale(1.3) rotate(-8deg); }
+  60%  { transform: scale(1.2) rotate(6deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.sg-login-day {
+  font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.16em; margin-bottom: 4px;
+}
+.sg-login-title {
+  font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900;
+  letter-spacing: 0.08em; margin-bottom: 6px;
+}
+.sg-login-sub { font-size: 12px; color: rgba(255,255,255,0.38); margin-bottom: 20px; }
+.sg-login-rewards {
+  display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.sg-login-reward-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 10px 14px; min-width: 64px;
+}
+.sg-login-reward-icon { font-size: 20px; }
+.sg-login-reward-val { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; }
+.sg-login-reward-lbl { font-size: 8px; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; }
+.sg-reward-burst {
+  animation: burst-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes burst-in {
+  0%  { transform: scale(0) rotate(-15deg); opacity: 0; }
+  100%{ transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ── CHEST INVENTORY ── */
+.sg-chest-inv-row {
+  display: flex; gap: 8px; margin-bottom: 10px;
+}
+.sg-chest-inv-card {
+  flex: 1; border: 1px solid; border-radius: 14px; padding: 14px 8px;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.sg-chest-inv-card:active { transform: scale(0.96); }
+.sg-chest-inv-card.empty { opacity: 0.25; cursor: default; }
+.sg-chest-inv-card.empty:active { transform: none; }
+.sg-chest-inv-icon { font-size: 34px; display: block; margin-bottom: 5px; }
+.sg-chest-inv-name { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 2px; }
+.sg-chest-inv-count {
+  font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900;
+}
+.sg-chest-inv-tap { font-size: 9px; margin-top: 4px; opacity: 0.5; letter-spacing: 0.06em; }
+.sg-chest-open-flash {
+  position: fixed; inset: 0; z-index: 960; pointer-events: none;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  animation: flash-out 0.5s ease forwards;
+}
+@keyframes flash-out { from{opacity:1} to{opacity:0} }
+
+/* ── TROPHY ROAD ── */
+.sg-trophy-road {
+  position: relative; padding: 8px 0 4px;
+  margin-bottom: 8px;
+}
+.sg-trophy-track {
+  position: absolute; top: 50%; left: 28px; right: 28px;
+  height: 3px; background: rgba(255,255,255,0.08);
+  transform: translateY(-50%); border-radius: 2px; z-index: 0;
+}
+.sg-trophy-track-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, #ffaa00, #ff7700);
+  transition: width 0.8s ease;
+  box-shadow: 0 0 6px rgba(255,170,0,0.5);
+}
+.sg-trophy-nodes {
+  display: flex; justify-content: space-between;
+  position: relative; z-index: 1;
+}
+.sg-trophy-node {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  width: 52px;
+}
+.sg-trophy-gem {
+  width: 36px; height: 36px; border-radius: 10px; border: 2px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: all 0.3s; position: relative;
+}
+.sg-trophy-gem.unlocked {
+  animation: gem-glow 2s ease infinite;
+}
+@keyframes gem-glow {
+  0%,100% { box-shadow: 0 0 6px currentColor; }
+  50%      { box-shadow: 0 0 16px currentColor; }
+}
+.sg-trophy-gem.claimable {
+  animation: gem-pulse 0.8s ease infinite alternate;
+}
+@keyframes gem-pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.12); }
+}
+.sg-trophy-label {
+  font-size: 8px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; text-align: center;
+}
+.sg-trophy-label.done { color: #ffaa00; }
+
+/* ── SCREEN NUDGE ── */
+.sg-nudge-left  { animation: nudge-left  0.16s ease-out both; }
+.sg-nudge-right { animation: nudge-right 0.16s ease-out both; }
+.sg-nudge-up    { animation: nudge-up    0.16s ease-out both; }
+.sg-nudge-down  { animation: nudge-down  0.16s ease-out both; }
+@keyframes nudge-left  { 0%{transform:translateX(0)} 40%{transform:translateX(-4px)} 100%{transform:translateX(0)} }
+@keyframes nudge-right { 0%{transform:translateX(0)} 40%{transform:translateX(4px)}  100%{transform:translateX(0)} }
+@keyframes nudge-up    { 0%{transform:translateY(0)} 40%{transform:translateY(-4px)} 100%{transform:translateY(0)} }
+@keyframes nudge-down  { 0%{transform:translateY(0)} 40%{transform:translateY(4px)}  100%{transform:translateY(0)} }
+
+/* ── CASCADE FLASH ── */
+.sg-cascade-flash {
+  position: fixed; inset: 0; z-index: 998; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(255,170,0,0.12) 0%, transparent 70%);
+  animation: c-flash 0.4s ease forwards;
+}
+@keyframes c-flash { 0%{opacity:1} 100%{opacity:0} }
+
+/* ── WRAP CHAIN GLOW ── */
+.sg-wrap-chain-glow {
+  position: fixed; inset: 0; z-index: 997; pointer-events: none;
+  border: 2px solid rgba(168,85,247,0.5);
+  box-shadow: inset 0 0 40px rgba(168,85,247,0.2);
+  animation: wrap-fade 1.2s ease forwards;
+}
+@keyframes wrap-fade { 0%{opacity:1} 100%{opacity:0} }
+
+/* ── PERFECT CLEAR BANNER ── */
+.sg-perfect-clear {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  z-index: 999; pointer-events: none; text-align: center;
+  animation: pc-in 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes pc-in {
+  0%  { opacity:0; transform: translate(-50%,-50%) scale(0.5); }
+  100%{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+}
+.sg-pc-text {
+  font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900;
+  letter-spacing: 0.14em;
+  background: linear-gradient(135deg,#ffaa00,#00ff88,#00e5ff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 16px rgba(255,170,0,0.7));
+  white-space: nowrap;
+}
+
+/* ── PATROL CORRUPTION ── */
+.sg-tile.patrol-corrupt {
+  animation: patrol-pulse 0.6s ease infinite alternate !important;
+}
+@keyframes patrol-pulse {
+  from { box-shadow: 0 0 8px rgba(255,45,149,0.4); border-color: rgba(255,45,149,0.5); }
+  to   { box-shadow: 0 0 18px rgba(255,45,149,0.8); border-color: rgba(255,45,149,0.9); }
+}
+
+/* ── SPECIAL NODE CHARGED PULSE ── */
+.sg-tile:has(.sg-node)[style*="charged"] {
+  animation: charged-pulse 1s ease infinite alternate;
+}
+@keyframes charged-pulse {
+  from { box-shadow: 0 0 6px rgba(255,170,0,0.3); }
+  to   { box-shadow: 0 0 16px rgba(255,170,0,0.7); }
+}
+
+/* ── GRID MEMORY REPLAY INDICATOR ── */
+.sg-ghost-indicator {
+  position: fixed; bottom: 130px; right: 14px; z-index: 9998;
+  background: rgba(13,13,26,0.92); border: 1px solid rgba(168,85,247,0.4);
+  border-radius: 10px; padding: 6px 10px;
+  font-family: 'Share Tech Mono', monospace; font-size: 9px;
+  color: #a855f7; letter-spacing: 0.1em;
+  backdrop-filter: blur(8px);
+}
+
+/* ── SKIN PICKER ── */
+.sg-skin-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.sg-skin-btn {
+  flex: 1; min-width: 54px; border-radius: 10px; border: 1.5px solid;
+  padding: 10px 6px; text-align: center; cursor: pointer;
+  transition: all 0.18s; font-size: 10px; font-weight: 700;
+  font-family: 'Rajdhani', sans-serif; letter-spacing: 0.06em;
+}
+.sg-skin-btn.active { transform: scale(1.06); }
+.sg-skin-btn.locked { opacity: 0.35; cursor: default; }
+.sg-skin-swatch {
+  width: 22px; height: 22px; border-radius: 6px; margin: 0 auto 5px;
+  transform: rotate(45deg);
+}
+
 /* ── NEAR-WIN TENSION ── */
 .sg-app.near-win-state::before {
   content: '';
@@ -408,6 +648,17 @@
   animation: dot-pulse 1.2s ease infinite;
 }
 @keyframes dot-pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.sg-bldg.charged-pulse {
+  animation: bldg-charge 0.45s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+@keyframes bldg-charge {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.025); }
+  70%  { transform: scale(0.99); }
+  100% { transform: scale(1); }
+}
+.sg-bldg-fill.charged { animation: fill-flash 0.4s ease; }
+@keyframes fill-flash { 0%{filter:brightness(1)} 40%{filter:brightness(1.8)} 100%{filter:brightness(1)} }
 
 .sg-hint { font-size: 10px; color: rgba(255,255,255,0.15); text-align: center; padding: 6px 20px 8px; line-height: 1.5; flex-shrink: 0; }
 
@@ -1259,11 +1510,8 @@ window.sgMusic = {
     btn.addEventListener('click', function() { window.sgMusic.toggle(); });
     document.body.appendChild(btn);
 
-    /* Restore last preference */
-    var saved = localStorage.getItem('sg_music_on');
-    if (saved === '1') {
-      window.sgMusic._queuePlay();
-    }
+    /* Always queue autoplay on load — fires on first user gesture */
+    window.sgMusic._queuePlay();
   },
 
   toggle: function() {
@@ -1357,7 +1605,34 @@ var _uid = 0;
 const ROWS = 5, COLS = 5;
 const COLORS = ["cyan","magenta","amber","green"];
 const HEX = { cyan:"#00e5ff", magenta:"#ff2d95", amber:"#ffaa00", green:"#00ff88" };
-const LABEL = { cyan:"CYAN", magenta:"MAG", amber:"AMB", green:"GRN" };
+const LABEL   = { cyan:"CYAN",  magenta:"MAG",   amber:"AMB",   green:"GRN"  };
+const NODENAME= { cyan:"VOLT",  magenta:"FLUX",  amber:"CORE",  green:"GRID" };
+/* ─── GRID SKINS ────────────────────────────────────────────────── */
+const SKINS_KEY = "sg_skin_v1";
+const SKIN_DEFS = [
+  { id:"neon",    label:"NEON",    unlockLvl:0,  free:true,
+    node:"rotate(45deg)", glow:1, tileRadius:"11px",
+    colors:{ cyan:"#00e5ff", magenta:"#ff2d95", amber:"#ffaa00", green:"#00ff88" } },
+  { id:"circuit", label:"CIRCUIT", unlockLvl:10, free:false,
+    node:"none", glow:0.6, tileRadius:"4px",
+    colors:{ cyan:"#22d3ee", magenta:"#e879f9", amber:"#fbbf24", green:"#4ade80" } },
+  { id:"crystal", label:"CRYSTAL", unlockLvl:20, free:false,
+    node:"rotate(45deg) scale(1.1)", glow:1.4, tileRadius:"14px",
+    colors:{ cyan:"#a5f3fc", magenta:"#f9a8d4", amber:"#fde68a", green:"#bbf7d0" } },
+  { id:"ember",   label:"EMBER",   unlockLvl:30, free:false,
+    node:"rotate(45deg)", glow:0.8, tileRadius:"8px",
+    colors:{ cyan:"#fb923c", magenta:"#f43f5e", amber:"#fcd34d", green:"#a3e635" } },
+  { id:"void",    label:"VOID",    unlockLvl:40, free:false,
+    node:"none", glow:1.2, tileRadius:"50%",
+    colors:{ cyan:"#818cf8", magenta:"#c084fc", amber:"#e879f9", green:"#67e8f9" } },
+];
+function loadSkin(){ try{ return localStorage.getItem(SKINS_KEY)||"neon"; }catch{ return "neon"; } }
+function saveSkin(id){ try{ localStorage.setItem(SKINS_KEY,id); }catch{} }
+function getSkinColors(skinId){
+  var s=SKIN_DEFS.find(function(s){ return s.id===skinId; });
+  return s ? s.colors : SKIN_DEFS[0].colors;
+}
+
 const SLIDE_MS = 140;
 const MAX_LIVES = 5;
 const LIFE_REGEN_MS = 30 * 60 * 1000;
@@ -1448,6 +1723,8 @@ const DEF_META = {
   levelsCleared:[], stars:{}, lastCollect:Date.now(),
   dailyDate:"", dailyScore:0, dailyFinalScore:0, dailyMovesLeft:0, dailyStars:0,
   customLevels:[], starterPackShown:false,
+  chests:{ bronze:0, silver:0, gold:0, royal:0 },
+  trophyClaimed:[],
 };
 
 
@@ -1457,6 +1734,64 @@ function loadMeta(){
   catch{ return Object.assign({},DEF_META); }
 }
 function saveMeta(m){ try{ localStorage.setItem(STORE_KEY,JSON.stringify(m)); }catch{} }
+
+/* ─── KINGDOM RANK ──────────────────────────────────────────────── */
+const KINGDOM_RANKS = [
+  { min:0,  label:"RECRUIT",  color:"rgba(255,255,255,0.45)", border:"rgba(255,255,255,0.15)", bg:"rgba(255,255,255,0.04)" },
+  { min:5,  label:"CADET",    color:"#00e5ff",                border:"rgba(0,229,255,0.3)",    bg:"rgba(0,229,255,0.06)"   },
+  { min:10, label:"KNIGHT",   color:"#00ff88",                border:"rgba(0,255,136,0.3)",    bg:"rgba(0,255,136,0.06)"   },
+  { min:20, label:"BARON",    color:"#a855f7",                border:"rgba(168,85,247,0.35)",  bg:"rgba(168,85,247,0.07)"  },
+  { min:30, label:"LORD",     color:"#ff2d95",                border:"rgba(255,45,149,0.35)",  bg:"rgba(255,45,149,0.07)"  },
+  { min:40, label:"KING",     color:"#ffaa00",                border:"rgba(255,170,0,0.4)",    bg:"rgba(255,170,0,0.09)"   },
+  { min:49, label:"LEGEND",   color:"#ffaa00",                border:"rgba(255,170,0,0.6)",    bg:"rgba(255,170,0,0.14)"   },
+];
+function getKingdomRank(levelsCleared) {
+  var count = (levelsCleared||[]).length;
+  var rank = KINGDOM_RANKS[0];
+  for (var i = 0; i < KINGDOM_RANKS.length; i++) {
+    if (count >= KINGDOM_RANKS[i].min) rank = KINGDOM_RANKS[i];
+  }
+  return rank;
+}
+
+/* ─── CHEST SYSTEM ──────────────────────────────────────────────── */
+const CHEST_DEFS = {
+  bronze: { label:"BRONZE", icon:"📦", color:"#cd7f32", border:"rgba(205,127,50,0.4)",  bg:"rgba(205,127,50,0.08)",
+            rewards: function(rng){ return { coins: 20+Math.floor(rng()*40), parts: Math.random()<0.3?1:0, lives: 0 }; } },
+  silver: { label:"SILVER", icon:"🎁", color:"#c0c0c0", border:"rgba(192,192,192,0.4)", bg:"rgba(192,192,192,0.07)",
+            rewards: function(rng){ return { coins: 60+Math.floor(rng()*60), parts: 1+Math.floor(rng()*3), lives: Math.random()<0.2?1:0 }; } },
+  gold:   { label:"GOLD",   icon:"🏆", color:"#ffaa00", border:"rgba(255,170,0,0.5)",   bg:"rgba(255,170,0,0.1)",
+            rewards: function(rng){ return { coins: 120+Math.floor(rng()*100), parts: 3+Math.floor(rng()*4), lives: Math.random()<0.5?1:0 }; } },
+  royal:  { label:"ROYAL",  icon:"👑", color:"#a855f7", border:"rgba(168,85,247,0.55)", bg:"rgba(168,85,247,0.12)",
+            rewards: function(rng){ return { coins: 250+Math.floor(rng()*150), parts: 6+Math.floor(rng()*6), lives: 1+Math.floor(rng()*2) }; } },
+};
+
+/* ─── LOGIN CHEST ────────────────────────────────────────────────── */
+const LOGIN_KEY = "sg_login_v1";
+function getLoginChestType(streakCount) {
+  if (streakCount >= 7)  return "royal";
+  if (streakCount >= 4)  return "gold";
+  if (streakCount >= 2)  return "silver";
+  return "bronze";
+}
+function loadLoginData() {
+  try { var s = localStorage.getItem(LOGIN_KEY); return s ? JSON.parse(s) : { lastLogin:"", claimed:false }; }
+  catch { return { lastLogin:"", claimed:false }; }
+}
+function saveLoginData(d) { try { localStorage.setItem(LOGIN_KEY, JSON.stringify(d)); } catch {} }
+function shouldShowLoginChest() {
+  var d = loadLoginData();
+  return d.lastLogin !== todayStr();
+}
+
+/* ─── TROPHY ROAD ────────────────────────────────────────────────── */
+const TROPHY_MILESTONES = [
+  { levels:10, icon:"🏅", label:"10 LVL",  reward:{ coins:100, parts:5,  chest:"silver" } },
+  { levels:20, icon:"💎", label:"20 LVL",  reward:{ coins:200, parts:10, chest:"gold"   } },
+  { levels:30, icon:"⚡", label:"30 LVL",  reward:{ coins:300, parts:15, chest:"gold"   } },
+  { levels:40, icon:"🔥", label:"40 LVL",  reward:{ coins:400, parts:20, chest:"royal"  } },
+  { levels:50, icon:"👑", label:"LEGEND",  reward:{ coins:500, parts:30, chest:"royal"  } },
+];
 function calcIdle(meta){
   const lvl=meta.upgrades&&meta.upgrades.idleBoost?meta.upgrades.idleBoost:0;
   if(!lvl) return 0;
@@ -1539,24 +1874,55 @@ function markTutoDone(){ try{ localStorage.setItem(TUTO_KEY,"1"); }catch{} }
 
 function TutorialOverlay(props){
   var step=props.step, onNext=props.onNext, onSkip=props.onSkip;
+  /* Interactive tutorial steps with arrow directions */
   var steps=[
-    {icon:"👆",title:"SWIPE TO SHIFT",body:"Swipe any row left or right, or any column up or down. The board wraps — tiles pushed off one side reappear on the other.",btn:"NEXT"},
-    {icon:"⚡",title:"MATCH NODES",body:"Line up 3 or more same-color energy nodes after a shift. Longer chains and cascades charge buildings much faster.",btn:"NEXT"},
-    {icon:"🏙️",title:"POWER THE CITY",body:"Every match charges the target buildings shown below the grid. Fill all power bars to win the level. Let's go!",btn:"LET'S GO!"},
+    {
+      icon:"👆", title:"SWIPE TO SHIFT",
+      body:"Tap the arrow buttons (or swipe) to slide a row or column. Try sliding ROW 1 LEFT right now — the tiles wrap around!",
+      btn:"GOT IT", highlight:"row-0",
+      arrow:"← Slide this row",
+    },
+    {
+      icon:"⚡", title:"MATCH NODES",
+      body:"When 3+ same-color NODES line up in a row or column after a shift, they match and charge a building. Bigger chains = more charge!",
+      btn:"NEXT", highlight:null, arrow:null,
+    },
+    {
+      icon:"🔴", title:"WATCH FOR CORRUPTION",
+      body:"Corrupted ☠ tiles block matches. Match tiles RIGHT NEXT to corruption to clear it. If corruption fills the board, you lose.",
+      btn:"NEXT", highlight:null, arrow:null,
+    },
+    {
+      icon:"🏙️", title:"POWER THE CITY",
+      body:"Fill every building's power bar to win. Each building charges from its node color. VOLT=cyan  FLUX=magenta  CORE=amber  GRID=green",
+      btn:"LET'S GO!", highlight:null, arrow:null,
+    },
   ];
   var s=steps[step];
   return (
-    <div style={{position:"fixed",inset:0,zIndex:900,background:"rgba(7,7,15,0.92)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
-      <div style={{background:"rgba(13,13,26,0.98)",border:"1px solid rgba(0,229,255,0.2)",borderRadius:24,padding:"36px 28px",maxWidth:320,width:"90%",textAlign:"center",animation:"modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1)"}}>
-        <div style={{fontSize:52,marginBottom:12}}>{s.icon}</div>
-        <div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:900,letterSpacing:"0.1em",marginBottom:10,color:"#00e5ff",textShadow:"0 0 14px rgba(0,229,255,0.4)"}}>{s.title}</div>
-        <div style={{fontSize:13,color:"rgba(255,255,255,0.52)",lineHeight:1.65,marginBottom:24}}>{s.body}</div>
-        <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-          {step<2&&<button onClick={onSkip} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"10px 18px",color:"rgba(255,255,255,0.38)",fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em"}}>SKIP</button>}
-          <button onClick={onNext} style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)",border:"none",borderRadius:10,padding:"12px 28px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>{s.btn}</button>
+    <div style={{position:"fixed",inset:0,zIndex:900,background:"rgba(7,7,15,0.88)",display:"flex",alignItems:"flex-end",justifyContent:"center",backdropFilter:"blur(6px)",paddingBottom:20}}>
+      <div style={{background:"rgba(13,13,26,0.99)",border:"1px solid rgba(0,229,255,0.25)",borderRadius:22,padding:"28px 24px",maxWidth:360,width:"92%",animation:"modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1)",position:"relative"}}>
+        {/* Step indicator */}
+        <div style={{display:"flex",gap:5,justifyContent:"center",marginBottom:16}}>
+          {steps.map(function(_,i){ return (
+            <div key={i} style={{height:3,flex:1,borderRadius:2,background:i<=step?"#00e5ff":"rgba(255,255,255,0.1)",transition:"background 0.3s"}}/>
+          ); })}
         </div>
-        <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:16}}>
-          {steps.map(function(_,i){ return <div key={i} style={{width:6,height:6,borderRadius:"50%",background:i===step?"#00e5ff":"rgba(255,255,255,0.15)",transition:"background 0.3s"}}/>; })}
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+          <span style={{fontSize:36}}>{s.icon}</span>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,letterSpacing:"0.1em",color:"#00e5ff",textShadow:"0 0 12px rgba(0,229,255,0.4)"}}>{s.title}</div>
+        </div>
+        <div style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.7,marginBottom:20}}>{s.body}</div>
+        {s.arrow && (
+          <div style={{background:"rgba(0,229,255,0.08)",border:"1px solid rgba(0,229,255,0.3)",borderRadius:8,padding:"8px 14px",fontSize:11,color:"#00e5ff",letterSpacing:"0.1em",fontWeight:700,marginBottom:16,animation:"blink 0.7s ease infinite alternate"}}>
+            {s.arrow}
+          </div>
+        )}
+        <div style={{display:"flex",gap:10,justifyContent:"space-between",alignItems:"center"}}>
+          {step<steps.length-1?(
+            <button onClick={onSkip} style={{background:"none",border:"none",color:"rgba(255,255,255,0.25)",fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",padding:"8px 0"}}>SKIP TUTORIAL</button>
+          ):<div/>}
+          <button onClick={onNext} style={{background:"linear-gradient(135deg,#00e5ff,#00ff88)",border:"none",borderRadius:12,padding:"12px 28px",color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em"}}>{s.btn}</button>
         </div>
       </div>
     </div>
@@ -1899,8 +2265,29 @@ function getLevelSocialProof(levelId, meta) {
 
 function nextId() { return ++_uid; }
 function rndColor() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
-function makeTile(color, corrupted) {
-  return { id: nextId(), color: color || rndColor(), corrupted: corrupted === true };
+function makeTile(color, corrupted, nodeType) {
+  return { id: nextId(), color: color || rndColor(), corrupted: corrupted === true, nodeType: nodeType||null };
+}
+function makeSpecialTile(color, type){ return makeTile(color, false, type); }
+/* Inject special node types into a grid based on district level */
+function injectSpecialNodes(grid, levelId, rng){
+  if(!levelId || levelId < 10) return grid;
+  var g=grid.map(function(row){ return row.slice(); });
+  var fn=rng||Math.random;
+  var dist=Math.floor(levelId/10);
+  var types=["locked","charged","mirror","void"];
+  var type=types[Math.min(dist-1,3)];
+  var count=Math.min(2,Math.floor(dist/1.5));
+  var placed=0,tries=0;
+  while(placed<count&&tries<30){
+    tries++;
+    var r=Math.floor(fn()*ROWS),c=Math.floor(fn()*COLS);
+    if(!g[r][c].corrupted&&!g[r][c].nodeType){
+      g[r][c]=Object.assign({},g[r][c],{nodeType:type});
+      placed++;
+    }
+  }
+  return g;
 }
 function mkSeededRng(seed) {
   let s = ((seed ^ 0x9e3779b9) >>> 0) || 1;
@@ -1969,6 +2356,31 @@ function applyGravity(grid,matched){
   for(let c=0;c<COLS;c++){ const col=[]; for(let r=0;r<ROWS;r++){ if(g[r][c]) col.push(g[r][c]); } while(col.length<ROWS) col.unshift(makeTile()); for(let r=0;r<ROWS;r++) g[r][c]=col[r]; }
   return {g:g,cleared:cleared};
 }
+/* ─── PATROLLING CORRUPTION ────────────────────────────────────── */
+function movePatrollers(grid){
+  /* Find tiles marked as patrollers and move them one step */
+  const g=grid.map(function(row){ return row.map(function(t){ return Object.assign({},t); }); });
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(g[r][c]&&g[r][c].patrol&&g[r][c].corrupted){
+      var dir=g[r][c].patrolDir||0;
+      var dirs=[[0,1],[1,0],[0,-1],[-1,0]];
+      var tried=0;
+      while(tried<4){
+        var nr=r+dirs[dir][0], nc=c+dirs[dir][1];
+        if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&g[nr][nc]&&!g[nr][nc].corrupted&&!g[nr][nc].patrol){
+          /* Move patroller */
+          g[nr][nc]=Object.assign({},g[nr][nc],{corrupted:true,patrol:true,patrolDir:dir});
+          g[r][c]=Object.assign({},g[r][c],{corrupted:false,patrol:false,patrolDir:undefined});
+          break;
+        }
+        dir=(dir+1)%4; tried++;
+      }
+      if(tried>=4) g[r][c]=Object.assign({},g[r][c],{patrolDir:(dir+1)%4});
+    }
+  }
+  return g;
+}
+
 function spreadCorruption(grid,slow){
   if(slow&&Math.random()<slow*0.25) return grid;
   const g=grid.map(function(row){ return row.map(function(t){ return Object.assign({},t); }); });
@@ -1983,26 +2395,69 @@ function countCorruption(grid){ let n=0; for(let r=0;r<ROWS;r++) for(let c=0;c<C
 
 
 /* ─── TILE COMPONENT ────────────────────────────────────────────── */
+/* Node type icons */
+var NODE_TYPE_ICONS = { locked:"🔒", charged:"⚡", mirror:"🪞", void:"🌑" };
+var NODE_TYPE_TIPS  = { locked:"LOCKED — match adjacent to free", charged:"CHARGED — 2× charge on match", mirror:"MIRROR — charges opposite color too", void:"VOID — corrupts neighbors in 5 moves" };
+
 function Tile(props) {
-  const tile = props.tile, isHi = props.isHi, size = props.size, slideClass = props.slideClass || "", adjacentCorrupt = props.adjacentCorrupt;
+  const tile = props.tile, isHi = props.isHi, size = props.size;
+  const slideClass = props.slideClass || "", adjacentCorrupt = props.adjacentCorrupt;
+  const skinColors = props.skinColors || HEX;
   const isCr = tile && tile.corrupted;
+  const isPatrol = isCr && tile && tile.patrol;
+  const nodeType = tile && tile.nodeType;
   const color = (!isCr && tile && tile.color) ? tile.color : null;
-  const hex = color ? HEX[color] : null;
+  const hex = color ? (skinColors[color]||HEX[color]) : null;
+  const isLocked   = nodeType==="locked";
+  const isCharged  = nodeType==="charged";
+  const isMirror   = nodeType==="mirror";
+  const isVoidNode = nodeType==="void";
 
-  const borderColor = isCr ? "rgba(170,0,255,0.4)" : hex ? (isHi ? hex : hex+"55") : "rgba(255,255,255,0.06)";
-  const bg = isCr ? "rgba(30,0,50,0.95)" : hex ? (isHi ? hex+"44" : hex+"15") : "rgba(255,255,255,0.025)";
-  const outerShadow = isHi && hex ? ("0 0 20px "+hex+",0 0 40px "+hex+"44") : isCr ? "inset 0 0 20px rgba(170,0,255,0.2)" : hex ? "0 0 6px "+hex+"22" : "none";
+  /* Locked tile looks dim/grey, charged pulses amber, mirror has cyan shimmer, void has purple tinge */
+  var effectBorder = isLocked ? "rgba(150,150,150,0.6)" :
+                     isCharged? "#ffaa00" :
+                     isMirror ? "#00e5ff" :
+                     isVoidNode? "#a855f7" : null;
 
-  const cls = "sg-tile" + (isHi ? " matched" : "") + (isCr ? " corrupt" : "") + (adjacentCorrupt&&!isCr ? " adj-corrupt" : "") + (slideClass ? " "+slideClass : "");
+  const borderColor = isCr ? (isPatrol?"rgba(255,45,149,0.7)":"rgba(170,0,255,0.4)") :
+                      effectBorder ? effectBorder :
+                      hex ? (isHi ? hex : hex+"55") : "rgba(255,255,255,0.06)";
+  const bg = isCr ? (isPatrol?"rgba(50,0,20,0.97)":"rgba(30,0,50,0.95)") :
+             isLocked ? "rgba(100,100,110,0.15)" :
+             isCharged? "rgba(255,170,0,0.18)" :
+             isMirror ? "rgba(0,229,255,0.12)" :
+             isVoidNode? "rgba(168,85,247,0.15)" :
+             hex ? (isHi ? hex+"44" : hex+"15") : "rgba(255,255,255,0.025)";
+  const outerShadow = isHi && hex ? ("0 0 20px "+hex+",0 0 40px "+hex+"44") :
+                      isCr ? "inset 0 0 20px rgba(170,0,255,0.2)" :
+                      isCharged? "0 0 12px rgba(255,170,0,0.4)" :
+                      isMirror ? "0 0 10px rgba(0,229,255,0.3)" :
+                      isVoidNode? "0 0 14px rgba(168,85,247,0.4)" :
+                      hex ? "0 0 6px "+hex+"22" : "none";
+
+  const cls = "sg-tile" +
+    (isHi ? " matched" : "") +
+    (isCr ? " corrupt" : "") +
+    (adjacentCorrupt&&!isCr ? " adj-corrupt" : "") +
+    (isPatrol ? " patrol-corrupt" : "") +
+    (slideClass ? " "+slideClass : "");
 
   return (
     <div className={cls} style={{width: size+"px", height: size+"px", background: bg, borderColor: borderColor, boxShadow: outerShadow}}>
-      {isCr && <span className="sg-corrupt-icon">☠</span>}
+      {isCr && !isPatrol && <span className="sg-corrupt-icon">☠</span>}
+      {isPatrol && <span className="sg-corrupt-icon" style={{filter:"none",opacity:0.9}}>👾</span>}
       {isCr && <div className="sg-corrupt-overlay"/>}
-      {!isCr && hex && (
+      {/* Special node type indicator */}
+      {!isCr && nodeType && (
+        <div style={{position:"absolute",top:2,right:3,fontSize:9,opacity:0.8,zIndex:5}}>{NODE_TYPE_ICONS[nodeType]}</div>
+      )}
+      {!isCr && hex && !nodeType && (
         <div className="sg-node" style={{background: isHi ? hex : hex+"88", boxShadow: isHi ? "0 0 12px "+hex+",0 0 24px "+hex+"55" : "none"}}>
           {isHi && <div className="sg-node-ring" style={{borderColor: hex}}/>}
         </div>
+      )}
+      {!isCr && hex && nodeType && (
+        <div style={{fontSize:14,fontWeight:900,color:hex,textShadow:"0 0 8px "+hex,zIndex:2}}>{NODENAME[color]}</div>
       )}
       {!isCr && hex && isHi && <div className="sg-tile-glow" style={{background: "radial-gradient(circle, "+hex+"33 0%, transparent 65%)"}}/>}
     </div>
@@ -2057,7 +2512,14 @@ function GameBoard(props) {
   const [showAd,setShowAd]=useState(false);
   const lastChanceRef=useRef(false);
   const [nearWinData,setNearWinData]=useState(null);
+  const [chargedBldgs,setChargedBldgs]=useState(new Set()); /* buildings that just received charge */
   const sessionStatsRef=useRef({batteries:0,pulses:0,maxCascade:0,corruptCleared:0});
+  const moveHistoryRef=useRef([]); /* Grid Memory — record every shift */
+  const [showGhostReplay,setShowGhostReplay]=useState(false);
+  const [shiftNudge,setShiftNudge]=useState(null); /* {dir} for screen nudge */
+  const [cascadeFlash,setCascadeFlash]=useState(false); /* big cascade screen flash */
+  const [wrapChain,setWrapChain]=useState(false); /* wrap-chain bonus flag */
+  const [perfectClear,setPerfectClear]=useState(false);
   const timers=useRef([]);
   const gridRef=useRef(null);
   const touchRef=useRef({startX:0,startY:0,startRow:-1,startCol:-1,moved:false});
@@ -2079,6 +2541,10 @@ function GameBoard(props) {
     setSlideAnim({type:type,idx:idx,dir:dir});
     setPhase("busy");
     Audio.shift();
+    /* Screen nudge in shift direction */
+    setShiftNudge(dir); setTimeout(function(){ setShiftNudge(null); }, 160);
+    /* Record move for Grid Memory */
+    moveHistoryRef.current.push({type:type,idx:idx,dir:dir});
 
     later(function(){
       setSlideAnim(null);
@@ -2120,8 +2586,14 @@ function GameBoard(props) {
       const newBldgs=bldgs.map(function(b){
         const add=(totCleared[b.color]||0)*chargeBoost;
         const ch=Math.min(b.max,b.ch+add);
-        return Object.assign({},b,{ch:ch,on:ch>=b.max});
+        return Object.assign({},b,{ch:ch,on:ch>=b.max,justCharged:add>0});
       });
+      /* Track which buildings just got charge for pulse animation */
+      var newlyCharged=new Set(newBldgs.filter(function(b){ return b.justCharged; }).map(function(b){ return b.id; }));
+      if(newlyCharged.size>0){
+        setChargedBldgs(newlyCharged);
+        setTimeout(function(){ setChargedBldgs(new Set()); },500);
+      }
 
       setMoveCount(newMC); setMoves(newMoves);
 
@@ -2136,7 +2608,25 @@ function GameBoard(props) {
         toastQueue.forEach(function(t,i){ setTimeout(function(){ addToast(t.text,t.color); },i*320); });
         if(cascades>1){ setTimeout(function(){ addToast("CHAIN x"+cascades,"#ffaa00"); },toastQueue.length*320); Audio.chain(cascades); }
         if(cascades>=1) Audio.cascade(cascades-1);
-        if(newBldgs.every(function(b){ return b.on; })){ setPhase("win"); setTimeout(function(){ if(levelDef.boss) Audio.bossWin(); else Audio.win(); },100); return; }
+        /* Big cascade flash at 3+ */
+        if(cascades>=3){ setCascadeFlash(true); setTimeout(function(){ setCascadeFlash(false); },400); }
+        /* Wrap-chain detection: check if any cleared tile is at edge col/row */
+        var wrapDetected=false;
+        (Array.from ? Array.from(new Set()) : []);
+        /* Simple heuristic: if shift moved a tile off an edge and it matched */
+        if(frames.length>0){
+          frames[0].m && frames[0].m.forEach(function(k){
+            var p=k.split(","); var r=+p[0],c=+p[1];
+            if((type==="row"&&(c===0||c===COLS-1))||(type==="col"&&(r===0||r===ROWS-1))) wrapDetected=true;
+          });
+        }
+        if(wrapDetected&&cascades>=1){ addToast("⚡ WRAP CHAIN!","#a855f7"); setWrapChain(true); setTimeout(function(){ setWrapChain(false); },1200); }
+        if(newBldgs.every(function(b){ return b.on; })){
+          setPhase("win");
+          if(newMoves>0 && !lastChanceRef.current){ setPerfectClear(true); }
+          setTimeout(function(){ if(levelDef.boss) Audio.bossWin(); else Audio.win(); },100);
+          return;
+        }
 
         if(newMoves<=0){
           /* ── NEAR-WIN CHECK ── */
@@ -2221,6 +2711,18 @@ function GameBoard(props) {
     setScore(0); setHi(new Set()); setPhase("idle"); setMoveCount(0); setSlideAnim(null);
   }
 
+  /* ── GRID MEMORY ── */
+  function saveRun(){
+    var key="sg_ghost_"+levelDef.id;
+    var run={moves:moveHistoryRef.current.slice(),score:0};
+    try{ localStorage.setItem(key,JSON.stringify(run)); }catch{}
+  }
+  function loadGhostRun(){
+    var key="sg_ghost_"+levelDef.id;
+    try{ var s=localStorage.getItem(key); return s?JSON.parse(s):null; }catch{ return null; }
+  }
+  var ghostRun = React.useMemo(function(){ return loadGhostRun(); },[levelDef.id]);
+
   function continueWithMoves(n){
     lastChanceRef.current=true;
     setNearWinData(null);
@@ -2244,12 +2746,21 @@ function GameBoard(props) {
   const stars=calcStars(movesUsed,levelDef.moves);
   const isLastMove=moves===1&&phase==="idle"&&!bldgs.every(function(b){ return b.on; });
   const isNearWinState=phase==="nearwin";
+  /* Nudge class on grid area */
+  var nudgeClass = shiftNudge ? ("sg-nudge-"+shiftNudge) : "";
 
   /* ─── FIX 3: safe level name for campaign levels ────────────────── */
   const displayName = levelDef.name || (levelDef.dist ? levelDef.dist + " · LVL " + ((levelDef.id||0)+1) : "CUSTOM LEVEL");
 
   return (
     <div className={"sg-play"+(isNearWinState?" near-win-state":"")}>
+      {cascadeFlash && <div className="sg-cascade-flash"/>}
+      {wrapChain    && <div className="sg-wrap-chain-glow"/>}
+      {perfectClear && (
+        <div className="sg-perfect-clear">
+          <div className="sg-pc-text">⚡ PERFECT CLEAR ⚡</div>
+        </div>
+      )}
       <div className="sg-play-top">
         <button className="sg-back" onClick={onBack}>←</button>
         <div style={{textAlign:"center"}}>
@@ -2288,7 +2799,7 @@ function GameBoard(props) {
       </div>
 
       {/* ── GRID ── */}
-      <div className="sg-grid-area"
+      <div className={"sg-grid-area"+(nudgeClass?" "+nudgeClass:"")}
         ref={gridRef}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -2327,6 +2838,11 @@ function GameBoard(props) {
       </div>
 
       <div className="sg-swipe-hint">SWIPE TILES TO SHIFT • WRAPS AROUND</div>
+      {ghostRun && (
+        <div style={{textAlign:"center",fontSize:9,color:"rgba(168,85,247,0.7)",letterSpacing:"0.1em",paddingBottom:2,flexShrink:0}}>
+          👻 BEAT YOUR GHOST — {ghostRun.moves.length} MOVES
+        </div>
+      )}
 
       {/* Buildings */}
       <div className="sg-bldg-list">
@@ -2345,7 +2861,7 @@ function GameBoard(props) {
                 <div className="sg-bldg-track">
                   <div className="sg-bldg-fill" style={{width:Math.min(100,(b.ch/b.max)*100)+"%",background:b.on?"linear-gradient(90deg,"+hex+",#fff)":"linear-gradient(90deg,"+hex+"55,"+hex+")",boxShadow:b.on?"0 0 8px "+hex:"none"}}/>
                 </div>
-                <div className="sg-bldg-sub">{"MATCH "+LABEL[b.color]+" TILES"}</div>
+                <div className="sg-bldg-sub">{"MATCH "+NODENAME[b.color]+" ("+LABEL[b.color]+") NODES"}</div>
               </div>
             </div>
           );
@@ -2793,9 +3309,242 @@ function WeeklyTab(props) {
   );
 }
 
+/* ─── LOGIN CHEST POPUP ─────────────────────────────────────────── */
+function LoginChestPopup(props) {
+  var onClaim = props.onClaim, streak = props.streak;
+  var chestType = getLoginChestType(streak.count);
+  var chest = CHEST_DEFS[chestType];
+  var rng = mkSeededRng(Date.now() % 99999);
+  var rewards = chest.rewards(rng);
+  var _opened = React.useState(false); var opened = _opened[0]; var setOpened = _opened[1];
+  var _flash  = React.useState(false); var flash  = _flash[0];  var setFlash  = _flash[1];
+
+  function handleOpen() {
+    if (opened) return;
+    setOpened(true);
+    setFlash(true);
+    setTimeout(function(){ setFlash(false); }, 500);
+    Audio.win();
+  }
+
+  var dayLabel = streak.count >= 1 ? "DAY " + streak.count + " STREAK" : "WELCOME BACK";
+
+  return (
+    <div className="sg-login-overlay">
+      {flash && <div className="sg-chest-open-flash"/>}
+      <div className="sg-login-modal" style={{"--chest-glow": chest.bg}}>
+        {/* Top shimmer bar */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:3,
+          background:"linear-gradient(90deg,"+chest.color+","+chest.color+"88,"+chest.color+")"}}/>
+
+        <div className="sg-login-day" style={{color:chest.color}}>{dayLabel}</div>
+
+        {!opened ? (
+          <>
+            <div style={{fontSize:13,color:"rgba(255,255,255,0.4)",marginBottom:16,marginTop:4}}>
+              Tap to open your {chest.label} chest
+            </div>
+            <span className="sg-chest-anim" onClick={handleOpen}>{chest.icon}</span>
+            <div className="sg-login-title" style={{color:chest.color,marginTop:12}}>{chest.label} CHEST</div>
+            <div className="sg-login-sub">Daily reward — comes back tomorrow</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.2)",letterSpacing:"0.08em"}}>
+              {streak.count >= 2 ? "🔥 "+streak.count+"-day streak bonus active" : "Play daily to earn better chests"}
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="sg-chest-anim opening" style={{cursor:"default"}}>✨</span>
+            <div className="sg-login-title" style={{color:chest.color,marginTop:8}}>REWARDS!</div>
+            <div className="sg-login-rewards">
+              {rewards.coins > 0 && (
+                <div className="sg-login-reward-chip sg-reward-burst" style={{animationDelay:"0ms",borderColor:"rgba(255,170,0,0.3)"}}>
+                  <div className="sg-login-reward-icon">⬡</div>
+                  <div className="sg-login-reward-val" style={{color:"#ffaa00"}}>+{rewards.coins}</div>
+                  <div className="sg-login-reward-lbl">COINS</div>
+                </div>
+              )}
+              {rewards.parts > 0 && (
+                <div className="sg-login-reward-chip sg-reward-burst" style={{animationDelay:"80ms",borderColor:"rgba(0,229,255,0.3)"}}>
+                  <div className="sg-login-reward-icon">◈</div>
+                  <div className="sg-login-reward-val" style={{color:"#00e5ff"}}>+{rewards.parts}</div>
+                  <div className="sg-login-reward-lbl">PARTS</div>
+                </div>
+              )}
+              {rewards.lives > 0 && (
+                <div className="sg-login-reward-chip sg-reward-burst" style={{animationDelay:"160ms",borderColor:"rgba(255,45,149,0.3)"}}>
+                  <div className="sg-login-reward-icon">❤️</div>
+                  <div className="sg-login-reward-val" style={{color:"#ff2d95"}}>+{rewards.lives}</div>
+                  <div className="sg-login-reward-lbl">LIVES</div>
+                </div>
+              )}
+            </div>
+            <button onClick={function(){ onClaim(rewards); }}
+              style={{background:"linear-gradient(135deg,"+chest.color+","+chest.color+"99)",
+                border:"none",borderRadius:14,padding:"14px 36px",
+                color:"#06060f",fontFamily:"'Orbitron',monospace",fontSize:11,
+                fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",
+                boxShadow:"0 0 20px "+chest.color+"55"}}>
+              COLLECT
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── CHEST INVENTORY ───────────────────────────────────────────── */
+function ChestInventory(props) {
+  var meta = props.meta, setMeta = props.setMeta, lives = props.lives, setLives = props.setLives;
+  var _opening = React.useState(null); var opening = _opening[0]; var setOpening = _opening[1];
+  var _lastReward = React.useState(null); var lastReward = _lastReward[0]; var setLastReward = _lastReward[1];
+  var _flash = React.useState(false); var flash = _flash[0]; var setFlash = _flash[1];
+
+  var chests = meta.chests || { bronze:0, silver:0, gold:0, royal:0 };
+  var types = ['bronze','silver','gold','royal'];
+
+  function openChest(type) {
+    if ((chests[type]||0) <= 0) return;
+    setOpening(type);
+    setFlash(true);
+    setTimeout(function(){ setFlash(false); }, 500);
+    Audio.win();
+
+    var rng = mkSeededRng(Date.now() % 99999);
+    var rewards = CHEST_DEFS[type].rewards(rng);
+
+    setTimeout(function(){
+      setLastReward({ type:type, rewards:rewards });
+      setOpening(null);
+      setMeta(function(m) {
+        var newChests = Object.assign({}, m.chests||{});
+        newChests[type] = Math.max(0, (newChests[type]||0) - 1);
+        var n = Object.assign({}, m, {
+          coins: m.coins + rewards.coins,
+          parts: m.parts + rewards.parts,
+          chests: newChests,
+        });
+        saveMeta(n); return n;
+      });
+      if (rewards.lives > 0) {
+        var fresh = loadLives();
+        var updated = { count: Math.min(MAX_LIVES, fresh.count + rewards.lives), lastRegen: fresh.lastRegen };
+        saveLives(updated); setLives(updated);
+      }
+    }, 600);
+  }
+
+  return (
+    <div>
+      {flash && <div className="sg-chest-open-flash"/>}
+      <div className="sg-chest-inv-row">
+        {types.map(function(type) {
+          var def = CHEST_DEFS[type];
+          var count = chests[type] || 0;
+          var isEmpty = count <= 0;
+          return (
+            <div key={type}
+              className={"sg-chest-inv-card" + (isEmpty?" empty":"")}
+              style={{borderColor: isEmpty?"rgba(255,255,255,0.07)":def.border,
+                      background: isEmpty?"rgba(255,255,255,0.02)":def.bg}}
+              onClick={function(){ if(!isEmpty) openChest(type); }}>
+              <span className="sg-chest-inv-icon"
+                style={{filter:isEmpty?"grayscale(1) brightness(0.4)":"none",
+                  animation: opening===type?"chest-open 0.5s ease":"none"}}>
+                {def.icon}
+              </span>
+              <div className="sg-chest-inv-name" style={{color:isEmpty?"rgba(255,255,255,0.2)":def.color}}>
+                {def.label}
+              </div>
+              <div className="sg-chest-inv-count" style={{color:isEmpty?"rgba(255,255,255,0.15)":def.color}}>
+                {count}
+              </div>
+              {!isEmpty && <div className="sg-chest-inv-tap">TAP TO OPEN</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Last opened reward display */}
+      {lastReward && (
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",
+          borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+          <span style={{fontSize:20}}>{CHEST_DEFS[lastReward.type].icon}</span>
+          <div style={{flex:1,fontSize:11,color:"rgba(255,255,255,0.55)"}}>
+            Last opened: {CHEST_DEFS[lastReward.type].label} Chest
+          </div>
+          <div style={{display:"flex",gap:8,fontFamily:"'Share Tech Mono',monospace",fontSize:11}}>
+            {lastReward.rewards.coins>0&&<span style={{color:"#ffaa00"}}>+{lastReward.rewards.coins}⬡</span>}
+            {lastReward.rewards.parts>0&&<span style={{color:"#00e5ff"}}>+{lastReward.rewards.parts}◈</span>}
+            {lastReward.rewards.lives>0&&<span style={{color:"#ff2d95"}}>+{lastReward.rewards.lives}❤</span>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── TROPHY ROAD ────────────────────────────────────────────────── */
+function TrophyRoad(props) {
+  var meta = props.meta, setMeta = props.setMeta, setLives = props.setLives;
+  var cleared = (meta.levelsCleared||[]).length;
+  var trophyClaimed = meta.trophyClaimed || [];
+  var maxMilestone = TROPHY_MILESTONES[TROPHY_MILESTONES.length-1].levels;
+  var fillPct = Math.min(100, (cleared / maxMilestone) * 100);
+
+  function claimTrophy(m) {
+    if (trophyClaimed.includes(m.levels)) return;
+    var newClaimed = trophyClaimed.concat([m.levels]);
+    var newChests = Object.assign({}, meta.chests||{});
+    if (m.reward.chest) newChests[m.reward.chest] = (newChests[m.reward.chest]||0) + 1;
+    setMeta(function(prev) {
+      var n = Object.assign({}, prev, {
+        coins: prev.coins + m.reward.coins,
+        parts: prev.parts + m.reward.parts,
+        chests: newChests,
+        trophyClaimed: newClaimed,
+      });
+      saveMeta(n); return n;
+    });
+    Audio.win();
+  }
+
+  return (
+    <div className="sg-trophy-road">
+      <div className="sg-trophy-track">
+        <div className="sg-trophy-track-fill" style={{width:fillPct+"%"}}/>
+      </div>
+      <div className="sg-trophy-nodes">
+        {TROPHY_MILESTONES.map(function(m) {
+          var done   = cleared >= m.levels;
+          var claimed= trophyClaimed.includes(m.levels);
+          var canClaim = done && !claimed;
+          return (
+            <div key={m.levels} className="sg-trophy-node">
+              <div className={"sg-trophy-gem"+(claimed?" unlocked":(canClaim?" claimable":""))}
+                style={{
+                  borderColor: claimed?"#ffaa00":(canClaim?"#ffaa00":"rgba(255,255,255,0.1)"),
+                  background:  claimed?"rgba(255,170,0,0.18)":(canClaim?"rgba(255,170,0,0.12)":"rgba(255,255,255,0.03)"),
+                  color:       canClaim?"#ffaa00":"rgba(255,255,255,0.3)",
+                  cursor:      canClaim?"pointer":"default",
+                }}
+                onClick={function(){ if(canClaim) claimTrophy(m); }}>
+                {claimed ? "✓" : m.icon}
+              </div>
+              <div className={"sg-trophy-label"+(claimed?" done":"")}>
+                {m.label}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ─── CITY TAB ──────────────────────────────────────────────────── */
 function CityTab(props) {
-  var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData;
+  var meta=props.meta, setMeta=props.setMeta, xpData=props.xpData, lives=props.lives, setLives=props.setLives;
   var idle=calcIdle(meta);
   function collect(){ setMeta(function(m){ var n=Object.assign({},m,{coins:m.coins+calcIdle(m),lastCollect:Date.now()}); saveMeta(n); return n; }); }
   function buyUpgrade(id,cur,cost){
@@ -2806,6 +3555,12 @@ function CityTab(props) {
     <div style={{paddingBottom:16}}>
       <div className="sg-label" style={{marginTop:8}}>CITY RESTORATION</div>
       <CityOverview levelsCleared={meta.levelsCleared||[]} stars={meta.stars||{}}/>
+
+      <div className="sg-label">TROPHY ROAD</div>
+      <TrophyRoad meta={meta} setMeta={setMeta} setLives={setLives}/>
+
+      <div className="sg-label" style={{marginTop:14}}>CHESTS</div>
+      <ChestInventory meta={meta} setMeta={setMeta} lives={lives} setLives={setLives}/>
 
       <div className="sg-label">IDLE INCOME</div>
       <div className="sg-idle-card">
@@ -3273,6 +4028,7 @@ function Shiftgrid() {
   var challengeData=_cd[0]; var setChallengeData=_cd[1];
   var _su=React.useState(false); var showXPUp=_su[0]; var setShowXPUp=_su[1];
   var _sg=React.useState(loadSessionGoals); var sessionGoals=_sg[0]; var setSessionGoals=_sg[1];
+  var _lc=React.useState(shouldShowLoginChest); var showLoginChest=_lc[0]; var setShowLoginChest=_lc[1];
 
   React.useEffect(function(){
     var t=setInterval(function(){ setLives(loadLives()); },30000);
@@ -3330,12 +4086,17 @@ function Shiftgrid() {
       saveChallenges(newCD); setChallengeData(newCD);
     }
 
-    /* Meta */
+    /* Meta + Chest rewards */
     setMeta(function(m){
       var cleared=Array.from(new Set((m.levelsCleared||[]).concat([lvl.id])));
       var newStars=Object.assign({},m.stars||{});
       if((newStars[lvl.id]||0)<stars) newStars[lvl.id]=stars;
-      var n=Object.assign({},m,{coins:m.coins+(rewards.coins||0),parts:m.parts+(rewards.parts||0),levelsCleared:cleared,stars:newStars});
+      /* Chest drop logic */
+      var newChests=Object.assign({bronze:0,silver:0,gold:0,royal:0},m.chests||{});
+      if(lvl.boss)                        newChests.gold   = (newChests.gold||0)+1;
+      else if(stars===3)                  newChests.silver = (newChests.silver||0)+1;
+      else if(Math.random()<0.4)          newChests.bronze = (newChests.bronze||0)+1;
+      var n=Object.assign({},m,{coins:m.coins+(rewards.coins||0),parts:m.parts+(rewards.parts||0),levelsCleared:cleared,stars:newStars,chests:newChests});
       saveMeta(n); return n;
     });
 
@@ -3382,6 +4143,27 @@ function Shiftgrid() {
     if(pendingLevel){ setPlaying(pendingLevel); setPendingLevel(null); }
   }
 
+  function handleLoginClaim(rewards) {
+    saveLoginData({ lastLogin: todayStr(), claimed: true });
+    setShowLoginChest(false);
+    setMeta(function(m) {
+      var n = Object.assign({}, m, {
+        coins: m.coins + (rewards.coins||0),
+        parts: m.parts + (rewards.parts||0),
+      });
+      saveMeta(n); return n;
+    });
+    if ((rewards.lives||0) > 0) {
+      var fresh = loadLives();
+      var updated = { count: Math.min(MAX_LIVES, fresh.count + rewards.lives), lastRegen: fresh.lastRegen };
+      saveLives(updated); setLives(updated);
+    }
+    Audio.win();
+  }
+
+  var rank = getKingdomRank(meta.levelsCleared);
+  var streakAtRisk = streak.count >= 2 && streak.lastDay !== todayStr() && !isStreakProtected(streak);
+
   var TABS=[
     {id:"campaign",  icon:"🗺", label:"PLAY"},
     {id:"challenges",icon:"🎯", label:"QUESTS"},
@@ -3420,6 +4202,7 @@ function Shiftgrid() {
       {showTuto&&<TutorialOverlay step={tutoStep} onNext={handleTutoNext} onSkip={handleTutoSkip}/>}
       {livesGate&&<LivesGate lives={lives} onBack={function(){ setLivesGate(false); setPendingLevel(null); }} onWatchAd={watchAdForLife}/>}
       {showStarterPack&&<StarterPack onClose={function(){ setShowStarterPack(false); }} onBuy={function(){ setShowStarterPack(false); }}/>}
+      {showLoginChest&&<LoginChestPopup streak={streak} onClaim={handleLoginClaim}/>}
 
       {/* XP Level Up toast */}
       {showXPUp&&(
@@ -3429,7 +4212,12 @@ function Shiftgrid() {
       )}
 
       <div className="sg-header">
-        <div className="sg-logo">SHIFTGRID</div>
+        <div>
+          <div className="sg-logo">SHIFTGRID</div>
+          <div className="sg-kingdom-rank" style={{color:rank.color,borderColor:rank.border,background:rank.bg,marginTop:3}}>
+            {rank.label}
+          </div>
+        </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <div className="sg-lives">
             {[0,1,2,3,4].map(function(i){ return <span key={i} className={"sg-heart"+(i<lives.count?"":" empty")}>❤️</span>; })}
@@ -3446,7 +4234,7 @@ function Shiftgrid() {
         {tab==="campaign"   &&<CampaignTab meta={meta} onPlay={handlePlay} setMeta={setMeta} sessionGoals={sessionGoals} setSessionGoals={setSessionGoals}/>}
         {tab==="challenges" &&<ChallengesTab meta={meta} setMeta={setMeta} challengeData={challengeData} setChallengeData={setChallengeData} streak={streak} onStreakUpdate={setStreak} onPlay={handlePlay}/>}
         {tab==="event"      &&<WeeklyTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
-        {tab==="city"       &&<CityTab meta={meta} setMeta={setMeta} xpData={xpData}/>}
+        {tab==="city"       &&<CityTab meta={meta} setMeta={setMeta} xpData={xpData} lives={lives} setLives={setLives}/>}
         {tab==="editor"     &&<EditorTab meta={meta} setMeta={setMeta} onPlay={handlePlay}/>}
       </div>
       <nav className="sg-nav">
@@ -3457,7 +4245,7 @@ function Shiftgrid() {
             <button key={t.id} className={"sg-nav-btn"+(tab===t.id?" active":"")} onClick={function(){ Audio.tap(); setTab(t.id); }} style={{position:"relative"}}>
               <span className="nav-icon">{t.icon}</span>
               <span>{t.label}</span>
-              {hasDot&&tab!==t.id&&<div style={{position:"absolute",top:5,right:"50%",marginRight:-16,width:7,height:7,borderRadius:"50%",background:t.id==="challenges"?"#00ff88":"#ffaa00",boxShadow:"0 0 6px currentColor"}}/>}
+              {hasDot&&tab!==t.id&&<div style={{position:"absolute",top:5,right:"50%",marginRight:-16,width:7,height:7,borderRadius:"50%",background:dotColor,boxShadow:"0 0 6px "+dotColor}}/>}
             </button>
           );
         })}
