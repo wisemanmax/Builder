@@ -168,7 +168,7 @@
 
 .sg-play-top {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 12px 3px; flex-shrink: 0; min-height: 0;
+  padding: 4px 12px 2px; flex-shrink: 0; min-height: 0;
 }
 .sg-back {
   width: 30px; height: 30px; border-radius: 8px;
@@ -1699,8 +1699,8 @@
 
 /* ── TOASTS ── */
 .sg-toasts {
-  min-height: 28px; display: flex; align-items: center; justify-content: center;
-  gap: 10px; flex-wrap: wrap; padding: 0 14px 2px; flex-shrink: 0;
+  min-height: 0; display: flex; align-items: center; justify-content: center;
+  gap: 6px; flex-wrap: wrap; padding: 0 10px 1px; flex-shrink: 0;
 }
 .sg-toast {
   font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 700;
@@ -1715,9 +1715,9 @@
 /* ── GRID AREA ── */
 .sg-grid-area {
   display: flex; flex-direction: column; align-items: center;
-  gap: var(--gap); flex-shrink: 0; padding: 0 14px;
+  gap: var(--gap); flex-shrink: 0;
 }
-.sg-col-btns { display: flex; gap: var(--gap); padding: 0 calc(var(--bw) + var(--gap)); }
+.sg-col-btns { display: flex; gap: var(--gap); padding: 0; }
 .sg-grid-row { display: flex; gap: var(--gap); align-items: center; }
 
 /* Arrow shift buttons */
@@ -1731,7 +1731,7 @@
   transition: all 0.12s; flex-shrink: 0;
   font-family: inherit;
 }
-.sg-shift-btn.col-btn { width: var(--sz); height: 38px; }
+.sg-shift-btn.col-btn { width: var(--sz); height: 26px; }
 .sg-shift-btn:hover:not(:disabled) {
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
   border-color: rgba(255,255,255,0.18);
@@ -1817,7 +1817,7 @@
 @keyframes sl-down  { from{transform:translateY(0)} to{transform:translateY(calc(var(--sz) + var(--gap)))} }
 
 /* ── BUILDINGS ── */
-.sg-bldg-list { padding: 0 10px 4px; flex-shrink: 1; overflow-y: auto; max-height: 180px; }
+.sg-bldg-list { padding: 0 10px 4px; flex-shrink: 1; overflow-y: auto; max-height: 160px; min-height: 0; }
 .sg-bldg-lbl { font-size: 7px; letter-spacing: 0.18em; color: rgba(255,255,255,0.18); margin-bottom: 4px; }
 .sg-bldg {
   display: flex; align-items: center; gap: 7px;
@@ -3952,9 +3952,9 @@ const CHEST_DEFS = {
   bronze: { label:"BRONZE", icon:"📦", color:"#cd7f32", border:"rgba(205,127,50,0.4)",  bg:"rgba(205,127,50,0.08)",
             rewards: function(rng){ return { coins: 20+Math.floor(rng()*40), parts: 2+Math.floor(rng()*3), lives: 0 }; } },
   silver: { label:"SILVER", icon:"🎁", color:"#c0c0c0", border:"rgba(192,192,192,0.4)", bg:"rgba(192,192,192,0.07)",
-            rewards: function(rng){ return { coins: 60+Math.floor(rng()*60), parts: 5+Math.floor(rng()*6), lives: Math.random()<0.2?1:0 }; } },
+            rewards: function(rng){ return { coins: 60+Math.floor(rng()*60), parts: 5+Math.floor(rng()*6), lives: rng()<0.2?1:0 }; } },
   gold:   { label:"GOLD",   icon:"🏆", color:"#ffaa00", border:"rgba(255,170,0,0.5)",   bg:"rgba(255,170,0,0.1)",
-            rewards: function(rng){ return { coins: 120+Math.floor(rng()*100), parts: 12+Math.floor(rng()*9), lives: Math.random()<0.5?1:0 }; } },
+            rewards: function(rng){ return { coins: 120+Math.floor(rng()*100), parts: 12+Math.floor(rng()*9), lives: rng()<0.5?1:0 }; } },
   royal:  { label:"ROYAL",  icon:"👑", color:"#a855f7", border:"rgba(168,85,247,0.55)", bg:"rgba(168,85,247,0.12)",
             rewards: function(rng){ return { coins: 250+Math.floor(rng()*150), parts: 25+Math.floor(rng()*16), lives: 1+Math.floor(rng()*2) }; } },
 };
@@ -4509,7 +4509,7 @@ function injectSpecialNodes(grid, levelId, rng){
   while(placed<count&&tries<30){
     tries++;
     var r=Math.floor(fn()*ROWS),c=Math.floor(fn()*COLS);
-    if(!g[r][c].corrupted&&!g[r][c].nodeType){
+    if(!g[r][c].corrupted&&!g[r][c].nodeType&&!g[r][c].blocker){
       g[r][c]=Object.assign({},g[r][c],{nodeType:type});
       placed++;
     }
@@ -4539,7 +4539,7 @@ function addCorruption(grid,count,rng,withPatrol){
   let n=0,tries=0;
   while(n<count&&tries<100){
     tries++; const r=Math.floor(fn()*ROWS),c=Math.floor(fn()*COLS);
-    if(!g[r][c].corrupted){
+    if(!g[r][c].corrupted&&!g[r][c].blocker){
       var isPatrol = withPatrol && n===0; /* first corrupt tile is a patroller */
       g[r][c]=Object.assign({},g[r][c],{corrupted:true, patrol:isPatrol||false, patrolDir:isPatrol?0:undefined});
       n++;
@@ -4631,7 +4631,7 @@ function spreadCorruption(grid,slow){
   const sources=[]; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(g[r][c]&&g[r][c].corrupted) sources.push([r,c]);
   if(!sources.length) return g;
   const src=sources[Math.floor(Math.random()*sources.length)]; const sr=src[0],sc=src[1];
-  const nbrs=[[-1,0],[1,0],[0,-1],[0,1]].map(function(d){ return [sr+d[0],sc+d[1]]; }).filter(function(pos){ return pos[0]>=0&&pos[0]<ROWS&&pos[1]>=0&&pos[1]<COLS&&g[pos[0]][pos[1]]&&!g[pos[0]][pos[1]].corrupted; });
+  const nbrs=[[-1,0],[1,0],[0,-1],[0,1]].map(function(d){ return [sr+d[0],sc+d[1]]; }).filter(function(pos){ return pos[0]>=0&&pos[0]<ROWS&&pos[1]>=0&&pos[1]<COLS&&g[pos[0]][pos[1]]&&!g[pos[0]][pos[1]].corrupted&&!g[pos[0]][pos[1]].blocker; });
   if(nbrs.length){ const pick=nbrs[Math.floor(Math.random()*nbrs.length)]; g[pick[0]][pick[1]]=Object.assign({},g[pick[0]][pick[1]],{corrupted:true}); }
   return g;
 }
@@ -5000,7 +5000,12 @@ function GameBoard(props) {
   const initialAbilities = React.useMemo(function(){
     var base=loadAbilities();
     var preload=props.preloadedAbilities||[];
-    /* Already deducted from storage in handlePreLaunch, but make sure state reflects that */
+    /* Boosters already deducted in handlePreLaunch — add +1 charge in-game for each preloaded */
+    if(preload.length > 0){
+      var boosted = Object.assign({}, base);
+      preload.forEach(function(id){ boosted[id] = (boosted[id]||0) + 1; });
+      return boosted;
+    }
     return base;
   },[]);
   const colorblind   = React.useMemo(function(){ return loadSettings().colorblind||false; },[]);
@@ -5115,6 +5120,13 @@ function GameBoard(props) {
     if(phase!=="idle") return;
     timers.current.forEach(clearTimeout); timers.current=[];
 
+    /* ── ANCHOR: check if this row/col is locked ── */
+    if(!wasWildfire && isShiftBlocked(grid, type, idx)){
+      addToast("🔒 ANCHOR LOCK — clear an adjacent tile first!", "#64a0ff");
+      Audio.tap(); Haptics.medium();
+      return;
+    }
+
     setSlideAnim({type:type,idx:idx,dir:dir});
     setPhase("busy");
     Audio.shift(); Haptics.light();
@@ -5122,14 +5134,6 @@ function GameBoard(props) {
     setShiftNudge(dir); setTimeout(function(){ setShiftNudge(null); }, 160);
     /* Record move for Grid Memory */
     moveHistoryRef.current.push({type:type,idx:idx,dir:dir});
-
-    /* ── ANCHOR: check if this row/col is locked ── */
-    if(!wasWildfire && isShiftBlocked(grid, type, idx)){
-      setPhase("idle");
-      addToast("🔒 ANCHOR LOCK — clear an adjacent tile first!", "#64a0ff");
-      Audio.tap();
-      return;
-    }
 
     later(function(){
       setSlideAnim(null);
@@ -5143,8 +5147,8 @@ function GameBoard(props) {
       var wildfireCleared={};
       if(wasWildfire){
         var wildcells=[];
-        if(type==="row"){ for(var wc=0;wc<COLS;wc++) if(!g[idx][wc].corrupted) wildcells.push(idx+","+wc); }
-        else { for(var wr=0;wr<ROWS;wr++) if(!g[wr][idx].corrupted) wildcells.push(wr+","+idx); }
+        if(type==="row"){ for(var wc=0;wc<COLS;wc++) if(!g[idx][wc].corrupted&&!g[idx][wc].blocker) wildcells.push(idx+","+wc); }
+        else { for(var wr=0;wr<ROWS;wr++) if(!g[wr][idx].corrupted&&!g[wr][idx].blocker) wildcells.push(wr+","+idx); }
         if(wildcells.length>=3){
           var wm=new Set(wildcells);
           var wres=applyGravity(g,wm);
@@ -5458,6 +5462,10 @@ function GameBoard(props) {
     lastChanceRef.current=false;
     sessionStatsRef.current={batteries:0,pulses:0,maxCascade:0,corruptCleared:0,consecutiveWins:sessionStatsRef.current.consecutiveWins||0};
     moveHistoryRef.current=[];
+    /* Reset story beats so they replay on retry */
+    storyShownRef.current={};
+    setStoryBeat(null); setAriaTx(null);
+    setComboPower(0); prevRankRef.current=COMBO_RANKS[0].name;
     setNearWinData(null);
     setGrid(buildInitGrid()); setMoves(levelDef.moves);
     setBldgs(function(b){ return b.map(function(x){ return Object.assign({},x,{ch:0,on:false}); }); });
@@ -8549,6 +8557,14 @@ function Shiftgrid() {
       setPendingLevel({levelDef:finalDef,cb:cb});
       setShowTuto(true); setTutoStep(0); return;
     }
+    /* Deduct selected boosters from inventory before launching */
+    if(selectedBoosters && selectedBoosters.length > 0){
+      var curAbils = loadAbilities();
+      selectedBoosters.forEach(function(id){
+        if(curAbils[id] && curAbils[id] > 0) curAbils[id]--;
+      });
+      saveAbilities(curAbils);
+    }
     /* Store pre-selected boosters for GameBoard to pre-load */
     setPlaying({levelDef:finalDef, cb:cb, preloadedAbilities:selectedBoosters||[]});
   }
@@ -8564,6 +8580,7 @@ function Shiftgrid() {
     var stars=calcStars(movesUsed,lvl.moves);
 
     /* XP */
+    var isCampaignLevel = typeof lvl.id === "number" && lvl.id >= 0 && lvl.id <= 99;
     var gained=calcXP(rewards.score||0, stars, lvl.boss);
     var newXP=addXP(xpData, gained);
     var leveledUp=newXP.level>xpData.level;
@@ -8597,7 +8614,6 @@ function Shiftgrid() {
     }
 
     /* Meta + Chest rewards — only track numeric campaign level ids */
-    var isCampaignLevel = typeof lvl.id === "number" && lvl.id >= 0 && lvl.id <= 99;
     setMeta(function(m){
       var cleared=isCampaignLevel?Array.from(new Set((m.levelsCleared||[]).concat([lvl.id]))):(m.levelsCleared||[]);
       var newStars=Object.assign({},m.stars||{});
