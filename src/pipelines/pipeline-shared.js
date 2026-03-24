@@ -62,7 +62,7 @@ import {
   getPipelineSteps,
   clearPipelineSteps,
 } from '../components/message.js'
-import { setPreview, clearPreview, waitForApproval, waitForRetryDecision } from '../components/approval-card.js'
+import { setPreview, clearPreview, waitForApproval, waitForRetryDecision, waitForCheckpoint } from '../components/approval-card.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
 import { autoInjectSupabase } from '../lib/supabase-setup.js'
 import { showFeedbackCard } from '../components/feedback-card.js'
@@ -528,38 +528,78 @@ export function saveChatSession(appId, prompt) {
 /**
  * Render spec compliance card from a compliance JSON object.
  */
-export function renderComplianceCard(compliance) {
-  return (
-    '<div style="padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:11px">' +
-    '<div style="font-weight:700;color:rgba(255,255,255,.9);margin-bottom:6px">Spec Compliance: ' +
-    (compliance.score || 0) +
-    '/100</div>' +
-    (compliance.matched && compliance.matched.length
-      ? '<div style="color:rgba(255,255,255,.5);margin-bottom:2px">Matched:</div>' +
-        compliance.matched
-          .map(function (m) {
-            return '<div style="color:rgba(76,175,80,.8);padding-left:8px">\u2713 ' + esc(m) + '</div>'
-          })
-          .join('')
-      : '') +
-    (compliance.missing && compliance.missing.length
-      ? '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Missing:</div>' +
-        compliance.missing
-          .map(function (m) {
-            return '<div style="color:rgba(255,214,0,.7);padding-left:8px">\u26A0 ' + esc(m) + '</div>'
-          })
-          .join('')
-      : '') +
-    (compliance.violations && compliance.violations.length
-      ? '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Violations:</div>' +
-        compliance.violations
-          .map(function (m) {
-            return '<div style="color:rgba(255,82,82,.7);padding-left:8px">\u2717 ' + esc(m) + '</div>'
-          })
-          .join('')
-      : '') +
-    '</div>'
-  )
+export function renderComplianceCard(compliance, checklist) {
+  var scoreColor = compliance.score >= 80 ? 'rgba(76,175,80,.9)' : compliance.score >= 50 ? 'rgba(255,214,0,.9)' : 'rgba(255,82,82,.9)'
+  var html = '<div style="padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:11px">'
+  html += '<div style="font-weight:700;color:' + scoreColor + ';margin-bottom:6px">Spec Compliance: ' + (compliance.score || 0) + '/100</div>'
+
+  // Feature checklist with verified status
+  if (checklist && checklist.length) {
+    html += '<div style="color:rgba(255,255,255,.5);margin-bottom:4px">Feature Checklist:</div>'
+    for (var i = 0; i < checklist.length; i++) {
+      var item = checklist[i]
+      var icon = item.verified ? '\u2611' : '\u2610'
+      var color = item.verified ? 'rgba(76,175,80,.8)' : (item.required ? 'rgba(255,82,82,.7)' : 'rgba(255,214,0,.7)')
+      html += '<div style="color:' + color + ';padding-left:8px" class="' + (item.verified ? 'ts-check-done' : 'ts-check-miss') + '">' + icon + ' ' + esc(item.text)
+      if (item.required && !item.verified) html += ' <span style="font-size:9px;opacity:.6">(required)</span>'
+      html += '</div>'
+    }
+  }
+
+  if (compliance.matched && compliance.matched.length) {
+    html += '<div style="color:rgba(255,255,255,.5);margin-top:6px;margin-bottom:2px">Matched:</div>'
+    html += compliance.matched.map(function (m) {
+      return '<div style="color:rgba(76,175,80,.8);padding-left:8px">\u2713 ' + esc(m) + '</div>'
+    }).join('')
+  }
+  if (compliance.missing && compliance.missing.length) {
+    html += '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Missing:</div>'
+    html += compliance.missing.map(function (m) {
+      return '<div style="color:rgba(255,214,0,.7);padding-left:8px">\u26A0 ' + esc(m) + '</div>'
+    }).join('')
+  }
+  if (compliance.violations && compliance.violations.length) {
+    html += '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Violations:</div>'
+    html += compliance.violations.map(function (m) {
+      return '<div style="color:rgba(255,82,82,.7);padding-left:8px">\u2717 ' + esc(m) + '</div>'
+    }).join('')
+  }
+  html += '</div>'
+  return html
+}
+
+/**
+ * Cross-reference feature checklist against compliance results.
+ * Marks features as verified if they appear in compliance.matched.
+ */
+export function verifyFeatureChecklist(checklist, compliance) {
+  if (!checklist || !checklist.length || !compliance) return checklist || []
+  var matched = (compliance.matched || []).map(function (m) { return m.toLowerCase() })
+  var result = []
+  for (var i = 0; i < checklist.length; i++) {
+    var item = { id: checklist[i].id, text: checklist[i].text, required: checklist[i].required, verified: false }
+    var lower = item.text.toLowerCase()
+    for (var j = 0; j < matched.length; j++) {
+      if (matched[j].indexOf(lower) !== -1 || lower.indexOf(matched[j]) !== -1) {
+        item.verified = true
+        break
+      }
+    }
+    // Also check if it's NOT in the missing list
+    if (!item.verified && compliance.missing) {
+      var isMissing = false
+      for (var k = 0; k < compliance.missing.length; k++) {
+        if (compliance.missing[k].toLowerCase().indexOf(lower) !== -1 || lower.indexOf(compliance.missing[k].toLowerCase()) !== -1) {
+          isMissing = true
+          break
+        }
+      }
+      // If not missing and not explicitly matched, give benefit of the doubt
+      if (!isMissing) item.verified = true
+    }
+    result.push(item)
+  }
+  return result
 }
 
 /**
@@ -725,6 +765,7 @@ export {
   clearPreview,
   waitForApproval,
   waitForRetryDecision,
+  waitForCheckpoint,
   createStreamingPreview,
   autoInjectSupabase,
   showFeedbackCard,

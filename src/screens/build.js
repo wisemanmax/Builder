@@ -430,11 +430,34 @@ function _runBuild(text, existing, customName, images) {
 }
 
 var SYS_CLASSIFY_MAGNITUDE =
-  'Classify this change request for an existing web app as either "quick" or "full".\nQuick: CSS tweaks, color changes, text edits, simple style updates, adding/removing a single element, toggling visibility, font changes.\nFull: New features, new pages/views, adding data models, architectural changes, API integrations, complex interactive components.\nReturn ONLY JSON: {"magnitude":"quick"} or {"magnitude":"full"}'
+  'Classify this change request for an existing web app into one of these categories:\n' +
+  '- "css-only": Pure CSS/style changes — colors, fonts, spacing, sizing, borders, shadows, animations, themes, dark mode toggle, responsive tweaks. Nothing that changes HTML structure or JS logic.\n' +
+  '- "text-only": Text/content changes — updating headings, labels, placeholder text, button text, error messages, demo data. No structural or logic changes.\n' +
+  '- "quick": Small functional changes — adding/removing a single element, toggling visibility, simple UI tweaks that touch HTML+CSS but not major JS.\n' +
+  '- "full": New features, new pages/views, adding data models, architectural changes, API integrations, complex interactive components.\n' +
+  'Return ONLY JSON: {"magnitude":"css-only"|"text-only"|"quick"|"full"}'
+
+var SYS_CSS_EDIT =
+  'You are editing ONLY the <style> section of a single-file HTML app. The user wants a CSS-only change.\n' +
+  'RULES:\n' +
+  '1. Return the COMPLETE HTML file starting with <!DOCTYPE html>\n' +
+  '2. Modify ONLY CSS inside <style> tags — do NOT change any HTML structure or JavaScript\n' +
+  '3. Preserve all existing functionality, event handlers, and DOM structure\n' +
+  '4. All CSS inside <style>, all JS inside <script>\n' +
+  '5. ZERO external dependencies'
+
+var SYS_TEXT_EDIT =
+  'You are editing ONLY the text content of a single-file HTML app. The user wants a text/content change.\n' +
+  'RULES:\n' +
+  '1. Return the COMPLETE HTML file starting with <!DOCTYPE html>\n' +
+  '2. Modify ONLY text content, labels, headings, placeholder text, or demo data\n' +
+  '3. Do NOT change CSS styles, JavaScript logic, or HTML structure/attributes\n' +
+  '4. Preserve all existing functionality and event handlers\n' +
+  '5. All CSS inside <style>, all JS inside <script>'
 
 function _classifyAndRoute(text, existing, customName, images) {
   // Short prompts that look like simple edits → quick classify
-  var isLikelyQuick = text.length < 100 && !images.length
+  var isLikelyQuick = text.length < 150 && !images.length
   if (!isLikelyQuick) {
     _runBuild(text, existing, customName, images)
     return
@@ -447,6 +470,12 @@ function _classifyAndRoute(text, existing, customName, images) {
       $('send-btn').disabled = false
       try {
         var parsed = JSON.parse(raw)
+        if (parsed.magnitude === 'css-only' || parsed.magnitude === 'text-only') {
+          runQuickEdit(text, existing, images, parsed.magnitude)
+          syncStopButton()
+          _startStopBtnSync()
+          return
+        }
         if (parsed.magnitude === 'quick') {
           runQuickEdit(text, existing, images)
           syncStopButton()
