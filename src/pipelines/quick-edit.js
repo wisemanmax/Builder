@@ -73,7 +73,7 @@ export function runQuickEdit(prompt, existingApp, images) {
   callClaudeWithThinkingStream(
     effectiveSys,
     userMsg,
-    1000,
+    4000,
     function (type, text) {
       if (type === 'text') {
         charCount += text.length

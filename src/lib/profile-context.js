@@ -170,30 +170,36 @@ export function formatBriefWithConversation(thought) {
   var conv = thought.conversation || []
   if (!conv.length) return specText
 
-  // Extract substantive user messages (skip short ones and system markers)
+  // Extract substantive messages from both user and AI (skip short ones and system markers)
   var userMsgs = []
   for (var i = 0; i < conv.length; i++) {
     var c = conv[i]
-    if (c.role !== 'user') continue
     var txt = (c.text || '').trim()
     if (txt.length < 15) continue
     if (txt.indexOf('[Round reset') === 0) continue
     if (txt.indexOf('Round:') === 0) continue
     if (txt === 'Confirmed. Lock in this specification.') continue
-    userMsgs.push(txt)
+    if (c.role === 'user') {
+      userMsgs.push('[User] ' + txt)
+    } else if (c.role === 'assistant' || c.role === 'asst') {
+      // Include AI responses that contain design/feature decisions (not just JSON)
+      if (txt.indexOf('{') !== 0 && txt.length > 30) {
+        userMsgs.push('[AI] ' + txt)
+      }
+    }
   }
 
   if (!userMsgs.length) return specText
 
-  // Sort by length descending and take top 5 most substantive
+  // Sort by length descending and take top 15 most substantive
   userMsgs.sort(function (a, b) {
     return b.length - a.length
   })
-  userMsgs = userMsgs.slice(0, 5)
+  userMsgs = userMsgs.slice(0, 15)
 
-  var lines = [specText, '\n### IDEATION CONTEXT', "Key points from the user's ideation session:"]
+  var lines = [specText, '\n### IDEATION CONTEXT', "Key points from the user's ideation session (use these to deeply understand intent, preferences, and nuances):"]
   for (var j = 0; j < userMsgs.length; j++) {
-    var excerpt = userMsgs[j].length > 200 ? userMsgs[j].slice(0, 200) + '\u2026' : userMsgs[j]
+    var excerpt = userMsgs[j].length > 300 ? userMsgs[j].slice(0, 300) + '\u2026' : userMsgs[j]
     lines.push('- "' + excerpt + '"')
   }
   return lines.join('\n')

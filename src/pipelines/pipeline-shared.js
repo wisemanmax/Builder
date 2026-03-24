@@ -341,19 +341,60 @@ export function buildEffectiveSys(baseSys, thoughtCtx) {
 }
 
 /**
+ * Build a conversation memory summary from prior chat sessions.
+ * Extracts what the user asked for and what was built/changed each session,
+ * giving the AI context similar to a multi-turn chat conversation.
+ */
+function buildConversationMemory(existingApp) {
+  var memory = []
+  // Include prompt history with timestamps
+  var prompts = existingApp.prompts || []
+  for (var i = 0; i < prompts.length; i++) {
+    var p = prompts[i]
+    var entry = (p.type === 'initial' ? 'Initial build' : 'Update') + ': ' + p.text
+    if (p.ts) entry = '[' + p.ts.split('T')[0] + '] ' + entry
+    memory.push(entry)
+  }
+  // Include chat session summaries (what user asked and key outcomes)
+  var sessions = existingApp.chatHistory || []
+  for (var j = 0; j < Math.min(sessions.length, 5); j++) {
+    var s = sessions[j]
+    if (s.prompt) {
+      var sessionEntry = '[' + (s.ts || '').split('T')[0] + '] Session: ' + s.prompt
+      // Extract key user feedback from session messages
+      var msgs = s.messages || []
+      var userFeedback = []
+      for (var k = 0; k < msgs.length; k++) {
+        var m = msgs[k]
+        if (m.role === 'user' && m.text && m.text.length > 20) {
+          userFeedback.push(m.text.slice(0, 150))
+        }
+      }
+      if (userFeedback.length) {
+        sessionEntry += '\n  User feedback: ' + userFeedback.slice(0, 3).join(' | ')
+      }
+      memory.push(sessionEntry)
+    }
+  }
+  return memory
+}
+
+/**
  * Build the user message for a build or update request.
  */
 export function buildUserMessage(prompt, existingApp, customName, thoughtCtx) {
   var userMsg
   if (existingApp) {
     var currentCode = existingApp.code || ''
-    var prevPrompts = (existingApp.prompts || [])
-      .map(function (p) {
-        return p.text
-      })
-      .join('\n\u2192 ')
+    // Build rich conversation memory from all prior interactions
+    var memoryEntries = buildConversationMemory(existingApp)
     var codeSection = currentCode ? '\n\nCURRENT APP CODE:\n' + currentCode.slice(0, 120000) : ''
-    var historySection = prevPrompts ? '\n\nBUILD HISTORY (for context):\n' + prevPrompts : ''
+    var historySection = ''
+    if (memoryEntries.length) {
+      historySection = '\n\nCONVERSATION MEMORY (full history of this app — use this to understand context, user preferences, and prior decisions):\n' +
+        memoryEntries.join('\n') +
+        '\n\nThis is an ongoing project. The user has been iterating on this app. Maintain consistency with prior decisions unless the user explicitly asks to change something.'
+    }
     userMsg =
       'CHANGE REQUEST: ' +
       prompt +
