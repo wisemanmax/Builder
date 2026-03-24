@@ -62,6 +62,12 @@ import {
   registerPipeType,
   getPipelineSteps,
   clearPipelineSteps,
+  startPipeTimer,
+  stopPipeTimer,
+  updatePipeETA,
+  updatePipeStep,
+  updatePipeProgress,
+  finishPipeHeader,
 } from '../components/message.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision, waitForCheckpoint } from '../components/approval-card.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
@@ -808,6 +814,12 @@ export {
   registerPipeType,
   getPipelineSteps,
   clearPipelineSteps,
+  startPipeTimer,
+  stopPipeTimer,
+  updatePipeETA,
+  updatePipeStep,
+  updatePipeProgress,
+  finishPipeHeader,
   setPreview,
   clearPreview,
   waitForApproval,
