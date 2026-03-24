@@ -2,6 +2,7 @@ import { TEMPLATES } from '../config/templates.js'
 import { getBuildRecords } from './build-record.js'
 import { computeCompositeScore, computeQualityScore, computeSatisfactionScore } from './scoring.js'
 import { ST } from './state.js'
+import { callClaudeRaw } from './ai.js'
 
 /**
  * Phase 4: Similarity-Based Template Ranking
@@ -208,8 +209,111 @@ export function rankTemplates(prompt, profileId) {
   return ranked
 }
 
+/* ---- Semantic similarity via Claude ---- */
+
+var SYS_TEMPLATE_MATCH =
+  'You match app ideas to template categories. Given a user prompt and template list, ' +
+  'rank the top 3 most relevant templates.\n\n' +
+  'Return ONLY valid JSON — no markdown:\n' +
+  '[{ "id": "template-id", "relevance": 0-100, "reason": "one short sentence" }]\n\n' +
+  'Only include templates with relevance > 20. Max 3 results.'
+
+var _semanticCache = {}
+
 /**
- * Get top N recommended templates.
+ * Use Claude to semantically match a prompt to templates.
+ * Results are cached per prompt. Falls back to keyword matching on failure.
+ * @param {string} prompt
+ * @returns {Promise<object>} { templateId: { relevance, reason } }
+ */
+export function semanticRankTemplates(prompt) {
+  if (!prompt) return Promise.resolve({})
+
+  // Check cache (normalize prompt to lowercase trimmed)
+  var cacheKey = prompt.toLowerCase().trim().slice(0, 200)
+  if (_semanticCache[cacheKey]) return Promise.resolve(_semanticCache[cacheKey])
+
+  // Skip if no API key
+  if (!ST.key) return Promise.resolve({})
+
+  var templateList = TEMPLATES.map(function (t) {
+    return '- ' + t.id + ': ' + t.name + ' (' + t.category + ') — ' + (t.desc || '')
+  }).join('\n')
+
+  var msg = 'USER PROMPT: "' + prompt.slice(0, 500) + '"\n\nTEMPLATES:\n' + templateList
+
+  return callClaudeRaw(SYS_TEMPLATE_MATCH, msg, 500)
+    .then(function (raw) {
+      var results
+      try {
+        results = JSON.parse(raw)
+      } catch (e) {
+        var match = raw.match(/\[[\s\S]*\]/)
+        if (match) {
+          try { results = JSON.parse(match[0]) } catch (e2) { results = [] }
+        } else {
+          results = []
+        }
+      }
+
+      var lookup = {}
+      for (var i = 0; i < results.length; i++) {
+        if (results[i] && results[i].id) {
+          lookup[results[i].id] = {
+            relevance: results[i].relevance || 0,
+            reason: results[i].reason || '',
+          }
+        }
+      }
+      _semanticCache[cacheKey] = lookup
+      return lookup
+    })
+    .catch(function () {
+      // Fall back to empty — keyword matching will still work
+      return {}
+    })
+}
+
+/**
+ * Get top N recommended templates with optional semantic boost.
+ * Tries semantic matching first, then falls back to keyword-only.
+ * @param {string} prompt
+ * @param {number} n - max results (default 3)
+ * @returns {Promise<object[]>} top recommendations
+ */
+export function getRecommendationsSemantic(prompt, n) {
+  return semanticRankTemplates(prompt).then(function (semantic) {
+    var ranked = rankTemplates(prompt)
+
+    // Boost scores with semantic relevance
+    for (var i = 0; i < ranked.length; i++) {
+      var sem = semantic[ranked[i].id]
+      if (sem) {
+        // Add up to 30 points from semantic match (relevance is 0-100)
+        ranked[i].score += (sem.relevance / 100) * 30
+        if (!ranked[i].reason && sem.reason) ranked[i].reason = sem.reason
+        if (sem.relevance >= 60 && !ranked[i].reason) ranked[i].reason = 'AI matched'
+      }
+    }
+
+    // Re-sort
+    ranked.sort(function (a, b) {
+      if (b.score !== a.score) return b.score - a.score
+      return a.name.localeCompare(b.name)
+    })
+
+    var results = []
+    for (var j = 0; j < ranked.length && results.length < (n || 3); j++) {
+      if (ranked[j].score > 5 || ranked[j].reason) {
+        results.push(ranked[j])
+      }
+    }
+    return results
+  })
+}
+
+/**
+ * Get top N recommended templates (synchronous, keyword-only).
  * Only returns templates with a meaningful score.
  * @param {string} prompt
  * @param {number} n - max results (default 3)

@@ -34,6 +34,19 @@ export function analyzeFeedback(profileId) {
     }
   })
 
+  // Gather thought-level feedback from thoughts
+  var thoughtFeedback = []
+  for (var t = 0; t < ST.thoughts.length; t++) {
+    var th = ST.thoughts[t]
+    if (th.feedback && th.feedback.rating) {
+      thoughtFeedback.push({
+        thoughtName: th.name || '',
+        thoughtRating: th.feedback.rating,
+        thoughtText: th.feedback.text || '',
+      })
+    }
+  }
+
   var msg =
     'Analyze this feedback from ' +
     feedback.length +
@@ -41,6 +54,11 @@ export function analyzeFeedback(profileId) {
     (profile.name || 'unnamed') +
     '":\n\n' +
     JSON.stringify(feedbackSummary, null, 2)
+
+  if (thoughtFeedback.length) {
+    msg += '\n\nIDEATION/THOUGHT FEEDBACK (' + thoughtFeedback.length + ' entries):\n' +
+      JSON.stringify(thoughtFeedback, null, 2)
+  }
 
   return callClaudeRaw(SYS_LEARN, msg, 2000).then(function (raw) {
     var parsed
@@ -54,6 +72,7 @@ export function analyzeFeedback(profileId) {
       negativePatterns: Array.isArray(parsed.negativePatterns) ? parsed.negativePatterns : [],
       designPrefs: Array.isArray(parsed.designPrefs) ? parsed.designPrefs : [],
       functionalPrefs: Array.isArray(parsed.functionalPrefs) ? parsed.functionalPrefs : [],
+      ideationPrefs: Array.isArray(parsed.ideationPrefs) ? parsed.ideationPrefs : [],
       lastAnalyzedAt: new Date().toISOString(),
       feedbackCount: feedback.length,
     }

@@ -100,6 +100,16 @@ export function getProfileContext() {
         .join('\n') +
       '\n'
   }
+  if (prefs.ideationPrefs && prefs.ideationPrefs.length) {
+    prefsText +=
+      'IDEATION PREFERENCES:\n' +
+      prefs.ideationPrefs
+        .map(function (p) {
+          return '- ' + p
+        })
+        .join('\n') +
+      '\n'
+  }
 
   // Phase 3: Build-learned rules from build record analysis
   var buildRulesText = ''

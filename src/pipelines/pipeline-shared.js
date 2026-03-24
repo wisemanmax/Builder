@@ -65,7 +65,7 @@ import {
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision, waitForCheckpoint } from '../components/approval-card.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
 import { autoInjectSupabase } from '../lib/supabase-setup.js'
-import { showFeedbackCard } from '../components/feedback-card.js'
+import { showFeedbackCard, showThoughtFeedback } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
@@ -590,6 +590,7 @@ export function renderComplianceCard(compliance, checklist) {
 /**
  * Cross-reference feature checklist against compliance results.
  * Marks features as verified if they appear in compliance.matched.
+ * Also persists verification results back to the thought in state.
  */
 export function verifyFeatureChecklist(checklist, compliance) {
   if (!checklist || !checklist.length || !compliance) return checklist || []
@@ -618,7 +619,32 @@ export function verifyFeatureChecklist(checklist, compliance) {
     }
     result.push(item)
   }
+  // Persist verified status back to the thought object
+  _persistChecklistToThought(result)
   return result
+}
+
+/**
+ * Save verified checklist results back to the thought in state.
+ */
+function _persistChecklistToThought(items) {
+  if (!ST.activeThoughtId || !items || !items.length) return
+  for (var i = 0; i < ST.thoughts.length; i++) {
+    if (ST.thoughts[i].id === ST.activeThoughtId && ST.thoughts[i].featureChecklist) {
+      var cl = ST.thoughts[i].featureChecklist
+      var lookup = {}
+      for (var j = 0; j < items.length; j++) {
+        lookup[items[j].id] = items[j]
+      }
+      for (var k = 0; k < cl.length; k++) {
+        if (lookup[cl[k].id]) {
+          cl[k].verified = lookup[cl[k].id].verified
+        }
+      }
+      persist()
+      break
+    }
+  }
 }
 
 /**
@@ -788,6 +814,7 @@ export {
   createStreamingPreview,
   autoInjectSupabase,
   showFeedbackCard,
+  showThoughtFeedback,
   renderGrid,
   pushToSupabase,
   openProjectSheet,
