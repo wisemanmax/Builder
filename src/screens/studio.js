@@ -8,6 +8,7 @@ import { openBuilder, closeBuilder } from './build.js'
 import { openProjectSheet, closeProject } from './project.js'
 import { runPipeline } from '../pipelines/build-pipeline.js'
 import { renderShareCard } from '../lib/share.js'
+import { openVersionPanel } from '../components/version-panel.js'
 
 export function openApp(id) {
   var app = null
@@ -206,6 +207,10 @@ export function initStudio() {
   // Share button
   var shareBtn = $('vbar-share-btn')
   if (shareBtn) shareBtn.addEventListener('click', openShareCard)
+
+  // History button
+  var histBtn = $('vbar-history-btn')
+  if (histBtn) histBtn.addEventListener('click', openVersionPanel)
 
   // Studio editor
   $('se-header-toggle').addEventListener('click', function (e) {

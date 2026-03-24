@@ -63,6 +63,7 @@ import {
   createStreamingPreview,
   autoInjectSupabase,
   showFeedbackCard,
+  showThoughtFeedback,
   renderGrid,
   openProjectSheet,
   injectProfileContext,
@@ -1025,7 +1026,10 @@ export function runPipeline(prompt, existingApp, customName, images) {
         approved: true,
       })
       // Show feedback card if a profile is active
-      return showFeedbackCard(appId, appName, prompt)
+      return showFeedbackCard(appId, appName, prompt).then(function () {
+        // Show thought feedback if this build used a thought (only once per thought)
+        if (ST.activeThoughtId) return showThoughtFeedback(ST.activeThoughtId)
+      })
     })
     .catch(function (err) {
       if (err.message === 'PIPELINE_CANCELLED') {

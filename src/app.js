@@ -65,7 +65,7 @@ import {
   initOrgThinkSheet,
 } from './screens/org-think.js'
 import { renderProfileChip, showProfilePicker, initProfilePicker, cycleProfile } from './components/profile-switcher.js'
-import { initFeedbackCard } from './components/feedback-card.js'
+import { initFeedbackCard, initThoughtFeedback } from './components/feedback-card.js'
 import { initProfilesSettings } from './screens/profiles.js'
 import { openThoughtsFolder, closeThoughtsFolder, initThoughtsFolder, openThoughtDetail } from './screens/thoughts.js'
 import { selfUpdateBuilder } from './pipelines/builder-plus.js'
@@ -121,6 +121,7 @@ export function init() {
   initStudio()
   initSettings()
   initFeedbackCard()
+  initThoughtFeedback()
   initProfilePicker()
   initProfilesSettings()
   initContextMenu(openApp, openProjectSheet, openBuilder, delApp)

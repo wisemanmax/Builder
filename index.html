@@ -269,6 +269,26 @@
   </div>
 </div>
 
+<!-- THOUGHT FEEDBACK OVERLAY -->
+<div id="thought-fb-overlay" role="dialog" aria-label="Rate ideation">
+  <div class="fb-card">
+    <div class="fb-title">&#x1F4AD; Rate this ideation</div>
+    <div class="fb-app-name" id="tfb-thought-name">Thought</div>
+    <div class="fb-stars tfb-stars">
+      <span class="fb-star tfb-star" data-val="1">&#x2605;</span>
+      <span class="fb-star tfb-star" data-val="2">&#x2605;</span>
+      <span class="fb-star tfb-star" data-val="3">&#x2605;</span>
+      <span class="fb-star tfb-star" data-val="4">&#x2605;</span>
+      <span class="fb-star tfb-star" data-val="5">&#x2605;</span>
+    </div>
+    <div class="fl"><label>What was missing or unclear?</label><textarea class="fi" id="tfb-text" rows="2" placeholder="Optional..."></textarea></div>
+    <div class="fb-actions">
+      <button class="btn-p" id="tfb-submit">Save</button>
+      <button class="fb-skip" id="tfb-skip">Skip</button>
+    </div>
+  </div>
+</div>
+
 <!-- PROJECT SHEET -->
 <div id="project-sheet">
   <div class="psheet">
@@ -332,6 +352,7 @@
     </div>
     <div class="vbar-btns" id="vbar-btns">
       <button class="vbar-btn" id="vbar-proj">&#x1F4CB;</button>
+      <button class="vbar-btn" id="vbar-history-btn" title="Version history">&#x23F3;</button>
       <button class="vbar-btn" id="vbar-share-btn" title="Share app">&#x1F517;</button>
       <button class="vbar-btn" id="vbar-fs-toggle" title="Full screen preview">&#x26F6;</button>
     </div>

@@ -279,8 +279,15 @@ export const SYS_LEARN =
   '- negativePatterns: Things the user consistently dislikes or wants changed\n' +
   '- designPrefs: Visual/design preferences (colors, layouts, typography patterns)\n' +
   '- functionalPrefs: Feature/behavior preferences (UX patterns, interaction styles)\n' +
+  '\nYou may also receive thought/ideation feedback entries with:\n' +
+  '- thoughtRating (1-5 stars for how well the ideation captured the user\'s vision)\n' +
+  '- thoughtText (what was missing or unclear in the ideation)\n' +
+  '\nIf thought feedback is present, also extract ideation preferences:\n' +
+  '- ideationPrefs: What makes ideation sessions effective or ineffective for this user\n' +
   '\nKeep each pattern to one concise, actionable sentence. Max 5 items per category.\n' +
-  "If there isn't enough data for a category, return an empty array for it."
+  "If there isn't enough data for a category, return an empty array for it.\n" +
+  '\nUpdated JSON format (add ideationPrefs if thought feedback exists):\n' +
+  '{"positivePatterns":[],"negativePatterns":[],"designPrefs":[],"functionalPrefs":[],"ideationPrefs":[]}'
 
 export const SYS_EXTRACT_RULES =
   'You are analyzing build quality data from an AI app builder to extract actionable improvement rules.\n' +

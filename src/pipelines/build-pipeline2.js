@@ -10,6 +10,7 @@ import {
   saveChatSession,
   ADVISORY_CHECK_IDS,
   renderComplianceCard,
+  verifyFeatureChecklist,
   formatTemplateInjection,
   ST,
   persist,
@@ -58,6 +59,7 @@ import {
   createStreamingPreview,
   autoInjectSupabase,
   showFeedbackCard,
+  showThoughtFeedback,
   renderGrid,
   openProjectSheet,
   injectProfileContext,
@@ -467,13 +469,19 @@ export function runPipeline2(prompt, existingApp, customName, images) {
           })
         : null
       if (activeThought && activeThought.brief && v2) {
+        var featureChecklist = activeThought.featureChecklist || []
         var complianceInput =
           'APP SPECIFICATION:\n' +
           specText +
           '\n\nUSER RULES:\n' +
-          rulesText +
-          '\n\nGENERATED CODE:\n' +
-          v2.slice(0, 40000)
+          rulesText
+        if (featureChecklist.length) {
+          complianceInput += '\n\nFEATURE CHECKLIST (verify each):\n' +
+            featureChecklist.map(function (f, i) {
+              return (i + 1) + '. ' + (f.required ? '[REQUIRED] ' : '[OPTIONAL] ') + f.text
+            }).join('\n')
+        }
+        complianceInput += '\n\nGENERATED CODE:\n' + v2.slice(0, 40000)
         return retryStep(
           function () {
             return callClaudeRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
@@ -484,7 +492,8 @@ export function runPipeline2(prompt, existingApp, customName, images) {
           .then(function (raw) {
             try {
               var compliance = JSON.parse(raw)
-              addMsg({ role: 'asst', type: 'text', html: renderComplianceCard(compliance) })
+              var verifiedChecklist = verifyFeatureChecklist(featureChecklist, compliance)
+              addMsg({ role: 'asst', type: 'text', html: renderComplianceCard(compliance, verifiedChecklist) })
               if (compliance.score < 50) {
                 addMsg({
                   role: 'asst',
@@ -680,7 +689,9 @@ export function runPipeline2(prompt, existingApp, customName, images) {
         costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
         approved: true,
       })
-      return showFeedbackCard(appId, appName, prompt)
+      return showFeedbackCard(appId, appName, prompt).then(function () {
+        if (ST.activeThoughtId) return showThoughtFeedback(ST.activeThoughtId)
+      })
     })
     .catch(function (err) {
       if (err.message === 'PIPELINE_CANCELLED') {
