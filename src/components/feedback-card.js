@@ -132,7 +132,10 @@ export function showThoughtFeedback(thoughtId) {
   // Find thought
   var thought = null
   for (var i = 0; i < ST.thoughts.length; i++) {
-    if (ST.thoughts[i].id === thoughtId) { thought = ST.thoughts[i]; break }
+    if (ST.thoughts[i].id === thoughtId) {
+      thought = ST.thoughts[i]
+      break
+    }
   }
   if (!thought) return Promise.resolve()
   // Already rated
@@ -141,7 +144,10 @@ export function showThoughtFeedback(thoughtId) {
   return new Promise(function (resolve) {
     _thoughtFbResolve = resolve
     var el = $('thought-fb-overlay')
-    if (!el) { resolve(); return }
+    if (!el) {
+      resolve()
+      return
+    }
 
     $('tfb-thought-name').textContent = thought.name || 'Thought'
     var stars = el.querySelectorAll('.tfb-star')

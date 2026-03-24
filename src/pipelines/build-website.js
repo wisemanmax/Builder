@@ -45,6 +45,8 @@ import {
   getThoughtDesignOverrides,
   getTemplateSkeleton,
   telemetry,
+  shouldSkipStep,
+  buildResumeContext,
 } from './pipeline-shared.js'
 import { ghPushTree } from '../lib/github.js'
 import {
@@ -105,7 +107,9 @@ function fileContent(files, path) {
  * 7: Pages  8: Routing  9: Documentation
  * 10: Push  11: Preview  12: Approval  13: Merge
  */
-export function runWebsitePipeline(prompt, existingApp, customName, images) {
+export function runWebsitePipeline(prompt, existingApp, resumeSession, images) {
+  var customName = typeof resumeSession === 'string' ? resumeSession : null
+  if (resumeSession && typeof resumeSession === 'string') resumeSession = null
   clearCurrentSession()
   resetCostAccum()
   clearPipelineCancel()
@@ -127,7 +131,9 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
   var appIcon = ST.pendingIcon
   var appCi = ST.pendingColor
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
-  var branchName = hasGitHub ? 'builder/site-' + appId + '-' + Date.now().toString(36) : ''
+  var branchName =
+    (resumeSession && resumeSession.branchName) ||
+    (hasGitHub ? 'builder/site-' + appId + '-' + Date.now().toString(36) : '')
 
   var _buildId = telemetry.startBuild(appId, 'website')
   var _br = telemetry.createBuildRecord(appId, 'website', prompt, {
@@ -186,9 +192,18 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     })
   }
 
+  var _resumeCtx = resumeSession ? buildResumeContext(resumeSession) : ''
+  var _isResuming = !!resumeSession
+  if (_isResuming) {
+    addMsg({ role: 'system', text: 'Resuming from previous session \u2014 skipping completed steps.' })
+  }
+  ST._resumeSession = null
+
   // Silent branch creation
   var p = Promise.resolve()
-  if (hasGitHub) {
+  if (_isResuming && branchName) {
+    updatePS(pid, 0, 'done', branchName + ' (reused)')
+  } else if (hasGitHub) {
     p = retryStep(
       function () {
         return ghCreateBranch(branchName)
@@ -252,6 +267,7 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     if (_templateSkeleton) {
       decomposeMsg += formatTemplateInjection(_templateSkeleton, _thoughtDesign)
     }
+    if (_resumeCtx) decomposeMsg += '\n\n' + _resumeCtx
     return retryStep(
       function () {
         return callClaudeRaw(effectiveDecomposeSys, decomposeMsg, 4000, images)
@@ -612,7 +628,14 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
       for (var fsi = 0; fsi < _fk.length; fsi++) _finalSize += (files[_fk[fsi]] || '').length
       telemetry.completeBuildRecord(_buildId, {
         finalCodeSize: _finalSize,
-        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        costData: costData.breakdown.length
+          ? {
+              rawCost: costData.rawCost,
+              userPrice: costData.userPrice,
+              totalInput: costData.totalInput,
+              totalOutput: costData.totalOutput,
+            }
+          : null,
         approved: true,
       })
       return showFeedbackCard(appId, appName, prompt)
@@ -638,7 +661,10 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
-        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.emit('user.approval', {
+          approved: false,
+          timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null,
+        })
         telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalStartTs ? Date.now() - _approvalStartTs : null)
         updatePS(pid, 12, 'error', 'Changes requested')

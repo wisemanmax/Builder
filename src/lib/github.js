@@ -156,6 +156,8 @@ export function ghPushThought(thought) {
       brief: thought.brief,
       linkedRulesId: thought.linkedRulesId,
       linkedAppId: thought.linkedAppId,
+      version: thought.version || 1,
+      versions: thought.versions || [],
       createdAt: thought.createdAt,
       updatedAt: thought.updatedAt,
     },
@@ -240,6 +242,70 @@ export function ghPushRulesManifest() {
   })
 }
 
+export function ghPushBuildHistory(appId, chatHistory) {
+  if (!ST.ghToken || !ST.ghUser || !ST.ghRepo || !appId) return Promise.resolve(null)
+  var path = 'history/' + appId + '.json'
+  var content = JSON.stringify(
+    {
+      appId: appId,
+      sessions: (chatHistory || []).map(function (s) {
+        return {
+          id: s.id,
+          ts: s.ts,
+          prompt: s.prompt,
+          messages: s.messages || [],
+        }
+      }),
+      updatedAt: new Date().toISOString(),
+    },
+    null,
+    2
+  )
+  return ghGetFileSha(path, 'main').then(function (sha) {
+    return ghPushFile(path, content, 'Save build history: ' + appId, 'main', sha)
+  })
+}
+
+export function ghPushBuildHistoryManifest() {
+  if (!ST.ghToken || !ST.ghUser || !ST.ghRepo) return Promise.resolve(null)
+  var manifestData = ST.apps
+    .filter(function (a) {
+      return a.chatHistory && a.chatHistory.length > 0
+    })
+    .map(function (a) {
+      return {
+        appId: a.id,
+        appName: a.name,
+        sessionCount: a.chatHistory.length,
+        path: 'history/' + a.id + '.json',
+        updatedAt: a.updatedAt,
+      }
+    })
+  return ghGetFileSha('history/manifest.json', 'main').then(function (sha) {
+    return ghPushFile(
+      'history/manifest.json',
+      JSON.stringify(manifestData, null, 2),
+      'Update build history manifest',
+      'main',
+      sha
+    )
+  })
+}
+
+export function ghSyncBuildHistory(appId) {
+  var app = null
+  for (var i = 0; i < ST.apps.length; i++) {
+    if (ST.apps[i].id === appId) {
+      app = ST.apps[i]
+      break
+    }
+  }
+  if (!app || !app.chatHistory || !app.chatHistory.length) return Promise.resolve(null)
+  return Promise.all([ghPushBuildHistory(appId, app.chatHistory), ghPushBuildHistoryManifest()]).catch(function (e) {
+    logWarn('GitHub', 'build history sync: ' + e)
+  })
+}
+
 export function ghSyncThoughtAndRules(thought, rules) {
   var promises = [ghPushThought(thought), ghPushThoughtsManifest()]
   if (rules) {
@@ -296,6 +362,64 @@ export function testGitHub() {
     })
     .catch(function () {
       return false
+    })
+}
+
+function _pullBuildHistory() {
+  var historyManifestUrl = ghApiUrl('history/manifest.json')
+  fetch(historyManifestUrl, { headers: ghHeaders() })
+    .then(function (res) {
+      if (!res.ok) return
+      return res.json().then(function (file) {
+        var raw = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))))
+        var entries = JSON.parse(raw)
+        if (!Array.isArray(entries)) return
+        var fetchPromises = entries.map(function (entry) {
+          return fetch(ghApiUrl(entry.path), { headers: ghHeaders() })
+            .then(function (r) {
+              if (!r.ok) return null
+              return r.json().then(function (f) {
+                var data = JSON.parse(decodeURIComponent(escape(atob(f.content.replace(/\n/g, '')))))
+                return data
+              })
+            })
+            .catch(function () {
+              return null
+            })
+        })
+        return Promise.all(fetchPromises).then(function (historyFiles) {
+          var merged = 0
+          historyFiles.forEach(function (h) {
+            if (!h || !h.appId || !h.sessions) return
+            var app = null
+            for (var i = 0; i < ST.apps.length; i++) {
+              if (ST.apps[i].id === h.appId) {
+                app = ST.apps[i]
+                break
+              }
+            }
+            if (!app) return
+            if (!app.chatHistory) app.chatHistory = []
+            var existingIds = {}
+            app.chatHistory.forEach(function (s) {
+              existingIds[s.id] = true
+            })
+            h.sessions.forEach(function (s) {
+              if (!existingIds[s.id]) {
+                app.chatHistory.push(s)
+                merged++
+              }
+            })
+            app.chatHistory.sort(function (a, b) {
+              return (b.ts || '').localeCompare(a.ts || '')
+            })
+          })
+          if (merged > 0) persist()
+        })
+      })
+    })
+    .catch(function () {
+      // History pull is best-effort
     })
 }
 
@@ -444,6 +568,8 @@ export function pullFromGitHub() {
             logWarn('GitHub', 'manifest update after sync: ' + e)
           })
         }
+        // Also pull build history for all apps
+        _pullBuildHistory()
         toast(
           'Synced ' +
             added +

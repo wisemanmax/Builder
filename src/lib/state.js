@@ -33,6 +33,7 @@ export const ST = {
   _pendingTemplate: null,
   pipelineMode: 'builder1',
   _pipelineCancelRequested: false,
+  _resumeSession: null,
 }
 
 export function persist() {
@@ -121,11 +122,15 @@ export function hydrate() {
   setTimeout(function () {
     try {
       var _tel = import('./telemetry.js')
-      _tel.then(function (m) { m.pruneEvents() })
+      _tel.then(function (m) {
+        m.pruneEvents()
+      })
     } catch (e) {}
     try {
       var _br = import('./build-record.js')
-      _br.then(function (m) { m.pruneRecords() })
+      _br.then(function (m) {
+        m.pruneRecords()
+      })
     } catch (e) {}
   }, 2000)
 }

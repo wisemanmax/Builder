@@ -64,6 +64,8 @@ import {
   openProjectSheet,
   injectProfileContext,
   telemetry,
+  shouldSkipStep,
+  buildResumeContext,
 } from './pipeline-shared.js'
 
 /**
@@ -71,7 +73,9 @@ import {
  * 0: Plan  1: Build  2: Checks  3: Claude Audit  4: Fix
  * 5: Push  6: Preview  7: Approval  8: Merge
  */
-export function runPipeline2(prompt, existingApp, customName, images) {
+export function runPipeline2(prompt, existingApp, resumeSession, images) {
+  var customName = typeof resumeSession === 'string' ? resumeSession : null
+  if (resumeSession && typeof resumeSession === 'string') resumeSession = null
   clearCurrentSession()
   resetCostAccum()
   clearPipelineCancel()
@@ -98,7 +102,9 @@ export function runPipeline2(prompt, existingApp, customName, images) {
   var appIcon = ST.pendingIcon
   var appCi = ST.pendingColor
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
-  var branchName = hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : ''
+  var branchName =
+    (resumeSession && resumeSession.branchName) ||
+    (hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : '')
 
   var v1, v2, specText, rulesText, fixSys, thinkingText, _streamPreview
   var _buildId = telemetry.startBuild(appId, 'builder2')
@@ -133,20 +139,31 @@ export function runPipeline2(prompt, existingApp, customName, images) {
     })
   }
 
+  var _resumeCtx = resumeSession ? buildResumeContext(resumeSession) : ''
+  var _isResuming = !!resumeSession
+  if (_isResuming) {
+    addMsg({ role: 'system', text: 'Resuming from previous session \u2014 skipping completed steps.' })
+  }
+  ST._resumeSession = null
+
   // Silent branch creation (not a visible step)
   var p = Promise.resolve()
   if (hasGitHub) {
-    p = retryStep(
-      function () {
-        return ghCreateBranch(branchName)
-      },
-      3,
-      'Branch'
-    ).catch(function (e) {
-      console.warn('[Pipeline2] Branch creation failed, continuing local-only:', e.message)
-      hasGitHub = false
-      branchName = ''
-    })
+    if (_isResuming && branchName) {
+      updatePS(pid, 0, 'done', branchName + ' (reused)')
+    } else {
+      p = retryStep(
+        function () {
+          return ghCreateBranch(branchName)
+        },
+        3,
+        'Branch'
+      ).catch(function (e) {
+        console.warn('[Pipeline2] Branch creation failed, continuing local-only:', e.message)
+        hasGitHub = false
+        branchName = ''
+      })
+    }
   }
 
   var planJSON = ''
@@ -163,6 +180,7 @@ export function runPipeline2(prompt, existingApp, customName, images) {
         ' reference image' +
         (images.length > 1 ? 's' : '') +
         ' attached \u2014 use them to understand the desired design/layout]'
+    if (_resumeCtx) planMsg += '\n\n' + _resumeCtx
     return retryStep(
       function () {
         return callClaudeRaw(SYS_PLAN, planMsg, 2000, images)
@@ -269,7 +287,13 @@ export function runPipeline2(prompt, existingApp, customName, images) {
           return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
         })
         if (passNum === 1) {
-          telemetry.emit('build.checks', { passCount: checks.filter(function (c) { return c.passed }).length, totalCount: checks.length, criticalFails: criticalFails.length })
+          telemetry.emit('build.checks', {
+            passCount: checks.filter(function (c) {
+              return c.passed
+            }).length,
+            totalCount: checks.length,
+            criticalFails: criticalFails.length,
+          })
           telemetry.updateBuildRecord(_buildId, 'checks', checks)
         }
         addMsg({ role: 'asst', type: 'checks', checks: checks })
@@ -345,8 +369,10 @@ export function runPipeline2(prompt, existingApp, customName, images) {
               // Always include full code so the model has complete context
               var fm =
                 (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
-                ':\n' + issueList +
-                '\n\nCURRENT CODE:\n' + currentCode +
+                ':\n' +
+                issueList +
+                '\n\nCURRENT CODE:\n' +
+                currentCode +
                 (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
               repairHistory.push({ role: 'user', content: fm })
 
@@ -470,16 +496,15 @@ export function runPipeline2(prompt, existingApp, customName, images) {
         : null
       if (activeThought && activeThought.brief && v2) {
         var featureChecklist = activeThought.featureChecklist || []
-        var complianceInput =
-          'APP SPECIFICATION:\n' +
-          specText +
-          '\n\nUSER RULES:\n' +
-          rulesText
+        var complianceInput = 'APP SPECIFICATION:\n' + specText + '\n\nUSER RULES:\n' + rulesText
         if (featureChecklist.length) {
-          complianceInput += '\n\nFEATURE CHECKLIST (verify each):\n' +
-            featureChecklist.map(function (f, i) {
-              return (i + 1) + '. ' + (f.required ? '[REQUIRED] ' : '[OPTIONAL] ') + f.text
-            }).join('\n')
+          complianceInput +=
+            '\n\nFEATURE CHECKLIST (verify each):\n' +
+            featureChecklist
+              .map(function (f, i) {
+                return i + 1 + '. ' + (f.required ? '[REQUIRED] ' : '[OPTIONAL] ') + f.text
+              })
+              .join('\n')
         }
         complianceInput += '\n\nGENERATED CODE:\n' + v2.slice(0, 40000)
         return retryStep(
@@ -686,7 +711,14 @@ export function runPipeline2(prompt, existingApp, customName, images) {
       })
       telemetry.completeBuildRecord(_buildId, {
         finalCodeSize: v2 ? v2.length : 0,
-        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        costData: costData.breakdown.length
+          ? {
+              rawCost: costData.rawCost,
+              userPrice: costData.userPrice,
+              totalInput: costData.totalInput,
+              totalOutput: costData.totalOutput,
+            }
+          : null,
         approved: true,
       })
       return showFeedbackCard(appId, appName, prompt).then(function () {
@@ -712,7 +744,10 @@ export function runPipeline2(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
-        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.emit('user.approval', {
+          approved: false,
+          timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null,
+        })
         telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         updatePS(pid, 7, 'error', 'Changes requested')
         clearPreview(appId)

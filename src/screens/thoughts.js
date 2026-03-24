@@ -1,6 +1,6 @@
 import { ST } from '../lib/state.js'
 import { $, esc, fmtDate } from '../lib/utils.js'
-import { openThink } from './think.js'
+import { openThink, editThought, viewThoughtVersions } from './think.js'
 
 var _currentSort = 'date-new'
 
@@ -75,16 +75,21 @@ function renderThoughtCards(sortBy) {
     var prompt =
       (t.originalPrompt || '').length > 80 ? t.originalPrompt.slice(0, 80) + '\u2026' : t.originalPrompt || ''
     var date = t.updatedAt ? fmtDate(t.updatedAt) : t.createdAt ? fmtDate(t.createdAt) : ''
+    var ver = t.version || 1
+    var hasVersions = t.versions && t.versions.length > 0
     html +=
       '<div class="tf-card" onclick="B.openThoughtDetail(\'' +
       esc(t.id) +
       '\')">' +
       '<div class="tf-card-top">' +
       '<div class="tf-card-icon">\uD83D\uDCAD</div>' +
+      '<div style="display:flex;gap:4px;align-items:center">' +
+      (ver > 1 ? '<div class="tf-card-version">v' + ver + '</div>' : '') +
       '<div class="tf-card-status ' +
       esc(t.status || 'draft') +
       '">' +
       esc(t.status || 'draft') +
+      '</div>' +
       '</div>' +
       '</div>' +
       '<div class="tf-card-name">' +
@@ -107,6 +112,20 @@ function renderThoughtCards(sortBy) {
       '<span>' +
       esc(date) +
       '</span>' +
+      '</div>' +
+      '<div class="tf-card-actions" style="display:flex;gap:6px;margin-top:6px">' +
+      (t.status === 'complete' && t.brief
+        ? '<button class="tf-action-btn" onclick="event.stopPropagation();B.editThoughtFromFolder(\'' +
+          esc(t.id) +
+          '\')">\u270F\uFE0F Edit</button>'
+        : '') +
+      (hasVersions
+        ? '<button class="tf-action-btn" onclick="event.stopPropagation();B.viewThoughtVersionsFromFolder(\'' +
+          esc(t.id) +
+          '\')">\uD83D\uDCDC History (' +
+          t.versions.length +
+          ')</button>'
+        : '') +
       '</div>' +
       '</div>'
   }

@@ -1,7 +1,7 @@
 import { ST, persist } from '../lib/state.js'
-import { $, esc, uid, toast, scrubKeys } from '../lib/utils.js'
+import { $, esc, uid, toast, scrubKeys, fmtDate } from '../lib/utils.js'
 import { THINK_ROUND_LABELS } from '../config/constants.js'
-import { SYS_THINK } from '../config/prompts.js'
+import { SYS_THINK, SYS_THINK_EDIT } from '../config/prompts.js'
 import { callGPTThink, resetCostAccum } from '../lib/ai.js'
 import { injectProfileContext } from '../lib/profile-context.js'
 import { calculateBuildCost } from '../lib/cost.js'
@@ -16,6 +16,9 @@ var _thinkState = {
   originalPrompt: '',
   brief: null,
   rules: null,
+  editMode: false,
+  editBrief: null,
+  editRules: null,
 }
 
 export function openThink(resumeId) {
@@ -194,7 +197,12 @@ export function sendThinkMsg() {
       text,
   })
 
-  var effectiveSys = injectProfileContext(SYS_THINK)
+  var baseSys = _thinkState.editMode ? SYS_THINK_EDIT : SYS_THINK
+  if (_thinkState.editMode && _thinkState.editBrief) {
+    baseSys += '\n\nCURRENT BRIEF:\n' + JSON.stringify(_thinkState.editBrief)
+    if (_thinkState.editRules) baseSys += '\n\nCURRENT RULES:\n' + JSON.stringify(_thinkState.editRules)
+  }
+  var effectiveSys = injectProfileContext(baseSys)
   var aiCall = callGPTThink(effectiveSys, apiMessages, 2000)
 
   aiCall
@@ -372,6 +380,8 @@ export function saveThought(status) {
     featureChecklist: featureChecklist,
     linkedRulesId: null,
     linkedAppId: null,
+    version: 1,
+    versions: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -383,15 +393,172 @@ export function saveThought(status) {
     }
   }
   if (idx >= 0) {
-    thought.createdAt = ST.thoughts[idx].createdAt
-    thought.linkedRulesId = ST.thoughts[idx].linkedRulesId
-    thought.linkedAppId = ST.thoughts[idx].linkedAppId
+    var existing = ST.thoughts[idx]
+    thought.createdAt = existing.createdAt
+    thought.linkedRulesId = existing.linkedRulesId
+    thought.linkedAppId = existing.linkedAppId
+    thought.version = existing.version || 1
+    thought.versions = existing.versions || []
     ST.thoughts[idx] = thought
   } else {
     ST.thoughts.unshift(thought)
   }
   persist()
   return thought
+}
+
+function snapshotVersion(thought, editNote) {
+  if (!thought.versions) thought.versions = []
+  thought.versions.push({
+    version: thought.version || 1,
+    brief: thought.brief ? JSON.parse(JSON.stringify(thought.brief)) : null,
+    conversation: thought.conversation ? thought.conversation.slice() : [],
+    editedAt: new Date().toISOString(),
+    editNote: editNote || 'Version ' + (thought.version || 1),
+  })
+  thought.version = (thought.version || 1) + 1
+  return thought
+}
+
+export function editThought(thoughtId) {
+  var t = null
+  for (var i = 0; i < ST.thoughts.length; i++) {
+    if (ST.thoughts[i].id === thoughtId) {
+      t = ST.thoughts[i]
+      break
+    }
+  }
+  if (!t || !t.brief) {
+    toast('This thought has no brief to edit yet')
+    return
+  }
+  $('builder-sheet').classList.remove('open')
+  resetCostAccum()
+  _thinkState = {
+    round: 1,
+    maxRounds: 1,
+    thoughtId: t.id,
+    conversation: t.conversation ? t.conversation.slice() : [],
+    originalPrompt: t.originalPrompt || '',
+    brief: t.brief ? JSON.parse(JSON.stringify(t.brief)) : null,
+    rules: null,
+    editMode: true,
+    editBrief: JSON.parse(JSON.stringify(t.brief)),
+    editRules: null,
+  }
+  // Find linked rules
+  if (t.linkedRulesId) {
+    for (var j = 0; j < ST.rules.length; j++) {
+      if (ST.rules[j].id === t.linkedRulesId) {
+        _thinkState.editRules = {
+          must: ST.rules[j].mustRules || [],
+          must_not: ST.rules[j].mustNotRules || [],
+          nice_to_have: ST.rules[j].niceToHave || [],
+        }
+        break
+      }
+    }
+  }
+  var ts = $('think-scroll')
+  ts.innerHTML = ''
+  renderThinkProgress(1)
+  $('ts-sub').textContent = 'Edit Mode \u00B7 v' + (t.version || 1) + ' \u2192 v' + ((t.version || 1) + 1)
+  addThinkMsg({
+    type: 'ai',
+    text:
+      'You\'re editing "' +
+      esc(t.brief.name || 'your app') +
+      '" (v' +
+      (t.version || 1) +
+      '). What would you like to change?',
+  })
+  _thinkState.conversation.push({
+    role: 'ai',
+    text: 'Editing "' + (t.brief.name || 'your app') + '" (v' + (t.version || 1) + '). What would you like to change?',
+    round: 0,
+  })
+  $('think-sheet').classList.add('open')
+  setTimeout(function () {
+    $('think-input').focus()
+  }, 420)
+}
+
+export function viewThoughtVersions(thoughtId) {
+  var t = null
+  for (var i = 0; i < ST.thoughts.length; i++) {
+    if (ST.thoughts[i].id === thoughtId) {
+      t = ST.thoughts[i]
+      break
+    }
+  }
+  if (!t) return
+  var versions = t.versions || []
+  var html = '<div class="think-summary" style="max-height:70vh;overflow-y:auto">'
+  html += '<h3>Version History \u00B7 ' + esc(t.name || 'Untitled') + '</h3>'
+  if (!versions.length) {
+    html += '<p style="color:rgba(255,255,255,.4)">No previous versions yet (currently v' + (t.version || 1) + ')</p>'
+  } else {
+    for (var j = versions.length - 1; j >= 0; j--) {
+      var v = versions[j]
+      html += '<div style="margin-top:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.04)">'
+      html += '<div style="display:flex;justify-content:space-between;align-items:center">'
+      html += '<strong style="color:rgba(255,255,255,.7)">v' + v.version + '</strong>'
+      html +=
+        '<span style="font-size:10px;color:rgba(255,255,255,.3)">' +
+        esc(v.editedAt ? fmtDate(v.editedAt) : '') +
+        '</span>'
+      html += '</div>'
+      if (v.editNote)
+        html += '<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">' + esc(v.editNote) + '</div>'
+      if (v.brief) {
+        html += '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:6px">'
+        if (v.brief.name) html += '<strong>' + esc(v.brief.name) + '</strong><br>'
+        if (v.brief.features && v.brief.features.length) {
+          html +=
+            'Features: ' +
+            v.brief.features
+              .map(function (f) {
+                return esc(f)
+              })
+              .join(', ')
+        }
+        html += '</div>'
+      }
+      html += '</div>'
+    }
+  }
+  html += '<div style="margin-top:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.06)">'
+  html += '<div style="display:flex;justify-content:space-between;align-items:center">'
+  html += '<strong style="color:var(--g1)">v' + (t.version || 1) + ' (current)</strong>'
+  html +=
+    '<span style="font-size:10px;color:rgba(255,255,255,.3)">' +
+    esc(t.updatedAt ? fmtDate(t.updatedAt) : '') +
+    '</span>'
+  html += '</div>'
+  if (t.brief) {
+    html += '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:6px">'
+    if (t.brief.name) html += '<strong>' + esc(t.brief.name) + '</strong><br>'
+    if (t.brief.features && t.brief.features.length) {
+      html +=
+        'Features: ' +
+        t.brief.features
+          .map(function (f) {
+            return esc(f)
+          })
+          .join(', ')
+    }
+    html += '</div>'
+  }
+  html += '</div>'
+  html += '</div>'
+  var ts = $('think-scroll')
+  ts.innerHTML = ''
+  addThinkMsg({ type: 'summary', html: html })
+  var actRow = document.createElement('div')
+  actRow.className = 'think-actions'
+  actRow.innerHTML = '<button class="ta-save" onclick="B.closeThink()">Close</button>'
+  ts.appendChild(actRow)
+  $('think-sheet').classList.add('open')
 }
 
 export function saveRulesFromThought(thought, rulesData) {
@@ -417,6 +584,17 @@ export function saveRulesFromThought(thought, rulesData) {
 }
 
 export function finishThink() {
+  // Snapshot version before saving if this is an edit or if thought already had a brief
+  var existingIdx = -1
+  for (var ei = 0; ei < ST.thoughts.length; ei++) {
+    if (ST.thoughts[ei].id === _thinkState.thoughtId) {
+      existingIdx = ei
+      break
+    }
+  }
+  if (existingIdx >= 0 && ST.thoughts[existingIdx].brief && _thinkState.editMode) {
+    snapshotVersion(ST.thoughts[existingIdx], _thinkState.editMode ? 'Edited' : 'Refined')
+  }
   var thought = saveThought('complete')
   var rules = null
   if (_thinkState.rules) {
@@ -464,6 +642,18 @@ export function editThinkBrief() {
 }
 
 export function refineThink() {
+  // Snapshot current version before refining
+  var refIdx = -1
+  for (var ri = 0; ri < ST.thoughts.length; ri++) {
+    if (ST.thoughts[ri].id === _thinkState.thoughtId) {
+      refIdx = ri
+      break
+    }
+  }
+  if (refIdx >= 0 && ST.thoughts[refIdx].brief) {
+    snapshotVersion(ST.thoughts[refIdx], 'Before refinement')
+    persist()
+  }
   _thinkState.round = Math.max(1, _thinkState.round - 1)
   renderThinkProgress(_thinkState.round)
   _thinkState.brief = null

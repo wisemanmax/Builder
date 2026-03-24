@@ -150,9 +150,7 @@ function _renderTemplateGallery() {
   var cards = ''
   for (var i = 0; i < ranked.length; i++) {
     var t = ranked[i]
-    var badge = t.reason
-      ? '<span class="tpl-badge">' + esc(t.reason) + '</span>'
-      : ''
+    var badge = t.reason ? '<span class="tpl-badge">' + esc(t.reason) + '</span>' : ''
     cards +=
       '<div class="tpl-card" data-cat="' +
       t.category +
@@ -356,18 +354,34 @@ export function addMsg(cfg) {
         cfg.id +
         '-inner">' +
         // Pipeline header with timer, step counter, and ETA
-        '<div class="pipe-hdr" id="' + cfg.id + '-hdr">' +
+        '<div class="pipe-hdr" id="' +
+        cfg.id +
+        '-hdr">' +
         '<div class="pipe-hdr-left">' +
-        '<div class="pipe-hdr-title">' + (cfg.pipelineType === 'game' ? '\uD83C\uDFAE Game Builder' : '\u26A1 Builder') + '</div>' +
-        '<div class="pipe-hdr-step" id="' + cfg.id + '-stepctr">Step 0 of ' + pNames.length + '</div>' +
+        '<div class="pipe-hdr-title">' +
+        (cfg.pipelineType === 'game' ? '\uD83C\uDFAE Game Builder' : '\u26A1 Builder') +
+        '</div>' +
+        '<div class="pipe-hdr-step" id="' +
+        cfg.id +
+        '-stepctr">Step 0 of ' +
+        pNames.length +
+        '</div>' +
         '</div>' +
         '<div class="pipe-hdr-right">' +
-        '<div class="pipe-hdr-timer" id="' + cfg.id + '-timer">00:00</div>' +
-        '<div class="pipe-hdr-eta" id="' + cfg.id + '-eta"></div>' +
+        '<div class="pipe-hdr-timer" id="' +
+        cfg.id +
+        '-timer">00:00</div>' +
+        '<div class="pipe-hdr-eta" id="' +
+        cfg.id +
+        '-eta"></div>' +
         '</div>' +
         '</div>' +
         // Progress bar
-        '<div class="pipe-progress" id="' + cfg.id + '-progress"><div class="pipe-progress-bar" id="' + cfg.id + '-bar" style="width:0%"></div></div>'
+        '<div class="pipe-progress" id="' +
+        cfg.id +
+        '-progress"><div class="pipe-progress-bar" id="' +
+        cfg.id +
+        '-bar" style="width:0%"></div></div>'
       for (var i = 0; i < pNames.length; i++) {
         phtml +=
           '<div class="ps s-idle" id="' +
@@ -623,19 +637,31 @@ export function addMsg(cfg) {
       var cpid = esc(cfg.pid || '')
       var issueCount = cfg.issueCount || 0
       var issueList = cfg.issues || []
-      var cpHtml = '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">\uD83D\uDEA7</div>' +
+      var cpHtml =
+        '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">\uD83D\uDEA7</div>' +
         '<div style="flex:1;min-width:0"><div class="checkpoint-card">' +
-        '<div class="checkpoint-title">\uD83D\uDEA7 Checkpoint: ' + issueCount + ' issue' + (issueCount !== 1 ? 's' : '') + ' found after first audit</div>' +
+        '<div class="checkpoint-title">\uD83D\uDEA7 Checkpoint: ' +
+        issueCount +
+        ' issue' +
+        (issueCount !== 1 ? 's' : '') +
+        ' found after first audit</div>' +
         '<div class="checkpoint-issues">'
       for (var ci = 0; ci < Math.min(issueList.length, 5); ci++) {
         cpHtml += '<div>\u2022 ' + esc(issueList[ci]) + '</div>'
       }
       if (issueList.length > 5) cpHtml += '<div style="opacity:.5">+ ' + (issueList.length - 5) + ' more</div>'
-      cpHtml += '</div>' +
+      cpHtml +=
+        '</div>' +
         '<div class="checkpoint-actions">' +
-        '<button class="checkpoint-btn checkpoint-btn-fix" data-pid="' + cpid + '" data-choice="fix">\uD83D\uDEE0 Fix these issues</button>' +
-        '<button class="checkpoint-btn checkpoint-btn-skip" data-pid="' + cpid + '" data-choice="skip">\u23ED Skip \u2014 proceed as-is</button>' +
-        '<button class="checkpoint-btn checkpoint-btn-skip" data-pid="' + cpid + '" data-choice="stop">\u23F9 Stop pipeline</button>' +
+        '<button class="checkpoint-btn checkpoint-btn-fix" data-pid="' +
+        cpid +
+        '" data-choice="fix">\uD83D\uDEE0 Fix these issues</button>' +
+        '<button class="checkpoint-btn checkpoint-btn-skip" data-pid="' +
+        cpid +
+        '" data-choice="skip">\u23ED Skip \u2014 proceed as-is</button>' +
+        '<button class="checkpoint-btn checkpoint-btn-skip" data-pid="' +
+        cpid +
+        '" data-choice="stop">\u23F9 Stop pipeline</button>' +
         '</div></div></div></div>'
       row.innerHTML = cpHtml
       setTimeout(function () {
@@ -646,7 +672,8 @@ export function addMsg(cfg) {
             var decision = this.dataset.choice
             var allCpBtns = row.querySelectorAll('.checkpoint-btn')
             for (var cbk = 0; cbk < allCpBtns.length; cbk++) allCpBtns[cbk].disabled = true
-            this.textContent = decision === 'fix' ? 'Fixing\u2026' : decision === 'stop' ? 'Stopping\u2026' : 'Proceeding\u2026'
+            this.textContent =
+              decision === 'fix' ? 'Fixing\u2026' : decision === 'stop' ? 'Stopping\u2026' : 'Proceeding\u2026'
             resolveCheckpoint(pid3, decision)
           })
         }
@@ -735,8 +762,28 @@ export function updatePS(pid, step, state, det) {
   var isWeb2 = _pipeTypes[pid] === 'website2'
   var isWeb = _pipeTypes[pid] === 'website'
   var isB2 = _pipeTypes[pid] === 'builder2'
-  var names = isStitch ? PIPE5_NAMES : isGame ? PIPE6_NAMES : isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
-  var icons = isStitch ? PIPE5_ICONS : isGame ? PIPE6_ICONS : isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
+  var names = isStitch
+    ? PIPE5_NAMES
+    : isGame
+      ? PIPE6_NAMES
+      : isWeb2
+        ? PIPE4_NAMES
+        : isWeb
+          ? PIPE3_NAMES
+          : isB2
+            ? PIPE2_NAMES
+            : PIPE_NAMES
+  var icons = isStitch
+    ? PIPE5_ICONS
+    : isGame
+      ? PIPE6_ICONS
+      : isWeb2
+        ? PIPE4_ICONS
+        : isWeb
+          ? PIPE3_ICONS
+          : isB2
+            ? PIPE2_ICONS
+            : PIPE_ICONS
   var ico =
     state === 'done' ? '\u2713' : state === 'error' ? '\u2717' : state === 'wait' ? '\u23F8' : icons[step] || '\u00B7'
   el.className = 'ps s-' + state
@@ -768,7 +815,10 @@ export function startPipeTimer(pid) {
     startTs: startTs,
     interval: setInterval(function () {
       var el = $(pid + '-timer')
-      if (!el) { stopPipeTimer(pid); return }
+      if (!el) {
+        stopPipeTimer(pid)
+        return
+      }
       var elapsed = Math.floor((Date.now() - startTs) / 1000)
       var m = Math.floor(elapsed / 60)
       var s = elapsed % 60

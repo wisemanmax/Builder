@@ -2,7 +2,7 @@ import { callClaudeRaw } from './ai.js'
 import { ST, persist } from './state.js'
 
 var SYS_VERIFY_CHECKLIST =
-  'You are a code reviewer. Given an HTML app\'s source code and a feature checklist, ' +
+  "You are a code reviewer. Given an HTML app's source code and a feature checklist, " +
   'determine which features are implemented in the code.\n\n' +
   'Analyze the code carefully. A feature is "verified" if there is clear evidence it works ' +
   '(DOM elements, event handlers, logic, styles that implement it).\n\n' +
@@ -24,12 +24,13 @@ export function verifyFeatureChecklist(code, checklist) {
   // Truncate code to ~30KB to keep token count reasonable
   var trimmedCode = code.length > 30000 ? code.slice(0, 30000) + '\n<!-- ... truncated -->' : code
 
-  var checklistText = checklist.map(function (item) {
-    return '- [' + item.id + '] ' + item.text + (item.required ? ' (REQUIRED)' : ' (optional)')
-  }).join('\n')
+  var checklistText = checklist
+    .map(function (item) {
+      return '- [' + item.id + '] ' + item.text + (item.required ? ' (REQUIRED)' : ' (optional)')
+    })
+    .join('\n')
 
-  var msg = 'APP CODE:\n```html\n' + trimmedCode + '\n```\n\n' +
-    'FEATURE CHECKLIST:\n' + checklistText
+  var msg = 'APP CODE:\n```html\n' + trimmedCode + '\n```\n\n' + 'FEATURE CHECKLIST:\n' + checklistText
 
   return callClaudeRaw(SYS_VERIFY_CHECKLIST, msg, 1500).then(function (raw) {
     var results
@@ -39,7 +40,11 @@ export function verifyFeatureChecklist(code, checklist) {
       // Try to extract JSON array from response
       var match = raw.match(/\[[\s\S]*\]/)
       if (match) {
-        try { results = JSON.parse(match[0]) } catch (e2) { results = [] }
+        try {
+          results = JSON.parse(match[0])
+        } catch (e2) {
+          results = []
+        }
       } else {
         results = []
       }

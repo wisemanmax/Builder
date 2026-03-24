@@ -45,6 +45,8 @@ import {
   getThoughtDesignOverrides,
   getTemplateSkeleton,
   telemetry,
+  shouldSkipStep,
+  buildResumeContext,
 } from './pipeline-shared.js'
 import { waitForBlueprintApproval } from '../components/approval-card.js'
 import {
@@ -867,7 +869,9 @@ function _generateBuildManifest(intakePayload, checksReport, reviewFindings, cle
  * @param {Object} callbacks - { updateStage, updateEstimate, updateTime }
  * @returns {Promise<void>}
  */
-export function runStitchPipeline(context, callbacks) {
+export function runStitchPipeline(context, callbacks, resumeSession) {
+  var customName = typeof resumeSession === 'string' ? resumeSession : null
+  if (resumeSession && typeof resumeSession === 'string') resumeSession = null
   var cb = callbacks || {}
   var updateStage = cb.updateStage || function () {}
   var updateEstimate = cb.updateEstimate || function () {}
@@ -900,7 +904,7 @@ export function runStitchPipeline(context, callbacks) {
   var appIcon = ST.pendingIcon || '\uD83C\uDFAF'
   var appCi = ST.pendingColor != null ? ST.pendingColor : Math.floor(Math.random() * GRADS.length)
   var hasGitHub = !!(ST.ghToken && ST.ghUser && ST.ghRepo)
-  var branchName = hasGitHub ? 'stitch/' + appId : null
+  var branchName = (resumeSession && resumeSession.branchName) || (hasGitHub ? 'stitch/' + appId : null)
 
   var intakePayload = null
   var stitchHTML = null
@@ -918,6 +922,13 @@ export function runStitchPipeline(context, callbacks) {
     hasImages: false,
   })
   var _approvalStartTs = 0
+
+  var _resumeCtx = resumeSession ? buildResumeContext(resumeSession) : ''
+  var _isResuming = !!resumeSession
+  if (_isResuming) {
+    addMsg({ role: 'system', text: 'Resuming from previous session \u2014 skipping completed steps.' })
+  }
+  ST._resumeSession = null
 
   // --- Halt handler ---
   function haltWithOptions(stageName, stageIndex, error) {
@@ -1015,6 +1026,7 @@ export function runStitchPipeline(context, callbacks) {
 
       // ── Stage 2: Blueprint ──
       checkPipelineCancel()
+      if (_resumeCtx) intakePayload.appDescription += '\n\n' + _resumeCtx
       updateStage(1, 'running', 'Calling Stitch API…')
       if (containerId) updateStitchStage(containerId, 1, PIPE5_STATUS.RUNNING, 'Calling Stitch API…')
       updatePS(pid, 1, 'active', 'Generating blueprint…')
@@ -1157,8 +1169,16 @@ export function runStitchPipeline(context, callbacks) {
         summary: checksReport.summary,
       })
       var _localChecks = checksReport.localChecks || []
-      var _criticalFails = _localChecks.filter(function (c) { return !c.passed }).length
-      telemetry.emit('build.checks', { passCount: _localChecks.filter(function (c) { return c.passed }).length, totalCount: _localChecks.length, criticalFails: _criticalFails })
+      var _criticalFails = _localChecks.filter(function (c) {
+        return !c.passed
+      }).length
+      telemetry.emit('build.checks', {
+        passCount: _localChecks.filter(function (c) {
+          return c.passed
+        }).length,
+        totalCount: _localChecks.length,
+        criticalFails: _criticalFails,
+      })
       telemetry.updateBuildRecord(_buildId, 'checks', _localChecks)
 
       // --- Structure Diff violation loop-back ---
@@ -1384,21 +1404,23 @@ export function runStitchPipeline(context, callbacks) {
         var appPath = 'apps/' + appId + '.html'
         return retryStage(
           function () {
-            return ghCreateBranch(branchName)
-              .catch(function () {
-                /* branch may exist */
+            return (
+              _isResuming && branchName
+                ? Promise.resolve()
+                : ghCreateBranch(branchName).catch(function () {
+                    /* branch may exist */
+                  })
+            ).then(function () {
+              return ghGetFileSha(appPath, branchName).then(function (existingSha) {
+                return ghPushFile(
+                  appPath,
+                  finalHTML,
+                  (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [stitch]',
+                  branchName,
+                  existingSha
+                )
               })
-              .then(function () {
-                return ghGetFileSha(appPath, branchName).then(function (existingSha) {
-                  return ghPushFile(
-                    appPath,
-                    finalHTML,
-                    (existingApp ? 'Update' : 'Add') + ' ' + appName + ' [stitch]',
-                    branchName,
-                    existingSha
-                  )
-                })
-              })
+            })
           },
           'Deliver-Push',
           2,
@@ -1637,7 +1659,14 @@ export function runStitchPipeline(context, callbacks) {
 
       telemetry.completeBuildRecord(_buildId, {
         finalCodeSize: finalHTML ? finalHTML.length : 0,
-        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        costData: costData.breakdown.length
+          ? {
+              rawCost: costData.rawCost,
+              userPrice: costData.userPrice,
+              totalInput: costData.totalInput,
+              totalOutput: costData.totalOutput,
+            }
+          : null,
         approved: true,
       })
       return showFeedbackCard(appId, appName, prompt)
@@ -1673,7 +1702,10 @@ export function runStitchPipeline(context, callbacks) {
       }
 
       if (err.message === 'CHANGES_REQUESTED') {
-        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.emit('user.approval', {
+          approved: false,
+          timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null,
+        })
         telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         clearPreview(appId)
         saveAppLocally(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)

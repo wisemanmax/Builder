@@ -51,6 +51,7 @@ import {
   ghMergeBranch,
   ghDeleteBranch,
   ghPushManifest,
+  ghSyncBuildHistory,
 } from '../lib/github.js'
 import { runLocalChecks } from '../lib/checks.js'
 import {
@@ -69,12 +70,19 @@ import {
   updatePipeProgress,
   finishPipeHeader,
 } from '../components/message.js'
-import { setPreview, clearPreview, waitForApproval, waitForRetryDecision, waitForCheckpoint } from '../components/approval-card.js'
+import {
+  setPreview,
+  clearPreview,
+  waitForApproval,
+  waitForRetryDecision,
+  waitForCheckpoint,
+} from '../components/approval-card.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
 import { autoInjectSupabase } from '../lib/supabase-setup.js'
 import { showFeedbackCard, showThoughtFeedback } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
+import { getSelectedThoughtIds } from '../components/thought-card.js'
 import { openProjectSheet } from '../screens/project.js'
 import { startBuild as _startBuild, endBuild as _endBuild, emit as _emit, getBuildContext } from '../lib/telemetry.js'
 import {
@@ -94,6 +102,63 @@ export var telemetry = {
   updateBuildRecord: _updateBuildRecord,
   completeBuildRecord: _completeBuildRecord,
   incrementEditCount: _incrementEditCount,
+}
+
+// --- Pipeline resume helpers ---
+
+/**
+ * Check whether a step should be skipped during a resumed build.
+ * Returns true if the step was already completed successfully.
+ */
+export function shouldSkipStep(resumeSession, stepIndex) {
+  if (!resumeSession || !resumeSession.steps) return false
+  var pid = resumeSession.pid || 'recovered'
+  var stepData = resumeSession.steps[pid]
+  if (!stepData || !stepData[stepIndex]) return false
+  return stepData[stepIndex].state === 'done'
+}
+
+/**
+ * Build a context summary for the AI when resuming a halted pipeline.
+ * Includes which steps were completed and key details from chat history.
+ */
+export function buildResumeContext(resumeSession) {
+  if (!resumeSession) return ''
+  var lines = ['[RESUMED BUILD — The following steps were already completed in a previous session:]']
+  if (resumeSession.steps) {
+    var pid = resumeSession.pid || 'recovered'
+    var stepData = resumeSession.steps[pid] || {}
+    var stepKeys = Object.keys(stepData)
+    for (var i = 0; i < stepKeys.length; i++) {
+      var sd = stepData[stepKeys[i]]
+      if (sd && sd.state === 'done') {
+        lines.push('- Step ' + stepKeys[i] + ': ' + (sd.detail || 'completed'))
+      }
+    }
+  }
+  if (resumeSession.prompt) {
+    lines.push('\nOriginal prompt: ' + resumeSession.prompt)
+  }
+  lines.push('\nContinue building from the next incomplete step. Do not repeat work already done.')
+  return lines.join('\n')
+}
+
+/**
+ * Get the first step index that should run when resuming.
+ */
+export function getResumeStartStep(resumeSession) {
+  if (!resumeSession || !resumeSession.steps) return 0
+  var pid = resumeSession.pid || 'recovered'
+  var stepData = resumeSession.steps[pid] || {}
+  var maxDone = -1
+  var stepKeys = Object.keys(stepData)
+  for (var i = 0; i < stepKeys.length; i++) {
+    var idx = parseInt(stepKeys[i], 10)
+    if (stepData[stepKeys[i]] && stepData[stepKeys[i]].state === 'done' && idx > maxDone) {
+      maxDone = idx
+    }
+  }
+  return maxDone + 1
 }
 
 // Check IDs that are advisory-only and should not count as critical failures
@@ -268,6 +333,7 @@ export function setupPipelineGuards(pid) {
 
 /**
  * Resolve active thought context for injection into build prompts.
+ * Supports multiple selected thoughts — primary gets full brief, supplementary get summary.
  * Returns { activeThought, specText, rulesText, thoughtDesign, sysExtras }
  */
 export function resolveThoughtContext() {
@@ -275,13 +341,25 @@ export function resolveThoughtContext() {
   var rulesText = 'No specific rules'
   var sysExtras = ''
   var thoughtDesign = null
-  var activeThought = ST.activeThoughtId
-    ? ST.thoughts.find(function (t) {
-        return t.id === ST.activeThoughtId
-      })
-    : null
+
+  // Get all selected thought IDs (primary first)
+  var selectedIds = getSelectedThoughtIds()
+  if (!selectedIds.length && ST.activeThoughtId) selectedIds = [ST.activeThoughtId]
+
+  var activeThought = null
+  var allThoughts = []
+  for (var ti = 0; ti < selectedIds.length; ti++) {
+    for (var si = 0; si < ST.thoughts.length; si++) {
+      if (ST.thoughts[si].id === selectedIds[ti]) {
+        allThoughts.push(ST.thoughts[si])
+        if (!activeThought) activeThought = ST.thoughts[si]
+        break
+      }
+    }
+  }
 
   if (activeThought) {
+    // Process primary thought (full brief + rules)
     var linkedRules = activeThought.linkedRulesId
       ? ST.rules.find(function (r) {
           return r.id === activeThought.linkedRulesId
@@ -318,6 +396,32 @@ export function resolveThoughtContext() {
       sysExtras += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
     }
     thoughtDesign = getThoughtDesignOverrides(activeThought)
+
+    // Process supplementary thoughts (summary only)
+    for (var st = 1; st < allThoughts.length; st++) {
+      var suppThought = allThoughts[st]
+      if (suppThought.brief) {
+        var suppName = suppThought.brief.name || suppThought.name || 'Supplementary'
+        var suppFeatures = (suppThought.brief.features || []).join(', ')
+        sysExtras +=
+          '\n\nSUPPLEMENTARY THOUGHT (' +
+          suppName +
+          '):\n' +
+          (suppThought.brief.whatItDoes ? 'What it does: ' + suppThought.brief.whatItDoes.join(', ') + '\n' : '') +
+          (suppFeatures ? 'Features: ' + suppFeatures + '\n' : '')
+        // Merge supplementary rules too
+        if (suppThought.linkedRulesId) {
+          var suppRules = ST.rules.find(function (r) {
+            return r.id === suppThought.linkedRulesId
+          })
+          if (suppRules) {
+            if (suppRules.mustRules && suppRules.mustRules.length) {
+              sysExtras += 'Additional must-do: ' + suppRules.mustRules.join(', ') + '\n'
+            }
+          }
+        }
+      }
+    }
   }
 
   return {
@@ -417,7 +521,8 @@ export function buildUserMessage(prompt, existingApp, customName, thoughtCtx) {
     var codeSection = currentCode ? '\n\nCURRENT APP CODE:\n' + currentCode.slice(0, 120000) : ''
     var historySection = ''
     if (memoryEntries.length) {
-      historySection = '\n\nCONVERSATION MEMORY (full history of this app — use this to understand context, user preferences, and prior decisions):\n' +
+      historySection =
+        '\n\nCONVERSATION MEMORY (full history of this app — use this to understand context, user preferences, and prior decisions):\n' +
         memoryEntries.join('\n') +
         '\n\nThis is an ongoing project. The user has been iterating on this app. Maintain consistency with prior decisions unless the user explicitly asks to change something.'
     }
@@ -547,17 +652,27 @@ export function saveChatSession(appId, prompt) {
     prompt: (prompt || '').slice(0, 200),
     messages: session,
   })
-  if (app.chatHistory.length > 10) app.chatHistory = app.chatHistory.slice(0, 10)
+  if (app.chatHistory.length > 25) app.chatHistory = app.chatHistory.slice(0, 25)
+  persist()
   clearCurrentSession()
+  // Auto-sync build history to GitHub
+  ghSyncBuildHistory(appId).catch(function () {})
 }
 
 /**
  * Render spec compliance card from a compliance JSON object.
  */
 export function renderComplianceCard(compliance, checklist) {
-  var scoreColor = compliance.score >= 80 ? 'rgba(76,175,80,.9)' : compliance.score >= 50 ? 'rgba(255,214,0,.9)' : 'rgba(255,82,82,.9)'
-  var html = '<div style="padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:11px">'
-  html += '<div style="font-weight:700;color:' + scoreColor + ';margin-bottom:6px">Spec Compliance: ' + (compliance.score || 0) + '/100</div>'
+  var scoreColor =
+    compliance.score >= 80 ? 'rgba(76,175,80,.9)' : compliance.score >= 50 ? 'rgba(255,214,0,.9)' : 'rgba(255,82,82,.9)'
+  var html =
+    '<div style="padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:11px">'
+  html +=
+    '<div style="font-weight:700;color:' +
+    scoreColor +
+    ';margin-bottom:6px">Spec Compliance: ' +
+    (compliance.score || 0) +
+    '/100</div>'
 
   // Feature checklist with verified status
   if (checklist && checklist.length) {
@@ -565,8 +680,16 @@ export function renderComplianceCard(compliance, checklist) {
     for (var i = 0; i < checklist.length; i++) {
       var item = checklist[i]
       var icon = item.verified ? '\u2611' : '\u2610'
-      var color = item.verified ? 'rgba(76,175,80,.8)' : (item.required ? 'rgba(255,82,82,.7)' : 'rgba(255,214,0,.7)')
-      html += '<div style="color:' + color + ';padding-left:8px" class="' + (item.verified ? 'ts-check-done' : 'ts-check-miss') + '">' + icon + ' ' + esc(item.text)
+      var color = item.verified ? 'rgba(76,175,80,.8)' : item.required ? 'rgba(255,82,82,.7)' : 'rgba(255,214,0,.7)'
+      html +=
+        '<div style="color:' +
+        color +
+        ';padding-left:8px" class="' +
+        (item.verified ? 'ts-check-done' : 'ts-check-miss') +
+        '">' +
+        icon +
+        ' ' +
+        esc(item.text)
       if (item.required && !item.verified) html += ' <span style="font-size:9px;opacity:.6">(required)</span>'
       html += '</div>'
     }
@@ -574,21 +697,27 @@ export function renderComplianceCard(compliance, checklist) {
 
   if (compliance.matched && compliance.matched.length) {
     html += '<div style="color:rgba(255,255,255,.5);margin-top:6px;margin-bottom:2px">Matched:</div>'
-    html += compliance.matched.map(function (m) {
-      return '<div style="color:rgba(76,175,80,.8);padding-left:8px">\u2713 ' + esc(m) + '</div>'
-    }).join('')
+    html += compliance.matched
+      .map(function (m) {
+        return '<div style="color:rgba(76,175,80,.8);padding-left:8px">\u2713 ' + esc(m) + '</div>'
+      })
+      .join('')
   }
   if (compliance.missing && compliance.missing.length) {
     html += '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Missing:</div>'
-    html += compliance.missing.map(function (m) {
-      return '<div style="color:rgba(255,214,0,.7);padding-left:8px">\u26A0 ' + esc(m) + '</div>'
-    }).join('')
+    html += compliance.missing
+      .map(function (m) {
+        return '<div style="color:rgba(255,214,0,.7);padding-left:8px">\u26A0 ' + esc(m) + '</div>'
+      })
+      .join('')
   }
   if (compliance.violations && compliance.violations.length) {
     html += '<div style="color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:2px">Violations:</div>'
-    html += compliance.violations.map(function (m) {
-      return '<div style="color:rgba(255,82,82,.7);padding-left:8px">\u2717 ' + esc(m) + '</div>'
-    }).join('')
+    html += compliance.violations
+      .map(function (m) {
+        return '<div style="color:rgba(255,82,82,.7);padding-left:8px">\u2717 ' + esc(m) + '</div>'
+      })
+      .join('')
   }
   html += '</div>'
   return html
@@ -601,7 +730,9 @@ export function renderComplianceCard(compliance, checklist) {
  */
 export function verifyFeatureChecklist(checklist, compliance) {
   if (!checklist || !checklist.length || !compliance) return checklist || []
-  var matched = (compliance.matched || []).map(function (m) { return m.toLowerCase() })
+  var matched = (compliance.matched || []).map(function (m) {
+    return m.toLowerCase()
+  })
   var result = []
   for (var i = 0; i < checklist.length; i++) {
     var item = { id: checklist[i].id, text: checklist[i].text, required: checklist[i].required, verified: false }
@@ -616,7 +747,10 @@ export function verifyFeatureChecklist(checklist, compliance) {
     if (!item.verified && compliance.missing) {
       var isMissing = false
       for (var k = 0; k < compliance.missing.length; k++) {
-        if (compliance.missing[k].toLowerCase().indexOf(lower) !== -1 || lower.indexOf(compliance.missing[k].toLowerCase()) !== -1) {
+        if (
+          compliance.missing[k].toLowerCase().indexOf(lower) !== -1 ||
+          lower.indexOf(compliance.missing[k].toLowerCase()) !== -1
+        ) {
           isMissing = true
           break
         }

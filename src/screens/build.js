@@ -38,6 +38,7 @@ import {
 } from '../components/stitch-tracker.js'
 import { classifyIntent, callClaudeChat, callClaudeClarify, callClaudeRaw, resetCostAccum } from '../lib/ai.js'
 import { clearPipelineCancel } from '../lib/state.js'
+import { ghSyncBuildHistory } from '../lib/github.js'
 import { runQuickEdit } from '../pipelines/quick-edit.js'
 
 // Pending images for next message (array of {base64, mediaType, name})
@@ -314,7 +315,11 @@ export function sendMsg() {
     } else {
       $('app-name-input').value = ''
       // If no Think Engine spec is active, try clarification for complex prompts
-      var hasSpec = ST.activeThoughtId && ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId && t.brief })
+      var hasSpec =
+        ST.activeThoughtId &&
+        ST.thoughts.find(function (t) {
+          return t.id === ST.activeThoughtId && t.brief
+        })
       if (!hasSpec && text.length > 20) {
         _clarifyThenBuild(text, existing, customName, images)
       } else {
@@ -331,55 +336,73 @@ function _clarifyThenBuild(text, existing, customName, images) {
   ST._building = true
   $('send-btn').disabled = true
   addMsg({ role: 'asst', type: 'text', text: 'Analyzing your request\u2026' })
-  callClaudeClarify(text, images).then(function (result) {
-    ST._building = false
-    $('send-btn').disabled = false
-    if (!result.needsClarification) {
+  callClaudeClarify(text, images)
+    .then(function (result) {
+      ST._building = false
+      $('send-btn').disabled = false
+      if (!result.needsClarification) {
+        _runBuild(text, existing, customName, images)
+        return
+      }
+      // Store pending build context
+      _pendingClarification = {
+        originalPrompt: text,
+        existing: existing,
+        customName: customName,
+        images: images,
+        questions: result.questions,
+        answers: [],
+      }
+      // Render clarification card
+      _renderClarificationCard(result)
+    })
+    .catch(function () {
+      ST._building = false
+      $('send-btn').disabled = false
       _runBuild(text, existing, customName, images)
-      return
-    }
-    // Store pending build context
-    _pendingClarification = {
-      originalPrompt: text,
-      existing: existing,
-      customName: customName,
-      images: images,
-      questions: result.questions,
-      answers: [],
-    }
-    // Render clarification card
-    _renderClarificationCard(result)
-  }).catch(function () {
-    ST._building = false
-    $('send-btn').disabled = false
-    _runBuild(text, existing, customName, images)
-  })
+    })
 }
 
 function _renderClarificationCard(result) {
-  var html = '<div class="clarify-card" style="padding:14px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(99,102,241,.3);border-radius:12px;margin:4px 0">'
-  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:10px">\uD83E\uDD14 A few quick questions to build something better:</div>'
+  var html =
+    '<div class="clarify-card" style="padding:14px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(99,102,241,.3);border-radius:12px;margin:4px 0">'
+  html +=
+    '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:10px">\uD83E\uDD14 A few quick questions to build something better:</div>'
   for (var i = 0; i < result.questions.length; i++) {
     var q = result.questions[i]
     var opts = (result.quickOptions && result.quickOptions[i]) || []
     html += '<div style="margin-bottom:10px">'
-    html += '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:6px">' + (i + 1) + '. ' + esc(q) + '</div>'
+    html +=
+      '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:6px">' + (i + 1) + '. ' + esc(q) + '</div>'
     html += '<div style="display:flex;flex-wrap:wrap;gap:6px">'
     for (var j = 0; j < opts.length; j++) {
-      html += '<button onclick="window._selectClarifyOption(' + i + ',' + j + ')" class="clarify-opt" data-qi="' + i + '" data-oi="' + j + '" style="padding:6px 12px;font-size:11px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:8px;color:rgba(255,255,255,.85);cursor:pointer;transition:all .15s ease">' + esc(opts[j]) + '</button>'
+      html +=
+        '<button onclick="window._selectClarifyOption(' +
+        i +
+        ',' +
+        j +
+        ')" class="clarify-opt" data-qi="' +
+        i +
+        '" data-oi="' +
+        j +
+        '" style="padding:6px 12px;font-size:11px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:8px;color:rgba(255,255,255,.85);cursor:pointer;transition:all .15s ease">' +
+        esc(opts[j]) +
+        '</button>'
     }
     html += '</div></div>'
   }
   html += '<div style="display:flex;gap:8px;margin-top:8px">'
-  html += '<button onclick="window._submitClarification()" id="clarify-submit" style="padding:8px 16px;font-size:11px;font-weight:600;background:rgba(99,102,241,.8);border:none;border-radius:8px;color:#fff;cursor:pointer">Build with answers</button>'
-  html += '<button onclick="window._skipClarification()" style="padding:8px 16px;font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.6);cursor:pointer">Skip \u2014 just build it</button>'
+  html +=
+    '<button onclick="window._submitClarification()" id="clarify-submit" style="padding:8px 16px;font-size:11px;font-weight:600;background:rgba(99,102,241,.8);border:none;border-radius:8px;color:#fff;cursor:pointer">Build with answers</button>'
+  html +=
+    '<button onclick="window._skipClarification()" style="padding:8px 16px;font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.6);cursor:pointer">Skip \u2014 just build it</button>'
   html += '</div></div>'
   addMsg({ role: 'asst', type: 'text', html: html })
 }
 
 window._selectClarifyOption = function (qi, oi) {
   if (!_pendingClarification) return
-  var opts = (_pendingClarification.questions[qi] ? [] : [])
+  var opts = _pendingClarification.questions[qi] ? [] : []
   // Find all buttons for this question and toggle selection
   var btns = document.querySelectorAll('.clarify-opt[data-qi="' + qi + '"]')
   for (var i = 0; i < btns.length; i++) {
@@ -695,8 +718,28 @@ export function recoverInterruptedBuild(session) {
     var isWeb = session.pipelineMode === 'website'
     var isB2 = session.pipelineMode === 'builder2'
     var isGame = session.pipelineMode === 'game'
-    var names = isStitch ? PIPE5_NAMES : isGame ? PIPE6_NAMES : isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
-    var icons = isStitch ? PIPE5_ICONS : isGame ? PIPE6_ICONS : isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
+    var names = isStitch
+      ? PIPE5_NAMES
+      : isGame
+        ? PIPE6_NAMES
+        : isWeb2
+          ? PIPE4_NAMES
+          : isWeb
+            ? PIPE3_NAMES
+            : isB2
+              ? PIPE2_NAMES
+              : PIPE_NAMES
+    var icons = isStitch
+      ? PIPE5_ICONS
+      : isGame
+        ? PIPE6_ICONS
+        : isWeb2
+          ? PIPE4_ICONS
+          : isWeb
+            ? PIPE3_ICONS
+            : isB2
+              ? PIPE2_ICONS
+              : PIPE_ICONS
     var modeLabel = isStitch
       ? 'Flawless Pipeline'
       : isGame
@@ -774,10 +817,14 @@ export function recoverInterruptedBuild(session) {
   actionHtml +=
     '<button onclick="B.dismissRecovery()" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u2713 Dismiss</button>'
   if (app) {
+    // Store session for resume — use a temp global
+    window._bldrResumeSession = session
+    actionHtml +=
+      '<button onclick="B.resumeBuild()" style="padding:8px 16px;border-radius:9px;background:rgba(61,90,254,.15);border:1.5px solid rgba(61,90,254,.3);color:rgba(61,90,254,.9);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u25B6\uFE0F Resume Build</button>'
     actionHtml +=
       '<button onclick="B.openBuilder(\'' +
       esc(session.appId) +
-      '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u270F\uFE0F Retry Build</button>'
+      '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\u270F\uFE0F Restart Build</button>'
   }
   actionHtml += '</div>'
   addMsg({ role: 'asst', type: 'text', html: actionHtml })
@@ -793,8 +840,10 @@ export function recoverInterruptedBuild(session) {
         prompt: '(Interrupted) ' + (session.prompt || '').slice(0, 180),
         messages: recoveredMessages,
       })
-      if (app.chatHistory.length > 10) app.chatHistory = app.chatHistory.slice(0, 10)
+      if (app.chatHistory.length > 25) app.chatHistory = app.chatHistory.slice(0, 25)
       persist()
+      // Sync recovered build history to GitHub
+      ghSyncBuildHistory(app.id).catch(function () {})
     }
   }
 
@@ -811,6 +860,53 @@ export function recoverInterruptedBuild(session) {
 
 export function dismissRecovery() {
   closeBuilder()
+}
+
+export function resumeBuild() {
+  var session = window._bldrResumeSession
+  if (!session) {
+    toast('No session to resume')
+    return
+  }
+  window._bldrResumeSession = null
+  ST._resumeSession = session
+  // Open builder with the app, then trigger a resume build
+  var appId = session.appId
+  var prompt = session.prompt || ''
+  resetChat()
+  addMsg({ role: 'system', text: 'Resuming build from where it left off\u2026' })
+  $('bs-title').textContent = 'Resuming: ' + (session.appName || 'App')
+  $('bs-sub').textContent = 'Picking up from step ' + ((session.lastStep || 0) + 1)
+  $('name-row').style.display = 'none'
+  $('app-name-input').value = ''
+  ST.activeAppId = appId
+  ST._building = true
+  syncStopButton()
+  _startStopBtnSync()
+  // Determine pipeline and run with resume
+  var mode = session.pipelineMode || ST.pipelineMode || 'builder1'
+  var existingApp = null
+  for (var i = 0; i < ST.apps.length; i++) {
+    if (ST.apps[i].id === appId) {
+      existingApp = ST.apps[i]
+      break
+    }
+  }
+  if (mode === 'builder2') {
+    runPipeline2(prompt, existingApp, session)
+  } else if (mode === 'website') {
+    runWebsitePipeline(prompt, existingApp, session)
+  } else if (mode === 'website2') {
+    runWebsite2Pipeline(prompt, existingApp, session)
+  } else if (mode === 'stitch') {
+    // Stitch has different signature — build context and callbacks
+    var stitchCtx = { prompt: prompt, existingApp: existingApp }
+    runStitchPipeline(stitchCtx, {}, session)
+  } else if (mode === 'game') {
+    runGamePipeline(prompt, existingApp, session)
+  } else {
+    runPipeline(prompt, existingApp, session)
+  }
 }
 
 // Poll to sync stop button visibility when build state changes

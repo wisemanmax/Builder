@@ -68,9 +68,13 @@ import {
   openProjectSheet,
   injectProfileContext,
   telemetry,
+  shouldSkipStep,
+  buildResumeContext,
 } from './pipeline-shared.js'
 
-export function runPipeline(prompt, existingApp, customName, images) {
+export function runPipeline(prompt, existingApp, resumeSession, images) {
+  var customName = typeof resumeSession === 'string' ? resumeSession : null
+  if (resumeSession && typeof resumeSession === 'string') resumeSession = null
   clearCurrentSession()
   resetCostAccum()
   clearPipelineCancel()
@@ -91,7 +95,9 @@ export function runPipeline(prompt, existingApp, customName, images) {
   var appIcon = ST.pendingIcon
   var appCi = ST.pendingColor
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
-  var branchName = hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : ''
+  var branchName =
+    (resumeSession && resumeSession.branchName) ||
+    (hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : '')
 
   var v1, v2, specText, rulesText, fixSys, thinkingText, _streamPreview
   var _buildId = telemetry.startBuild(appId, 'builder1')
@@ -126,25 +132,39 @@ export function runPipeline(prompt, existingApp, customName, images) {
     })
   }
 
+  // Build resume context if resuming
+  var _resumeCtx = resumeSession ? buildResumeContext(resumeSession) : ''
+  var _isResuming = !!resumeSession
+  if (_isResuming) {
+    addMsg({ role: 'system', text: 'Resuming from previous session \u2014 skipping completed steps.' })
+  }
+  ST._resumeSession = null
+
   // Step 0 — Branch
   var p = Promise.resolve()
   if (hasGitHub) {
-    updatePS(pid, 0, 'active', 'Creating feature branch\u2026')
-    p = retryStep(
-      function () {
-        return ghCreateBranch(branchName)
-      },
-      3,
-      'Branch'
-    )
-      .then(function () {
-        updatePS(pid, 0, 'done', branchName)
-        _persistProgress(0)
-      })
-      .catch(function (e) {
-        updatePS(pid, 0, 'error', e.message)
-        throw new Error('Branch creation failed: ' + e.message)
-      })
+    if (_isResuming && branchName) {
+      // Reuse existing branch from interrupted build
+      updatePS(pid, 0, 'done', branchName + ' (reused)')
+      _persistProgress(0)
+    } else {
+      updatePS(pid, 0, 'active', 'Creating feature branch\u2026')
+      p = retryStep(
+        function () {
+          return ghCreateBranch(branchName)
+        },
+        3,
+        'Branch'
+      )
+        .then(function () {
+          updatePS(pid, 0, 'done', branchName)
+          _persistProgress(0)
+        })
+        .catch(function (e) {
+          updatePS(pid, 0, 'error', e.message)
+          throw new Error('Branch creation failed: ' + e.message)
+        })
+    }
   } else {
     updatePS(pid, 0, 'skip', 'No GitHub \u2014 local-only mode')
   }
@@ -156,6 +176,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
     checkPipelineCancel()
     updatePS(pid, 1, 'active', 'Claude is planning the architecture\u2026')
     var planMsg = 'App description: ' + prompt
+    if (_resumeCtx) planMsg += '\n\n' + _resumeCtx
     if (images && images.length)
       planMsg +=
         '\n\n[' +
@@ -269,7 +290,13 @@ export function runPipeline(prompt, existingApp, customName, images) {
           return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
         })
         if (passNum === 1) {
-          telemetry.emit('build.checks', { passCount: checks.filter(function (c) { return c.passed }).length, totalCount: checks.length, criticalFails: criticalFails.length })
+          telemetry.emit('build.checks', {
+            passCount: checks.filter(function (c) {
+              return c.passed
+            }).length,
+            totalCount: checks.length,
+            criticalFails: criticalFails.length,
+          })
           telemetry.updateBuildRecord(_buildId, 'checks', checks)
         }
         addMsg({ role: 'asst', type: 'checks', checks: checks })
@@ -331,123 +358,125 @@ export function runPipeline(prompt, existingApp, customName, images) {
               checkpointPromise = waitForCheckpoint(pid)
             }
             return checkpointPromise.then(function (decision) {
-            telemetry.emit('user.checkpoint', { decision: decision, issueCount: allIssues.length })
-            telemetry.updateBuildRecord(_buildId, 'checkpointDecision', decision)
-            if (decision === 'stop') {
-              throw new Error('PIPELINE_CANCELLED')
-            }
-            if (decision === 'skip') {
-              v2 = currentCode
-              updatePS(pid, 5, 'done', 'Skipped fixes \u2014 using current version')
-              return Promise.resolve()
-            }
-            updatePS(
-              pid,
-              5,
-              'active',
-              'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026'
-            )
-            var issueList = allIssues
-              .map(function (b, i) {
-                return (
-                  i +
-                  1 +
-                  '. [' +
-                  (b.severity || 'medium').toUpperCase() +
-                  '] ' +
-                  (b.issue || '') +
-                  ' \u2014 ' +
-                  (b.location || '')
-                )
-              })
-              .join('\n')
-
-            // Always include full code so the model has complete context (like a chat conversation)
-            var fm =
-              (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
-              ':\n' + issueList +
-              '\n\nCURRENT CODE:\n' + currentCode +
-              (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
-            repairHistory.push({ role: 'user', content: fm })
-
-            return retryStep(
-              function () {
-                return callClaudeMultiTurn(fixSys, repairHistory)
-              },
-              2,
-              'Fix'
-            )
-              .then(function (fixed) {
-                repairHistory.push({ role: 'assistant', content: fixed })
-                currentCode = fixed
-                totalFixed += allIssues.length
-                telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
-                var _existingPasses = (_br && _br.fixPasses) || []
-                _existingPasses.push({ passNum: passNum, issuesBefore: allIssues.length })
-                telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
-                if (passNum < MAX_FIX_PASSES) {
-                  updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
-                  return runValidationPass()
-                } else {
-                  var finalChecks = runLocalChecks(currentCode)
-                  var finalFails = finalChecks.filter(function (c) {
-                    return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
-                  })
-                  if (finalFails.length > 0) {
-                    updatePS(
-                      pid,
-                      5,
-                      'warn',
-                      finalFails.length +
-                        ' issue' +
-                        (finalFails.length !== 1 ? 's' : '') +
-                        ' remain after ' +
-                        MAX_FIX_PASSES +
-                        ' passes'
-                    )
-                  } else {
-                    updatePS(
-                      pid,
-                      5,
-                      'done',
-                      'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
-                    )
-                  }
-                  v2 = currentCode
-                  addMsg({
-                    role: 'asst',
-                    type: 'text',
-                    text:
-                      'Validation summary: ' +
-                      totalFixed +
-                      ' issue' +
-                      (totalFixed !== 1 ? 's' : '') +
-                      ' addressed across ' +
-                      passNum +
-                      ' pass' +
-                      (passNum !== 1 ? 'es' : '') +
-                      '.' +
-                      (finalFails.length > 0
-                        ? ' ' +
-                          finalFails.length +
-                          ' minor issue' +
-                          (finalFails.length !== 1 ? 's' : '') +
-                          ' may remain.'
-                        : ''),
-                  })
-                }
-              })
-              .catch(function (e) {
+              telemetry.emit('user.checkpoint', { decision: decision, issueCount: allIssues.length })
+              telemetry.updateBuildRecord(_buildId, 'checkpointDecision', decision)
+              if (decision === 'stop') {
+                throw new Error('PIPELINE_CANCELLED')
+              }
+              if (decision === 'skip') {
                 v2 = currentCode
-                var errMsg = scrubKeys(e.message || String(e))
-                updatePS(
-                  pid,
-                  5,
-                  'error',
-                  'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
-                )
-                addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
-              })
+                updatePS(pid, 5, 'done', 'Skipped fixes \u2014 using current version')
+                return Promise.resolve()
+              }
+              updatePS(
+                pid,
+                5,
+                'active',
+                'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026'
+              )
+              var issueList = allIssues
+                .map(function (b, i) {
+                  return (
+                    i +
+                    1 +
+                    '. [' +
+                    (b.severity || 'medium').toUpperCase() +
+                    '] ' +
+                    (b.issue || '') +
+                    ' \u2014 ' +
+                    (b.location || '')
+                  )
+                })
+                .join('\n')
+
+              // Always include full code so the model has complete context (like a chat conversation)
+              var fm =
+                (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
+                ':\n' +
+                issueList +
+                '\n\nCURRENT CODE:\n' +
+                currentCode +
+                (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
+              repairHistory.push({ role: 'user', content: fm })
+
+              return retryStep(
+                function () {
+                  return callClaudeMultiTurn(fixSys, repairHistory)
+                },
+                2,
+                'Fix'
+              )
+                .then(function (fixed) {
+                  repairHistory.push({ role: 'assistant', content: fixed })
+                  currentCode = fixed
+                  totalFixed += allIssues.length
+                  telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
+                  var _existingPasses = (_br && _br.fixPasses) || []
+                  _existingPasses.push({ passNum: passNum, issuesBefore: allIssues.length })
+                  telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
+                  if (passNum < MAX_FIX_PASSES) {
+                    updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
+                    return runValidationPass()
+                  } else {
+                    var finalChecks = runLocalChecks(currentCode)
+                    var finalFails = finalChecks.filter(function (c) {
+                      return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
+                    })
+                    if (finalFails.length > 0) {
+                      updatePS(
+                        pid,
+                        5,
+                        'warn',
+                        finalFails.length +
+                          ' issue' +
+                          (finalFails.length !== 1 ? 's' : '') +
+                          ' remain after ' +
+                          MAX_FIX_PASSES +
+                          ' passes'
+                      )
+                    } else {
+                      updatePS(
+                        pid,
+                        5,
+                        'done',
+                        'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
+                      )
+                    }
+                    v2 = currentCode
+                    addMsg({
+                      role: 'asst',
+                      type: 'text',
+                      text:
+                        'Validation summary: ' +
+                        totalFixed +
+                        ' issue' +
+                        (totalFixed !== 1 ? 's' : '') +
+                        ' addressed across ' +
+                        passNum +
+                        ' pass' +
+                        (passNum !== 1 ? 'es' : '') +
+                        '.' +
+                        (finalFails.length > 0
+                          ? ' ' +
+                            finalFails.length +
+                            ' minor issue' +
+                            (finalFails.length !== 1 ? 's' : '') +
+                            ' may remain.'
+                          : ''),
+                    })
+                  }
+                })
+                .catch(function (e) {
+                  v2 = currentCode
+                  var errMsg = scrubKeys(e.message || String(e))
+                  updatePS(
+                    pid,
+                    5,
+                    'error',
+                    'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
+                  )
+                  addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
+                })
             }) // end checkpointPromise.then
           } else {
             v2 = currentCode
@@ -501,8 +530,14 @@ export function runPipeline(prompt, existingApp, customName, images) {
         'EnhReview'
       )
         .then(function (review) {
-          telemetry.emit('build.enhance', { enhancementCount: review.enhancements.length, bugCount: review.bugs.length })
-          telemetry.updateBuildRecord(_buildId, 'enhancementReview', { enhancements: review.enhancements, bugs: review.bugs })
+          telemetry.emit('build.enhance', {
+            enhancementCount: review.enhancements.length,
+            bugCount: review.bugs.length,
+          })
+          telemetry.updateBuildRecord(_buildId, 'enhancementReview', {
+            enhancements: review.enhancements,
+            bugs: review.bugs,
+          })
           var totalSuggestions = review.enhancements.length + review.bugs.length
           updatePS(
             pid,
@@ -752,16 +787,15 @@ export function runPipeline(prompt, existingApp, customName, images) {
         : null
       if (activeThought && activeThought.brief && v2) {
         var featureChecklist = activeThought.featureChecklist || []
-        var complianceInput =
-          'APP SPECIFICATION:\n' +
-          specText +
-          '\n\nUSER RULES:\n' +
-          rulesText
+        var complianceInput = 'APP SPECIFICATION:\n' + specText + '\n\nUSER RULES:\n' + rulesText
         if (featureChecklist.length) {
-          complianceInput += '\n\nFEATURE CHECKLIST (verify each):\n' +
-            featureChecklist.map(function (f, i) {
-              return (i + 1) + '. ' + (f.required ? '[REQUIRED] ' : '[OPTIONAL] ') + f.text
-            }).join('\n')
+          complianceInput +=
+            '\n\nFEATURE CHECKLIST (verify each):\n' +
+            featureChecklist
+              .map(function (f, i) {
+                return i + 1 + '. ' + (f.required ? '[REQUIRED] ' : '[OPTIONAL] ') + f.text
+              })
+              .join('\n')
         }
         complianceInput += '\n\nGENERATED CODE:\n' + v2.slice(0, 40000)
         return retryStep(
@@ -778,18 +812,35 @@ export function runPipeline(prompt, existingApp, customName, images) {
               addMsg({ role: 'asst', type: 'text', html: renderComplianceCard(compliance, verifiedChecklist) })
 
               // Auto-fix if required features are missing and score is below threshold
-              var missingRequired = verifiedChecklist.filter(function (f) { return f.required && !f.verified })
+              var missingRequired = verifiedChecklist.filter(function (f) {
+                return f.required && !f.verified
+              })
               if (missingRequired.length > 0 && compliance.score < 70) {
                 addMsg({
                   role: 'asst',
                   type: 'text',
-                  text: 'Auto-fixing ' + missingRequired.length + ' missing required feature' + (missingRequired.length !== 1 ? 's' : '') + '\u2026',
+                  text:
+                    'Auto-fixing ' +
+                    missingRequired.length +
+                    ' missing required feature' +
+                    (missingRequired.length !== 1 ? 's' : '') +
+                    '\u2026',
                 })
-                var fixMsg = 'MISSING REQUIRED FEATURES — add these to the app:\n' +
-                  missingRequired.map(function (f, i) { return (i + 1) + '. ' + f.text }).join('\n')
+                var fixMsg =
+                  'MISSING REQUIRED FEATURES — add these to the app:\n' +
+                  missingRequired
+                    .map(function (f, i) {
+                      return i + 1 + '. ' + f.text
+                    })
+                    .join('\n')
                 if (compliance.missing && compliance.missing.length) {
-                  fixMsg += '\n\nADDITIONAL MISSING REQUIREMENTS:\n' +
-                    compliance.missing.map(function (m, i) { return (i + 1) + '. ' + m }).join('\n')
+                  fixMsg +=
+                    '\n\nADDITIONAL MISSING REQUIREMENTS:\n' +
+                    compliance.missing
+                      .map(function (m, i) {
+                        return i + 1 + '. ' + m
+                      })
+                      .join('\n')
                 }
                 fixMsg += '\n\nCURRENT CODE:\n' + v2
                 return retryStep(
@@ -800,13 +851,25 @@ export function runPipeline(prompt, existingApp, customName, images) {
                   'ComplianceFix'
                 ).then(function (fixed) {
                   v2 = fixed
-                  addMsg({ role: 'asst', type: 'text', text: 'Compliance fix applied \u2014 ' + missingRequired.length + ' feature' + (missingRequired.length !== 1 ? 's' : '') + ' added.' })
+                  addMsg({
+                    role: 'asst',
+                    type: 'text',
+                    text:
+                      'Compliance fix applied \u2014 ' +
+                      missingRequired.length +
+                      ' feature' +
+                      (missingRequired.length !== 1 ? 's' : '') +
+                      ' added.',
+                  })
                 })
               } else if (compliance.score < 50) {
                 addMsg({
                   role: 'asst',
                   type: 'text',
-                  text: 'Low spec compliance (' + compliance.score + '/100). The built app may not match your ideation brief.',
+                  text:
+                    'Low spec compliance (' +
+                    compliance.score +
+                    '/100). The built app may not match your ideation brief.',
                 })
               }
             } catch (e) {
@@ -1022,7 +1085,14 @@ export function runPipeline(prompt, existingApp, customName, images) {
       // Complete build record with outcomes
       telemetry.completeBuildRecord(_buildId, {
         finalCodeSize: v2 ? v2.length : 0,
-        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        costData: costData.breakdown.length
+          ? {
+              rawCost: costData.rawCost,
+              userPrice: costData.userPrice,
+              totalInput: costData.totalInput,
+              totalOutput: costData.totalOutput,
+            }
+          : null,
         approved: true,
       })
       // Show feedback card if a profile is active
@@ -1050,7 +1120,10 @@ export function runPipeline(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
-        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.emit('user.approval', {
+          approved: false,
+          timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null,
+        })
         telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalStartTs ? Date.now() - _approvalStartTs : null)
         updatePS(pid, 12, 'error', 'Changes requested')
