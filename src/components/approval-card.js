@@ -113,3 +113,18 @@ export function resolveRetry(pid, doRetry) {
   if (_retryGates[pid]) _retryGates[pid].resolve(doRetry)
   delete _retryGates[pid]
 }
+
+// Checkpoint gates — pause pipeline after first audit to let user decide
+var _checkpointGates = {}
+
+export function waitForCheckpoint(pid) {
+  return new Promise(function (resolve) {
+    _checkpointGates[pid] = { resolve: resolve }
+  })
+}
+
+// decision: 'fix' | 'skip' | 'stop'
+export function resolveCheckpoint(pid, decision) {
+  if (_checkpointGates[pid]) _checkpointGates[pid].resolve(decision)
+  delete _checkpointGates[pid]
+}

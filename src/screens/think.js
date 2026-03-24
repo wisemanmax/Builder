@@ -282,6 +282,21 @@ export function renderThinkSummary(brief, rules) {
     html += '</div>'
   }
 
+  // Feature checklist
+  var checklist = extractFeatureChecklist(brief)
+  if (checklist.length) {
+    html += '<h4>Feature Checklist</h4><div class="ts-checklist">'
+    for (var ci = 0; ci < checklist.length; ci++) {
+      var item = checklist[ci]
+      html += '<div class="ts-check-item">'
+      html += '<span class="ts-check-box">' + (item.required ? '\u2610' : '\u25CB') + '</span>'
+      html += '<span class="ts-check-text">' + esc(item.text) + '</span>'
+      if (item.required) html += '<span class="ts-check-req">required</span>'
+      html += '</div>'
+    }
+    html += '</div>'
+  }
+
   if (rules) {
     if (rules.must && rules.must.length) {
       html += '<h4>Must Do</h4><ul>'
@@ -311,7 +326,41 @@ export function renderThinkSummary(brief, rules) {
   scrollThinkBot()
 }
 
+export function extractFeatureChecklist(brief) {
+  if (!brief) return []
+  var checklist = []
+  if (brief.features && brief.features.length) {
+    for (var i = 0; i < brief.features.length; i++) {
+      checklist.push({ id: 'feat-' + i, text: brief.features[i], required: true, verified: false })
+    }
+  }
+  if (brief.whatItDoes && brief.whatItDoes.length) {
+    for (var j = 0; j < brief.whatItDoes.length; j++) {
+      var isDuplicate = false
+      for (var k = 0; k < checklist.length; k++) {
+        if (checklist[k].text.toLowerCase() === brief.whatItDoes[j].toLowerCase()) {
+          isDuplicate = true
+          break
+        }
+      }
+      if (!isDuplicate) {
+        checklist.push({ id: 'core-' + j, text: brief.whatItDoes[j], required: true, verified: false })
+      }
+    }
+  }
+  if (brief.design) {
+    if (brief.design.theme) {
+      checklist.push({ id: 'design-theme', text: brief.design.theme + ' theme', required: false, verified: false })
+    }
+    if (brief.design.layout) {
+      checklist.push({ id: 'design-layout', text: brief.design.layout, required: false, verified: false })
+    }
+  }
+  return checklist
+}
+
 export function saveThought(status) {
+  var featureChecklist = extractFeatureChecklist(_thinkState.brief)
   var thought = {
     id: _thinkState.thoughtId,
     name: _thinkState.brief ? _thinkState.brief.name : (_thinkState.originalPrompt || 'Untitled').slice(0, 40),
@@ -320,6 +369,7 @@ export function saveThought(status) {
     rounds: _thinkState.round,
     conversation: _thinkState.conversation,
     brief: _thinkState.brief || null,
+    featureChecklist: featureChecklist,
     linkedRulesId: null,
     linkedAppId: null,
     createdAt: new Date().toISOString(),

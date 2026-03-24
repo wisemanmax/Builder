@@ -17,6 +17,7 @@ import {
   approveAndMerge,
   requestChanges,
   resolveRetry,
+  resolveCheckpoint,
   approveBlueprintContinue,
   rejectBlueprint,
 } from './approval-card.js'
@@ -589,6 +590,38 @@ export function addMsg(cfg) {
             for (var k = 0; k < allBtns.length; k++) allBtns[k].disabled = true
             this.textContent = choice ? 'Retrying\u2026' : 'Proceeding\u2026'
             resolveRetry(pid2, choice)
+          })
+        }
+      }, 0)
+    } else if (cfg.type === 'checkpoint') {
+      var cpid = esc(cfg.pid || '')
+      var issueCount = cfg.issueCount || 0
+      var issueList = cfg.issues || []
+      var cpHtml = '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">\uD83D\uDEA7</div>' +
+        '<div style="flex:1;min-width:0"><div class="checkpoint-card">' +
+        '<div class="checkpoint-title">\uD83D\uDEA7 Checkpoint: ' + issueCount + ' issue' + (issueCount !== 1 ? 's' : '') + ' found after first audit</div>' +
+        '<div class="checkpoint-issues">'
+      for (var ci = 0; ci < Math.min(issueList.length, 5); ci++) {
+        cpHtml += '<div>\u2022 ' + esc(issueList[ci]) + '</div>'
+      }
+      if (issueList.length > 5) cpHtml += '<div style="opacity:.5">+ ' + (issueList.length - 5) + ' more</div>'
+      cpHtml += '</div>' +
+        '<div class="checkpoint-actions">' +
+        '<button class="checkpoint-btn checkpoint-btn-fix" data-pid="' + cpid + '" data-choice="fix">\uD83D\uDEE0 Fix these issues</button>' +
+        '<button class="checkpoint-btn checkpoint-btn-skip" data-pid="' + cpid + '" data-choice="skip">\u23ED Skip \u2014 proceed as-is</button>' +
+        '<button class="checkpoint-btn checkpoint-btn-skip" data-pid="' + cpid + '" data-choice="stop">\u23F9 Stop pipeline</button>' +
+        '</div></div></div></div>'
+      row.innerHTML = cpHtml
+      setTimeout(function () {
+        var cpBtns = row.querySelectorAll('.checkpoint-btn[data-pid]')
+        for (var cbi = 0; cbi < cpBtns.length; cbi++) {
+          cpBtns[cbi].addEventListener('click', function () {
+            var pid3 = this.dataset.pid
+            var decision = this.dataset.choice
+            var allCpBtns = row.querySelectorAll('.checkpoint-btn')
+            for (var cbk = 0; cbk < allCpBtns.length; cbk++) allCpBtns[cbk].disabled = true
+            this.textContent = decision === 'fix' ? 'Fixing\u2026' : decision === 'stop' ? 'Stopping\u2026' : 'Proceeding\u2026'
+            resolveCheckpoint(pid3, decision)
           })
         }
       }, 0)

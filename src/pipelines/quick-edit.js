@@ -26,10 +26,129 @@ import {
   injectProfileContext,
 } from './pipeline-shared.js'
 
+var SYS_CSS_EDIT =
+  'You are editing ONLY the <style> section of a single-file HTML app. The user wants a CSS-only change.\n' +
+  'RULES:\n' +
+  '1. Return the COMPLETE HTML file starting with <!DOCTYPE html>\n' +
+  '2. Modify ONLY CSS inside <style> tags \u2014 do NOT change any HTML structure or JavaScript\n' +
+  '3. Preserve all existing functionality, event handlers, and DOM structure\n' +
+  '4. All CSS inside <style>, all JS inside <script>\n' +
+  '5. ZERO external dependencies'
+
+var SYS_TEXT_EDIT =
+  'You are editing ONLY the text content of a single-file HTML app. The user wants a text/content change.\n' +
+  'RULES:\n' +
+  '1. Return the COMPLETE HTML file starting with <!DOCTYPE html>\n' +
+  '2. Modify ONLY text content, labels, headings, placeholder text, or demo data\n' +
+  '3. Do NOT change CSS styles, JavaScript logic, or HTML structure/attributes\n' +
+  '4. Preserve all existing functionality and event handlers\n' +
+  '5. All CSS inside <style>, all JS inside <script>'
+
 export var QUICK_EDIT_NAMES = ['Claude \u00B7 Edit', 'Automated Checks', 'Save']
 export var QUICK_EDIT_ICONS = ['\u270F\uFE0F', '\uD83D\uDCCB', '\u2705']
 
-export function runQuickEdit(prompt, existingApp, images) {
+/**
+ * Generate a simple line-based diff between old and new code.
+ * Returns HTML showing added/removed/context lines.
+ */
+function generateDiffHtml(oldCode, newCode) {
+  var oldLines = oldCode.split('\n')
+  var newLines = newCode.split('\n')
+  var diffs = []
+  var contextSize = 2
+
+  // Simple LCS-based diff: find changed regions
+  var maxLen = Math.max(oldLines.length, newLines.length)
+  var changes = []
+  var oi = 0, ni = 0
+
+  while (oi < oldLines.length || ni < newLines.length) {
+    if (oi < oldLines.length && ni < newLines.length && oldLines[oi] === newLines[ni]) {
+      changes.push({ type: 'ctx', line: oldLines[oi], oldNum: oi + 1, newNum: ni + 1 })
+      oi++
+      ni++
+    } else {
+      // Find next matching line
+      var foundOld = -1, foundNew = -1
+      var searchRange = Math.min(20, maxLen)
+      for (var s = 1; s <= searchRange; s++) {
+        if (foundNew === -1 && ni + s < newLines.length && oi < oldLines.length && newLines[ni + s] === oldLines[oi]) {
+          foundNew = ni + s
+        }
+        if (foundOld === -1 && oi + s < oldLines.length && ni < newLines.length && oldLines[oi + s] === newLines[ni]) {
+          foundOld = oi + s
+        }
+        if (foundOld !== -1 || foundNew !== -1) break
+      }
+      if (foundOld !== -1 && (foundNew === -1 || foundOld - oi <= foundNew - ni)) {
+        // Lines were removed from old
+        while (oi < foundOld) {
+          changes.push({ type: 'rm', line: oldLines[oi], oldNum: oi + 1 })
+          oi++
+        }
+      } else if (foundNew !== -1) {
+        // Lines were added in new
+        while (ni < foundNew) {
+          changes.push({ type: 'add', line: newLines[ni], newNum: ni + 1 })
+          ni++
+        }
+      } else {
+        // Replace
+        if (oi < oldLines.length) {
+          changes.push({ type: 'rm', line: oldLines[oi], oldNum: oi + 1 })
+          oi++
+        }
+        if (ni < newLines.length) {
+          changes.push({ type: 'add', line: newLines[ni], newNum: ni + 1 })
+          ni++
+        }
+      }
+    }
+  }
+
+  // Collapse context lines, show only those near changes
+  var result = []
+  var totalAdded = 0, totalRemoved = 0
+  for (var i = 0; i < changes.length; i++) {
+    if (changes[i].type !== 'ctx') {
+      if (changes[i].type === 'add') totalAdded++
+      if (changes[i].type === 'rm') totalRemoved++
+      // Include surrounding context
+      var start = Math.max(0, i - contextSize)
+      var end = Math.min(changes.length - 1, i + contextSize)
+      for (var j = start; j <= end; j++) {
+        if (result.indexOf(j) === -1) result.push(j)
+      }
+    }
+  }
+  result.sort(function (a, b) { return a - b })
+
+  if (result.length === 0) return ''
+
+  var html = '<div class="diff-view">'
+  html += '<div class="diff-header">' + totalAdded + ' added, ' + totalRemoved + ' removed</div>'
+  var lastIdx = -1
+  for (var r = 0; r < result.length; r++) {
+    var idx = result[r]
+    if (lastIdx !== -1 && idx - lastIdx > 1) {
+      html += '<div class="diff-line diff-ctx">\u22EF</div>'
+    }
+    var c = changes[idx]
+    var lineText = esc(c.line.length > 200 ? c.line.slice(0, 200) + '\u2026' : c.line)
+    if (c.type === 'add') {
+      html += '<div class="diff-line diff-add">+ ' + lineText + '</div>'
+    } else if (c.type === 'rm') {
+      html += '<div class="diff-line diff-rm">- ' + lineText + '</div>'
+    } else {
+      html += '<div class="diff-line diff-ctx">  ' + lineText + '</div>'
+    }
+    lastIdx = idx
+  }
+  html += '</div>'
+  return html
+}
+
+export function runQuickEdit(prompt, existingApp, images, editMode) {
   resetCostAccum()
   clearPipelineCancel()
   ST._building = true
@@ -37,14 +156,17 @@ export function runQuickEdit(prompt, existingApp, images) {
   if (sb) sb.disabled = true
   var pid = 'qe' + Date.now()
 
-  addMsg({ role: 'asst', type: 'pipeline', id: pid, names: QUICK_EDIT_NAMES, icons: QUICK_EDIT_ICONS })
+  var modeLabel = editMode === 'css-only' ? 'CSS' : editMode === 'text-only' ? 'Text' : 'Edit'
+  var editNames = ['Claude \u00B7 ' + modeLabel, 'Automated Checks', 'Save']
+  addMsg({ role: 'asst', type: 'pipeline', id: pid, names: editNames, icons: QUICK_EDIT_ICONS })
 
   var appId = existingApp.id
   var appName = existingApp.name
   var v2
 
   // Step 0 — Claude Edit
-  updatePS(pid, 0, 'active', 'Claude is editing\u2026')
+  var editLabel = editMode === 'css-only' ? 'CSS edit' : editMode === 'text-only' ? 'text edit' : 'editing'
+  updatePS(pid, 0, 'active', 'Claude is applying ' + editLabel + '\u2026')
 
   var currentCode = existingApp.code || ''
   var prevPrompts = (existingApp.prompts || [])
@@ -52,15 +174,19 @@ export function runQuickEdit(prompt, existingApp, images) {
       return p.text
     })
     .join('\n\u2192 ')
+
+  var changeLabel = editMode === 'css-only' ? 'CSS CHANGE REQUEST' : editMode === 'text-only' ? 'TEXT CHANGE REQUEST' : 'CHANGE REQUEST'
   var userMsg =
-    'CHANGE REQUEST: ' +
+    changeLabel + ': ' +
     prompt +
     (prevPrompts ? '\n\nBUILD HISTORY:\n' + prevPrompts : '') +
     '\n\nCURRENT APP CODE:\n' +
     currentCode.slice(0, 120000) +
     '\n\nApply the requested change to the existing code above. Return the complete modified HTML.'
 
-  var effectiveSys = injectProfileContext(SYS_UPDATE)
+  // Use targeted system prompt based on edit mode
+  var baseSys = editMode === 'css-only' ? SYS_CSS_EDIT : editMode === 'text-only' ? SYS_TEXT_EDIT : SYS_UPDATE
+  var effectiveSys = injectProfileContext(baseSys)
   var charCount = 0
 
   // Set up streaming preview
@@ -70,10 +196,11 @@ export function runQuickEdit(prompt, existingApp, images) {
     previewCtrl = createStreamingPreview('viewer-iframe')
   }
 
+  var thinkBudget = editMode === 'css-only' || editMode === 'text-only' ? 2000 : 4000
   callClaudeWithThinkingStream(
     effectiveSys,
     userMsg,
-    4000,
+    thinkBudget,
     function (type, text) {
       if (type === 'text') {
         charCount += text.length
@@ -90,6 +217,12 @@ export function runQuickEdit(prompt, existingApp, images) {
         v2 = autoInjectSupabase(v2)
       }
       updatePS(pid, 0, 'done', 'Edit complete \u2713')
+
+      // Show diff of changes
+      var diffHtml = generateDiffHtml(currentCode, v2)
+      if (diffHtml) {
+        addMsg({ role: 'asst', type: 'text', html: '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:2px">Changes made:</div>' + diffHtml })
+      }
 
       // Step 1 — Automated Checks
       checkPipelineCancel()
@@ -130,6 +263,7 @@ export function runQuickEdit(prompt, existingApp, images) {
         addMsg({ role: 'asst', type: 'cost', cost: costData })
       }
 
+      var modeDesc = editMode === 'css-only' ? 'CSS Edit' : editMode === 'text-only' ? 'Text Edit' : 'Quick Edit'
       addMsg({
         role: 'asst',
         type: 'text',
@@ -137,7 +271,7 @@ export function runQuickEdit(prompt, existingApp, images) {
           '<strong>' +
           esc(appName) +
           '</strong> updated \u2713' +
-          '<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:4px">Quick Edit \u2014 local save only. Use full pipeline for GitHub deployment.</div>',
+          '<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:4px">' + modeDesc + ' \u2014 local save only. Use full pipeline for GitHub deployment.</div>',
       })
       toast('\u2713 ' + appName + ' updated!', 2500)
       renderGrid()

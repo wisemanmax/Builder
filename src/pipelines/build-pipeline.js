@@ -10,6 +10,7 @@ import {
   saveChatSession,
   ADVISORY_CHECK_IDS,
   renderComplianceCard,
+  verifyFeatureChecklist,
   formatTemplateInjection,
   ST,
   persist,
@@ -58,6 +59,7 @@ import {
   clearPreview,
   waitForApproval,
   waitForRetryDecision,
+  waitForCheckpoint,
   createStreamingPreview,
   autoInjectSupabase,
   showFeedbackCard,
@@ -296,6 +298,25 @@ export function runPipeline(prompt, existingApp, customName, images) {
             .concat(result.bugs)
 
           if (allIssues.length > 0) {
+            // Interactive checkpoint after first audit — let user decide
+            var checkpointPromise = Promise.resolve('fix')
+            if (passNum === 1 && allIssues.length > 0) {
+              var issueTexts = allIssues.map(function (b) {
+                return '[' + (b.severity || 'medium').toUpperCase() + '] ' + (b.issue || '')
+              })
+              addMsg({ role: 'asst', type: 'checkpoint', pid: pid, issueCount: allIssues.length, issues: issueTexts })
+              notifyUser('Checkpoint', allIssues.length + ' issues found — fix, skip, or stop?')
+              checkpointPromise = waitForCheckpoint(pid)
+            }
+            return checkpointPromise.then(function (decision) {
+            if (decision === 'stop') {
+              throw new Error('PIPELINE_CANCELLED')
+            }
+            if (decision === 'skip') {
+              v2 = currentCode
+              updatePS(pid, 5, 'done', 'Skipped fixes \u2014 using current version')
+              return Promise.resolve()
+            }
             updatePS(
               pid,
               5,
@@ -399,6 +420,7 @@ export function runPipeline(prompt, existingApp, customName, images) {
                 )
                 addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
               })
+            }) // end checkpointPromise.then
           } else {
             v2 = currentCode
             if (passNum === 1) {
@@ -699,13 +721,19 @@ export function runPipeline(prompt, existingApp, customName, images) {
           })
         : null
       if (activeThought && activeThought.brief && v2) {
+        var featureChecklist = activeThought.featureChecklist || []
         var complianceInput =
           'APP SPECIFICATION:\n' +
           specText +
           '\n\nUSER RULES:\n' +
-          rulesText +
-          '\n\nGENERATED CODE:\n' +
-          v2.slice(0, 40000)
+          rulesText
+        if (featureChecklist.length) {
+          complianceInput += '\n\nFEATURE CHECKLIST (verify each):\n' +
+            featureChecklist.map(function (f, i) {
+              return (i + 1) + '. ' + (f.required ? '[REQUIRED] ' : '[OPTIONAL] ') + f.text
+            }).join('\n')
+        }
+        complianceInput += '\n\nGENERATED CODE:\n' + v2.slice(0, 40000)
         return retryStep(
           function () {
             return callClaudeRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
@@ -716,15 +744,39 @@ export function runPipeline(prompt, existingApp, customName, images) {
           .then(function (raw) {
             try {
               var compliance = JSON.parse(raw)
-              addMsg({ role: 'asst', type: 'text', html: renderComplianceCard(compliance) })
-              if (compliance.score < 50) {
+              var verifiedChecklist = verifyFeatureChecklist(featureChecklist, compliance)
+              addMsg({ role: 'asst', type: 'text', html: renderComplianceCard(compliance, verifiedChecklist) })
+
+              // Auto-fix if required features are missing and score is below threshold
+              var missingRequired = verifiedChecklist.filter(function (f) { return f.required && !f.verified })
+              if (missingRequired.length > 0 && compliance.score < 70) {
                 addMsg({
                   role: 'asst',
                   type: 'text',
-                  text:
-                    'Low spec compliance (' +
-                    compliance.score +
-                    '/100). The built app may not match your ideation brief. Consider re-running the think engine or providing more specific requirements.',
+                  text: 'Auto-fixing ' + missingRequired.length + ' missing required feature' + (missingRequired.length !== 1 ? 's' : '') + '\u2026',
+                })
+                var fixMsg = 'MISSING REQUIRED FEATURES — add these to the app:\n' +
+                  missingRequired.map(function (f, i) { return (i + 1) + '. ' + f.text }).join('\n')
+                if (compliance.missing && compliance.missing.length) {
+                  fixMsg += '\n\nADDITIONAL MISSING REQUIREMENTS:\n' +
+                    compliance.missing.map(function (m, i) { return (i + 1) + '. ' + m }).join('\n')
+                }
+                fixMsg += '\n\nCURRENT CODE:\n' + v2
+                return retryStep(
+                  function () {
+                    return callClaude(withContext(SYS_FIX.replace('{INTENT}', prompt)), fixMsg)
+                  },
+                  2,
+                  'ComplianceFix'
+                ).then(function (fixed) {
+                  v2 = fixed
+                  addMsg({ role: 'asst', type: 'text', text: 'Compliance fix applied \u2014 ' + missingRequired.length + ' feature' + (missingRequired.length !== 1 ? 's' : '') + ' added.' })
+                })
+              } else if (compliance.score < 50) {
+                addMsg({
+                  role: 'asst',
+                  type: 'text',
+                  text: 'Low spec compliance (' + compliance.score + '/100). The built app may not match your ideation brief.',
                 })
               }
             } catch (e) {
