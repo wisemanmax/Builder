@@ -523,17 +523,12 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
                 })
                 .join('\n')
 
-              var fm
-              if (passNum === 1) {
-                fm = 'ISSUES TO FIX:\n' + issueList + '\n\nORIGINAL CODE:\n' + currentCode
-              } else {
-                fm =
-                  'REMAINING ISSUES after pass ' +
-                  (passNum - 1) +
-                  ':\n' +
-                  issueList +
-                  '\n\nFix these without reintroducing previously resolved issues.'
-              }
+              // Always include full code so the model has complete context
+              var fm =
+                (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
+                ':\n' + issueList +
+                '\n\nCURRENT CODE:\n' + currentCode +
+                (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
               repairHistory.push({ role: 'user', content: fm })
 
               return retryStep(

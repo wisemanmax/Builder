@@ -33,7 +33,7 @@ import {
   updateStitchEstimate,
   updateStitchTime,
 } from '../components/stitch-tracker.js'
-import { classifyIntent, callClaudeChat, callClaudeRaw, resetCostAccum } from '../lib/ai.js'
+import { classifyIntent, callClaudeChat, callClaudeClarify, callClaudeRaw, resetCostAccum } from '../lib/ai.js'
 import { clearPipelineCancel } from '../lib/state.js'
 import { runQuickEdit } from '../pipelines/quick-edit.js'
 
@@ -310,9 +310,108 @@ export function sendMsg() {
       _handleChat(text, images)
     } else {
       $('app-name-input').value = ''
-      _runBuild(text, existing, customName, images)
+      // If no Think Engine spec is active, try clarification for complex prompts
+      var hasSpec = ST.activeThoughtId && ST.thoughts.find(function (t) { return t.id === ST.activeThoughtId && t.brief })
+      if (!hasSpec && text.length > 20) {
+        _clarifyThenBuild(text, existing, customName, images)
+      } else {
+        _runBuild(text, existing, customName, images)
+      }
     }
   })
+}
+
+// --- Clarification flow ---
+var _pendingClarification = null
+
+function _clarifyThenBuild(text, existing, customName, images) {
+  ST._building = true
+  $('send-btn').disabled = true
+  addMsg({ role: 'asst', type: 'text', text: 'Analyzing your request\u2026' })
+  callClaudeClarify(text, images).then(function (result) {
+    ST._building = false
+    $('send-btn').disabled = false
+    if (!result.needsClarification) {
+      _runBuild(text, existing, customName, images)
+      return
+    }
+    // Store pending build context
+    _pendingClarification = {
+      originalPrompt: text,
+      existing: existing,
+      customName: customName,
+      images: images,
+      questions: result.questions,
+      answers: [],
+    }
+    // Render clarification card
+    _renderClarificationCard(result)
+  }).catch(function () {
+    ST._building = false
+    $('send-btn').disabled = false
+    _runBuild(text, existing, customName, images)
+  })
+}
+
+function _renderClarificationCard(result) {
+  var html = '<div class="clarify-card" style="padding:14px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(99,102,241,.3);border-radius:12px;margin:4px 0">'
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:10px">\uD83E\uDD14 A few quick questions to build something better:</div>'
+  for (var i = 0; i < result.questions.length; i++) {
+    var q = result.questions[i]
+    var opts = (result.quickOptions && result.quickOptions[i]) || []
+    html += '<div style="margin-bottom:10px">'
+    html += '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:6px">' + (i + 1) + '. ' + esc(q) + '</div>'
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">'
+    for (var j = 0; j < opts.length; j++) {
+      html += '<button onclick="window._selectClarifyOption(' + i + ',' + j + ')" class="clarify-opt" data-qi="' + i + '" data-oi="' + j + '" style="padding:6px 12px;font-size:11px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:8px;color:rgba(255,255,255,.85);cursor:pointer;transition:all .15s ease">' + esc(opts[j]) + '</button>'
+    }
+    html += '</div></div>'
+  }
+  html += '<div style="display:flex;gap:8px;margin-top:8px">'
+  html += '<button onclick="window._submitClarification()" id="clarify-submit" style="padding:8px 16px;font-size:11px;font-weight:600;background:rgba(99,102,241,.8);border:none;border-radius:8px;color:#fff;cursor:pointer">Build with answers</button>'
+  html += '<button onclick="window._skipClarification()" style="padding:8px 16px;font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.6);cursor:pointer">Skip \u2014 just build it</button>'
+  html += '</div></div>'
+  addMsg({ role: 'asst', type: 'text', html: html })
+}
+
+window._selectClarifyOption = function (qi, oi) {
+  if (!_pendingClarification) return
+  var opts = (_pendingClarification.questions[qi] ? [] : [])
+  // Find all buttons for this question and toggle selection
+  var btns = document.querySelectorAll('.clarify-opt[data-qi="' + qi + '"]')
+  for (var i = 0; i < btns.length; i++) {
+    if (parseInt(btns[i].getAttribute('data-oi')) === oi) {
+      btns[i].style.background = 'rgba(99,102,241,.5)'
+      btns[i].style.borderColor = 'rgba(99,102,241,.8)'
+      _pendingClarification.answers[qi] = btns[i].textContent
+    } else {
+      btns[i].style.background = 'rgba(99,102,241,.15)'
+      btns[i].style.borderColor = 'rgba(99,102,241,.3)'
+    }
+  }
+}
+
+window._submitClarification = function () {
+  if (!_pendingClarification) return
+  var pc = _pendingClarification
+  _pendingClarification = null
+  // Build enriched prompt with answers
+  var enriched = pc.originalPrompt + '\n\nAdditional details:'
+  for (var i = 0; i < pc.questions.length; i++) {
+    var answer = pc.answers[i] || ''
+    if (answer) {
+      enriched += '\n- ' + pc.questions[i] + ' \u2192 ' + answer
+    }
+  }
+  addMsg({ role: 'user', text: 'Additional details provided via clarification.' })
+  _runBuild(enriched, pc.existing, pc.customName, pc.images)
+}
+
+window._skipClarification = function () {
+  if (!_pendingClarification) return
+  var pc = _pendingClarification
+  _pendingClarification = null
+  _runBuild(pc.originalPrompt, pc.existing, pc.customName, pc.images)
 }
 
 var PIPELINE_MAP = {

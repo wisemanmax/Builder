@@ -488,7 +488,7 @@ function runAssemble(stitchHTML, intakePayload, streamPreview) {
     intakePayload.prompt
 
   var _assembleThinking = ''
-  return callClaudeWithThinkingStream(sys, userMsg, 2000, function (type, text) {
+  return callClaudeWithThinkingStream(sys, userMsg, 10000, function (type, text) {
     if (type === 'thinking') {
       _assembleThinking += text
     } else if (type === 'text' && streamPreview) {

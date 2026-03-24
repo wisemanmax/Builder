@@ -2,7 +2,7 @@ import { ST } from './state.js'
 import { scrubKeys } from './utils.js'
 import { logWarn } from './errors.js'
 import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
-import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CHAT } from '../config/prompts.js'
+import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CLARIFY, SYS_CHAT } from '../config/prompts.js'
 import {
   CLAUDE_MODEL,
   GPT_MODEL,
@@ -251,7 +251,7 @@ export function classifyFetchError(e, api) {
 }
 
 export function callClaude(sys, msg, temperature) {
-  temperature = temperature !== undefined ? temperature : 0.3
+  temperature = temperature !== undefined ? temperature : 0.6
   return fetchWithRetry(
     ANTHROPIC_API_URL,
     {
@@ -259,7 +259,7 @@ export function callClaude(sys, msg, temperature) {
       headers: claudeHeaders(),
       body: JSON.stringify({
         model: CLAUDE_MODEL,
-        max_tokens: 16000,
+        max_tokens: 32000,
         temperature: temperature,
         system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: msg }],
@@ -277,8 +277,8 @@ export function callClaude(sys, msg, temperature) {
 }
 
 export function callClaudeWithThinking(sys, msg, thinkingBudget) {
-  thinkingBudget = thinkingBudget || 2000
-  var maxTokens = thinkingBudget + 16000
+  thinkingBudget = thinkingBudget || 10000
+  var maxTokens = thinkingBudget + 32000
   return fetchWithRetry(
     ANTHROPIC_API_URL,
     {
@@ -347,7 +347,7 @@ export function callClaudeMultiTurn(sys, messages, temperature) {
       headers: claudeHeaders(),
       body: JSON.stringify({
         model: CLAUDE_MODEL,
-        max_tokens: 16000,
+        max_tokens: 32000,
         temperature: temperature,
         system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }],
         messages: messages,
@@ -401,8 +401,8 @@ function _buildUserContent(msg, images) {
 }
 
 export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, images) {
-  thinkingBudget = thinkingBudget || 2000
-  var maxTokens = thinkingBudget + 16000
+  thinkingBudget = thinkingBudget || 10000
+  var maxTokens = thinkingBudget + 32000
 
   function parseSSE(responseBody) {
     var reader = responseBody.getReader()
@@ -693,7 +693,7 @@ export function callGPTRaw2(sys, msg, maxTokens, images) {
       body: JSON.stringify({
         model: GPT_MODEL,
         max_tokens: maxTokens,
-        temperature: 0.3,
+        temperature: 0.6,
         messages: [
           { role: 'system', content: sys },
           { role: 'user', content: userContent },
@@ -711,7 +711,7 @@ export function callGPTRaw2(sys, msg, maxTokens, images) {
 }
 
 export function callGPTMultiTurn2(sys, messages, temperature) {
-  temperature = temperature !== undefined ? temperature : 0.3
+  temperature = temperature !== undefined ? temperature : 0.6
   return fetchWithRetry(
     OPENAI_API_URL,
     {
@@ -719,7 +719,7 @@ export function callGPTMultiTurn2(sys, messages, temperature) {
       headers: gptHeaders(),
       body: JSON.stringify({
         model: GPT_MODEL,
-        max_tokens: 16000,
+        max_tokens: 32000,
         temperature: temperature,
         messages: [{ role: 'system', content: sys }].concat(messages),
       }),
@@ -742,9 +742,9 @@ export function callGPTWithStream(sys, msg, onChunk, images) {
     headers: gptHeaders(),
     body: JSON.stringify({
       model: GPT_MODEL,
-      max_tokens: 16000,
+      max_tokens: 32000,
       stream: true,
-      temperature: 0.3,
+      temperature: 0.6,
       messages: [
         { role: 'system', content: sys },
         { role: 'user', content: userContent },
@@ -861,4 +861,22 @@ export function classifyIntent(msg, images) {
 
 export function callClaudeChat(msg, images) {
   return callClaudeRaw(SYS_CHAT, msg, 2000, images)
+}
+
+export function callClaudeClarify(msg, images) {
+  return callClaudeRaw(SYS_CLARIFY, msg, 1000, images)
+    .then(function (raw) {
+      try {
+        var parsed = JSON.parse(raw)
+        if (parsed.needsClarification && parsed.questions && parsed.questions.length) {
+          return parsed
+        }
+        return { needsClarification: false }
+      } catch (e) {
+        return { needsClarification: false }
+      }
+    })
+    .catch(function () {
+      return { needsClarification: false }
+    })
 }
