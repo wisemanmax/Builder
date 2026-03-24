@@ -59,6 +59,7 @@ import {
   renderGrid,
   openProjectSheet,
   injectProfileContext,
+  telemetry,
 } from './pipeline-shared.js'
 
 import {
@@ -114,6 +115,15 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
   var appCi = ST.pendingColor
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : ''
+
+  var _buildId = telemetry.startBuild(appId, 'game')
+  var _br = telemetry.createBuildRecord(appId, 'game', prompt, {
+    isUpdate: !!existingApp,
+    thoughtId: ST.activeThoughtId || null,
+    templateId: ST._pendingTemplate ? 'template' : null,
+    hasImages: !!(images && images.length),
+  })
+  var _approvalStartTs = 0
 
   var v1, v2, specText, rulesText, fixSys, thinkingText, _streamPreview
 
@@ -180,6 +190,8 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       .then(function (raw) {
         planJSON = raw
         updatePS(pid, 0, 'done', 'Game architecture planned \u2713')
+        telemetry.emit('build.plan', { planLength: raw.length })
+        telemetry.updateBuildRecord(_buildId, 'plan', raw)
         _persistProgress(0)
         // Show the plan
         try {
@@ -268,6 +280,8 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         _streamPreview.destroy()
       }
       updatePS(pid, 1, 'done', 'Game built \u2713')
+      telemetry.emit('build.code', { charCount: v1.length, hasThinking: !!thinkingText })
+      telemetry.updateBuildRecord(_buildId, 'thinking', thinkingText || '')
       _persistProgress(1)
       saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
       if (thinkingText.trim()) {
@@ -324,6 +338,14 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
             : 'Standard checks passed' + passLabel + ' \u2713'
         )
 
+        // Telemetry: capture combined check results
+        telemetry.emit('build.checks', {
+          passCount: gameChecks.concat(stdChecks).filter(function (c) { return c.passed }).length,
+          totalCount: gameChecks.length + stdChecks.length,
+          criticalFails: gameFails.length + criticalFails.length,
+        })
+        telemetry.updateBuildRecord(_buildId, 'checks', gameChecks.concat(stdChecks))
+
         // Step 4 — Game-Specific Audit (Claude)
         updatePS(pid, 4, 'active', 'Auditing gameplay' + passLabel + '\u2026')
         return retryStep(
@@ -353,6 +375,8 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
                 : 'Gameplay is clean' + passLabel + ' \u2713'
             )
             if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: 'game-audit' })
+            telemetry.emit('build.audit', { bugCount: bugs.length, auditor: 'game-audit' })
+            telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
             return { gameFails: gameFails, criticalFails: criticalFails, bugs: bugs }
           })
           .catch(function (e) {
@@ -414,6 +438,10 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
                   repairHistory.push({ role: 'assistant', content: fixed })
                   currentCode = fixed
                   totalFixed += allIssues.length
+                  telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
+                  var _existingPasses = _br.fixPasses || []
+                  _existingPasses.push({ pass: passNum, fixed: allIssues.length })
+                  telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
                   if (passNum < MAX_FIX_PASSES) {
                     updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
                     return runValidationPass()
@@ -598,11 +626,16 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       updatePS(pid, 8, 'wait', 'Waiting for your approval\u2026')
       addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
       notifyUser('Game Ready for Review', appName + ' is waiting for your approval.')
+      _approvalStartTs = Date.now()
 
       return waitForApproval(pid)
     })
     .then(function () {
       updatePS(pid, 8, 'done', 'Approved \u2713')
+      var _approvalMs = _approvalStartTs ? Date.now() - _approvalStartTs : null
+      telemetry.emit('user.approval', { approved: true, timeMs: _approvalMs })
+      telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'approved')
+      telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalMs)
 
       // Step 9 — Merge to main
       var mergeStatusId = 'merge-' + Date.now()
@@ -706,6 +739,11 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
           '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>' +
           '</div>',
       })
+      telemetry.completeBuildRecord(_buildId, {
+        finalCodeSize: v2 ? v2.length : 0,
+        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        approved: true,
+      })
       return showFeedbackCard(appId, appName, prompt)
     })
     .catch(function (err) {
@@ -727,6 +765,9 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
+        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
+        telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalStartTs ? Date.now() - _approvalStartTs : null)
         updatePS(pid, 8, 'error', 'Changes requested')
         clearPreview(appId)
         addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
@@ -738,6 +779,8 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       }
       clearPreview(appId || '')
       var safeMsg = scrubKeys(err.message || String(err))
+      telemetry.emit('build.error', { message: safeMsg })
+      telemetry.completeBuildRecord(_buildId, { cancelled: true })
       addMsg({ role: 'asst', type: 'text', text: 'Game build error: ' + safeMsg })
       toast('Build failed', 3000)
       if (v2 || v1) {
@@ -747,10 +790,15 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         renderGrid()
       }
     })
-    .then(function () {
-      ST._building = false
-      $('send-btn').disabled = false
+    .finally(function () {
+      telemetry.endBuild(_buildId)
+      saveChatSession(appId, prompt)
+      persist()
       clearBuildSession()
+      clearPipelineSteps()
+      ST._building = false
+      var sb = $('send-btn')
+      if (sb) sb.disabled = false
       guards.cleanup()
     })
 }
