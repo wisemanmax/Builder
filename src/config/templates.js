@@ -40,6 +40,13 @@ export const TEMPLATES = [
     desc: 'Interactive quiz with scoring and categories',
   },
   {
+    id: 'endless-runner',
+    name: 'Endless Runner',
+    icon: '\uD83C\uDFC3',
+    category: 'games',
+    desc: '3-lane runner with obstacles, coins, and progressive speed',
+  },
+  {
     id: 'analytics-dashboard',
     name: 'Analytics Dashboard',
     icon: '\uD83D\uDCCA',
