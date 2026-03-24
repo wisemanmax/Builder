@@ -33,6 +33,8 @@ import {
   callClaudeAudit,
   callGPT,
   callGPTReview,
+  callGPTRaw2,
+  callGPTTopRaw,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -67,6 +69,8 @@ import {
   SYS_PLAN_GAME,
   SYS_AUDIT_GAME,
   SYS_FIX_GAME,
+  SYS_GAME_CHECK_AI,
+  SYS_STD_CHECK_AI,
 } from '../config/prompts-game.js'
 
 import { runGameChecks } from '../lib/checks-game.js'
@@ -182,7 +186,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         ' attached \u2014 study the visual style, gameplay mechanics, and UI layout]'
     return retryStep(
       function () {
-        return callClaudeRaw(SYS_PLAN_GAME, planMsg, 3000, images)
+        return callGPTRaw2(SYS_PLAN_GAME, planMsg, 3000, images)
       },
       2,
       'GamePlan'
@@ -298,23 +302,30 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         passNum++
         var passLabel = passNum > 1 ? ' (pass ' + passNum + '/' + MAX_FIX_PASSES + ')' : ''
 
-        // Step 2 — Game-Specific Checks
+        // Step 2 — Game-Specific Checks (local + AI via OpenAI top model)
         updatePS(pid, 2, 'active', 'Running game checks' + passLabel + '\u2026')
         var gameChecks = runGameChecks(currentCode)
         var gameFails = gameChecks.filter(function (c) {
           return !c.passed && GAME_ADVISORY_IDS.indexOf(c.id) === -1
         })
         addMsg({ role: 'asst', type: 'checks', checks: gameChecks })
-        updatePS(
-          pid,
-          2,
-          gameFails.length ? 'warn' : 'done',
-          gameFails.length
-            ? gameFails.length + ' game issue' + (gameFails.length !== 1 ? 's' : '') + passLabel
-            : 'Game checks passed' + passLabel + ' \u2713'
-        )
 
-        // Step 3 — Standard Checks (subset relevant to games)
+        // AI-powered game check using OpenAI top model
+        var aiGameCheckPromise = retryStep(
+          function () {
+            return callGPTTopRaw(
+              SYS_GAME_CHECK_AI,
+              'GAME CONCEPT: ' + prompt + '\n\nGAME CODE:\n' + currentCode.slice(0, 50000),
+              4000
+            ).then(function (raw) {
+              try { return JSON.parse(raw) } catch (e) { return [] }
+            })
+          },
+          1,
+          'AIGameCheck'
+        ).catch(function () { return [] })
+
+        // Step 3 — Standard Checks (local + AI via OpenAI top model)
         updatePS(pid, 3, 'active', 'Running standard checks' + passLabel + '\u2026')
         var stdChecks = runLocalChecks(currentCode)
         var criticalFails = stdChecks.filter(function (c) {
@@ -329,24 +340,76 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
           return gameExempt.indexOf(c.id) === -1
         })
         addMsg({ role: 'asst', type: 'checks', checks: stdChecks })
-        updatePS(
-          pid,
-          3,
-          criticalFails.length ? 'warn' : 'done',
-          criticalFails.length
-            ? criticalFails.length + ' standard issue' + (criticalFails.length !== 1 ? 's' : '') + passLabel
-            : 'Standard checks passed' + passLabel + ' \u2713'
-        )
 
-        // Telemetry: capture combined check results
-        telemetry.emit('build.checks', {
-          passCount: gameChecks.concat(stdChecks).filter(function (c) { return c.passed }).length,
-          totalCount: gameChecks.length + stdChecks.length,
-          criticalFails: gameFails.length + criticalFails.length,
-        })
-        telemetry.updateBuildRecord(_buildId, 'checks', gameChecks.concat(stdChecks))
+        // AI-powered standard check using OpenAI top model
+        var aiStdCheckPromise = retryStep(
+          function () {
+            return callGPTTopRaw(
+              SYS_STD_CHECK_AI,
+              'CODE:\n' + currentCode.slice(0, 50000),
+              3000
+            ).then(function (raw) {
+              try { return JSON.parse(raw) } catch (e) { return [] }
+            })
+          },
+          1,
+          'AIStdCheck'
+        ).catch(function () { return [] })
 
-        // Step 4 — Game-Specific Audit (Claude)
+        // Wait for both AI checks to complete
+        return Promise.all([aiGameCheckPromise, aiStdCheckPromise]).then(function (aiResults) {
+          var aiGameBugs = Array.isArray(aiResults[0]) ? aiResults[0] : []
+          var aiStdBugs = Array.isArray(aiResults[1]) ? aiResults[1] : []
+
+          // Merge AI game check results into gameFails
+          var aiGameFails = aiGameBugs.map(function (b) {
+            return { cat: 'AI Game Check', id: 'ai-game-' + Math.random().toString(36).slice(2, 8), label: b.issue, passed: false, detail: b.location || '' }
+          })
+          if (aiGameFails.length) {
+            addMsg({ role: 'asst', type: 'checks', checks: aiGameFails })
+          }
+
+          // Merge AI standard check results into criticalFails
+          var aiStdFails = aiStdBugs.map(function (b) {
+            return { cat: 'AI Standard Check', id: 'ai-std-' + Math.random().toString(36).slice(2, 8), label: b.issue, passed: false, detail: b.location || '' }
+          })
+          if (aiStdFails.length) {
+            addMsg({ role: 'asst', type: 'checks', checks: aiStdFails })
+          }
+
+          var totalGameFails = gameFails.concat(aiGameFails)
+          var totalCriticalFails = criticalFails.concat(aiStdFails)
+
+          updatePS(
+            pid,
+            2,
+            totalGameFails.length ? 'warn' : 'done',
+            totalGameFails.length
+              ? totalGameFails.length + ' game issue' + (totalGameFails.length !== 1 ? 's' : '') + passLabel
+              : 'Game checks passed' + passLabel + ' \u2713'
+          )
+          updatePS(
+            pid,
+            3,
+            totalCriticalFails.length ? 'warn' : 'done',
+            totalCriticalFails.length
+              ? totalCriticalFails.length + ' standard issue' + (totalCriticalFails.length !== 1 ? 's' : '') + passLabel
+              : 'Standard checks passed' + passLabel + ' \u2713'
+          )
+
+          // Telemetry: capture combined check results
+          telemetry.emit('build.checks', {
+            passCount: gameChecks.concat(stdChecks).filter(function (c) { return c.passed }).length,
+            totalCount: gameChecks.length + stdChecks.length + aiGameBugs.length + aiStdBugs.length,
+            criticalFails: totalGameFails.length + totalCriticalFails.length,
+          })
+          telemetry.updateBuildRecord(_buildId, 'checks', gameChecks.concat(stdChecks))
+
+          // Replace gameFails and criticalFails with merged totals for downstream
+          gameFails = totalGameFails
+          criticalFails = totalCriticalFails
+
+        // Step 4 — Game-Specific Audit (Claude — deep analysis)
         updatePS(pid, 4, 'active', 'Auditing gameplay' + passLabel + '\u2026')
         return retryStep(
           function () {
@@ -534,6 +597,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
               return Promise.resolve()
             }
           })
+        }) // end Promise.all AI checks
       }
 
       return runValidationPass()

@@ -244,10 +244,10 @@ export const PIPE5_STATUS = {
 }
 
 export const PIPE6_NAMES = [
-  'Claude \u00B7 Game Plan',
+  'GPT \u00B7 Game Plan',
   'Claude \u00B7 Build',
-  'Game Checks',
-  'Standard Checks',
+  'GPT-5 \u00B7 Game Checks',
+  'GPT-5 \u00B7 Standard Checks',
   'Claude \u00B7 Game Audit',
   'Claude \u00B7 Fix',
   'Push to Branch',

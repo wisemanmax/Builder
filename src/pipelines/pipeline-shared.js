@@ -40,6 +40,7 @@ import {
   callGPTWithStream,
   callGPTMultiTurn2,
   callGPTAudit2,
+  callGPTTopRaw,
   resetCostAccum,
 } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
@@ -789,6 +790,7 @@ export {
   callGPTWithStream,
   callGPTMultiTurn2,
   callGPTAudit2,
+  callGPTTopRaw,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
