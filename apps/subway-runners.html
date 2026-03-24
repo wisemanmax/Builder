@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Subway Runner</title>
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: #87CEEB;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+        }
+        
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .ui-element {
+            position: absolute;
+            pointer-events: auto;
+        }
+        
+        #pauseBtn {
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: #4A90E2;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        
+        #pauseBtn:active {
+            transform: scale(0.95);
+        }
+        
+        #pauseBtn:focus,
+        #pauseBtn:focus-visible {
+            outline: 3px solid #FFD700;
+            outline-offset: 2px;
+        }
+        
+        #score {
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-align: right;
+        }
+        
+        #coins {
+            bottom: 30px;
+            right: 20px;
+            color: #FFD700;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #multiplier {
+            top: 80px;
+            right: 20px;
+            color: #FF6B35;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        #menuScreen, #gameOverScreen, #pauseScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 2000;
+        }
+        
+        .menu-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            margin-bottom: 40px;
+        }
+        
+        .menu-button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+        
+        .menu-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+        
+        .menu-button:active {
+            transform: translateY(0);
+        }
+        
+        .menu-button:focus,
+        .menu-button:focus-visible {
+            outline: 3px solid #FFD700;
+            outline-offset: 2px;
+        }
+        
+        #highScore {
+            font-size: 18px;
+            color: #87CEEB;
+            margin-bottom: 20px;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .powerup-icon {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .magnet-active {
+            background: linear-gradient(45deg, #E74C3C, #C0392B);
+            opacity: 1;
+        }
+        
+        .speed-active {
+            background: linear-gradient(45deg, #3498DB, #2980B9);
+            opacity: 1;
+        }
+        
+        #touchControls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            pointer-events: none;
+        }
+        
+        .touch-zone {
+            position: absolute;
+            background: rgba(255,255,255,0.05);
+            border: 1px dashed rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.6);
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: auto;
+        }
+        
+        .touch-zone:focus,
+        .touch-zone:focus-visible {
+            outline: 3px solid #FFD700;
+            outline-offset: 2px;
+        }
+        
+        #leftZone {
+            left: 0;
+            top: 30%;
+            width: 15%;
+            height: 40%;
+        }
+        
+        #rightZone {
+            right: 0;
+            top: 30%;
+            width: 15%;
+            height: 40%;
+        }
+        
+        #jumpZone {
+            left: 20%;
+            top: 15%;
+            width: 60%;
+            height: 35%;
+        }
+        
+        #slideZone {
+            left: 20%;
+            bottom: 15%;
+            width: 60%;
+            height: 35%;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-title {
+                font-size: 36px;
+            }
+            
+            .menu-button {
+                font-size: 18px;
+                padding: 12px 24px;
+            }
+            
+            #touchControls {
+                display: block;
+                pointer-events: none;
+            }
+            
+            .touch-zone {
+                pointer-events: auto;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            #touchControls {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="ui">
+            <button id="pauseBtn" class="ui-element" aria-label="Pause game">⏸️</button>
+            
+            <div id="score" class="ui-element" role="status" aria-label="Current score">
+                <div>000000</div>
+            </div>
+            
+            <div id="multiplier" class="ui-element" role="status" aria-label="Score multiplier">x1</div>
+            
+            <div id="coins" class="ui-element" role="status" aria-label="Coins collected">
+                <span>🪙</span>
+                <span>0</span>
+            </div>
+            
+            <div id="powerupIcon" class="ui-element powerup-icon" role="status" aria-label="Active power-up"></div>
+            
+            <div id="touchControls">
+                <div id="leftZone" class="touch-zone" tabindex="0" role="button" aria-label="Move left (tap or press Enter)">👈</div>
+                <div id="rightZone" class="touch-zone" tabindex="0" role="button" aria-label="Move right (tap or press Enter)">👉</div>
+                <div id="jumpZone" class="touch-zone" tabindex="0" role="button" aria-label="Jump (tap or press Enter)">⬆️ JUMP</div>
+                <div id="slideZone" class="touch-zone" tabindex="0" role="button" aria-label="Slide (tap or press Enter)">⬇️ SLIDE</div>
+            </div>
+        </div>
+        
+        <div id="menuScreen">
+            <h1 class="menu-title">🚇 BRIGHT SUBWAY RUNNER</h1>
+            <div id="highScore">High Score: 0</div>
+            <button id="playBtn" class="menu-button">🎮 PLAY</button>
+            <button id="soundBtn" class="menu-button">🔊 SOUND ON</button>
+            <div id="controls">
+                Desktop: Arrow Keys or WASD to move, Space to jump<br>
+                Mobile: Swipe to move and jump
+            </div>
+        </div>
+        
+        <div id="pauseScreen" style="display: none;">
+            <h2 class="menu-title">⏸️ PAUSED</h2>
+            <button id="resumeBtn" class="menu-button">▶️ RESUME</button>
+            <button id="restartBtn" class="menu-button">🔄 RESTART</button>
+            <button id="menuBtn" class="menu-button">🏠 MENU</button>
+        </div>
+        
+        <div id="gameOverScreen" style="display: none;">
+            <h2 class="menu-title">💥 GAME OVER</h2>
+            <div id="finalScore" style="font-size: 24px; margin: 20px;">Score: 0</div>
+            <div id="finalCoins" style="font-size: 20px; margin: 10px;">Coins: 0</div>
+            <div id="newHighScore" style="display: none; color: #FFD700; font-size: 18px; margin: 10px;">🏆 NEW HIGH SCORE!</div>
+            <button id="playAgainBtn" class="menu-button">🎮 PLAY AGAIN</button>
+            <button id="backToMenuBtn" class="menu-button">🏠 MENU</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+
+    <script>
+        // Game state management
+        const GameState = {
+            MENU: 'menu',
+            PLAYING: 'playing', 
+            PAUSED: 'paused',
+            GAME_OVER: 'game_over'
+        };
+
+        class Game {
+            constructor() {
+                this.state = GameState.MENU;
+                this.canvas = document.getElementById('gameCanvas');
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
+                
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                // Game variables
+                this.score = 0;
+                this.coins = 0;
+                this.multiplier = 1;
+                this.distance = 0;
+                this.speed = 8;
+                this.baseSpeed = 8;
+                this.gameOverTriggered = false;
+                this.collisionImmunityTimer = 0;
+                
+                // Player
+                this.player = null;
+                this.playerLane = 0; // -1, 0, 1 for left, center, right
+                this.playerState = 'running'; // running, jumping, sliding
+                this.jumpVelocity = 0;
+                this.slideTimer = 0;
+                this.laneChangeTimer = 0;
+                this.laneChangeProgress = 0;
+                this.previousPlayerX = 0;
+                
+                // Collections
+                this.obstacles = [];
+                this.trains = [];
+                this.coinsList = [];
+                this.powerUps = [];
+                this.environmentChunks = [];
+                this.activeParticles = [];
+                
+                // Object pools
+                this.obstaclePool = [];
+                this.trainPool = [];
+                this.coinPool = [];
+                this.powerUpPool = [];
+                
+                // Power-ups
+                this.magnetActive = false;
+                this.magnetTimer = 0;
+                this.speedBoostActive = false;
+                this.speedBoostTimer = 0;
+                this.baseSpeedAtBoostStart = 8;
+                
+                // Input
+                this.keys = {};
+                this.lastTouchY = 0;
+                this.lastTouchX = 0;
+                this.inputBuffer = [];
+                
+                // Spawning
+                this.lastObstacleSpawn = 0;
+                this.lastTrainSpawn = 0;
+                this.lastCoinSpawn = 0;
+                this.lastPowerUpSpawn = 0;
+                
+                // Audio
+                this.soundEnabled = true;
+                this.sounds = {};
+                this.audioInitialized = false;
+                
+                // Performance
+                this.lastTime = 0;
+                
+                // Camera shake
+                this.cameraShake = { x: 0, y: 0, intensity: 0 };
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupScene();
+                this.createPlayer();
+                this.setupLights();
+                this.setupEnvironment();
+                this.setupInput();
+                this.setupUI();
+                this.setupAudio();
+                this.loadHighScore();
+                
+                // Position camera behind player
+                this.camera.position.set(0, 6, 8);
+                this.camera.lookAt(0, 2, 0);
+                
+                this.gameLoop();
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            setupScene() {
+                this.scene.background = new THREE.Color(0x87CEEB);
+                this.scene.fog = new THREE.Fog(0x87CEEB, 50, 200);
+            }
+            
+            setupLights() {
+                // Ambient light
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                this.scene.add(ambientLight);
+                
+                // Directional light (sun)
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(-50, 100, 50);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                directionalLight.shadow.camera.near = 0.5;
+                directionalLight.shadow.camera.far = 500;
+                directionalLight.shadow.camera.left = -100;
+                directionalLight.shadow.camera.right = 100;
+                directionalLight.shadow.camera.top = 100;
+                directionalLight.shadow.camera.bottom = -100;
+                this.scene.add(directionalLight);
+            }
+            
+            createPlayer() {
+                const playerGeometry = new THREE.BoxGeometry(0.8, 1.8, 0.6);
+                const playerMaterial = new THREE.MeshLambertMaterial({ color: 0x3498DB });
+                this.player = new THREE.Mesh(playerGeometry, playerMaterial);
+                this.player.position.set(0, 1.9, 5);
+                this.player.castShadow = true;
+                
+                // Add a simple hat
+                const hatGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 8);
+                const hatMaterial = new THREE.MeshLambertMaterial({ color: 0xE74C3C });
+                const hat = new THREE.Mesh(hatGeometry, hatMaterial);
+                hat.position.set(0, 1.1, 0);
+                this.player.add(hat);
+                
+                this.scene.add(this.player);
+            }
+            
+            setupEnvironment() {
+                this.createTrackChunk(0);
+                this.createTrackChunk(1);
+                this.createTrackChunk(2);
+            }
+            
+            createTrackChunk(index) {
+                const chunk = new THREE.Group();
+                const chunkLength = 50;
+                
+                // Railway tracks
+                for (let i = 0; i < 3; i++) {
+                    const laneX = (i - 1) * 4;
+                    
+                    // Rails
+                    const railGeometry = new THREE.BoxGeometry(0.1, 0.2, chunkLength);
+                    const railMaterial = new THREE.MeshLambertMaterial({ color: 0x666666 });
+                    
+                    const leftRail = new THREE.Mesh(railGeometry, railMaterial);
+                    leftRail.position.set(laneX - 1, 0.1, 0);
+                    chunk.add(leftRail);
+                    
+                    const rightRail = new THREE.Mesh(railGeometry, railMaterial);
+                    rightRail.position.set(laneX + 1, 0.1, 0);
+                    chunk.add(rightRail);
+                }
+                
+                // Sleepers
+                for (let z = -chunkLength/2; z < chunkLength/2; z += 2) {
+                    const sleeperGeometry = new THREE.BoxGeometry(12, 0.3, 0.8);
+                    const sleeperMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+                    const sleeper = new THREE.Mesh(sleeperGeometry, sleeperMaterial);
+                    sleeper.position.set(0, 0, z);
+                    sleeper.receiveShadow = true;
+                    chunk.add(sleeper);
+                }
+                
+                // Side barriers
+                const barrierGeometry = new THREE.BoxGeometry(1, 3, chunkLength);
+                const barrierMaterial = new THREE.MeshLambertMaterial({ color: 0x2ECC71 });
+                
+                const leftBarrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
+                leftBarrier.position.set(-7, 1.5, 0);
+                leftBarrier.userData = { type: 'barrier' };
+                chunk.add(leftBarrier);
+                
+                const rightBarrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
+                rightBarrier.position.set(7, 1.5, 0);
+                rightBarrier.userData = { type: 'barrier' };
+                chunk.add(rightBarrier);
+                
+                // Background buildings (simple boxes)
+                for (let i = 0; i < 5; i++) {
+                    const buildingGeometry = new THREE.BoxGeometry(
+                        Math.random() * 5 + 3,
+                        Math.random() * 15 + 10,
+                        Math.random() * 8 + 5
+                    );
+                    const buildingMaterial = new THREE.MeshLambertMaterial({ 
+                        color: new THREE.Color().setHSL(Math.random(), 0.5, 0.7) 
+                    });
+                    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+                    
+                    building.position.set(
+                        (Math.random() - 0.5) * 60 + (Math.random() < 0.5 ? -20 : 20),
+                        building.geometry.parameters.height / 2,
+                        (Math.random() - 0.5) * chunkLength
+                    );
+                    chunk.add(building);
+                }
+                
+                // Trees
+                for (let i = 0; i < 8; i++) {
+                    const treeGroup = new THREE.Group();
+                    
+                    // Trunk
+                    const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.5, 4, 6);
+                    const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+                    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                    trunk.position.y = 2;
+                    treeGroup.add(trunk);
+                    
+                    // Leaves
+                    const leavesGeometry = new THREE.SphereGeometry(2, 8, 6);
+                    const leavesMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+                    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+                    leaves.position.y = 5;
+                    treeGroup.add(leaves);
+                    
+                    treeGroup.position.set(
+                        (Math.random() - 0.5) * 30 + (Math.random() < 0.5 ? -15 : 15),
+                        0,
+                        (Math.random() - 0.5) * chunkLength
+                    );
+                    chunk.add(treeGroup);
+                }
+                
+                chunk.position.z = -index * chunkLength;
+                this.scene.add(chunk);
+                this.environmentChunks.push(chunk);
+            }
+            
+            setupInput() {
+                // Keyboard
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    if (this.state === GameState.PLAYING) {
+                        this.handleKeyInput(e.key);
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                });
+                
+                // Touch controls
+                let startY = 0;
+                let startX = 0;
+                
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    startY = e.touches[0].clientY;
+                    startX = e.touches[0].clientX;
+                });
+                
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    if (this.state !== GameState.PLAYING) return;
+                    
+                    const endY = e.changedTouches[0].clientY;
+                    const endX = e.changedTouches[0].clientX;
+                    const deltaY = startY - endY;
+                    const deltaX = startX - endX;
+                    
+                    const minSwipeDistance = 30;
+                    
+                    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+                        if (deltaY > minSwipeDistance) {
+                            this.handleKeyInput('ArrowUp');
+                        } else if (deltaY < -minSwipeDistance) {
+                            this.handleKeyInput('ArrowDown');
+                        }
+                    } else {
+                        if (deltaX > minSwipeDistance) {
+                            this.handleKeyInput('ArrowLeft');
+                        } else if (deltaX < -minSwipeDistance) {
+                            this.handleKeyInput('ArrowRight');
+                        }
+                    }
+                });
+                
+                // Touch zones with keyboard support
+                const setupTouchZone = (id, action) => {
+                    const element = document.getElementById(id);
+                    element.addEventListener('click', () => {
+                        if (this.state === GameState.PLAYING) this.handleKeyInput(action);
+                    });
+                    element.addEventListener('keydown', (e) => {
+                        if ((e.key === 'Enter' || e.key === ' ') && this.state === GameState.PLAYING) {
+                            e.preventDefault();
+                            this.handleKeyInput(action);
+                        }
+                    });
+                };
+                
+                setupTouchZone('leftZone', 'ArrowLeft');
+                setupTouchZone('rightZone', 'ArrowRight');
+                setupTouchZone('jumpZone', 'ArrowUp');
+                setupTouchZone('slideZone', 'ArrowDown');
+            }
+            
+            handleKeyInput(key) {
+                if (this.state !== GameState.PLAYING) return;
+                
+                switch(key) {
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        if (this.playerLane > -1 && this.laneChangeTimer <= 0) {
+                            this.playerLane--;
+                            this.laneChangeTimer = 0.3;
+                            this.laneChangeProgress = 0;
+                            this.previousPlayerX = this.player.position.x;
+                            this.playSound('swoosh');
+                        }
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        if (this.playerLane < 1 && this.laneChangeTimer <= 0) {
+                            this.playerLane++;
+                            this.laneChangeTimer = 0.3;
+                            this.laneChangeProgress = 0;
+                            this.previousPlayerX = this.player.position.x;
+                            this.playSound('swoosh');
+                        }
+                        break;
+                    case 'ArrowUp':
+                    case ' ':
+                    case 'w':
+                    case 'W':
+                        if (this.playerState === 'running') {
+                            this.playerState = 'jumping';
+                            this.jumpVelocity = 12;
+                            this.playSound('jump');
+                        }
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        if (this.playerState === 'running') {
+                            this.playerState = 'sliding';
+                            this.slideTimer = 0.8;
+                            this.playSound('slide');
+                        }
+                        break;
+                }
+            }
+            
+            setupUI() {
+                // Resume audio context on any user interaction
+                const resumeAudio = () => {
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume().catch(e => {
+                            console.warn('Failed to resume audio context:', e);
+                        });
+                    }
+                    
+                    // Try to initialize audio if not already done
+                    if (!this.audioInitialized && !this.audioContext) {
+                        this.setupAudio();
+                    }
+                };
+                
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.startGame();
+                });
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.pauseGame();
+                });
+                document.getElementById('resumeBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.resumeGame();
+                });
+                document.getElementById('restartBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.restartGame();
+                });
+                document.getElementById('menuBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.showMenu();
+                });
+                document.getElementById('playAgainBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.startGame();
+                });
+                document.getElementById('backToMenuBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.showMenu();
+                });
+                document.getElementById('soundBtn').addEventListener('click', () => {
+                    resumeAudio();
+                    this.toggleSound();
+                });
+                
+                // Pause with escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.state === GameState.PLAYING) {
+                        this.pauseGame();
+                    }
+                });
+            }
+            
+            setupAudio() {
+                // Create simple procedural sounds using Web Audio API
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.audioInitialized = true;
+                } catch (e) {
+                    console.warn('Audio context not supported');
+                    this.audioInitialized = false;
+                }
+                
+                this.sounds = {
+                    jump: () => this.playTone(400, 0.2, 'sine'),
+                    slide: () => this.playTone(200, 0.3, 'sawtooth'),
+                    coin: () => this.playTone(800, 0.2, 'square'),
+                    crash: () => this.playTone(100, 0.5, 'sawtooth'),
+                    powerup: () => {
+                        this.playTone(600, 0.1, 'sine');
+                        setTimeout(() => this.playTone(800, 0.1, 'sine'), 100);
+                        setTimeout(() => this.playTone(1000, 0.1, 'sine'), 200);
+                    },
+                    swoosh: () => this.playTone(300, 0.1, 'triangle')
+                };
+            }
+            
+            playTone(frequency, duration, waveType = 'sine') {
+                if (!this.soundEnabled || !this.audioContext || !this.audioInitialized) return;
+                
+                try {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                    oscillator.type = waveType;
+                    
+                    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                } catch (e) {
+                    console.warn('Audio playback failed:', e);
+                }
+            }
+            
+            playSound(soundName) {
+                if (this.sounds[soundName]) {
+                    this.sounds[soundName]();
+                }
+            }
+            
+            startGame() {
+                this.state = GameState.PLAYING;
+                this.score = 0;
+                this.coins = 0;
+                this.distance = 0;
+                this.multiplier = 1;
+                this.speed = this.baseSpeed;
+                this.playerLane = 0;
+                this.playerState = 'running';
+                this.jumpVelocity = 0;
+                this.slideTimer = 0;
+                this.laneChangeTimer = 0;
+                this.laneChangeProgress = 0;
+                this.gameOverTriggered = false;
+                this.collisionImmunityTimer = 0;
+                this.previousPlayerX = 0;
+                
+                // Reset player position and material
+                this.player.position.set(0, 1.9, 5);
+                this.player.material.opacity = 1;
+                
+                // Clear all objects
+                this.clearObjects();
+                
+                // Reset power-ups
+                this.magnetActive = false;
+                this.magnetTimer = 0;
+                this.speedBoostActive = false;
+                this.speedBoostTimer = 0;
+                this.baseSpeedAtBoostStart = this.baseSpeed;
+                
+                // Reset spawn timers
+                this.lastObstacleSpawn = 0;
+                this.lastTrainSpawn = 0;
+                this.lastCoinSpawn = 0;
+                this.lastPowerUpSpawn = 0;
+                
+                // Reset camera shake
+                this.cameraShake = { x: 0, y: 0, intensity: 0 };
+                
+                this.hideMenus();
+                this.updateUI();
+            }
+            
+            pauseGame() {
+                if (this.state === GameState.PLAYING) {
+                    this.state = GameState.PAUSED;
+                    document.getElementById('pauseScreen').style.display = 'flex';
+                }
+            }
+            
+            resumeGame() {
+                this.state = GameState.PLAYING;
+                document.getElementById('pauseScreen').style.display = 'none';
+            }
+            
+            restartGame() {
+                document.getElementById('pauseScreen').style.display = 'none';
+                this.startGame();
+            }
+            
+            showMenu() {
+                this.state = GameState.MENU;
+                this.hideMenus();
+                document.getElementById('menuScreen').style.display = 'flex';
+            }
+            
+            gameOver() {
+                if (this.gameOverTriggered) return;
+                this.gameOverTriggered = true;
+                
+                this.state = GameState.GAME_OVER;
+                this.playSound('crash');
+                
+                // Trigger intense screen shake
+                this.cameraShake.intensity = 2.0;
+                
+                // Update high score
+                const highScore = this.getHighScore();
+                let newHighScore = false;
+                if (this.score > highScore) {
+                    this.saveHighScore(this.score);
+                    newHighScore = true;
+                }
+                
+                // Show game over screen
+                document.getElementById('finalScore').textContent = `Score: ${this.score}`;
+                document.getElementById('finalCoins').textContent = `Coins: ${this.coins}`;
+                document.getElementById('newHighScore').style.display = newHighScore ? 'block' : 'none';
+                document.getElementById('gameOverScreen').style.display = 'flex';
+            }
+            
+            hideMenus() {
+                document.getElementById('menuScreen').style.display = 'none';
+                document.getElementById('pauseScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+            }
+            
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                const btn = document.getElementById('soundBtn');
+                btn.textContent = this.soundEnabled ? '🔊 SOUND ON' : '🔇 SOUND OFF';
+                localStorage.setItem('brightSubwaySound', this.soundEnabled);
+            }
+            
+            loadHighScore() {
+                const saved = localStorage.getItem('brightSubwayHighScore');
+                const soundSaved = localStorage.getItem('brightSubwaySound');
+                
+                if (saved) {
+                    document.getElementById('highScore').textContent = `High Score: ${saved}`;
+                }
+                
+                if (soundSaved !== null) {
+                    this.soundEnabled = JSON.parse(soundSaved);
+                    this.toggleSound(); // Update button text
+                }
+            }
+            
+            getHighScore() {
+                return parseInt(localStorage.getItem('brightSubwayHighScore') || '0');
+            }
+            
+            saveHighScore(score) {
+                localStorage.setItem('brightSubwayHighScore', score.toString());
+                document.getElementById('highScore').textContent = `High Score: ${score}`;
+            }
+            
+            update(deltaTime) {
+                if (this.state !== GameState.PLAYING) return;
+                
+                // Update collision immunity
+                if (this.collisionImmunityTimer > 0) {
+                    this.collisionImmunityTimer -= deltaTime;
+                }
+                
+                // Update distance and speed
+                this.distance += this.speed * deltaTime;
+                
+                // Update base speed progression
+                const naturalSpeed = this.baseSpeed + Math.floor(this.distance / 500) * 2;
+                
+                // Apply speed boost if active, otherwise use natural progression
+                if (!this.speedBoostActive) {
+                    this.speed = naturalSpeed;
+                }
+                
+                // Update score
+                this.score += Math.floor(this.speed * deltaTime * 10);
+                
+                // Update multiplier based on distance
+                this.multiplier = Math.min(10, 1 + Math.floor(this.distance / 1000));
+                
+                this.updatePlayer(deltaTime);
+                this.updateObjects(deltaTime);
+                this.updateParticles(deltaTime);
+                this.spawnObjects();
+                this.checkCollisions();
+                this.updatePowerUps(deltaTime);
+                this.updateEnvironment();
+                this.updateCamera(deltaTime);
+                this.updateUI();
+            }
+            
+            updatePlayer(deltaTime) {
+                // Lane changing with smooth animation
+                if (this.laneChangeTimer > 0) {
+                    this.laneChangeTimer -= deltaTime;
+                    this.laneChangeProgress = Math.min(1, (0.3 - this.laneChangeTimer) / 0.3);
+                    
+                    // Add visual trail effect during lane change
+                    if (this.laneChangeProgress < 1) {
+                        this.player.material.opacity = 0.7 + 0.3 * Math.sin(this.laneChangeProgress * Math.PI * 4);
+                    } else {
+                        this.player.material.opacity = 1;
+                        this.laneChangeTimer = 0; // Ensure timer is exactly 0
+                    }
+                } else {
+                    this.player.material.opacity = 1;
+                }
+                
+                const targetX = this.playerLane * 4;
+                const lerpSpeed = this.laneChangeTimer > 0 ? 12 : 8;
+                this.player.position.x = THREE.MathUtils.lerp(this.player.position.x, targetX, deltaTime * lerpSpeed);
+                
+                // Jumping
+                if (this.playerState === 'jumping') {
+                    this.player.position.y += this.jumpVelocity * deltaTime;
+                    this.jumpVelocity -= 25 * deltaTime; // gravity
+                    
+                    if (this.player.position.y <= 1.9) {
+                        this.player.position.y = 1.9;
+                        this.playerState = 'running';
+                        this.jumpVelocity = 0;
+                    }
+                }
+                
+                // Sliding
+                if (this.playerState === 'sliding') {
+                    this.slideTimer -= deltaTime;
+                    this.player.scale.y = 0.5;
+                    this.player.position.y = 1.4;
+                    
+                    if (this.slideTimer <= 0) {
+                        this.playerState = 'running';
+                        this.player.scale.y = 1;
+                        this.player.position.y = 1.9;
+                    }
+                } else if (this.playerState === 'running') {
+                    this.player.scale.y = 1;
+                    this.player.position.y = 1.9;
+                }
+                
+                // Simple running animation
+                if (this.playerState === 'running') {
+                    this.player.rotation.z = Math.sin(Date.now() * 0.01) * 0.1;
+                }
+            }
+            
+            updateObjects(deltaTime) {
+                // Update obstacles
+                this.obstacles.forEach((obstacle, index) => {
+                    obstacle.position.z += this.speed * deltaTime;
+                    if (obstacle.position.z > 10) {
+                        this.scene.remove(obstacle);
+                        this.obstacles.splice(index, 1);
+                        this.returnToPool(obstacle, this.obstaclePool);
+                    }
+                });
+                
+                // Update trains
+                this.trains.forEach((train, index) => {
+                    train.position.z += this.speed * deltaTime;
+                    if (train.position.z > 15) {
+                        this.scene.remove(train);
+                        this.trains.splice(index, 1);
+                        this.returnToPool(train, this.trainPool);
+                    }
+                });
+                
+                // Update coins
+                this.coinsList.forEach((coin, index) => {
+                    coin.position.z += this.speed * deltaTime;
+                    coin.rotation.y += deltaTime * 5;
+                    
+                    // Magnet effect
+                    if (this.magnetActive) {
+                        const distance = coin.position.distanceTo(this.player.position);
+                        if (distance < 8) {
+                            const direction = new THREE.Vector3()
+                                .subVectors(this.player.position, coin.position)
+                                .normalize()
+                                .multiplyScalar(deltaTime * 15);
+                            coin.position.add(direction);
+                        }
+                    }
+                    
+                    if (coin.position.z > 10) {
+                        this.scene.remove(coin);
+                        this.coinsList.splice(index, 1);
+                        this.returnToPool(coin, this.coinPool);
+                    }
+                });
+                
+                // Update power-ups
+                this.powerUps.forEach((powerUp, index) => {
+                    powerUp.position.z += this.speed * deltaTime;
+                    powerUp.rotation.y += deltaTime * 3;
+                    powerUp.position.y = 2 + Math.sin(Date.now() * 0.005) * 0.5;
+                    
+                    if (powerUp.position.z > 10) {
+                        this.scene.remove(powerUp);
+                        this.powerUps.splice(index, 1);
+                        this.returnToPool(powerUp, this.powerUpPool);
+                    }
+                });
+            }
+            
+            updateParticles(deltaTime) {
+                // Update active particles
+                for (let i = this.activeParticles.length - 1; i >= 0; i--) {
+                    const particle = this.activeParticles[i];
+                    
+                    particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime));
+                    particle.velocity.multiplyScalar(0.95);
+                    particle.material.opacity *= 0.95;
+                    particle.life -= deltaTime;
+                    
+                    if (particle.life <= 0 || particle.material.opacity < 0.01) {
+                        this.scene.remove(particle);
+                        this.activeParticles.splice(i, 1);
+                    }
+                }
+            }
+            
+            spawnObjects() {
+                const currentTime = this.distance;
+                
+                // Spawn obstacles
+                if (currentTime - this.lastObstacleSpawn > 80 + Math.random() * 40) {
+                    this.spawnObstacle();
+                    this.lastObstacleSpawn = currentTime;
+                }
+                
+                // Spawn trains
+                if (currentTime - this.lastTrainSpawn > 200 + Math.random() * 100) {
+                    this.spawnTrain();
+                    this.lastTrainSpawn = currentTime;
+                }
+                
+                // Spawn coins
+                if (currentTime - this.lastCoinSpawn > 30 + Math.random() * 20) {
+                    this.spawnCoins();
+                    this.lastCoinSpawn = currentTime;
+                }
+                
+                // Spawn power-ups
+                if (currentTime - this.lastPowerUpSpawn > 400 + Math.random() * 200) {
+                    this.spawnPowerUp();
+                    this.lastPowerUpSpawn = currentTime;
+                }
+            }
+            
+            spawnObstacle() {
+                const obstacle = this.getFromPool(this.obstaclePool, () => {
+                    const geometry = new THREE.BoxGeometry(1.5, 2.5, 0.8);
+                    const material = new THREE.MeshLambertMaterial({ color: 0xFF6B35 });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.castShadow = true;
+                    return mesh;
+                });
+                
+                const lane = Math.floor(Math.random() * 3) - 1;
+                obstacle.position.set(lane * 4, 1.25, -50);
+                
+                this.scene.add(obstacle);
+                this.obstacles.push(obstacle);
+            }
+            
+            spawnTrain() {
+                const train = this.getFromPool(this.trainPool, () => {
+                    const group = new THREE.Group();
+                    
+                    // Train body
+                    const bodyGeometry = new THREE.BoxGeometry(3, 3, 8);
+                    const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xE74C3C });
+                    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                    body.position.y = 1.5;
+                    body.castShadow = true;
+                    group.add(body);
+                    
+                    // Windows
+                    const windowGeometry = new THREE.BoxGeometry(2.5, 1, 0.1);
+                    const windowMaterial = new THREE.MeshLambertMaterial({ color: 0x87CEEB });
+                    
+                    for (let i = -2; i <= 2; i += 2) {
+                        const window = new THREE.Mesh(windowGeometry, windowMaterial);
+                        window.position.set(0, 2, i);
+                        group.add(window);
+                    }
+                    
+                    return group;
+                });
+                
+                const lane = Math.floor(Math.random() * 3) - 1;
+                train.position.set(lane * 4, 0, -80);
+                
+                this.scene.add(train);
+                this.trains.push(train);
+            }
+            
+            spawnCoins() {
+                const patterns = ['line', 'arc', 'cluster'];
+                const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                const lane = Math.floor(Math.random() * 3) - 1;
+                
+                switch (pattern) {
+                    case 'line':
+                        for (let i = 0; i < 5; i++) {
+                            this.createCoin(lane * 4, 2.5, -40 - i * 3);
+                        }
+                        break;
+                    case 'arc':
+                        for (let i = -1; i <= 1; i++) {
+                            this.createCoin((lane + i) * 4, 2.5 + Math.abs(i), -45);
+                        }
+                        break;
+                    case 'cluster':
+                        for (let x = -1; x <= 1; x++) {
+                            for (let z = 0; z < 3; z++) {
+                                this.createCoin((lane + x * 0.5) * 4, 2.5, -40 - z * 2);
+                            }
+                        }
+                        break;
+                }
+            }
+            
+            createCoin(x, y, z) {
+                const coin = this.getFromPool(this.coinPool, () => {
+                    const geometry = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 8);
+                    const material = new THREE.MeshLambertMaterial({ color: 0xFFD700 });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.userData = { value: 10 };
+                    return mesh;
+                });
+                
+                coin.position.set(x, y, z);
+                coin.rotation.x = Math.PI / 2;
+                
+                this.scene.add(coin);
+                this.coinsList.push(coin);
+            }
+            
+            spawnPowerUp() {
+                const powerUp = this.getFromPool(this.powerUpPool, () => {
+                    const geometry = new THREE.SphereGeometry(0.6, 8, 6);
+                    const material = new THREE.MeshLambertMaterial({ color: 0x9B59B6 });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    
+                    const types = ['magnet', 'speed'];
+                    mesh.userData = { 
+                        type: types[Math.floor(Math.random() * types.length)],
+                        duration: 5
+                    };
+                    
+                    // Different colors for different power-ups
+                    if (mesh.userData.type === 'magnet') {
+                        mesh.material.color.setHex(0xE74C3C);
+                    } else if (mesh.userData.type === 'speed') {
+                        mesh.material.color.setHex(0x3498DB);
+                    }
+                    
+                    return mesh;
+                });
+                
+                const lane = Math.floor(Math.random() * 3) - 1;
+                powerUp.position.set(lane * 4, 2.5, -60);
+                
+                this.scene.add(powerUp);
+                this.powerUps.push(powerUp);
+            }
+            
+            checkCollisions() {
+                if (this.collisionImmunityTimer > 0 || this.gameOverTriggered) return;
+                
+                const playerBox = new THREE.Box3().setFromObject(this.player);
+                
+                // Expand collision boxes slightly for high-speed collision detection
+                const speedFactor = Math.max(1, this.speed / this.baseSpeed);
+                const expansionFactor = speedFactor * 0.1;
+                playerBox.expandByScalar(expansionFactor);
+                
+                // Check side barrier collisions
+                if (Math.abs(this.player.position.x) > 6) {
+                    this.gameOver();
+                    return;
+                }
+                
+                // Obstacle collisions
+                for (let i = 0; i < this.obstacles.length; i++) {
+                    const obstacle = this.obstacles[i];
+                    const obstacleBox = new THREE.Box3().setFromObject(obstacle);
+                    obstacleBox.expandByScalar(expansionFactor);
+                    
+                    if (playerBox.intersectsBox(obstacleBox)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+                
+                // Train collisions
+                for (let i = 0; i < this.trains.length; i++) {
+                    const train = this.trains[i];
+                    const trainBox = new THREE.Box3().setFromObject(train);
+                    trainBox.expandByScalar(expansionFactor);
+                    
+                    if (playerBox.intersectsBox(trainBox)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+                
+                // Environment barrier collisions
+                for (let i = 0; i < this.environmentChunks.length; i++) {
+                    const chunk = this.environmentChunks[i];
+                    for (let j = 0; j < chunk.children.length; j++) {
+                        const child = chunk.children[j];
+                        if (child.userData && child.userData.type === 'barrier') {
+                            const barrierBox = new THREE.Box3().setFromObject(child);
+                            barrierBox.expandByScalar(expansionFactor);
+                            
+                            if (playerBox.intersectsBox(barrierBox)) {
+                                this.gameOver();
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                // Coin collisions
+                this.coinsList.forEach((coin, index) => {
+                    const coinBox = new THREE.Box3().setFromObject(coin);
+                    if (playerBox.intersectsBox(coinBox)) {
+                        this.scene.remove(coin);
+                        this.coinsList.splice(index, 1);
+                        this.returnToPool(coin, this.coinPool);
+                        
+                        this.coins += coin.userData.value;
+                        this.score += coin.userData.value * this.multiplier;
+                        this.playSound('coin');
+                        
+                        // Coin burst effect (simple scale animation)
+                        this.createCoinBurst(coin.position);
+                    }
+                });
+                
+                // Power-up collisions
+                this.powerUps.forEach((powerUp, index) => {
+                    const powerUpBox = new THREE.Box3().setFromObject(powerUp);
+                    if (playerBox.intersectsBox(powerUpBox)) {
+                        this.scene.remove(powerUp);
+                        this.powerUps.splice(index, 1);
+                        this.returnToPool(powerUp, this.powerUpPool);
+                        
+                        this.activatePowerUp(powerUp.userData.type, powerUp.userData.duration);
+                        this.playSound('powerup');
+                    }
+                });
+            }
+            
+            createCoinBurst(position) {
+                // Simple particle effect with proper cleanup
+                for (let i = 0; i < 5; i++) {
+                    const particle = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.1, 4, 4),
+                        new THREE.MeshLambertMaterial({ color: 0xFFD700 })
+                    );
+                    
+                    particle.position.copy(position);
+                    particle.velocity = new THREE.Vector3(
+                        (Math.random() - 0.5) * 4,
+                        Math.random() * 4,
+                        (Math.random() - 0.5) * 4
+                    );
+                    particle.life = 2.0; // 2 second lifetime
+                    
+                    this.scene.add(particle);
+                    this.activeParticles.push(particle);
+                }
+            }
+            
+            activatePowerUp(type, duration) {
+                if (type === 'magnet') {
+                    this.magnetActive = true;
+                    this.magnetTimer = duration;
+                    this.updatePowerUpUI('🧲', 'magnet-active');
+                } else if (type === 'speed') {
+                    // Store current natural speed when boost starts
+                    if (!this.speedBoostActive) {
+                        this.baseSpeedAtBoostStart = this.baseSpeed + Math.floor(this.distance / 500) * 2;
+                    }
+                    this.speedBoostActive = true;
+                    this.speedBoostTimer = duration;
+                    this.speed = this.baseSpeedAtBoostStart * 1.5;
+                    this.updatePowerUpUI('⚡', 'speed-active');
+                }
+            }
+            
+            updatePowerUps(deltaTime) {
+                // Magnet power-up
+                if (this.magnetActive) {
+                    this.magnetTimer -= deltaTime;
+                    if (this.magnetTimer <= 0) {
+                        this.magnetActive = false;
+                        if (!this.speedBoostActive) {
+                            this.hidePowerUpUI();
+                        }
+                    }
+                }
+                
+                // Speed boost power-up
+                if (this.speedBoostActive) {
+                    this.speedBoostTimer -= deltaTime;
+                    if (this.speedBoostTimer <= 0) {
+                        this.speedBoostActive = false;
+                        // Return to natural speed progression
+                        this.speed = this.baseSpeed + Math.floor(this.distance / 500) * 2;
+                        if (!this.magnetActive) {
+                            this.hidePowerUpUI();
+                        }
+                    } else {
+                        // Update speed boost to account for natural progression
+                        const currentNaturalSpeed = this.baseSpeed + Math.floor(this.distance / 500) * 2;
+                        this.speed = currentNaturalSpeed * 1.5;
+                    }
+                }
+            }
+            
+            updatePowerUpUI(icon, className) {
+                const powerUpIcon = document.getElementById('powerupIcon');
+                powerUpIcon.textContent = icon;
+                powerUpIcon.className = `ui-element powerup-icon ${className}`;
+                powerUpIcon.style.opacity = '1';
+            }
+            
+            hidePowerUpUI() {
+                const powerUpIcon = document.getElementById('powerupIcon');
+                powerUpIcon.style.transition = 'opacity 0.5s ease-out';
+                powerUpIcon.style.opacity = '0';
+                setTimeout(() => {
+                    powerUpIcon.className = 'ui-element powerup-icon';
+                    powerUpIcon.style.transition = 'opacity 0.3s';
+                }, 500);
+            }
+            
+            updateEnvironment() {
+                // Move environment chunks
+                this.environmentChunks.forEach((chunk, index) => {
+                    chunk.position.z += this.speed * 0.016; // Approximate delta time for 60fps
+                    
+                    // Recycle chunk when it goes behind the camera
+                    if (chunk.position.z > 50) {
+                        chunk.position.z -= 150; // 3 chunks * 50 units each
+                    }
+                });
+            }
+            
+            updateCamera(deltaTime) {
+                // Smooth camera follow
+                const targetY = 6 + (this.playerState === 'jumping' ? 2 : 0);
+                this.camera.position.y = THREE.MathUtils.lerp(this.camera.position.y, targetY, 0.05);
+                
+                // Update screen shake
+                if (this.cameraShake.intensity > 0) {
+                    this.cameraShake.x = (Math.random() - 0.5) * this.cameraShake.intensity;
+                    this.cameraShake.y = (Math.random() - 0.5) * this.cameraShake.intensity;
+                    this.cameraShake.intensity *= 0.9; // Decay shake
+                    
+                    if (this.cameraShake.intensity <= 0.02) {
+                        this.cameraShake.intensity = 0;
+                        this.cameraShake.x = 0;
+                        this.cameraShake.y = 0;
+                    }
+                }
+                
+                // Apply screen shake for collisions and near misses
+                const baseX = 0;
+                const baseY = this.camera.position.y;
+                
+                // Near miss shake (less intense)
+                if (this.obstacles.length > 0) {
+                    const nearestObstacle = this.obstacles.find(obs => 
+                        Math.abs(obs.position.z - this.player.position.z) < 3 &&
+                        Math.abs(obs.position.x - this.player.position.x) < 2
+                    );
+                    if (nearestObstacle && this.cameraShake.intensity < 0.3) {
+                        this.cameraShake.intensity = Math.max(this.cameraShake.intensity, 0.3);
+                    }
+                }
+                
+                // Apply shake to camera
+                this.camera.position.x = baseX + this.cameraShake.x;
+                this.camera.position.y = baseY + this.cameraShake.y;
+            }
+            
+            updateUI() {
+                document.getElementById('score').querySelector('div').textContent = 
+                    this.score.toString().padStart(6, '0');
+                document.getElementById('coins').querySelector('span:last-child').textContent = this.coins;
+                document.getElementById('multiplier').textContent = `x${this.multiplier}`;
+            }
+            
+            getFromPool(pool, createFn) {
+                return pool.length > 0 ? pool.pop() : createFn();
+            }
+            
+            returnToPool(object, pool) {
+                object.position.set(0, 0, 0);
+                object.rotation.set(0, 0, 0);
+                object.scale.set(1, 1, 1);
+                if (object.material) {
+                    object.material.opacity = 1;
+                }
+                pool.push(object);
+            }
+            
+            clearObjects() {
+                // Clear obstacles
+                this.obstacles.forEach(obstacle => {
+                    this.scene.remove(obstacle);
+                    this.returnToPool(obstacle, this.obstaclePool);
+                });
+                this.obstacles = [];
+                
+                // Clear trains
+                this.trains.forEach(train => {
+                    this.scene.remove(train);
+                    this.returnToPool(train, this.trainPool);
+                });
+                this.trains = [];
+                
+                // Clear coins
+                this.coinsList.forEach(coin => {
+                    this.scene.remove(coin);
+                    this.returnToPool(coin, this.coinPool);
+                });
+                this.coinsList = [];
+                
+                // Clear power-ups
+                this.powerUps.forEach(powerUp => {
+                    this.scene.remove(powerUp);
+                    this.returnToPool(powerUp, this.powerUpPool);
+                });
+                this.powerUps = [];
+                
+                // Clear particles
+                this.activeParticles.forEach(particle => {
+                    this.scene.remove(particle);
+                });
+                this.activeParticles = [];
+            }
+            
+            gameLoop() {
+                const currentTime = performance.now();
+                const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.016); // Cap at 60fps
+                this.lastTime = currentTime;
+                
+                this.update(deltaTime);
+                this.renderer.render(this.scene, this.camera);
+                
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Start the game
+        const game = new Game();
+    </script>
+</body>
+</html>
