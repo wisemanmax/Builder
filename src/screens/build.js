@@ -14,6 +14,8 @@ import {
   PIPE4_ICONS,
   PIPE5_NAMES,
   PIPE5_ICONS,
+  PIPE6_NAMES,
+  PIPE6_ICONS,
 } from '../config/constants.js'
 import { _syncStitchGate } from './settings.js'
 import { TEMPLATES } from '../config/templates.js'
@@ -27,6 +29,7 @@ import { runWebsitePipeline } from '../pipelines/build-website.js'
 import { runWebsite2Pipeline } from '../pipelines/build-website2.js'
 import { runSelfUpdatePipeline } from '../pipelines/builder-plus.js'
 import { runStitchPipeline } from '../pipelines/build-stitch.js'
+import { runGamePipeline } from '../pipelines/build-game.js'
 import {
   renderStitchTracker,
   updateStitchStage,
@@ -419,6 +422,7 @@ var PIPELINE_MAP = {
   website2: runWebsite2Pipeline,
   website: runWebsitePipeline,
   builder2: runPipeline2,
+  game: runGamePipeline,
   standard: runPipeline,
 }
 
@@ -608,6 +612,9 @@ function _updatePipelineSub(app) {
   } else if (ST.pipelineMode === 'builder2') {
     $('bs-sub').textContent =
       'Plan \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Push \u2192 Preview \u2192 Approve \u2192 Merge'
+  } else if (ST.pipelineMode === 'game') {
+    $('bs-sub').textContent =
+      'Plan \u2192 Build \u2192 Game Checks \u2192 Std Checks \u2192 Audit \u2192 Fix \u2192 Push \u2192 Preview \u2192 Approve \u2192 Merge'
   } else {
     $('bs-sub').textContent =
       'Branch \u2192 Build \u2192 Check \u2192 Audit \u2192 Fix \u2192 Preview \u2192 Approve \u2192 Merge'
@@ -687,17 +694,20 @@ export function recoverInterruptedBuild(session) {
     var isWeb2 = session.pipelineMode === 'website2'
     var isWeb = session.pipelineMode === 'website'
     var isB2 = session.pipelineMode === 'builder2'
-    var names = isStitch ? PIPE5_NAMES : isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
-    var icons = isStitch ? PIPE5_ICONS : isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
+    var isGame = session.pipelineMode === 'game'
+    var names = isStitch ? PIPE5_NAMES : isGame ? PIPE6_NAMES : isWeb2 ? PIPE4_NAMES : isWeb ? PIPE3_NAMES : isB2 ? PIPE2_NAMES : PIPE_NAMES
+    var icons = isStitch ? PIPE5_ICONS : isGame ? PIPE6_ICONS : isWeb2 ? PIPE4_ICONS : isWeb ? PIPE3_ICONS : isB2 ? PIPE2_ICONS : PIPE_ICONS
     var modeLabel = isStitch
       ? 'Flawless Pipeline'
-      : isWeb2
-        ? 'Website 2'
-        : isWeb
-          ? 'Website'
-          : isB2
-            ? 'Claude-Only'
-            : 'Standard'
+      : isGame
+        ? 'Game'
+        : isWeb2
+          ? 'Website 2'
+          : isWeb
+            ? 'Website'
+            : isB2
+              ? 'Claude-Only'
+              : 'Standard'
     var summaryHtml =
       '<div style="margin-top:4px"><strong>Pipeline Progress</strong> <span style="font-size:10px;color:rgba(255,255,255,.35)">(' +
       modeLabel +
