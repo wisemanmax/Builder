@@ -40,6 +40,7 @@ import {
   callGPTWithStream,
   callGPTMultiTurn2,
   callGPTAudit2,
+  callGPTTopRaw,
   resetCostAccum,
 } from '../lib/ai.js'
 import { calculateBuildCost } from '../lib/cost.js'
@@ -61,6 +62,12 @@ import {
   registerPipeType,
   getPipelineSteps,
   clearPipelineSteps,
+  startPipeTimer,
+  stopPipeTimer,
+  updatePipeETA,
+  updatePipeStep,
+  updatePipeProgress,
+  finishPipeHeader,
 } from '../components/message.js'
 import { setPreview, clearPreview, waitForApproval, waitForRetryDecision, waitForCheckpoint } from '../components/approval-card.js'
 import { createStreamingPreview } from '../lib/streaming-preview.js'
@@ -789,6 +796,7 @@ export {
   callGPTWithStream,
   callGPTMultiTurn2,
   callGPTAudit2,
+  callGPTTopRaw,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -806,6 +814,12 @@ export {
   registerPipeType,
   getPipelineSteps,
   clearPipelineSteps,
+  startPipeTimer,
+  stopPipeTimer,
+  updatePipeETA,
+  updatePipeStep,
+  updatePipeProgress,
+  finishPipeHeader,
   setPreview,
   clearPreview,
   waitForApproval,

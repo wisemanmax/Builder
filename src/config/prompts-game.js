@@ -130,6 +130,38 @@ export const SYS_AUDIT_GAME =
   '\nReturn JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]\n' +
   'If clean, return []. Return ONLY raw JSON, no markdown.'
 
+export const SYS_GAME_CHECK_AI =
+  'You are a senior game QA engineer. Analyze the given browser game code and identify REAL issues that affect playability.\n' +
+  '\nFocus ONLY on:\n' +
+  '1. GAME LOOP: Missing requestAnimationFrame, no delta time, fixed frame-rate movement\n' +
+  '2. STATE MACHINE: Missing states (menu/playing/paused/game-over), broken transitions, restart not resetting\n' +
+  '3. INPUT: Missing keyboard OR touch support, keys not prevented from scrolling, unresponsive controls\n' +
+  '4. COLLISION: Missing or broken collision detection, objects passing through each other\n' +
+  '5. SCORING: Score not updating, high score not persisting, display issues\n' +
+  '6. DIFFICULTY: No progression, game stays same difficulty forever\n' +
+  '7. RENDERING: Canvas not resizing, z-order issues, broken draw calls\n' +
+  '8. CRITICAL BUGS: Infinite loops, memory leaks, crashes, undefined errors\n' +
+  '\nDo NOT flag: art style opinions, feature suggestions, minor polish issues\n' +
+  '\nReturn JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where in code"}]\n' +
+  'If the game is clean, return []. Return ONLY raw JSON, no markdown.'
+
+export const SYS_STD_CHECK_AI =
+  'You are a senior web developer performing a quality review on a single-file HTML app (browser game).\n' +
+  '\nCheck ONLY these critical standards:\n' +
+  '1. DOCTYPE and valid HTML structure\n' +
+  '2. Viewport meta tag for mobile\n' +
+  '3. No eval() or document.write() usage (security)\n' +
+  '4. No XSS vulnerabilities via innerHTML with user input\n' +
+  '5. Page title present\n' +
+  '6. Character encoding declared\n' +
+  '7. PWA meta tags (theme-color, apple-mobile-web-app-capable)\n' +
+  '8. File not excessively large\n' +
+  '9. No broken script references or syntax errors\n' +
+  '10. Accessibility basics (lang attribute, button labels)\n' +
+  '\nGames are EXEMPT from: responsive breakpoints, semantic HTML, CSS variables, inline event handler rules\n' +
+  '\nReturn JSON array: [{"severity":"high"|"medium"|"low","issue":"description","location":"where"}]\n' +
+  'If clean, return []. Return ONLY raw JSON, no markdown.'
+
 export const SYS_FIX_GAME =
   'You are a senior game developer performing targeted bug fixes on a single-file HTML browser game.\n' +
   '\nRULES:\n' +

@@ -354,7 +354,20 @@ export function addMsg(cfg) {
       var phtml =
         '<div class="awrap"><div class="aav">\u26A1</div><div style="flex:1;min-width:0"><div class="pipe-card" id="' +
         cfg.id +
-        '-inner">'
+        '-inner">' +
+        // Pipeline header with timer, step counter, and ETA
+        '<div class="pipe-hdr" id="' + cfg.id + '-hdr">' +
+        '<div class="pipe-hdr-left">' +
+        '<div class="pipe-hdr-title">' + (cfg.pipelineType === 'game' ? '\uD83C\uDFAE Game Builder' : '\u26A1 Builder') + '</div>' +
+        '<div class="pipe-hdr-step" id="' + cfg.id + '-stepctr">Step 0 of ' + pNames.length + '</div>' +
+        '</div>' +
+        '<div class="pipe-hdr-right">' +
+        '<div class="pipe-hdr-timer" id="' + cfg.id + '-timer">00:00</div>' +
+        '<div class="pipe-hdr-eta" id="' + cfg.id + '-eta"></div>' +
+        '</div>' +
+        '</div>' +
+        // Progress bar
+        '<div class="pipe-progress" id="' + cfg.id + '-progress"><div class="pipe-progress-bar" id="' + cfg.id + '-bar" style="width:0%"></div></div>'
       for (var i = 0; i < pNames.length; i++) {
         phtml +=
           '<div class="ps s-idle" id="' +
@@ -740,4 +753,59 @@ export function updatePS(pid, step, state, det) {
   if (!_pipelineSteps[pid]) _pipelineSteps[pid] = {}
   _pipelineSteps[pid][step] = { state: state, detail: det }
   scrollBot()
+}
+
+// --- Pipeline timer, ETA, and progress helpers ---
+
+var _pipeTimers = {}
+
+export function startPipeTimer(pid) {
+  if (_pipeTimers[pid]) clearInterval(_pipeTimers[pid].interval)
+  var startTs = Date.now()
+  var timerEl = $(pid + '-timer')
+  if (timerEl) timerEl.textContent = '00:00'
+  _pipeTimers[pid] = {
+    startTs: startTs,
+    interval: setInterval(function () {
+      var el = $(pid + '-timer')
+      if (!el) { stopPipeTimer(pid); return }
+      var elapsed = Math.floor((Date.now() - startTs) / 1000)
+      var m = Math.floor(elapsed / 60)
+      var s = elapsed % 60
+      el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s
+    }, 1000),
+  }
+}
+
+export function stopPipeTimer(pid) {
+  if (_pipeTimers[pid]) {
+    clearInterval(_pipeTimers[pid].interval)
+    // Add final "completed in" style
+    var timerEl = $(pid + '-timer')
+    if (timerEl) timerEl.classList.add('pipe-timer-done')
+    delete _pipeTimers[pid]
+  }
+}
+
+export function updatePipeETA(pid, text) {
+  var el = $(pid + '-eta')
+  if (el) el.textContent = text
+}
+
+export function updatePipeStep(pid, currentStep, totalSteps) {
+  var el = $(pid + '-stepctr')
+  if (el) el.textContent = 'Step ' + currentStep + ' of ' + totalSteps
+}
+
+export function updatePipeProgress(pid, percent) {
+  var bar = $(pid + '-bar')
+  if (bar) bar.style.width = Math.min(100, Math.max(0, percent)) + '%'
+}
+
+export function finishPipeHeader(pid) {
+  stopPipeTimer(pid)
+  updatePipeETA(pid, 'Complete')
+  updatePipeProgress(pid, 100)
+  var hdr = $(pid + '-hdr')
+  if (hdr) hdr.classList.add('pipe-hdr-done')
 }

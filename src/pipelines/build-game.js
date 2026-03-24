@@ -33,6 +33,8 @@ import {
   callClaudeAudit,
   callGPT,
   callGPTReview,
+  callGPTRaw2,
+  callGPTTopRaw,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -49,6 +51,12 @@ import {
   registerPipeType,
   getPipelineSteps,
   clearPipelineSteps,
+  startPipeTimer,
+  stopPipeTimer,
+  updatePipeETA,
+  updatePipeStep,
+  updatePipeProgress,
+  finishPipeHeader,
   setPreview,
   clearPreview,
   waitForApproval,
@@ -67,6 +75,8 @@ import {
   SYS_PLAN_GAME,
   SYS_AUDIT_GAME,
   SYS_FIX_GAME,
+  SYS_GAME_CHECK_AI,
+  SYS_STD_CHECK_AI,
 } from '../config/prompts-game.js'
 
 import { runGameChecks } from '../lib/checks-game.js'
@@ -167,8 +177,15 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
   }
 
   var planJSON = ''
+  var TOTAL_STEPS = 10
 
   p.then(function () {
+    // Start the build timer and ETA display
+    startPipeTimer(pid)
+    updatePipeETA(pid, '~2\u20134 min')
+    updatePipeStep(pid, 1, TOTAL_STEPS)
+    updatePipeProgress(pid, 2)
+
     // Step 0 — Plan Game Architecture
     checkPipelineCancel()
     updatePS(pid, 0, 'active', 'Planning game architecture\u2026')
@@ -182,7 +199,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         ' attached \u2014 study the visual style, gameplay mechanics, and UI layout]'
     return retryStep(
       function () {
-        return callClaudeRaw(SYS_PLAN_GAME, planMsg, 3000, images)
+        return callGPTRaw2(SYS_PLAN_GAME, planMsg, 3000, images)
       },
       2,
       'GamePlan'
@@ -190,6 +207,9 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       .then(function (raw) {
         planJSON = raw
         updatePS(pid, 0, 'done', 'Game architecture planned \u2713')
+        updatePipeStep(pid, 2, TOTAL_STEPS)
+        updatePipeProgress(pid, 10)
+        updatePipeETA(pid, '~2\u20133 min')
         telemetry.emit('build.plan', { planLength: raw.length })
         telemetry.updateBuildRecord(_buildId, 'plan', raw)
         _persistProgress(0)
@@ -223,6 +243,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       // Step 1 — Build the game
       checkPipelineCancel()
       updatePS(pid, 1, 'active', 'Building your game\u2026')
+      updatePipeProgress(pid, 15)
       var thoughtCtx = resolveThoughtContext()
       specText = thoughtCtx.specText
       rulesText = thoughtCtx.rulesText
@@ -280,6 +301,9 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         _streamPreview.destroy()
       }
       updatePS(pid, 1, 'done', 'Game built \u2713')
+      updatePipeStep(pid, 3, TOTAL_STEPS)
+      updatePipeProgress(pid, 40)
+      updatePipeETA(pid, '~1\u20132 min')
       telemetry.emit('build.code', { charCount: v1.length, hasThinking: !!thinkingText })
       telemetry.updateBuildRecord(_buildId, 'thinking', thinkingText || '')
       _persistProgress(1)
@@ -298,23 +322,31 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         passNum++
         var passLabel = passNum > 1 ? ' (pass ' + passNum + '/' + MAX_FIX_PASSES + ')' : ''
 
-        // Step 2 — Game-Specific Checks
+        // Step 2 — Game-Specific Checks (local + AI via OpenAI top model)
         updatePS(pid, 2, 'active', 'Running game checks' + passLabel + '\u2026')
+        if (passNum === 1) { updatePipeStep(pid, 3, TOTAL_STEPS); updatePipeProgress(pid, 45) }
         var gameChecks = runGameChecks(currentCode)
         var gameFails = gameChecks.filter(function (c) {
           return !c.passed && GAME_ADVISORY_IDS.indexOf(c.id) === -1
         })
         addMsg({ role: 'asst', type: 'checks', checks: gameChecks })
-        updatePS(
-          pid,
-          2,
-          gameFails.length ? 'warn' : 'done',
-          gameFails.length
-            ? gameFails.length + ' game issue' + (gameFails.length !== 1 ? 's' : '') + passLabel
-            : 'Game checks passed' + passLabel + ' \u2713'
-        )
 
-        // Step 3 — Standard Checks (subset relevant to games)
+        // AI-powered game check using OpenAI top model
+        var aiGameCheckPromise = retryStep(
+          function () {
+            return callGPTTopRaw(
+              SYS_GAME_CHECK_AI,
+              'GAME CONCEPT: ' + prompt + '\n\nGAME CODE:\n' + currentCode.slice(0, 50000),
+              4000
+            ).then(function (raw) {
+              try { return JSON.parse(raw) } catch (e) { return [] }
+            })
+          },
+          1,
+          'AIGameCheck'
+        ).catch(function () { return [] })
+
+        // Step 3 — Standard Checks (local + AI via OpenAI top model)
         updatePS(pid, 3, 'active', 'Running standard checks' + passLabel + '\u2026')
         var stdChecks = runLocalChecks(currentCode)
         var criticalFails = stdChecks.filter(function (c) {
@@ -329,24 +361,77 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
           return gameExempt.indexOf(c.id) === -1
         })
         addMsg({ role: 'asst', type: 'checks', checks: stdChecks })
-        updatePS(
-          pid,
-          3,
-          criticalFails.length ? 'warn' : 'done',
-          criticalFails.length
-            ? criticalFails.length + ' standard issue' + (criticalFails.length !== 1 ? 's' : '') + passLabel
-            : 'Standard checks passed' + passLabel + ' \u2713'
-        )
 
-        // Telemetry: capture combined check results
-        telemetry.emit('build.checks', {
-          passCount: gameChecks.concat(stdChecks).filter(function (c) { return c.passed }).length,
-          totalCount: gameChecks.length + stdChecks.length,
-          criticalFails: gameFails.length + criticalFails.length,
-        })
-        telemetry.updateBuildRecord(_buildId, 'checks', gameChecks.concat(stdChecks))
+        // AI-powered standard check using OpenAI top model
+        var aiStdCheckPromise = retryStep(
+          function () {
+            return callGPTTopRaw(
+              SYS_STD_CHECK_AI,
+              'CODE:\n' + currentCode.slice(0, 50000),
+              3000
+            ).then(function (raw) {
+              try { return JSON.parse(raw) } catch (e) { return [] }
+            })
+          },
+          1,
+          'AIStdCheck'
+        ).catch(function () { return [] })
 
-        // Step 4 — Game-Specific Audit (Claude)
+        // Wait for both AI checks to complete
+        return Promise.all([aiGameCheckPromise, aiStdCheckPromise]).then(function (aiResults) {
+          var aiGameBugs = Array.isArray(aiResults[0]) ? aiResults[0] : []
+          var aiStdBugs = Array.isArray(aiResults[1]) ? aiResults[1] : []
+
+          // Merge AI game check results into gameFails
+          var aiGameFails = aiGameBugs.map(function (b) {
+            return { cat: 'AI Game Check', id: 'ai-game-' + Math.random().toString(36).slice(2, 8), label: b.issue, passed: false, detail: b.location || '' }
+          })
+          if (aiGameFails.length) {
+            addMsg({ role: 'asst', type: 'checks', checks: aiGameFails })
+          }
+
+          // Merge AI standard check results into criticalFails
+          var aiStdFails = aiStdBugs.map(function (b) {
+            return { cat: 'AI Standard Check', id: 'ai-std-' + Math.random().toString(36).slice(2, 8), label: b.issue, passed: false, detail: b.location || '' }
+          })
+          if (aiStdFails.length) {
+            addMsg({ role: 'asst', type: 'checks', checks: aiStdFails })
+          }
+
+          var totalGameFails = gameFails.concat(aiGameFails)
+          var totalCriticalFails = criticalFails.concat(aiStdFails)
+
+          updatePS(
+            pid,
+            2,
+            totalGameFails.length ? 'warn' : 'done',
+            totalGameFails.length
+              ? totalGameFails.length + ' game issue' + (totalGameFails.length !== 1 ? 's' : '') + passLabel
+              : 'Game checks passed' + passLabel + ' \u2713'
+          )
+          updatePS(
+            pid,
+            3,
+            totalCriticalFails.length ? 'warn' : 'done',
+            totalCriticalFails.length
+              ? totalCriticalFails.length + ' standard issue' + (totalCriticalFails.length !== 1 ? 's' : '') + passLabel
+              : 'Standard checks passed' + passLabel + ' \u2713'
+          )
+
+          // Telemetry: capture combined check results
+          telemetry.emit('build.checks', {
+            passCount: gameChecks.concat(stdChecks).filter(function (c) { return c.passed }).length,
+            totalCount: gameChecks.length + stdChecks.length + aiGameBugs.length + aiStdBugs.length,
+            criticalFails: totalGameFails.length + totalCriticalFails.length,
+          })
+          telemetry.updateBuildRecord(_buildId, 'checks', gameChecks.concat(stdChecks))
+
+          // Replace gameFails and criticalFails with merged totals for downstream
+          gameFails = totalGameFails
+          criticalFails = totalCriticalFails
+
+        // Step 4 — Game-Specific Audit (Claude — deep analysis)
+        if (passNum === 1) { updatePipeStep(pid, 5, TOTAL_STEPS); updatePipeProgress(pid, 55); updatePipeETA(pid, '~1 min') }
         updatePS(pid, 4, 'active', 'Auditing gameplay' + passLabel + '\u2026')
         return retryStep(
           function () {
@@ -398,6 +483,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
               .concat(result.bugs)
 
             // Step 5 — Fix
+            if (passNum === 1) { updatePipeStep(pid, 6, TOTAL_STEPS); updatePipeProgress(pid, 65) }
             if (allIssues.length > 0) {
               updatePS(
                 pid,
@@ -534,6 +620,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
               return Promise.resolve()
             }
           })
+        }) // end Promise.all AI checks
       }
 
       return runValidationPass()
@@ -577,6 +664,9 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
     .then(function () {
       // Step 6 — Push to branch
       checkPipelineCancel()
+      updatePipeStep(pid, 7, TOTAL_STEPS)
+      updatePipeProgress(pid, 75)
+      updatePipeETA(pid, '~30s')
       if (hasGitHub) {
         updatePS(pid, 6, 'active', 'Pushing to ' + branchName + '\u2026')
         var appPath = 'apps/' + appId + '.html'
@@ -610,6 +700,8 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
     })
     .then(function () {
       // Step 7 — Preview
+      updatePipeStep(pid, 8, TOTAL_STEPS)
+      updatePipeProgress(pid, 85)
       updatePS(pid, 7, 'done', 'Preview ready')
       setPreview(appId, v2)
       addMsg({
@@ -623,6 +715,10 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       })
 
       // Step 8 — Final Validation (approval gate)
+      updatePipeStep(pid, 9, TOTAL_STEPS)
+      updatePipeProgress(pid, 90)
+      updatePipeETA(pid, 'Awaiting approval')
+      stopPipeTimer(pid)
       updatePS(pid, 8, 'wait', 'Waiting for your approval\u2026')
       addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
       notifyUser('Game Ready for Review', appName + ' is waiting for your approval.')
@@ -632,6 +728,10 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
     })
     .then(function () {
       updatePS(pid, 8, 'done', 'Approved \u2713')
+      startPipeTimer(pid)
+      updatePipeStep(pid, 10, TOTAL_STEPS)
+      updatePipeProgress(pid, 92)
+      updatePipeETA(pid, 'Finishing up\u2026')
       var _approvalMs = _approvalStartTs ? Date.now() - _approvalStartTs : null
       telemetry.emit('user.approval', { approved: true, timeMs: _approvalMs })
       telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'approved')
@@ -694,6 +794,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
     })
     .then(function (mode) {
       ST.activeAppId = appId
+      finishPipeHeader(pid)
       notifyUser('Game Complete', appName + (mode === 'github' ? ' is live on GitHub Pages!' : ' has been saved.'))
       $('ihint').textContent = '\uD83C\uDFAE Describe changes for your game'
       $('bs-proj-btn').style.display = 'flex'
@@ -791,6 +892,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       }
     })
     .finally(function () {
+      stopPipeTimer(pid)
       telemetry.endBuild(_buildId)
       saveChatSession(appId, prompt)
       persist()
