@@ -24,6 +24,7 @@ var TEMPLATE_KEYWORDS = {
   'budget-tracker': ['budget', 'expense', 'finance', 'money', 'spending', 'income', 'cost'],
   'recipe-book': ['recipe', 'cook', 'food', 'meal', 'ingredient', 'kitchen', 'menu'],
   'mood-journal': ['mood', 'journal', 'diary', 'emotion', 'feeling', 'log', 'mental', 'wellness'],
+  'endless-runner': ['runner', 'endless', 'obstacle', 'lane', 'dodge', 'speed', 'coin', 'jump', 'run', 'arcade'],
 }
 
 // Category-level keywords for broader matching

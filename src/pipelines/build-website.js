@@ -44,6 +44,7 @@ import {
   injectProfileContext,
   getThoughtDesignOverrides,
   getTemplateSkeleton,
+  telemetry,
 } from './pipeline-shared.js'
 import { ghPushTree } from '../lib/github.js'
 import {
@@ -127,6 +128,15 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
   var appCi = ST.pendingColor
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
   var branchName = hasGitHub ? 'builder/site-' + appId + '-' + Date.now().toString(36) : ''
+
+  var _buildId = telemetry.startBuild(appId, 'website')
+  var _br = telemetry.createBuildRecord(appId, 'website', prompt, {
+    isUpdate: !!existingApp,
+    thoughtId: ST.activeThoughtId || null,
+    templateId: ST._pendingTemplate ? ST._pendingTemplate.id || 'template' : null,
+    hasImages: !!(images && images.length),
+  })
+  var _approvalStartTs = 0
 
   var files = {} // accumulated: { 'package.json': '...', 'src/global.css': '...' }
   var decomposition = '' // raw JSON string from step 0
@@ -251,6 +261,8 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
     ).then(function (raw) {
       decomposition = raw
       updatePS(pid, 0, 'done', 'Decomposition complete \u2713')
+      telemetry.emit('build.plan', { planLength: raw.length })
+      telemetry.updateBuildRecord(_buildId, 'plan', raw)
       _persistProgress(0)
       addMsg({ role: 'asst', type: 'text', text: 'Architecture decomposed. Starting build\u2026' })
     })
@@ -379,10 +391,14 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
       return generateStep(sys, 'Generate a comprehensive README.md.', 6000, 'Docs').then(function () {
         updatePS(pid, 9, 'done', 'Documentation ready \u2713')
         _persistProgress(9)
+        var _totalCodeSize = 0
+        var _fileKeys = Object.keys(files)
+        for (var fi = 0; fi < _fileKeys.length; fi++) _totalCodeSize += (files[_fileKeys[fi]] || '').length
+        telemetry.emit('build.code', { charCount: _totalCodeSize, fileCount: _fileKeys.length })
         addMsg({
           role: 'asst',
           type: 'text',
-          text: Object.keys(files).length + ' files generated. Preparing preview\u2026',
+          text: _fileKeys.length + ' files generated. Preparing preview\u2026',
         })
       })
     })
@@ -477,11 +493,16 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
       updatePS(pid, 12, 'wait', 'Waiting for your approval\u2026')
       addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
       notifyUser('Website Ready for Review', appName + ' is waiting for your approval.')
+      _approvalStartTs = Date.now()
 
       return waitForApproval(pid)
     })
     .then(function () {
       updatePS(pid, 12, 'done', 'Approved \u2713')
+      var _approvalMs = _approvalStartTs ? Date.now() - _approvalStartTs : null
+      telemetry.emit('user.approval', { approved: true, timeMs: _approvalMs })
+      telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'approved')
+      telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalMs)
 
       // Step 13 — Merge to main
       var mergeStatusId = 'merge-' + Date.now()
@@ -586,6 +607,14 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
           '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>' +
           '</div>',
       })
+      var _finalSize = 0
+      var _fk = Object.keys(files)
+      for (var fsi = 0; fsi < _fk.length; fsi++) _finalSize += (files[_fk[fsi]] || '').length
+      telemetry.completeBuildRecord(_buildId, {
+        finalCodeSize: _finalSize,
+        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        approved: true,
+      })
       return showFeedbackCard(appId, appName, prompt)
     })
     .catch(function (err) {
@@ -609,6 +638,9 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
+        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
+        telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalStartTs ? Date.now() - _approvalStartTs : null)
         updatePS(pid, 12, 'error', 'Changes requested')
         clearPreview(appId)
         addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
@@ -621,11 +653,14 @@ export function runWebsitePipeline(prompt, existingApp, customName, images) {
       }
       clearPreview(appId || '')
       var safeMsg = scrubKeys(err.message || String(err))
+      telemetry.emit('build.error', { message: safeMsg })
+      telemetry.completeBuildRecord(_buildId, { cancelled: true })
       addMsg({ role: 'asst', type: 'text', text: 'Pipeline error: ' + safeMsg + '. Please try again.' })
       notifyUser('Website Build Failed', safeMsg)
       toast('Error: ' + safeMsg, 5000)
     })
     .finally(function () {
+      telemetry.endBuild(_buildId)
       saveChatSession(appId, prompt)
       persist()
       clearBuildSession()
