@@ -86,6 +86,7 @@ export function openVersionPanel() {
   if (old) old.remove()
 
   var html = '<div id="version-panel" class="version-panel">' +
+    '<div class="vp-inner">' +
     '<div class="vp-header">' +
     '<span class="vp-title">\u23F3 Version History</span>' +
     '<button id="vp-close" class="vp-close">\u2715</button>' +
@@ -114,6 +115,7 @@ export function openVersionPanel() {
 
   html += '</div>' +
     '<div id="vp-diff-view" class="vp-diff-view" style="display:none"></div>' +
+    '</div>' +
     '</div>'
 
   document.body.insertAdjacentHTML('beforeend', html)
@@ -206,13 +208,16 @@ function rollbackToVersion(versionIndex) {
   }
   if (idx < 0) return
 
+  // Capture target code BEFORE mutating versions array (prepend shifts indices)
+  var targetCode = app.versions[versionIndex].code
+
   // Save current as a version before restoring (non-destructive)
   ST.apps[idx].versions = [{ code: ST.apps[idx].code, ts: ST.apps[idx].updatedAt }].concat(
     (ST.apps[idx].versions || []).slice(0, 9)
   )
 
   // Restore selected version
-  ST.apps[idx].code = app.versions[versionIndex].code
+  ST.apps[idx].code = targetCode
   ST.apps[idx].updatedAt = new Date().toISOString()
   persist()
 
