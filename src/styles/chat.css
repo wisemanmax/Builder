@@ -58,7 +58,8 @@
 @media(max-width:360px){.tpl-grid{grid-template-columns:1fr}}
 
 /* Template card top row */
-.tpl-card-top{display:flex;align-items:center;justify-content:space-between}
+.tpl-card-top{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.tpl-badge{font-size:10px;padding:2px 6px;border-radius:8px;background:var(--accent,#6366f1);color:#fff;white-space:nowrap;font-weight:600;letter-spacing:.02em}
 .tpl-card-preview{background:none;border:none;cursor:pointer;font-size:14px;padding:0;opacity:.35;transition:opacity .15s;line-height:1}
 .tpl-card-preview:hover{opacity:.85}
 
