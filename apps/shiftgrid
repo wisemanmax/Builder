@@ -538,8 +538,7 @@
 
     /* ── COMBO POWER METER ── */
     .sg-combo-power-wrap {
-      position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
-      width: min(320px, 90vw); z-index: 600; pointer-events: none;
+      padding: 2px 12px 3px; flex-shrink: 0;
     }
     .sg-combo-power-track { height: 5px; }
     .sg-combo-power-header {
@@ -998,11 +997,12 @@
        STORY DIALOGUE SYSTEM
     ══════════════════════════════════════ */
     .sg-story-dialogue {
-      position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
+      position: fixed; bottom: 240px; left: 50%; transform: translateX(-50%);
       width: min(340px, 92vw); border-radius: 12px; padding: 10px 14px;
-      border: 1px solid; z-index: 500;
-      animation: banner-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
-      position: relative; overflow: hidden;
+      border: 1px solid; z-index: 601;
+      background: rgba(7,7,15,0.97); backdrop-filter: blur(12px);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+      animation: slide-up-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
     }
     .sg-story-dialogue::before {
       content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -1018,8 +1018,8 @@
     }
     .sg-story-char-role { font-size: 7px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; }
     .sg-story-line {
-      font-size: 11px; color: rgba(255,255,255,0.75); line-height: 1.65;
-      font-style: italic; position: relative; padding-left: 8px;
+      font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.88);
+      margin-top: 6px; font-style: italic;
     }
     .sg-story-line::before {
       content: '"'; position: absolute; left: 0; top: -2px;
@@ -1029,21 +1029,24 @@
       display: flex; justify-content: flex-end; margin-top: 6px;
     }
     .sg-story-dismiss-btn {
-      background: none; border: none; font-size: 8px; color: rgba(255,255,255,0.2);
-      cursor: pointer; letter-spacing: 0.08em; font-family: 'Rajdhani',sans-serif;
-      padding: 2px 4px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px; padding: 4px 12px; cursor: pointer;
+      font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
+      color: rgba(255,255,255,0.6); letter-spacing: 0.12em;
     }
     .sg-story-dismiss-btn:hover { color: rgba(255,255,255,0.4); }
 
     /* ARIA transmission — different look, monospace, scanline feel */
     .sg-aria-transmission {
-      position: fixed; top: 110px; left: 50%; transform: translateX(-50%);
-      width: min(340px, 92vw); padding: 6px 12px; z-index: 500; pointer-events: none;
-      background: rgba(255,45,149,0.12); border: 1px solid rgba(255,45,149,0.25);
-      border-radius: 8px; font-family: 'Share Tech Mono', monospace;
-      font-size: 8px; color: rgba(255,45,149,0.7); letter-spacing: 0.12em;
-      animation: banner-in 0.3s ease;
-      overflow: hidden; position: relative;
+      position: fixed; bottom: 260px; left: 50%; transform: translateX(-50%);
+      width: min(340px, 92vw); padding: 8px 12px; z-index: 600;
+      pointer-events: none;
+      background: rgba(7,7,15,0.95); border: 1px solid rgba(255,45,149,0.5);
+      border-radius: 10px; font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; color: rgba(255,45,149,0.9); letter-spacing: 0.1em;
+      line-height: 1.4; backdrop-filter: blur(8px);
+      animation: slide-up-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 0 20px rgba(255,45,149,0.2);
     }
     .sg-aria-transmission::before {
       content: '◈  ARIA BROADCAST  ◈';
@@ -1414,8 +1417,8 @@
 
     /* Last move banner */
     .sg-last-move-banner {
-      position: fixed; bottom: 180px; left: 50%; transform: translateX(-50%);
-      white-space: nowrap; padding: 5px 16px; z-index: 500; pointer-events: none;
+      position: fixed; bottom: 255px; left: 50%; transform: translateX(-50%);
+      white-space: nowrap; padding: 5px 16px; z-index: 599; pointer-events: none;
       background: linear-gradient(90deg, rgba(255,45,149,0.25), rgba(255,170,0,0.18));
       border: 1px solid rgba(255,45,149,0.6);
       border-radius: 10px; text-align: center; flex-shrink: 0;
@@ -1662,8 +1665,7 @@
 
     /* ── SPREAD TENSION BAR ── */
     .sg-spread-bar-wrap {
-      position: fixed; bottom: 170px; left: 50%; transform: translateX(-50%);
-      width: min(340px, 92vw); z-index: 498; pointer-events: none;
+      margin: 0 12px 1px; flex-shrink: 0;
     }
     .sg-spread-bar-label {
       display: flex; justify-content: space-between; align-items: center;
@@ -1702,9 +1704,9 @@
 
     /* ── TOASTS ── */
     .sg-toasts {
-      position: fixed; top: 42%; left: 50%; transform: translateX(-50%);
+      position: fixed; top: 38%; left: 50%; transform: translateX(-50%);
       display: flex; flex-direction: column; align-items: center;
-      gap: 5px; pointer-events: none; z-index: 500; min-height: 0;
+      gap: 5px; pointer-events: none; z-index: 550; min-height: 0;
     }
     .sg-toast {
       font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 700;
