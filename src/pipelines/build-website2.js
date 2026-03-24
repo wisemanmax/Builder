@@ -57,6 +57,7 @@ import {
   injectProfileContext,
   getThoughtDesignOverrides,
   getTemplateSkeleton,
+  telemetry,
 } from './pipeline-shared.js'
 import {
   SYS_WEB2_RECON,
@@ -143,6 +144,14 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
 
   var v1, v2, reconJSON, brandJSON, structureJSON, designJSON, thinkingText, _streamPreview
   var activeThought, _specText, _rulesText
+  var _buildId = telemetry.startBuild(appId, 'website2')
+  var _br = telemetry.createBuildRecord(appId, 'website2', prompt, {
+    isUpdate: !!existingApp,
+    thoughtId: ST.activeThoughtId || null,
+    templateId: ST._pendingTemplate ? 'template' : null,
+    hasImages: !!(images && images.length),
+  })
+  var _approvalStartTs = 0
 
   function _persistProgress(lastStep) {
     persistBuildSession({
@@ -231,6 +240,8 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     )
       .then(function (raw) {
         reconJSON = raw
+        telemetry.emit('build.plan', { planLength: raw.length })
+        telemetry.updateBuildRecord(_buildId, 'plan', raw)
         updatePS(pid, 0, 'done', 'Recon complete \u2713')
         _persistProgress(0)
         addMsg({ role: 'asst', type: 'text', text: 'Site content, structure, and content manifest extracted.' })
@@ -429,6 +440,8 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
       updatePS(pid, 4, 'done', 'Build complete \u2713')
       _persistProgress(4)
       saveAppLocally(appId, appName, appIcon, appCi, v1, prompt, existingApp, false)
+      telemetry.emit('build.code', { charCount: v1.length, hasThinking: !!thinkingText })
+      telemetry.updateBuildRecord(_buildId, 'thinking', thinkingText || '')
       if (thinkingText.trim()) {
         addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
       }
@@ -450,6 +463,10 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         var criticalFails = checks.filter(function (c) {
           return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
         })
+        if (passNum === 1) {
+          telemetry.emit('build.checks', { passCount: checks.filter(function (c) { return c.passed }).length, totalCount: checks.length, criticalFails: criticalFails.length })
+          telemetry.updateBuildRecord(_buildId, 'checks', checks)
+        }
         addMsg({ role: 'asst', type: 'checks', checks: checks })
         updatePS(
           pid,
@@ -486,6 +503,10 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
                 bugs: bugs,
                 source: ST.website2Provider === 'chatgpt' ? 'chatgpt' : 'claude',
               })
+            if (passNum === 1) {
+              telemetry.emit('build.audit', { bugCount: bugs.length, auditor: ST.website2Provider === 'chatgpt' ? 'chatgpt' : 'claude' })
+              telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
+            }
             return { criticalFails: criticalFails, bugs: bugs }
           })
           .catch(function (e) {
@@ -542,6 +563,10 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
                   repairHistory.push({ role: 'assistant', content: fixed })
                   currentCode = fixed
                   totalFixed += allIssues.length
+                  telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
+                  var _ep = (_br && _br.fixPasses) || []
+                  _ep.push({ passNum: passNum, issuesBefore: allIssues.length })
+                  telemetry.updateBuildRecord(_buildId, 'fixPasses', _ep)
                   if (passNum < MAX_FIX_PASSES) {
                     updatePS(pid, 7, 'active', 'Re-validating fixes' + passLabel + '\u2026')
                     return runValidationPass()
@@ -693,11 +718,16 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
       updatePS(pid, 10, 'wait', 'Waiting for your approval\u2026')
       addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
       notifyUser('Website Ready for Review', appName + ' is waiting for your approval.')
+      _approvalStartTs = Date.now()
 
       return waitForApproval(pid)
     })
     .then(function () {
       updatePS(pid, 10, 'done', 'Approved \u2713')
+      var _approvalMs = _approvalStartTs ? Date.now() - _approvalStartTs : null
+      telemetry.emit('user.approval', { approved: true, timeMs: _approvalMs })
+      telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'approved')
+      telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalMs)
 
       // Step 11 — Merge to main
       var mergeStatusId = 'merge-' + Date.now()
@@ -801,6 +831,11 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
           '\')" style="padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer">\uD83D\uDCCB Project</button>' +
           '</div>',
       })
+      telemetry.completeBuildRecord(_buildId, {
+        finalCodeSize: v2 ? v2.length : 0,
+        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        approved: true,
+      })
       return showFeedbackCard(appId, appName, prompt)
     })
     .catch(function (err) {
@@ -822,6 +857,8 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
+        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         updatePS(pid, 10, 'error', 'Changes requested')
         clearPreview(appId)
         addMsg({ role: 'asst', type: 'text', text: 'No problem! Describe what you want changed.' })
@@ -833,11 +870,14 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
       }
       clearPreview(appId || '')
       var safeMsg = scrubKeys(err.message || String(err))
+      telemetry.emit('build.error', { message: safeMsg })
+      telemetry.completeBuildRecord(_buildId, { cancelled: true })
       addMsg({ role: 'asst', type: 'text', text: 'Pipeline error: ' + safeMsg + '. Please try again.' })
       notifyUser('Website Build Failed', safeMsg)
       toast('Error: ' + safeMsg, 5000)
     })
     .finally(function () {
+      telemetry.endBuild(_buildId)
       saveChatSession(appId, prompt)
       persist()
       clearBuildSession()

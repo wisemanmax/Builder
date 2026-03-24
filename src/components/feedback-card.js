@@ -1,6 +1,7 @@
 import { ST, persist, getActiveProfile } from '../lib/state.js'
 import { $, uid, toast } from '../lib/utils.js'
 import { maybeAutoAnalyze } from '../lib/learning.js'
+import { attachFeedback } from '../lib/build-record.js'
 
 var _feedbackResolve = null
 
@@ -92,6 +93,10 @@ export function initFeedbackCard() {
     if (!profile.feedback) profile.feedback = []
     profile.feedback.push(entry)
     persist()
+
+    // Attach feedback to the most recent build record for this app
+    attachFeedback(entry.appId, rating, tags)
+
     toast('Feedback saved \u2014 ' + profile.feedback.length + ' total for ' + profile.name)
     _closeFeedback()
 
