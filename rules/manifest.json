@@ -25,5 +25,14 @@
     "path": "rules/bright-subway-runner-rules.json",
     "createdAt": "2026-03-24T20:01:27.323Z",
     "updatedAt": "2026-03-24T20:01:27.323Z"
+  },
+  {
+    "id": "83bc3e99-6a47-4680-8fb5-059f6ecef2c7",
+    "name": "Bright Subway Endless Runner Rules",
+    "linkedThoughtId": "57d42534-6edd-4c42-b94f-e907b46b832b",
+    "ruleCount": 11,
+    "path": "rules/bright-subway-endless-runner-rules.json",
+    "createdAt": "2026-03-24T23:04:50.792Z",
+    "updatedAt": "2026-03-24T23:04:50.792Z"
   }
 ]
