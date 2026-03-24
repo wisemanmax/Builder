@@ -101,10 +101,38 @@ export function getProfileContext() {
       '\n'
   }
 
+  // Phase 3: Build-learned rules from build record analysis
+  var buildRulesText = ''
+  var blr = profile.buildLearnedRules || {}
+  var hasBuildMust = blr.mustRules && blr.mustRules.length
+  var hasBuildMustNot = blr.mustNotRules && blr.mustNotRules.length
+  if (hasBuildMust || hasBuildMustNot) {
+    buildRulesText += 'QUALITY RULES (learned from past build outcomes):\n'
+    if (hasBuildMust)
+      buildRulesText +=
+        'ALWAYS DO:\n' +
+        blr.mustRules
+          .map(function (r) {
+            return '- ' + r
+          })
+          .join('\n') +
+        '\n'
+    if (hasBuildMustNot)
+      buildRulesText +=
+        'NEVER DO:\n' +
+        blr.mustNotRules
+          .map(function (r) {
+            return '- ' + r
+          })
+          .join('\n') +
+        '\n'
+  }
+
   return {
     orgText: orgText,
     profileRulesText: profileRulesText,
     prefsText: prefsText,
+    buildRulesText: buildRulesText,
     profileName: profile.name || '',
   }
 }
@@ -120,6 +148,8 @@ export function injectProfileContext(sysPrompt) {
     sysPrompt += '\n\nGLOBAL RULES (' + ctx.profileName + ' \u2014 always apply):\n' + ctx.profileRulesText
   if (ctx.prefsText)
     sysPrompt += '\n\nLEARNED PREFERENCES (from past builds \u2014 follow these patterns):\n' + ctx.prefsText
+  if (ctx.buildRulesText)
+    sysPrompt += '\n\nBUILD QUALITY RULES (extracted from build history \u2014 follow strictly):\n' + ctx.buildRulesText
   return sysPrompt
 }
 

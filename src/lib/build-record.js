@@ -2,6 +2,7 @@ import { ST } from './state.js'
 import { uid } from './utils.js'
 import { scrubKeys } from './utils.js'
 import { emit, getBuildContext } from './telemetry.js'
+import { scoreRecord } from './scoring.js'
 
 var STORAGE_KEY = 'bldr_build_records'
 var MAX_RECORDS = 20
@@ -132,6 +133,10 @@ export function completeBuildRecord(buildId, outcome) {
       }
 
       delete r._startTime
+
+      // Phase 2: compute scores
+      scoreRecord(r)
+
       _saveRecords(records)
 
       emit('build.complete', {
@@ -143,6 +148,13 @@ export function completeBuildRecord(buildId, outcome) {
         checkScore: r.finalCheckScore,
         totalChecks: r.totalChecks,
       })
+
+      // Phase 3: trigger auto rule extraction (dynamic import to avoid circular dep)
+      if (r.profileId) {
+        import('./learning.js').then(function (mod) {
+          mod.maybeAutoExtractRules(r.profileId)
+        }).catch(function () {})
+      }
 
       return r
     }
@@ -220,6 +232,8 @@ export function attachFeedback(appId, rating, tags) {
     if (records[i].appId === appId) {
       records[i].feedbackRating = rating
       records[i].feedbackTags = tags || []
+      // Phase 2: recompute scores now that satisfaction data is available
+      scoreRecord(records[i])
       _saveRecords(records)
       return records[i]
     }
