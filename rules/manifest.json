@@ -1,11 +1,29 @@
 [
   {
-    "id": "ammy9tq2x16apb8",
-    "name": "Baseball Card Tracker Rules",
-    "linkedThoughtId": "ammy9k9hmdh66m8",
-    "ruleCount": 7,
-    "path": "rules/baseball-card-tracker-rules.json",
-    "createdAt": "2026-03-20T02:19:34.857Z",
-    "updatedAt": "2026-03-20T02:19:34.857Z"
+    "id": "ammyy57ro1ukc56",
+    "name": "Longhorn 2048 Rules",
+    "linkedThoughtId": "ammyxzjqbbqib23",
+    "ruleCount": 11,
+    "path": "rules/longhorn-2048-rules.json",
+    "createdAt": "2026-03-20T13:40:21.780Z",
+    "updatedAt": "2026-03-20T13:40:21.780Z"
+  },
+  {
+    "id": "ammzbd6c48pypjq",
+    "name": "DeltaConnect Rules",
+    "linkedThoughtId": "ammzb95uaz8287y",
+    "ruleCount": 11,
+    "path": "rules/deltaconnect-rules.json",
+    "createdAt": "2026-03-20T19:50:28.180Z",
+    "updatedAt": "2026-03-20T19:50:28.180Z"
+  },
+  {
+    "id": "039c26de-730d-4a13-a0a7-49ca0cc25edc",
+    "name": "Bright Subway Runner Rules",
+    "linkedThoughtId": "57d42534-6edd-4c42-b94f-e907b46b832b",
+    "ruleCount": 10,
+    "path": "rules/bright-subway-runner-rules.json",
+    "createdAt": "2026-03-24T20:01:27.323Z",
+    "updatedAt": "2026-03-24T20:01:27.323Z"
   }
 ]
