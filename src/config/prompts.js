@@ -282,6 +282,37 @@ export const SYS_LEARN =
   '\nKeep each pattern to one concise, actionable sentence. Max 5 items per category.\n' +
   "If there isn't enough data for a category, return an empty array for it."
 
+export const SYS_EXTRACT_RULES =
+  'You are analyzing build quality data from an AI app builder to extract actionable improvement rules.\n' +
+  '\nYou will receive an array of build records, each containing:\n' +
+  '- pipeline: which build pipeline was used\n' +
+  '- prompt: what the user asked to build (truncated)\n' +
+  '- qualityScore: objective quality score 0-100\n' +
+  '- satisfactionScore: user satisfaction score 0-100 (may be null)\n' +
+  '- compositeScore: blended score 0-100\n' +
+  '- checks: array of {id, label, passed} quality checks\n' +
+  '- auditBugs: array of {severity, issue} found by audit\n' +
+  '- fixPasses: number of fix iterations needed\n' +
+  '- feedbackRating: user rating 1-5 (may be null)\n' +
+  '- feedbackTags: user-selected quality tags\n' +
+  '- editCountAfter: number of manual edits user made after build\n' +
+  '- approvalDecision: approved/rejected/cancelled\n' +
+  '\nYour job: find patterns across ALL records to identify:\n' +
+  '1. What consistently causes LOW scores (recurring failing checks, common audit bugs)\n' +
+  '2. What consistently causes HIGH scores (patterns in successful builds)\n' +
+  '3. Actionable rules the AI builder should follow to improve future builds\n' +
+  '\nReturn ONLY valid JSON (no markdown, no code fences):\n' +
+  '{"mustRules":["rule 1","rule 2"],"mustNotRules":["rule 1","rule 2"],"insights":["insight 1","insight 2"]}\n' +
+  '\n- mustRules: Concrete actions the builder MUST do to improve quality (max 5)\n' +
+  '- mustNotRules: Concrete anti-patterns the builder MUST avoid (max 5)\n' +
+  '- insights: High-level observations about build quality trends (max 3)\n' +
+  '\nRules must be:\n' +
+  '- Specific and actionable (not vague like "write better code")\n' +
+  '- Based on patterns across multiple builds (not one-off issues)\n' +
+  '- Focused on the most impactful improvements\n' +
+  '- One concise sentence each\n' +
+  "If there isn't enough data to extract a pattern, return fewer rules rather than guessing."
+
 export const SYS_THINK =
   'You are an expert product strategist helping a user ideate and refine an app concept through a structured conversation.\n' +
   'You operate in ROUNDS. The user will tell you which round you are on.\n' +

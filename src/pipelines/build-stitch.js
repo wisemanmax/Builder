@@ -44,6 +44,7 @@ import {
   injectProfileContext,
   getThoughtDesignOverrides,
   getTemplateSkeleton,
+  telemetry,
 } from './pipeline-shared.js'
 import { waitForBlueprintApproval } from '../components/approval-card.js'
 import {
@@ -910,6 +911,14 @@ export function runStitchPipeline(context, callbacks) {
   var finalHTML = null
   var buildManifest = null
 
+  var _buildId = telemetry.startBuild(appId, 'stitch')
+  var _br = telemetry.createBuildRecord(appId, 'stitch', prompt, {
+    isUpdate: !!existingApp,
+    thoughtId: ST.activeThoughtId || null,
+    hasImages: false,
+  })
+  var _approvalStartTs = 0
+
   // --- Halt handler ---
   function haltWithOptions(stageName, stageIndex, error) {
     clearInterval(timerInterval)
@@ -1110,6 +1119,8 @@ export function runStitchPipeline(context, callbacks) {
       updateStage(3, 'passed', 'App assembled (' + Math.round(assembledHTML.length / 1024) + 'KB)')
       if (containerId) updateStitchStage(containerId, 3, PIPE5_STATUS.PASSED, 'App assembled')
       updatePS(pid, 3, 'done', 'Assembly complete ✓')
+      telemetry.emit('build.code', { charCount: assembledHTML.length })
+      telemetry.updateBuildRecord(_buildId, 'thinking', assembleThinking || '')
       if (assembleThinking.trim()) {
         addMsg({ role: 'asst', type: 'thinking', text: assembleThinking.trim() })
       }
@@ -1145,6 +1156,10 @@ export function runStitchPipeline(context, callbacks) {
         structuralGaps: (checksReport.structuralGaps || []).length,
         summary: checksReport.summary,
       })
+      var _localChecks = checksReport.localChecks || []
+      var _criticalFails = _localChecks.filter(function (c) { return !c.passed }).length
+      telemetry.emit('build.checks', { passCount: _localChecks.filter(function (c) { return c.passed }).length, totalCount: _localChecks.length, criticalFails: _criticalFails })
+      telemetry.updateBuildRecord(_buildId, 'checks', _localChecks)
 
       // --- Structure Diff violation loop-back ---
       // If Claude added HTML tags, loop back to Stage 3 with a violation report (one retry)
@@ -1288,6 +1303,8 @@ export function runStitchPipeline(context, callbacks) {
           return (f.severity || '').toLowerCase() === 'info'
         }).length,
       })
+      telemetry.emit('build.audit', { bugCount: reviewFindings.length, auditor: 'gpt4o' })
+      telemetry.updateBuildRecord(_buildId, 'auditBugs', reviewFindings)
 
       var findingSummary = reviewFindings.length + ' finding' + (reviewFindings.length !== 1 ? 's' : '')
       var criticals = reviewFindings.filter(function (f) {
@@ -1420,11 +1437,16 @@ export function runStitchPipeline(context, callbacks) {
       updatePS(pid, 7, 'wait', 'Waiting for your approval…')
       addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
       notifyUser('Stitch Build Ready', appName + ' is waiting for your approval.')
+      _approvalStartTs = Date.now()
 
       return waitForApproval(pid)
     })
     .then(function () {
       // Approved — merge if GitHub, otherwise finalize local
+      var _approvalMs = _approvalStartTs ? Date.now() - _approvalStartTs : null
+      telemetry.emit('user.approval', { approved: true, timeMs: _approvalMs })
+      telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'approved')
+      telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalMs)
       if (hasGitHub) {
         updateStage(7, 'running', 'Merging to main…')
         if (containerId) updateStitchStage(containerId, 7, PIPE5_STATUS.RUNNING, 'Merging…')
@@ -1613,6 +1635,11 @@ export function runStitchPipeline(context, callbacks) {
           '</div>',
       })
 
+      telemetry.completeBuildRecord(_buildId, {
+        finalCodeSize: finalHTML ? finalHTML.length : 0,
+        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        approved: true,
+      })
       return showFeedbackCard(appId, appName, prompt)
     })
     .catch(function (err) {
@@ -1646,6 +1673,8 @@ export function runStitchPipeline(context, callbacks) {
       }
 
       if (err.message === 'CHANGES_REQUESTED') {
+        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         clearPreview(appId)
         saveAppLocally(appId, appName, appIcon, appCi, finalHTML || assembledHTML || '', prompt, existingApp, false)
         ST.activeAppId = appId
@@ -1684,10 +1713,19 @@ export function runStitchPipeline(context, callbacks) {
         toast('Stitch API error: ' + safeMsg + ' — you can try the standard pipeline', 5000)
       }
 
+      var _safeErrMsg = scrubKeys(err.message || String(err))
+      telemetry.emit('build.error', { message: _safeErrMsg })
+      telemetry.completeBuildRecord(_buildId, { cancelled: true })
+
       haltWithOptions(
         ['Intake', 'Blueprint', 'Blueprint Review', 'Assemble', 'Verify', 'Review', 'Polish', 'Deliver'][failedStage],
         failedStage,
         err
       )
+    })
+    .finally(function () {
+      telemetry.endBuild(_buildId)
+      persist()
+      clearBuildSession()
     })
 }

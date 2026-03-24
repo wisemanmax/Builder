@@ -14,6 +14,7 @@ import {
   PIPE6_ICONS,
 } from '../config/constants.js'
 import { TEMPLATES, TEMPLATE_CATEGORIES } from '../config/templates.js'
+import { rankTemplates } from '../lib/similarity.js'
 import { getTemplateSkeleton } from '../lib/template-loader.js'
 import {
   approveAndMerge,
@@ -144,9 +145,14 @@ function _renderTemplateGallery() {
       esc(cat.name) +
       '</div>'
   }
+  // Phase 4: Rank templates by build history performance
+  var ranked = rankTemplates()
   var cards = ''
-  for (var i = 0; i < TEMPLATES.length; i++) {
-    var t = TEMPLATES[i]
+  for (var i = 0; i < ranked.length; i++) {
+    var t = ranked[i]
+    var badge = t.reason
+      ? '<span class="tpl-badge">' + esc(t.reason) + '</span>'
+      : ''
     cards +=
       '<div class="tpl-card" data-cat="' +
       t.category +
@@ -156,6 +162,7 @@ function _renderTemplateGallery() {
       '<div class="tpl-card-top"><div class="tpl-card-icon">' +
       t.icon +
       '</div>' +
+      badge +
       '<button class="tpl-card-preview" onclick="event.stopPropagation();B._tplPreview(\'' +
       t.id +
       '\')" title="Preview">\uD83D\uDD0D</button></div>' +

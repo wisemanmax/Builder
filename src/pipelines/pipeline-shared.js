@@ -69,6 +69,25 @@ import { showFeedbackCard } from '../components/feedback-card.js'
 import { renderGrid } from '../components/app-icon.js'
 import { pushToSupabase } from '../lib/storage.js'
 import { openProjectSheet } from '../screens/project.js'
+import { startBuild as _startBuild, endBuild as _endBuild, emit as _emit, getBuildContext } from '../lib/telemetry.js'
+import {
+  createBuildRecord as _createBuildRecord,
+  updateBuildRecord as _updateBuildRecord,
+  completeBuildRecord as _completeBuildRecord,
+  incrementEditCount as _incrementEditCount,
+} from '../lib/build-record.js'
+
+// Re-export telemetry + build record helpers for pipelines
+export var telemetry = {
+  startBuild: _startBuild,
+  endBuild: _endBuild,
+  emit: _emit,
+  getBuildContext: getBuildContext,
+  createBuildRecord: _createBuildRecord,
+  updateBuildRecord: _updateBuildRecord,
+  completeBuildRecord: _completeBuildRecord,
+  incrementEditCount: _incrementEditCount,
+}
 
 // Check IDs that are advisory-only and should not count as critical failures
 export var ADVISORY_CHECK_IDS = [

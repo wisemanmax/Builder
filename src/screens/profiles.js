@@ -2,7 +2,7 @@ import { ST, persist, setActiveProfile, getActiveProfile } from '../lib/state.js
 import { $, esc, uid, toast } from '../lib/utils.js'
 import { createProfile, deleteProfile, renderProfileChip } from '../components/profile-switcher.js'
 import { openOrgThink } from './org-think.js'
-import { analyzeFeedback } from '../lib/learning.js'
+import { runFullAnalysis } from '../lib/learning.js'
 
 /**
  * Render profiles section in settings.
@@ -255,13 +255,9 @@ export function initProfilesSettings() {
     if (action === 'refresh-insights') {
       btn.disabled = true
       btn.textContent = 'Analyzing\u2026'
-      analyzeFeedback(id)
-        .then(function (prefs) {
-          toast(
-            'Insights updated \u2014 ' +
-              ((prefs.positivePatterns || []).length + (prefs.negativePatterns || []).length) +
-              ' patterns found'
-          )
+      runFullAnalysis(id)
+        .then(function () {
+          toast('Insights updated \u2014 feedback + build quality analyzed')
           renderProfilesSettings()
         })
         .catch(function (err) {

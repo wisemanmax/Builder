@@ -24,6 +24,7 @@ import {
   renderGrid,
   pushToSupabase,
   injectProfileContext,
+  telemetry,
 } from './pipeline-shared.js'
 
 var SYS_CSS_EDIT =
@@ -163,6 +164,10 @@ export function runQuickEdit(prompt, existingApp, images, editMode) {
   var appId = existingApp.id
   var appName = existingApp.name
   var v2
+
+  // Track this as a post-build edit on the most recent build record
+  telemetry.incrementEditCount(appId)
+  telemetry.emit('user.edit_after', { appId: appId, editMode: editMode || 'default' })
 
   // Step 0 — Claude Edit
   var editLabel = editMode === 'css-only' ? 'CSS edit' : editMode === 'text-only' ? 'text edit' : 'editing'

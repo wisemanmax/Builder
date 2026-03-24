@@ -116,6 +116,18 @@ export function hydrate() {
   ST.backendEnabled = localStorage.getItem(KEY_STORE.BACKEND) === 'true'
   ST.pipelineMode = localStorage.getItem(KEY_STORE.PIPELINE) || 'builder1'
   ST.website2Provider = localStorage.getItem(KEY_STORE.W2_PROVIDER) || 'claude'
+
+  // Deferred pruning of telemetry + build records (async, non-blocking)
+  setTimeout(function () {
+    try {
+      var _tel = import('./telemetry.js')
+      _tel.then(function (m) { m.pruneEvents() })
+    } catch (e) {}
+    try {
+      var _br = import('./build-record.js')
+      _br.then(function (m) { m.pruneRecords() })
+    } catch (e) {}
+  }, 2000)
 }
 
 export function saveKeys() {
