@@ -897,7 +897,7 @@ export function runStitchPipeline(context, callbacks, resumeSession) {
   if (containerId) updateStitchEstimate(containerId, '~2-4 min')
 
   var existingApp = context.existingApp || null
-  var customName = context.customName || ''
+  customName = context.customName || ''
   var prompt = context.prompt || ''
   var appName = customName || (existingApp ? existingApp.name : '') || autoName(prompt)
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
