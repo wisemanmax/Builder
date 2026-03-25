@@ -1,0 +1,44 @@
+[
+  {
+    "appId": "byheir",
+    "appName": "Byheir",
+    "sessionCount": 1,
+    "path": "history/byheir.json",
+    "updatedAt": "2026-03-25T19:43:08.948Z"
+  },
+  {
+    "appId": "surfer",
+    "appName": "Surfer",
+    "sessionCount": 1,
+    "path": "history/surfer.json",
+    "updatedAt": "2026-03-24T23:08:45.473Z"
+  },
+  {
+    "appId": "subway-runners",
+    "appName": "Subway runners",
+    "sessionCount": 1,
+    "path": "history/subway-runners.json",
+    "updatedAt": "2026-03-24T20:05:26.283Z"
+  },
+  {
+    "appId": "habit-tracker-2",
+    "appName": "Habit Tracker",
+    "sessionCount": 1,
+    "path": "history/habit-tracker-2.json",
+    "updatedAt": "2026-03-20T23:28:06.860Z"
+  },
+  {
+    "appId": "habit-tracker",
+    "appName": "Habit Tracker",
+    "sessionCount": 1,
+    "path": "history/habit-tracker.json",
+    "updatedAt": "2026-03-20T22:11:19.006Z"
+  },
+  {
+    "appId": "2048bw",
+    "appName": "2048BW",
+    "sessionCount": 1,
+    "path": "history/2048bw.json",
+    "updatedAt": "2026-03-21T15:57:32.941Z"
+  }
+]
