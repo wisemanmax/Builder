@@ -11,6 +11,8 @@ export function openSettings() {
   $('s-anth').value = ST.key
   $('s-gpt').value = ST.gptKey
   $('s-stitch').value = ST.stitchKey
+  $('s-groq').value = ST.groqKey
+  $('s-gemini').value = ST.geminiKey
   $('s-gh-token').value = ST.ghToken
   $('s-gh-user').value = ST.ghUser
   $('s-gh-repo').value = ST.ghRepo
@@ -70,6 +72,8 @@ export function initSettings() {
     ST.key = anthVal
     ST.gptKey = gptVal
     ST.stitchKey = $('s-stitch').value.trim()
+    ST.groqKey = $('s-groq').value.trim()
+    ST.geminiKey = $('s-gemini').value.trim()
     saveKeys()
     var ksc = $('key-safety-card')
     if (ksc) ksc.innerHTML = keyStatusHTML()
@@ -77,7 +81,11 @@ export function initSettings() {
     if (ST.stitchKey) {
       _testStitchKey(ST.stitchKey)
     }
-    toast(ST.gptKey ? 'AI keys saved \u2014 GPT audit active \u2713' : 'AI keys saved \u2713')
+    var extras = []
+    if (ST.gptKey) extras.push('GPT audit')
+    if (ST.groqKey) extras.push('Groq')
+    if (ST.geminiKey) extras.push('Gemini')
+    toast(extras.length ? 'AI keys saved \u2014 ' + extras.join(' + ') + ' active \u2713' : 'AI keys saved \u2713')
     // Update Flawless Pipeline button gate
     _syncStitchGate()
   })

@@ -124,6 +124,8 @@ export const KEY_STORE = {
   BACKEND: 'bldr_backend',
   PIPELINE: 'bldr_pipeline',
   W2_PROVIDER: 'bldr_w2provider',
+  GROQ: 'bldr_groqKey',
+  GEMINI: 'bldr_geminiKey',
 }
 
 export const PIPE2_NAMES = [
@@ -275,16 +277,27 @@ export const SELFUPDATE_ICONS = ['\uD83D\uDCE5', '\uD83D\uDD28', '\u2B06\uFE0F',
 // Cost analyzer pricing — per 1M tokens (USD)
 export var COST_RATES = {
   'claude-sonnet-4-20250514': { input: 3.0, output: 15.0, cacheRead: 0.3, cacheWrite: 3.75 },
+  'claude-haiku-4-5-20251001': { input: 0.80, output: 4.0, cacheRead: 0.08, cacheWrite: 1.0 },
   'gpt-4o': { input: 2.5, output: 10.0 },
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
   'gpt-5.4': { input: 5.0, output: 20.0 },
+  'dall-e-3': { perImage: 0.04 },
+  'llama-3.3-70b-versatile': { input: 0.59, output: 0.79 },
+  'gemini-2.5-flash': { input: 0.15, output: 0.60 },
 }
 export var COST_MARKUP = 7
 
 // --- Model & API constants ---
 export var CLAUDE_MODEL = 'claude-sonnet-4-20250514'
+export var CLAUDE_HAIKU_MODEL = 'claude-haiku-4-5-20251001'
 export var GPT_MODEL = 'gpt-4o'
 export var GPT_MINI_MODEL = 'gpt-4o-mini'
 export var GPT_THINK_MODEL = 'gpt-5.4'
+export var DALLE_MODEL = 'dall-e-3'
+export var GROQ_MODEL = 'llama-3.3-70b-versatile'
+export var GEMINI_MODEL = 'gemini-2.5-flash'
 export var ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 export var OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
+export var OPENAI_IMAGES_URL = 'https://api.openai.com/v1/images/generations'
+export var GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+export var GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/'

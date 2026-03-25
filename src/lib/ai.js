@@ -5,11 +5,18 @@ import { _nativeFetch, _validateKeyedRequest } from './key-guard.js'
 import { SYS_AUDIT, SYS_ENHANCE_REVIEW, SYS_CLASSIFY, SYS_CLARIFY, SYS_CHAT } from '../config/prompts.js'
 import {
   CLAUDE_MODEL,
+  CLAUDE_HAIKU_MODEL,
   GPT_MODEL,
   GPT_MINI_MODEL,
   GPT_THINK_MODEL,
+  DALLE_MODEL,
+  GROQ_MODEL,
+  GEMINI_MODEL,
   ANTHROPIC_API_URL,
   OPENAI_API_URL,
+  OPENAI_IMAGES_URL,
+  GROQ_API_URL,
+  GEMINI_API_URL,
 } from '../config/constants.js'
 
 function claudeHeaders() {
@@ -24,6 +31,10 @@ function claudeHeaders() {
 
 function gptHeaders() {
   return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + ST.gptKey }
+}
+
+function groqHeaders() {
+  return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + ST.groqKey }
 }
 
 function logCacheUsage(d, label) {
@@ -121,6 +132,52 @@ function claudeCatch(e) {
 function gptCatch(e) {
   if (e.message && e.message.indexOf('GPT:') === 0) throw e
   throw new Error(classifyFetchError(e, 'GPT'))
+}
+
+// Handle Groq API error responses
+function handleGroqError(r) {
+  if (!r.ok)
+    return r
+      .json()
+      .catch(function () {
+        return {}
+      })
+      .then(function (e) {
+        throw new Error('Groq: ' + scrubKeys((e.error && e.error.message) || 'HTTP ' + r.status))
+      })
+  return r.json()
+}
+
+function groqCatch(e) {
+  if (e.message && e.message.indexOf('Groq:') === 0) throw e
+  throw new Error(classifyFetchError(e, 'Groq'))
+}
+
+// Handle Gemini API error responses
+function handleGeminiError(r) {
+  if (!r.ok)
+    return r
+      .json()
+      .catch(function () {
+        return {}
+      })
+      .then(function (e) {
+        var msg = (e.error && e.error.message) || 'HTTP ' + r.status
+        throw new Error('Gemini: ' + scrubKeys(msg))
+      })
+  return r.json()
+}
+
+function geminiCatch(e) {
+  if (e.message && e.message.indexOf('Gemini:') === 0) throw e
+  throw new Error(classifyFetchError(e, 'Gemini'))
+}
+
+// Extract text from Gemini response
+function extractGeminiText(d) {
+  return (d.candidates && d.candidates[0] && d.candidates[0].content &&
+    d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
+    d.candidates[0].content.parts[0].text) || ''
 }
 
 // Check if an error is retryable (network/timeout)
@@ -904,5 +961,175 @@ export function callClaudeClarify(msg, images) {
     })
     .catch(function () {
       return { needsClarification: false }
+    })
+}
+
+// --- Claude Haiku (lightweight, cheap tasks) ---
+
+export function callClaudeHaiku(sys, msg, maxTokens) {
+  maxTokens = maxTokens || 2000
+  return fetchWithRetry(
+    ANTHROPIC_API_URL,
+    {
+      method: 'POST',
+      headers: claudeHeaders(),
+      body: JSON.stringify({
+        model: CLAUDE_HAIKU_MODEL,
+        max_tokens: maxTokens,
+        system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }],
+        messages: [{ role: 'user', content: msg }],
+      }),
+    },
+    60000
+  )
+    .then(handleClaudeError)
+    .then(function (d) {
+      logCacheUsage(d, 'callClaudeHaiku')
+      trackUsage('Haiku', CLAUDE_HAIKU_MODEL, d.usage)
+      return stripFences(extractClaudeText(d))
+    })
+    .catch(claudeCatch)
+}
+
+export function classifyIntentFast(msg, images) {
+  // Use Groq for sub-second classification if available, then Haiku, then Sonnet
+  if (ST.groqKey) {
+    return callGroq(SYS_CLASSIFY, msg, 100)
+      .then(function (raw) {
+        try {
+          var parsed = JSON.parse(raw)
+          return parsed.intent === 'chat' ? 'chat' : 'build'
+        } catch (e) {
+          return 'build'
+        }
+      })
+      .catch(function () {
+        return classifyIntent(msg, images)
+      })
+  }
+  if (ST.key) {
+    return callClaudeHaiku(SYS_CLASSIFY, msg, 100)
+      .then(function (raw) {
+        try {
+          var parsed = JSON.parse(raw)
+          return parsed.intent === 'chat' ? 'chat' : 'build'
+        } catch (e) {
+          return 'build'
+        }
+      })
+      .catch(function () {
+        return 'build'
+      })
+  }
+  return classifyIntent(msg, images)
+}
+
+// --- DALL-E 3 (image generation) ---
+
+export function callDALLE(prompt, size, quality) {
+  size = size || '1024x1024'
+  quality = quality || 'standard'
+  return fetchWithRetry(
+    OPENAI_IMAGES_URL,
+    {
+      method: 'POST',
+      headers: gptHeaders(),
+      body: JSON.stringify({
+        model: DALLE_MODEL,
+        prompt: prompt,
+        n: 1,
+        size: size,
+        quality: quality,
+        response_format: 'b64_json',
+      }),
+    },
+    120000
+  )
+    .then(handleGPTError)
+    .then(function (d) {
+      trackUsage('DALL-E', DALLE_MODEL, { images: 1 })
+      if (d.data && d.data[0] && d.data[0].b64_json) {
+        return { b64: d.data[0].b64_json, revisedPrompt: d.data[0].revised_prompt || '' }
+      }
+      throw new Error('DALL-E: Unexpected response format')
+    })
+    .catch(gptCatch)
+}
+
+// --- Groq (ultra-fast inference) ---
+
+export function callGroq(sys, msg, maxTokens) {
+  maxTokens = maxTokens || 1024
+  return fetchWithRetry(
+    GROQ_API_URL,
+    {
+      method: 'POST',
+      headers: groqHeaders(),
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        max_tokens: maxTokens,
+        temperature: 0,
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: msg },
+        ],
+      }),
+    },
+    30000
+  )
+    .then(handleGroqError)
+    .then(function (d) {
+      trackUsage('Groq', GROQ_MODEL, d.usage)
+      return stripFences(extractGPTText(d))
+    })
+    .catch(groqCatch)
+}
+
+// --- Gemini 2.5 Flash (large context) ---
+
+export function callGemini(sys, msg, maxTokens) {
+  maxTokens = maxTokens || 8192
+  var url = GEMINI_API_URL + GEMINI_MODEL + ':generateContent?key=' + ST.geminiKey
+  return fetchWithRetry(
+    url,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: sys }] },
+        contents: [{ role: 'user', parts: [{ text: msg }] }],
+        generationConfig: { maxOutputTokens: maxTokens },
+      }),
+    },
+    300000
+  )
+    .then(handleGeminiError)
+    .then(function (d) {
+      var usage = (d.usageMetadata) ? {
+        input_tokens: d.usageMetadata.promptTokenCount || 0,
+        output_tokens: d.usageMetadata.candidatesTokenCount || 0,
+      } : null
+      trackUsage('Gemini', GEMINI_MODEL, usage)
+      return stripFences(extractGeminiText(d))
+    })
+    .catch(geminiCatch)
+}
+
+export function callGeminiFullAudit(code) {
+  var sys = SYS_AUDIT + '\n\nIMPORTANT: You have the FULL source code — analyze every line. Return a JSON object with these categories:\n{"security":[],"accessibility":[],"performance":[],"quality":[],"suggestions":[]}\nEach item: {"severity":"critical|warning|info","line":"(approx line or section)","issue":"description","fix":"how to fix"}'
+  return callGemini(sys, 'Full audit of the complete application:\n\n' + code, 16384)
+    .then(function (raw) {
+      try {
+        var p = JSON.parse(raw)
+        return {
+          security: Array.isArray(p.security) ? p.security : [],
+          accessibility: Array.isArray(p.accessibility) ? p.accessibility : [],
+          performance: Array.isArray(p.performance) ? p.performance : [],
+          quality: Array.isArray(p.quality) ? p.quality : [],
+          suggestions: Array.isArray(p.suggestions) ? p.suggestions : [],
+        }
+      } catch (e) {
+        return { security: [], accessibility: [], performance: [], quality: [], suggestions: [] }
+      }
     })
 }
