@@ -7025,7 +7025,7 @@ function EndGame(props){
       <span className="sg-endgame-crown">👑</span>
       <img src={SG_LOGO} alt="SHIFTGRID" style={{width:160,height:160,objectFit:"contain",filter:"drop-shadow(0 0 30px rgba(255,170,0,0.6))"}}/>
       <div style={{fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#ffaa00",marginBottom:4}}>CITY FULLY RESTORED</div>
-      <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:24,textAlign:"center",lineHeight:1.7}}>All 50 districts powered. You are a LEGEND.<br/>The city stands because of you.</div>
+      <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:24,textAlign:"center",lineHeight:1.7}}>All 10 districts powered. You are a LEGEND.<br/>The city stands because of you.</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",maxWidth:320,marginBottom:24}}>
         {[
           {v:50,        lbl:"LEVELS",    c:"#00e5ff"},
@@ -7376,7 +7376,7 @@ function SquadTab(props){
         <div className="sg-squad-objective">
           <div className="sg-squad-obj-header">
             <div className="sg-squad-obj-title">⚡ WEEKLY SQUAD OBJECTIVE</div>
-            <div className="sg-squad-obj-reward">+{obj.reward.coins}⬡ {obj.reward.chest?"+ "+CHEST_DEFS[obj.reward.chest].icon:""}</div>
+            <div className="sg-squad-obj-reward">+{obj.reward.coins}⬡ {obj.reward.chest&&CHEST_DEFS[obj.reward.chest]?"+ "+CHEST_DEFS[obj.reward.chest].icon:""}</div>
           </div>
           <div className="sg-squad-obj-name">{obj.name}</div>
           <div className="sg-squad-obj-desc">{obj.desc}</div>
@@ -7639,7 +7639,7 @@ function BracketTab(props){
               <div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:700,color:"#ff2d95"}}>{result.oppScore.toLocaleString()}</div>
             </div>
           </div>
-          {result.won&&<div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>Reward: +{result.coins}⬡{result.chest?" + "+CHEST_DEFS[result.chest].icon:""}</div>}
+          {result.won&&<div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>Reward: +{result.coins}⬡{result.chest&&CHEST_DEFS[result.chest]?" + "+CHEST_DEFS[result.chest].icon:""}</div>}
         </div>
       )}
 
@@ -7858,7 +7858,7 @@ function CityTab(props) {
               <div className="sg-upg-name">{upg.label}</div>
               <div className="sg-upg-desc">{upg.desc}</div>
               <div className="sg-upg-pips">{upg.cost.map(function(_,i){ return <div key={i} className="sg-pip" style={{background:i<cur?"#00e5ff":"rgba(255,255,255,0.1)"}}/>; })}</div>
-              {maxed?<div className="sg-upg-max">MAX</div>:<button className="sg-upg-cost-btn" disabled={!can} style={{opacity:can?1:0.35}} onClick={function(){ buyUpgrade(upg.id,cur,cost); }}>{cost} coins</button>}
+              {maxed?<div className="sg-upg-max">MAX</div>:<button className="sg-upg-cost-btn" disabled={!can} style={{opacity:can?1:0.35,color:can?currColor:undefined,borderColor:can?currColor+"55":undefined}} onClick={function(){ buyUpgrade(upg.id,cur,cost,upCurrency); }}>{cost}{currIcon}</button>}
             </div>
           );
         })}
@@ -8146,7 +8146,7 @@ function StarChainMeter(props){
   var chain=loadStarChain();
   var stars=chain.stars||0;
   var pct=Math.min(100,(stars%STAR_CHAIN_GOAL)/STAR_CHAIN_GOAL*100);
-  var nextReward=STAR_CHAIN_REWARDS.find(function(r){ return !(chain.claimed||[]).includes(r.at)&&r.at>stars; });
+  var nextReward=STAR_CHAIN_REWARDS.find(function(r){ return !(chain.claimed||[]).includes(r.at)&&r.at>(stars%STAR_CHAIN_GOAL); });
   if(!nextReward) nextReward=STAR_CHAIN_REWARDS[STAR_CHAIN_REWARDS.length-1];
 
   return (
@@ -8162,7 +8162,7 @@ function StarChainMeter(props){
         {[1,2,3,4,5,6,7,8,9].map(function(n){
           var r=STAR_CHAIN_REWARDS.find(function(x){ return x.at===n; });
           return (
-            <span key={n} className={"sg-star-pip"+(stars%STAR_CHAIN_GOAL>=n||Math.floor(stars/STAR_CHAIN_GOAL)>0?" lit":"")}>
+            <span key={n} className={"sg-star-pip"+(stars%STAR_CHAIN_GOAL>=n?" lit":"")}>
               {r?r.icon:"·"}
             </span>
           );
@@ -8310,7 +8310,7 @@ function CampaignTab(props) {
 
       {/* ── OVERALL PROGRESS ── */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,marginTop:4}}>
-        <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>{cleared.length+"/50 CLEARED"}</div>
+        <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>{cleared.length+"/100 CLEARED"}</div>
         <div style={{display:"flex",gap:3}}>
           {ALL_DISTRICTS.map(function(d,i){
             var dc=d.ids.filter(function(id){ return cleared.includes(id); }).length;
@@ -8383,8 +8383,9 @@ function CampaignTab(props) {
               var localNum=(id%10)+1; /* 1–9 within district */
               return (
                 <div key={id}
-                  className={"sg-level-node"+(locked?" locked":"")+((id%10===4||id%10===8)&&!locked?" spike-level":"")} style={{position:"relative"}}
+                  className={"sg-level-node"+(locked?" locked":"")+((id%10===4||id%10===8)&&!locked?" spike-level":"")}
                   style={{
+                    position:"relative",
                     borderColor:done?dist.theme+"55":(locked?"rgba(255,255,255,0.06)":dist.theme+"25"),
                     background:done?dist.theme+"0a":(locked?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.03)"),
                   }}
@@ -8711,7 +8712,7 @@ function Shiftgrid() {
         return !newClaimed.includes(r.at) && sc.stars%STAR_CHAIN_GOAL>=r.at;
       });
       if(milestone){
-        newClaimed=newClaimed.concat([sc.stars]);
+        newClaimed=newClaimed.concat([milestone.at]);
         /* Award chest */
         setMeta(function(m){
           var nc=Object.assign({},m.chests||{});
