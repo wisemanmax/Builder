@@ -69,17 +69,41 @@ export function initSettings() {
         return
       }
     }
+    var groqVal = $('s-groq').value.trim()
+    if (groqVal) {
+      var grc = validateKey('groq', groqVal)
+      if (!grc.valid) {
+        toast('Groq key: ' + grc.msg)
+        return
+      }
+    }
+    var geminiVal = $('s-gemini').value.trim()
+    if (geminiVal) {
+      var gmc = validateKey('gemini', geminiVal)
+      if (!gmc.valid) {
+        toast('Gemini key: ' + gmc.msg)
+        return
+      }
+    }
     ST.key = anthVal
     ST.gptKey = gptVal
     ST.stitchKey = $('s-stitch').value.trim()
-    ST.groqKey = $('s-groq').value.trim()
-    ST.geminiKey = $('s-gemini').value.trim()
+    ST.groqKey = groqVal
+    ST.geminiKey = geminiVal
     saveKeys()
     var ksc = $('key-safety-card')
     if (ksc) ksc.innerHTML = keyStatusHTML()
     // Test Stitch key if provided
     if (ST.stitchKey) {
       _testStitchKey(ST.stitchKey)
+    }
+    // Test Groq key if provided
+    if (ST.groqKey) {
+      _testGroqKey(ST.groqKey)
+    }
+    // Test Gemini key if provided
+    if (ST.geminiKey) {
+      _testGeminiKey(ST.geminiKey)
     }
     var extras = []
     if (ST.gptKey) extras.push('GPT audit')
@@ -255,6 +279,38 @@ function _validateSupabaseApiKey(url, apiKey) {
       statusEl.style.background = 'rgba(255,82,82,.08)'
       statusEl.style.color = 'rgba(255,82,82,.9)'
       statusEl.textContent = '\u2717 Could not reach Supabase \u2014 check URL'
+    })
+}
+
+function _testGroqKey(key) {
+  fetch('https://api.groq.com/openai/v1/models', {
+    headers: {
+      Authorization: 'Bearer ' + key,
+    },
+  })
+    .then(function (res) {
+      if (res.ok) toast('\u2713 Groq API key verified', 3000)
+      else if (res.status === 401 || res.status === 403)
+        toast('\u2717 Groq API key invalid (HTTP ' + res.status + ')', 4000)
+      else toast('\u2717 Groq API error (HTTP ' + res.status + ')', 4000)
+    })
+    .catch(function () {
+      toast('\u2717 Could not reach Groq API', 4000)
+    })
+}
+
+function _testGeminiKey(key) {
+  fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key)
+  )
+    .then(function (res) {
+      if (res.ok) toast('\u2713 Gemini API key verified', 3000)
+      else if (res.status === 400 || res.status === 401 || res.status === 403)
+        toast('\u2717 Gemini API key invalid (HTTP ' + res.status + ')', 4000)
+      else toast('\u2717 Gemini API error (HTTP ' + res.status + ')', 4000)
+    })
+    .catch(function () {
+      toast('\u2717 Could not reach Gemini API', 4000)
     })
 }
 

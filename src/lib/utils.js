@@ -30,6 +30,8 @@ export function validateKey(type, value) {
     anthropic: { prefix: 'sk-ant-', minLen: 20 },
     openai: { prefix: 'sk-', minLen: 20 },
     github: { prefixes: ['ghp_', 'github_pat_'], minLen: 20 },
+    groq: { prefix: 'gsk_', minLen: 20 },
+    gemini: { prefix: 'AIza', minLen: 20 },
   }
   var p = patterns[type]
   if (!p) return { valid: true }
