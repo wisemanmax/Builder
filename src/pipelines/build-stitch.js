@@ -21,7 +21,7 @@ import {
   callClaudeRaw,
   callClaude,
   callClaudeWithThinkingStream,
-  callGPTRaw2,
+  smartRaw,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -654,12 +654,12 @@ function runVerify(assembledHTML, blueprintCleanCopy) {
 
 /**
  * Stage 5 — Review
- * Send assembledHTML + checksReport to GPT-4o → parse reviewFindings[].
+ * Send assembledHTML + checksReport to AI reviewer (Gemini > GPT > Claude).
  */
 function runReview(assembledHTML, checksReport) {
   var userMsg =
     'HTML APP:\n\n' + assembledHTML.slice(0, 60000) + '\n\nCHECKS REPORT:\n' + JSON.stringify(checksReport, null, 2)
-  return callGPTRaw2(GPT4O_STITCH_REVIEW, userMsg, 4000).then(function (raw) {
+  return smartRaw(GPT4O_STITCH_REVIEW, userMsg, 4000).then(function (raw) {
     try {
       var parsed = JSON.parse(raw)
       if (!Array.isArray(parsed)) parsed = []

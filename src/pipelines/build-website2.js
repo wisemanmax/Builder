@@ -30,6 +30,8 @@ import {
   callGPTMultiTurn2,
   callGPTWithStream,
   callGPTAudit2,
+  callGeminiFullAudit,
+  normalizeAuditResult,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -89,6 +91,8 @@ function _buildStream(sys, msg, thinkingBudget, onChunk, images) {
   return callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, images)
 }
 function _audit(code, customSysPrompt) {
+  // Prefer Gemini for audits — cheapest with 1M context window
+  if (ST.geminiKey) return callGeminiFullAudit(code).then(normalizeAuditResult)
   return ST.website2Provider === 'chatgpt'
     ? callGPTAudit2(code, customSysPrompt)
     : callClaudeAudit(code, customSysPrompt)
