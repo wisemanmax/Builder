@@ -267,12 +267,13 @@ export function initStudio() {
 
     function onMove(clientX, clientY) {
       if (!dragging) return
+      var delta
       if (isHorizontal()) {
-        var delta = startPos - clientX
+        delta = startPos - clientX
         var newW = Math.max(200, Math.min(startSize + delta, body.offsetWidth - 200))
         editor.style.width = newW + 'px'
       } else {
-        var delta = startPos - clientY
+        delta = startPos - clientY
         var newH = Math.max(52, Math.min(startSize + delta, body.offsetHeight - 80))
         editor.style.height = newH + 'px'
       }
