@@ -11,17 +11,17 @@ import { getBuildRecords } from './build-record.js'
 
 // --- Weights ---
 var QUALITY_WEIGHTS = {
-  checks: 0.40,       // check pass rate
+  checks: 0.4, // check pass rate
   auditSeverity: 0.25, // inverse of audit bug severity
-  fixPasses: 0.15,     // fewer fix passes = better first-pass quality
-  codeSize: 0.10,      // reasonable code size (not too small, not bloated)
-  approval: 0.10,      // approved vs rejected/cancelled
+  fixPasses: 0.15, // fewer fix passes = better first-pass quality
+  codeSize: 0.1, // reasonable code size (not too small, not bloated)
+  approval: 0.1, // approved vs rejected/cancelled
 }
 
 var SATISFACTION_WEIGHTS = {
-  feedbackRating: 0.50, // user star rating (1-5)
-  editCount: 0.25,      // fewer post-build edits = more satisfied
-  approvalSpeed: 0.25,  // faster approval = more confident
+  feedbackRating: 0.5, // user star rating (1-5)
+  editCount: 0.25, // fewer post-build edits = more satisfied
+  approvalSpeed: 0.25, // faster approval = more confident
 }
 
 var COMPOSITE_WEIGHTS = {
@@ -70,7 +70,8 @@ export function computeQualityScore(record) {
 
   // 3. Fix pass efficiency (0-100, fewer passes = better)
   var fixCount = (record.fixPasses && record.fixPasses.length) || 0
-  if (fixCount === 0) scores.fixPasses = 100 // passed first time
+  if (fixCount === 0)
+    scores.fixPasses = 100 // passed first time
   else if (fixCount === 1) scores.fixPasses = 80
   else if (fixCount === 2) scores.fixPasses = 60
   else if (fixCount === 3) scores.fixPasses = 40
@@ -92,7 +93,7 @@ export function computeQualityScore(record) {
     scores.codeSize = 70
   } else {
     // Bloated
-    scores.codeSize = Math.max(20, 100 - ((size - 400000) / 10000))
+    scores.codeSize = Math.max(20, 100 - (size - 400000) / 10000)
   }
 
   // 5. Approval outcome
@@ -152,7 +153,8 @@ export function computeSatisfactionScore(record) {
   // 3. Approval speed (faster = more confident)
   if (hasApprovalTime) {
     var ms = record.approvalTimeMs
-    if (ms < 5000) scores.approvalSpeed = 95 // very quick = confident
+    if (ms < 5000)
+      scores.approvalSpeed = 95 // very quick = confident
     else if (ms < 15000) scores.approvalSpeed = 85
     else if (ms < 30000) scores.approvalSpeed = 70
     else if (ms < 60000) scores.approvalSpeed = 55
@@ -181,10 +183,7 @@ export function computeSatisfactionScore(record) {
  */
 export function computeCompositeScore(qualityScore, satisfactionScore) {
   if (satisfactionScore == null) return qualityScore || 0
-  return Math.round(
-    qualityScore * COMPOSITE_WEIGHTS.quality +
-    satisfactionScore * COMPOSITE_WEIGHTS.satisfaction
-  )
+  return Math.round(qualityScore * COMPOSITE_WEIGHTS.quality + satisfactionScore * COMPOSITE_WEIGHTS.satisfaction)
 }
 
 /**
@@ -264,8 +263,12 @@ export function getProfileScoreStats(profileId) {
 
   // Top failing checks (sorted by frequency)
   var topIssues = Object.keys(failCounts)
-    .map(function (k) { return { check: k, count: failCounts[k] } })
-    .sort(function (a, b) { return b.count - a.count })
+    .map(function (k) {
+      return { check: k, count: failCounts[k] }
+    })
+    .sort(function (a, b) {
+      return b.count - a.count
+    })
     .slice(0, 5)
 
   return {

@@ -58,6 +58,8 @@ import {
   getThoughtDesignOverrides,
   getTemplateSkeleton,
   telemetry,
+  shouldSkipStep,
+  buildResumeContext,
 } from './pipeline-shared.js'
 import {
   SYS_WEB2_RECON,
@@ -101,7 +103,9 @@ function _providerName() {
  * 5: Checks  6: Claude Audit  7: Fix
  * 8: Push  9: Preview  10: Approval  11: Merge
  */
-export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
+export function runWebsite2Pipeline(prompt, existingApp, resumeSession, images) {
+  var customName = typeof resumeSession === 'string' ? resumeSession : null
+  if (resumeSession && typeof resumeSession === 'string') resumeSession = null
   resetCostAccum()
   // Validate API key for selected provider
   if (ST.website2Provider === 'chatgpt' && !ST.gptKey) {
@@ -140,7 +144,9 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
   var appIcon = ST.pendingIcon
   var appCi = ST.pendingColor
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
-  var branchName = hasGitHub ? 'builder/site2-' + appId + '-' + Date.now().toString(36) : ''
+  var branchName =
+    (resumeSession && resumeSession.branchName) ||
+    (hasGitHub ? 'builder/site2-' + appId + '-' + Date.now().toString(36) : '')
 
   var v1, v2, reconJSON, brandJSON, structureJSON, designJSON, thinkingText, _streamPreview
   var activeThought, _specText, _rulesText
@@ -171,9 +177,18 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     })
   }
 
+  var _resumeCtx = resumeSession ? buildResumeContext(resumeSession) : ''
+  var _isResuming = !!resumeSession
+  if (_isResuming) {
+    addMsg({ role: 'system', text: 'Resuming from previous session \u2014 skipping completed steps.' })
+  }
+  ST._resumeSession = null
+
   // Silent branch creation
   var p = Promise.resolve()
-  if (hasGitHub) {
+  if (_isResuming && branchName) {
+    updatePS(pid, 0, 'done', branchName + ' (reused)')
+  } else if (hasGitHub) {
     p = retryStep(
       function () {
         return ghCreateBranch(branchName)
@@ -231,6 +246,7 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
     if (_templateSkeleton) {
       reconMsg += formatTemplateInjection(_templateSkeleton, _thoughtDesign)
     }
+    if (_resumeCtx) reconMsg += '\n\n' + _resumeCtx
     return retryStep(
       function () {
         return _raw(effectiveReconSys, reconMsg, 6000, images)
@@ -464,7 +480,13 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
           return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
         })
         if (passNum === 1) {
-          telemetry.emit('build.checks', { passCount: checks.filter(function (c) { return c.passed }).length, totalCount: checks.length, criticalFails: criticalFails.length })
+          telemetry.emit('build.checks', {
+            passCount: checks.filter(function (c) {
+              return c.passed
+            }).length,
+            totalCount: checks.length,
+            criticalFails: criticalFails.length,
+          })
           telemetry.updateBuildRecord(_buildId, 'checks', checks)
         }
         addMsg({ role: 'asst', type: 'checks', checks: checks })
@@ -504,7 +526,10 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
                 source: ST.website2Provider === 'chatgpt' ? 'chatgpt' : 'claude',
               })
             if (passNum === 1) {
-              telemetry.emit('build.audit', { bugCount: bugs.length, auditor: ST.website2Provider === 'chatgpt' ? 'chatgpt' : 'claude' })
+              telemetry.emit('build.audit', {
+                bugCount: bugs.length,
+                auditor: ST.website2Provider === 'chatgpt' ? 'chatgpt' : 'claude',
+              })
               telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
             }
             return { criticalFails: criticalFails, bugs: bugs }
@@ -547,8 +572,10 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
               // Always include full code so the model has complete context
               var fm =
                 (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
-                ':\n' + issueList +
-                '\n\nCURRENT CODE:\n' + currentCode +
+                ':\n' +
+                issueList +
+                '\n\nCURRENT CODE:\n' +
+                currentCode +
                 (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
               repairHistory.push({ role: 'user', content: fm })
 
@@ -833,7 +860,14 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
       })
       telemetry.completeBuildRecord(_buildId, {
         finalCodeSize: v2 ? v2.length : 0,
-        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        costData: costData.breakdown.length
+          ? {
+              rawCost: costData.rawCost,
+              userPrice: costData.userPrice,
+              totalInput: costData.totalInput,
+              totalOutput: costData.totalOutput,
+            }
+          : null,
         approved: true,
       })
       return showFeedbackCard(appId, appName, prompt)
@@ -857,7 +891,10 @@ export function runWebsite2Pipeline(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
-        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.emit('user.approval', {
+          approved: false,
+          timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null,
+        })
         telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         updatePS(pid, 10, 'error', 'Changes requested')
         clearPreview(appId)

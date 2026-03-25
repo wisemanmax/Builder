@@ -98,6 +98,11 @@
 .thought-chip .tc-x{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.4);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;line-height:1}
 .thought-chip .tc-x:hover{background:rgba(255,82,82,.2);color:var(--co)}
 .tc-rules{font-size:10px;color:rgba(170,255,0,.5);margin-left:2px}
+.tc-ver{font-size:9px;color:rgba(61,90,254,.7);margin-left:2px}
+.thought-chip-secondary{background:rgba(61,90,254,.08);border-color:rgba(61,90,254,.2)}
+.tc-attach-more{padding:3px 10px;font-size:10px}
+.tpi-selected{background:rgba(170,255,0,.1);color:rgba(255,255,255,.85)}
+.tpi-selected .tpi-icon{color:rgba(170,255,0,.8)}
 .tc-attach{padding:5px 12px;border-radius:100px;background:rgba(255,255,255,.05);border:1.5px dashed rgba(255,255,255,.12);color:rgba(255,255,255,.35);font-size:11px;cursor:pointer;transition:all .18s}
 .tc-attach:hover{border-color:rgba(170,255,0,.3);color:rgba(255,255,255,.55);background:rgba(170,255,0,.05)}
 .thought-picker{position:absolute;left:16px;right:16px;top:100%;background:#1a1a2e;border:1.5px solid rgba(255,255,255,.1);border-radius:var(--rs);box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:5;max-height:200px;overflow-y:auto;padding:4px}

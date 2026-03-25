@@ -15,7 +15,7 @@ import { initContextMenu, showCtx, showCtxAt, closeCtx } from './components/cont
 import { initEmojiPicker, pickEmoji } from './components/emoji-picker.js'
 import { openPreview } from './components/approval-card.js'
 import { resetChat, initMessageHandlers } from './components/message.js'
-import { detachThought, showThoughtPicker, pickThought } from './components/thought-card.js'
+import { detachThought, detachThoughtById, showThoughtPicker, pickThought } from './components/thought-card.js'
 
 import { initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
@@ -30,6 +30,7 @@ import {
   checkInterruptedBuild,
   recoverInterruptedBuild,
   dismissRecovery,
+  resumeBuild,
   stopPipeline,
 } from './screens/build.js'
 import { openBuildHistory, closeBuildHistory, initBuildHistory } from './screens/build-history.js'
@@ -42,6 +43,8 @@ import {
   refineThink,
   confirmThinkBrief,
   editThinkBrief,
+  editThought,
+  viewThoughtVersions,
   initThinkSheet,
 } from './screens/think.js'
 import {
@@ -182,6 +185,7 @@ export function init() {
     closeCtx: closeCtx,
     pickEmoji: pickEmoji,
     detachThought: detachThought,
+    detachThoughtById: detachThoughtById,
     showThoughtPicker: showThoughtPicker,
     pickThought: pickThought,
     thinkOptionSelect: thinkOptionSelect,
@@ -212,12 +216,21 @@ export function init() {
     copyToClipboard: copyToClipboard,
     toast: toast,
     dismissRecovery: dismissRecovery,
+    resumeBuild: resumeBuild,
     stopPipeline: stopPipeline,
     openBuildHistory: openBuildHistory,
     closeBuildHistory: closeBuildHistory,
     openThoughtsFolder: openThoughtsFolder,
     closeThoughtsFolder: closeThoughtsFolder,
     openThoughtDetail: openThoughtDetail,
+    editThoughtFromFolder: function (id) {
+      closeThoughtsFolder()
+      editThought(id)
+    },
+    viewThoughtVersionsFromFolder: function (id) {
+      closeThoughtsFolder()
+      viewThoughtVersions(id)
+    },
     openShareCard: openShareCard,
   })
 }

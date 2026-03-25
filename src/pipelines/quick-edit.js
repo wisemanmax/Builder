@@ -61,7 +61,8 @@ function generateDiffHtml(oldCode, newCode) {
   // Simple LCS-based diff: find changed regions
   var maxLen = Math.max(oldLines.length, newLines.length)
   var changes = []
-  var oi = 0, ni = 0
+  var oi = 0,
+    ni = 0
 
   while (oi < oldLines.length || ni < newLines.length) {
     if (oi < oldLines.length && ni < newLines.length && oldLines[oi] === newLines[ni]) {
@@ -70,7 +71,8 @@ function generateDiffHtml(oldCode, newCode) {
       ni++
     } else {
       // Find next matching line
-      var foundOld = -1, foundNew = -1
+      var foundOld = -1,
+        foundNew = -1
       var searchRange = Math.min(20, maxLen)
       for (var s = 1; s <= searchRange; s++) {
         if (foundNew === -1 && ni + s < newLines.length && oi < oldLines.length && newLines[ni + s] === oldLines[oi]) {
@@ -109,7 +111,8 @@ function generateDiffHtml(oldCode, newCode) {
 
   // Collapse context lines, show only those near changes
   var result = []
-  var totalAdded = 0, totalRemoved = 0
+  var totalAdded = 0,
+    totalRemoved = 0
   for (var i = 0; i < changes.length; i++) {
     if (changes[i].type !== 'ctx') {
       if (changes[i].type === 'add') totalAdded++
@@ -122,7 +125,9 @@ function generateDiffHtml(oldCode, newCode) {
       }
     }
   }
-  result.sort(function (a, b) { return a - b })
+  result.sort(function (a, b) {
+    return a - b
+  })
 
   if (result.length === 0) return ''
 
@@ -180,9 +185,11 @@ export function runQuickEdit(prompt, existingApp, images, editMode) {
     })
     .join('\n\u2192 ')
 
-  var changeLabel = editMode === 'css-only' ? 'CSS CHANGE REQUEST' : editMode === 'text-only' ? 'TEXT CHANGE REQUEST' : 'CHANGE REQUEST'
+  var changeLabel =
+    editMode === 'css-only' ? 'CSS CHANGE REQUEST' : editMode === 'text-only' ? 'TEXT CHANGE REQUEST' : 'CHANGE REQUEST'
   var userMsg =
-    changeLabel + ': ' +
+    changeLabel +
+    ': ' +
     prompt +
     (prevPrompts ? '\n\nBUILD HISTORY:\n' + prevPrompts : '') +
     '\n\nCURRENT APP CODE:\n' +
@@ -226,7 +233,13 @@ export function runQuickEdit(prompt, existingApp, images, editMode) {
       // Show diff of changes
       var diffHtml = generateDiffHtml(currentCode, v2)
       if (diffHtml) {
-        addMsg({ role: 'asst', type: 'text', html: '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:2px">Changes made:</div>' + diffHtml })
+        addMsg({
+          role: 'asst',
+          type: 'text',
+          html:
+            '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:2px">Changes made:</div>' +
+            diffHtml,
+        })
       }
 
       // Step 1 — Automated Checks
@@ -276,7 +289,9 @@ export function runQuickEdit(prompt, existingApp, images, editMode) {
           '<strong>' +
           esc(appName) +
           '</strong> updated \u2713' +
-          '<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:4px">' + modeDesc + ' \u2014 local save only. Use full pipeline for GitHub deployment.</div>',
+          '<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:4px">' +
+          modeDesc +
+          ' \u2014 local save only. Use full pipeline for GitHub deployment.</div>',
       })
       toast('\u2713 ' + appName + ' updated!', 2500)
       renderGrid()

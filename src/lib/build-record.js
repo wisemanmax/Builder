@@ -5,8 +5,8 @@ import { emit, getBuildContext } from './telemetry.js'
 import { scoreRecord } from './scoring.js'
 
 var STORAGE_KEY = 'bldr_build_records'
-var MAX_RECORDS = 20
-var FULL_ARTIFACT_COUNT = 5 // most recent N keep full artifacts
+var MAX_RECORDS = 50
+var FULL_ARTIFACT_COUNT = 10 // most recent N keep full artifacts
 var MAX_PLAN_SIZE = 4000
 var MAX_THINKING_SIZE = 8000
 
@@ -120,7 +120,7 @@ export function completeBuildRecord(buildId, outcome) {
       r.finalCodeSize = outcome.finalCodeSize || null
       r.costData = outcome.costData || null
       r.duration = r._startTime ? Date.now() - r._startTime : null
-      r.approvalDecision = outcome.approved ? 'approved' : (outcome.cancelled ? 'cancelled' : r.approvalDecision)
+      r.approvalDecision = outcome.approved ? 'approved' : outcome.cancelled ? 'cancelled' : r.approvalDecision
 
       // Calculate check score
       if (r.checks && r.checks.length) {
@@ -151,9 +151,11 @@ export function completeBuildRecord(buildId, outcome) {
 
       // Phase 3: trigger auto rule extraction (dynamic import to avoid circular dep)
       if (r.profileId) {
-        import('./learning.js').then(function (mod) {
-          mod.maybeAutoExtractRules(r.profileId)
-        }).catch(function () {})
+        import('./learning.js')
+          .then(function (mod) {
+            mod.maybeAutoExtractRules(r.profileId)
+          })
+          .catch(function () {})
       }
 
       return r

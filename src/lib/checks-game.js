@@ -82,13 +82,7 @@ export function runGameChecks(code) {
     )
 
     // --- Scoring ---
-    add(
-      'Game Logic',
-      'has-score',
-      'Has scoring system',
-      /score/i.test(code),
-      'Game should track and display a score'
-    )
+    add('Game Logic', 'has-score', 'Has scoring system', /score/i.test(code), 'Game should track and display a score')
     add(
       'Game Logic',
       'has-highscore',
@@ -175,7 +169,13 @@ export function runGameChecks(code) {
     // --- CDN Libraries ---
     var cdnCount = (code.match(/cdnjs\.cloudflare\.com|unpkg\.com|cdn\.jsdelivr\.net/g) || []).length
     if (cdnCount > 0) {
-      add('Libraries', 'cdn-usage', 'Uses ' + cdnCount + ' CDN library(ies)', true, cdnCount + ' external libraries loaded')
+      add(
+        'Libraries',
+        'cdn-usage',
+        'Uses ' + cdnCount + ' CDN library(ies)',
+        true,
+        cdnCount + ' external libraries loaded'
+      )
     }
     var hasThreeJS = /THREE\./.test(code)
     var hasMatterJS = /Matter\./.test(code)

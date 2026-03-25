@@ -14,14 +14,14 @@ import { callClaudeRaw } from './ai.js'
 // Keywords associated with each template for matching
 var TEMPLATE_KEYWORDS = {
   'habit-tracker': ['habit', 'tracker', 'streak', 'daily', 'routine', 'goal', 'track'],
-  'pomodoro': ['timer', 'pomodoro', 'focus', 'interval', 'productivity', 'countdown', 'session'],
-  'kanban': ['kanban', 'board', 'task', 'project', 'column', 'drag', 'todo', 'workflow'],
+  pomodoro: ['timer', 'pomodoro', 'focus', 'interval', 'productivity', 'countdown', 'session'],
+  kanban: ['kanban', 'board', 'task', 'project', 'column', 'drag', 'todo', 'workflow'],
   'quiz-game': ['quiz', 'game', 'question', 'trivia', 'score', 'answer', 'test'],
   'analytics-dashboard': ['dashboard', 'analytics', 'chart', 'data', 'kpi', 'metric', 'report', 'graph'],
   'weather-app': ['weather', 'forecast', 'temperature', 'climate', 'condition'],
-  'portfolio': ['portfolio', 'personal', 'project', 'resume', 'cv', 'showcase', 'work'],
+  portfolio: ['portfolio', 'personal', 'project', 'resume', 'cv', 'showcase', 'work'],
   'landing-page': ['landing', 'saas', 'product', 'pricing', 'feature', 'marketing', 'startup', 'hero'],
-  'calculator': ['calculator', 'math', 'calculate', 'compute', 'scientific', 'convert'],
+  calculator: ['calculator', 'math', 'calculate', 'compute', 'scientific', 'convert'],
   'budget-tracker': ['budget', 'expense', 'finance', 'money', 'spending', 'income', 'cost'],
   'recipe-book': ['recipe', 'cook', 'food', 'meal', 'ingredient', 'kitchen', 'menu'],
   'mood-journal': ['mood', 'journal', 'diary', 'emotion', 'feeling', 'log', 'mental', 'wellness'],
@@ -47,7 +47,10 @@ var CATEGORY_KEYWORDS = {
  */
 function keywordSimilarity(prompt, keywords) {
   if (!prompt || !keywords || !keywords.length) return 0
-  var words = prompt.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/)
+  var words = prompt
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .split(/\s+/)
   var matches = 0
   for (var i = 0; i < keywords.length; i++) {
     for (var j = 0; j < words.length; j++) {
@@ -100,12 +103,13 @@ export function getTemplatePerformance(profileId) {
       stats[tplId] = { totalScore: 0, buildCount: 0, lastUsed: r.ts }
     }
 
-    var score = r.compositeScore != null
-      ? r.compositeScore
-      : computeCompositeScore(
-          r.qualityScore != null ? r.qualityScore : computeQualityScore(r),
-          r.satisfactionScore != null ? r.satisfactionScore : computeSatisfactionScore(r)
-        )
+    var score =
+      r.compositeScore != null
+        ? r.compositeScore
+        : computeCompositeScore(
+            r.qualityScore != null ? r.qualityScore : computeQualityScore(r),
+            r.satisfactionScore != null ? r.satisfactionScore : computeSatisfactionScore(r)
+          )
 
     stats[tplId].totalScore += score
     stats[tplId].buildCount++
@@ -250,7 +254,11 @@ export function semanticRankTemplates(prompt) {
       } catch (e) {
         var match = raw.match(/\[[\s\S]*\]/)
         if (match) {
-          try { results = JSON.parse(match[0]) } catch (e2) { results = [] }
+          try {
+            results = JSON.parse(match[0])
+          } catch (e2) {
+            results = []
+          }
         } else {
           results = []
         }

@@ -68,6 +68,8 @@ import {
   openProjectSheet,
   injectProfileContext,
   telemetry,
+  shouldSkipStep,
+  buildResumeContext,
 } from './pipeline-shared.js'
 
 import {
@@ -97,7 +99,9 @@ var GAME_ADVISORY_IDS = [
  * 0: Plan Game  1: Build  2: Game Checks  3: Standard Checks
  * 4: Game Audit  5: Fix  6: Push  7: Preview  8: Approval  9: Merge
  */
-export function runGamePipeline(prompt, existingApp, customName, images) {
+export function runGamePipeline(prompt, existingApp, resumeSession, images) {
+  var customName = typeof resumeSession === 'string' ? resumeSession : null
+  if (resumeSession && typeof resumeSession === 'string') resumeSession = null
   clearCurrentSession()
   resetCostAccum()
   clearPipelineCancel()
@@ -124,7 +128,9 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
   var appIcon = ST.pendingIcon
   var appCi = ST.pendingColor
   var appId = existingApp ? existingApp.id : uniqueSlug(appName)
-  var branchName = hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : ''
+  var branchName =
+    (resumeSession && resumeSession.branchName) ||
+    (hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : '')
 
   var _buildId = telemetry.startBuild(appId, 'game')
   var _br = telemetry.createBuildRecord(appId, 'game', prompt, {
@@ -160,9 +166,18 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
     })
   }
 
+  var _resumeCtx = resumeSession ? buildResumeContext(resumeSession) : ''
+  var _isResuming = !!resumeSession
+  if (_isResuming) {
+    addMsg({ role: 'system', text: 'Resuming from previous session \u2014 skipping completed steps.' })
+  }
+  ST._resumeSession = null
+
   // Silent branch creation (not a visible step)
   var p = Promise.resolve()
-  if (hasGitHub) {
+  if (_isResuming && branchName) {
+    updatePS(pid, 0, 'done', branchName + ' (reused)')
+  } else if (hasGitHub) {
     p = retryStep(
       function () {
         return ghCreateBranch(branchName)
@@ -197,6 +212,7 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         ' reference image' +
         (images.length > 1 ? 's' : '') +
         ' attached \u2014 study the visual style, gameplay mechanics, and UI layout]'
+    if (_resumeCtx) planMsg += '\n\n' + _resumeCtx
     return retryStep(
       function () {
         return callGPTRaw2(SYS_PLAN_GAME, planMsg, 3000, images)
@@ -324,7 +340,10 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
 
         // Step 2 — Game-Specific Checks (local + AI via OpenAI top model)
         updatePS(pid, 2, 'active', 'Running game checks' + passLabel + '\u2026')
-        if (passNum === 1) { updatePipeStep(pid, 3, TOTAL_STEPS); updatePipeProgress(pid, 45) }
+        if (passNum === 1) {
+          updatePipeStep(pid, 3, TOTAL_STEPS)
+          updatePipeProgress(pid, 45)
+        }
         var gameChecks = runGameChecks(currentCode)
         var gameFails = gameChecks.filter(function (c) {
           return !c.passed && GAME_ADVISORY_IDS.indexOf(c.id) === -1
@@ -339,12 +358,18 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
               'GAME CONCEPT: ' + prompt + '\n\nGAME CODE:\n' + currentCode.slice(0, 50000),
               4000
             ).then(function (raw) {
-              try { return JSON.parse(raw) } catch (e) { return [] }
+              try {
+                return JSON.parse(raw)
+              } catch (e) {
+                return []
+              }
             })
           },
           1,
           'AIGameCheck'
-        ).catch(function () { return [] })
+        ).catch(function () {
+          return []
+        })
 
         // Step 3 — Standard Checks (local + AI via OpenAI top model)
         updatePS(pid, 3, 'active', 'Running standard checks' + passLabel + '\u2026')
@@ -355,9 +380,18 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         // For games, some standard checks are less relevant — filter out
         criticalFails = criticalFails.filter(function (c) {
           // Games legitimately use inline event handlers, may skip semantic <main>, etc.
-          var gameExempt = ['no-inline-event-handlers', 'has-main', 'no-div-onclick', 'has-media-queries',
-            'multiple-breakpoints', 'has-mobile-breakpoint', 'no-fixed-widths', 'responsive-containers',
-            'responsive-typography', 'has-css-vars']
+          var gameExempt = [
+            'no-inline-event-handlers',
+            'has-main',
+            'no-div-onclick',
+            'has-media-queries',
+            'multiple-breakpoints',
+            'has-mobile-breakpoint',
+            'no-fixed-widths',
+            'responsive-containers',
+            'responsive-typography',
+            'has-css-vars',
+          ]
           return gameExempt.indexOf(c.id) === -1
         })
         addMsg({ role: 'asst', type: 'checks', checks: stdChecks })
@@ -365,17 +399,19 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         // AI-powered standard check using OpenAI top model
         var aiStdCheckPromise = retryStep(
           function () {
-            return callGPTTopRaw(
-              SYS_STD_CHECK_AI,
-              'CODE:\n' + currentCode.slice(0, 50000),
-              3000
-            ).then(function (raw) {
-              try { return JSON.parse(raw) } catch (e) { return [] }
+            return callGPTTopRaw(SYS_STD_CHECK_AI, 'CODE:\n' + currentCode.slice(0, 50000), 3000).then(function (raw) {
+              try {
+                return JSON.parse(raw)
+              } catch (e) {
+                return []
+              }
             })
           },
           1,
           'AIStdCheck'
-        ).catch(function () { return [] })
+        ).catch(function () {
+          return []
+        })
 
         // Wait for both AI checks to complete
         return Promise.all([aiGameCheckPromise, aiStdCheckPromise]).then(function (aiResults) {
@@ -384,7 +420,13 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
 
           // Merge AI game check results into gameFails
           var aiGameFails = aiGameBugs.map(function (b) {
-            return { cat: 'AI Game Check', id: 'ai-game-' + Math.random().toString(36).slice(2, 8), label: b.issue, passed: false, detail: b.location || '' }
+            return {
+              cat: 'AI Game Check',
+              id: 'ai-game-' + Math.random().toString(36).slice(2, 8),
+              label: b.issue,
+              passed: false,
+              detail: b.location || '',
+            }
           })
           if (aiGameFails.length) {
             addMsg({ role: 'asst', type: 'checks', checks: aiGameFails })
@@ -392,7 +434,13 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
 
           // Merge AI standard check results into criticalFails
           var aiStdFails = aiStdBugs.map(function (b) {
-            return { cat: 'AI Standard Check', id: 'ai-std-' + Math.random().toString(36).slice(2, 8), label: b.issue, passed: false, detail: b.location || '' }
+            return {
+              cat: 'AI Standard Check',
+              id: 'ai-std-' + Math.random().toString(36).slice(2, 8),
+              label: b.issue,
+              passed: false,
+              detail: b.location || '',
+            }
           })
           if (aiStdFails.length) {
             addMsg({ role: 'asst', type: 'checks', checks: aiStdFails })
@@ -420,7 +468,9 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
 
           // Telemetry: capture combined check results
           telemetry.emit('build.checks', {
-            passCount: gameChecks.concat(stdChecks).filter(function (c) { return c.passed }).length,
+            passCount: gameChecks.concat(stdChecks).filter(function (c) {
+              return c.passed
+            }).length,
             totalCount: gameChecks.length + stdChecks.length + aiGameBugs.length + aiStdBugs.length,
             criticalFails: totalGameFails.length + totalCriticalFails.length,
           })
@@ -430,196 +480,213 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
           gameFails = totalGameFails
           criticalFails = totalCriticalFails
 
-        // Step 4 — Game-Specific Audit (Claude — deep analysis)
-        if (passNum === 1) { updatePipeStep(pid, 5, TOTAL_STEPS); updatePipeProgress(pid, 55); updatePipeETA(pid, '~1 min') }
-        updatePS(pid, 4, 'active', 'Auditing gameplay' + passLabel + '\u2026')
-        return retryStep(
-          function () {
-            return callClaudeRaw(
-              SYS_AUDIT_GAME,
-              'GAME CONCEPT: ' + prompt + '\n\nGAME CODE:\n' + currentCode.slice(0, 60000),
-              4000
-            ).then(function (raw) {
-              try {
-                return JSON.parse(raw)
-              } catch (e) {
-                return []
-              }
-            })
-          },
-          2,
-          'GameAudit'
-        )
-          .then(function (bugs) {
-            updatePS(
-              pid,
-              4,
-              'done',
-              bugs.length
-                ? 'Found ' + bugs.length + ' gameplay issue' + (bugs.length !== 1 ? 's' : '') + passLabel
-                : 'Gameplay is clean' + passLabel + ' \u2713'
-            )
-            if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: 'game-audit' })
-            telemetry.emit('build.audit', { bugCount: bugs.length, auditor: 'game-audit' })
-            telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
-            return { gameFails: gameFails, criticalFails: criticalFails, bugs: bugs }
-          })
-          .catch(function (e) {
-            var auditErr = scrubKeys(e.message || String(e))
-            updatePS(pid, 4, 'error', 'Game audit failed' + passLabel + ': ' + auditErr)
-            return { gameFails: gameFails, criticalFails: criticalFails, bugs: [] }
-          })
-          .then(function (result) {
-            // Merge all issues
-            var allIssues = result.gameFails
-              .map(function (c) {
-                return { severity: 'medium', issue: '[Game] ' + c.label + (c.detail ? ' \u2014 ' + c.detail : ''), location: c.cat }
+          // Step 4 — Game-Specific Audit (Claude — deep analysis)
+          if (passNum === 1) {
+            updatePipeStep(pid, 5, TOTAL_STEPS)
+            updatePipeProgress(pid, 55)
+            updatePipeETA(pid, '~1 min')
+          }
+          updatePS(pid, 4, 'active', 'Auditing gameplay' + passLabel + '\u2026')
+          return retryStep(
+            function () {
+              return callClaudeRaw(
+                SYS_AUDIT_GAME,
+                'GAME CONCEPT: ' + prompt + '\n\nGAME CODE:\n' + currentCode.slice(0, 60000),
+                4000
+              ).then(function (raw) {
+                try {
+                  return JSON.parse(raw)
+                } catch (e) {
+                  return []
+                }
               })
-              .concat(
-                result.criticalFails.map(function (c) {
-                  return { severity: 'low', issue: '[Standard] ' + c.label + (c.detail ? ' \u2014 ' + c.detail : ''), location: c.cat }
-                })
-              )
-              .concat(result.bugs)
-
-            // Step 5 — Fix
-            if (passNum === 1) { updatePipeStep(pid, 6, TOTAL_STEPS); updatePipeProgress(pid, 65) }
-            if (allIssues.length > 0) {
+            },
+            2,
+            'GameAudit'
+          )
+            .then(function (bugs) {
               updatePS(
                 pid,
-                5,
-                'active',
-                'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026'
+                4,
+                'done',
+                bugs.length
+                  ? 'Found ' + bugs.length + ' gameplay issue' + (bugs.length !== 1 ? 's' : '') + passLabel
+                  : 'Gameplay is clean' + passLabel + ' \u2713'
               )
-              var issueList = allIssues
-                .map(function (b, i) {
-                  return (
-                    i +
-                    1 +
-                    '. [' +
-                    (b.severity || 'medium').toUpperCase() +
-                    '] ' +
-                    (b.issue || '') +
-                    ' \u2014 ' +
-                    (b.location || '')
-                  )
-                })
-                .join('\n')
-
-              var fm =
-                (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
-                ':\n' + issueList +
-                '\n\nCURRENT CODE:\n' + currentCode +
-                (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
-              repairHistory.push({ role: 'user', content: fm })
-
-              return retryStep(
-                function () {
-                  return callClaudeMultiTurn(fixSys, repairHistory)
-                },
-                2,
-                'Fix'
-              )
-                .then(function (fixed) {
-                  repairHistory.push({ role: 'assistant', content: fixed })
-                  currentCode = fixed
-                  totalFixed += allIssues.length
-                  telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
-                  var _existingPasses = _br.fixPasses || []
-                  _existingPasses.push({ pass: passNum, fixed: allIssues.length })
-                  telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
-                  if (passNum < MAX_FIX_PASSES) {
-                    updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
-                    return runValidationPass()
-                  } else {
-                    var finalGameChecks = runGameChecks(currentCode)
-                    var finalGameFails = finalGameChecks.filter(function (c) {
-                      return !c.passed && GAME_ADVISORY_IDS.indexOf(c.id) === -1
-                    })
-                    if (finalGameFails.length > 0) {
-                      updatePS(
-                        pid,
-                        5,
-                        'warn',
-                        finalGameFails.length +
-                          ' issue' +
-                          (finalGameFails.length !== 1 ? 's' : '') +
-                          ' remain after ' +
-                          MAX_FIX_PASSES +
-                          ' passes'
-                      )
-                    } else {
-                      updatePS(
-                        pid,
-                        5,
-                        'done',
-                        'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
-                      )
-                    }
-                    v2 = currentCode
-                    addMsg({
-                      role: 'asst',
-                      type: 'text',
-                      text:
-                        'Game validation: ' +
-                        totalFixed +
-                        ' issue' +
-                        (totalFixed !== 1 ? 's' : '') +
-                        ' addressed across ' +
-                        passNum +
-                        ' pass' +
-                        (passNum !== 1 ? 'es' : '') +
-                        '.' +
-                        (finalGameFails.length > 0
-                          ? ' ' +
-                            finalGameFails.length +
-                            ' minor issue' +
-                            (finalGameFails.length !== 1 ? 's' : '') +
-                            ' may remain.'
-                          : ''),
-                    })
+              if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: 'game-audit' })
+              telemetry.emit('build.audit', { bugCount: bugs.length, auditor: 'game-audit' })
+              telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
+              return { gameFails: gameFails, criticalFails: criticalFails, bugs: bugs }
+            })
+            .catch(function (e) {
+              var auditErr = scrubKeys(e.message || String(e))
+              updatePS(pid, 4, 'error', 'Game audit failed' + passLabel + ': ' + auditErr)
+              return { gameFails: gameFails, criticalFails: criticalFails, bugs: [] }
+            })
+            .then(function (result) {
+              // Merge all issues
+              var allIssues = result.gameFails
+                .map(function (c) {
+                  return {
+                    severity: 'medium',
+                    issue: '[Game] ' + c.label + (c.detail ? ' \u2014 ' + c.detail : ''),
+                    location: c.cat,
                   }
                 })
-                .catch(function (e) {
-                  v2 = currentCode
-                  var errMsg = scrubKeys(e.message || String(e))
-                  updatePS(
-                    pid,
-                    5,
-                    'error',
-                    'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
-                  )
-                  addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
-                })
-            } else {
-              v2 = currentCode
+                .concat(
+                  result.criticalFails.map(function (c) {
+                    return {
+                      severity: 'low',
+                      issue: '[Standard] ' + c.label + (c.detail ? ' \u2014 ' + c.detail : ''),
+                      location: c.cat,
+                    }
+                  })
+                )
+                .concat(result.bugs)
+
+              // Step 5 — Fix
               if (passNum === 1) {
-                updatePS(pid, 5, 'done', 'No fixes needed \u2713')
-              } else {
+                updatePipeStep(pid, 6, TOTAL_STEPS)
+                updatePipeProgress(pid, 65)
+              }
+              if (allIssues.length > 0) {
                 updatePS(
                   pid,
                   5,
-                  'done',
-                  'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
+                  'active',
+                  'Fixing ' + allIssues.length + ' issue' + (allIssues.length !== 1 ? 's' : '') + passLabel + '\u2026'
                 )
-                addMsg({
-                  role: 'asst',
-                  type: 'text',
-                  text:
-                    'Game validation: ' +
-                    totalFixed +
-                    ' issue' +
-                    (totalFixed !== 1 ? 's' : '') +
-                    ' addressed across ' +
-                    passNum +
-                    ' pass' +
-                    (passNum !== 1 ? 'es' : '') +
-                    '. Game is clean \u2713',
-                })
+                var issueList = allIssues
+                  .map(function (b, i) {
+                    return (
+                      i +
+                      1 +
+                      '. [' +
+                      (b.severity || 'medium').toUpperCase() +
+                      '] ' +
+                      (b.issue || '') +
+                      ' \u2014 ' +
+                      (b.location || '')
+                    )
+                  })
+                  .join('\n')
+
+                var fm =
+                  (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
+                  ':\n' +
+                  issueList +
+                  '\n\nCURRENT CODE:\n' +
+                  currentCode +
+                  (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
+                repairHistory.push({ role: 'user', content: fm })
+
+                return retryStep(
+                  function () {
+                    return callClaudeMultiTurn(fixSys, repairHistory)
+                  },
+                  2,
+                  'Fix'
+                )
+                  .then(function (fixed) {
+                    repairHistory.push({ role: 'assistant', content: fixed })
+                    currentCode = fixed
+                    totalFixed += allIssues.length
+                    telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
+                    var _existingPasses = _br.fixPasses || []
+                    _existingPasses.push({ pass: passNum, fixed: allIssues.length })
+                    telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
+                    if (passNum < MAX_FIX_PASSES) {
+                      updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
+                      return runValidationPass()
+                    } else {
+                      var finalGameChecks = runGameChecks(currentCode)
+                      var finalGameFails = finalGameChecks.filter(function (c) {
+                        return !c.passed && GAME_ADVISORY_IDS.indexOf(c.id) === -1
+                      })
+                      if (finalGameFails.length > 0) {
+                        updatePS(
+                          pid,
+                          5,
+                          'warn',
+                          finalGameFails.length +
+                            ' issue' +
+                            (finalGameFails.length !== 1 ? 's' : '') +
+                            ' remain after ' +
+                            MAX_FIX_PASSES +
+                            ' passes'
+                        )
+                      } else {
+                        updatePS(
+                          pid,
+                          5,
+                          'done',
+                          'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
+                        )
+                      }
+                      v2 = currentCode
+                      addMsg({
+                        role: 'asst',
+                        type: 'text',
+                        text:
+                          'Game validation: ' +
+                          totalFixed +
+                          ' issue' +
+                          (totalFixed !== 1 ? 's' : '') +
+                          ' addressed across ' +
+                          passNum +
+                          ' pass' +
+                          (passNum !== 1 ? 'es' : '') +
+                          '.' +
+                          (finalGameFails.length > 0
+                            ? ' ' +
+                              finalGameFails.length +
+                              ' minor issue' +
+                              (finalGameFails.length !== 1 ? 's' : '') +
+                              ' may remain.'
+                            : ''),
+                      })
+                    }
+                  })
+                  .catch(function (e) {
+                    v2 = currentCode
+                    var errMsg = scrubKeys(e.message || String(e))
+                    updatePS(
+                      pid,
+                      5,
+                      'error',
+                      'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
+                    )
+                    addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
+                  })
+              } else {
+                v2 = currentCode
+                if (passNum === 1) {
+                  updatePS(pid, 5, 'done', 'No fixes needed \u2713')
+                } else {
+                  updatePS(
+                    pid,
+                    5,
+                    'done',
+                    'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
+                  )
+                  addMsg({
+                    role: 'asst',
+                    type: 'text',
+                    text:
+                      'Game validation: ' +
+                      totalFixed +
+                      ' issue' +
+                      (totalFixed !== 1 ? 's' : '') +
+                      ' addressed across ' +
+                      passNum +
+                      ' pass' +
+                      (passNum !== 1 ? 'es' : '') +
+                      '. Game is clean \u2713',
+                  })
+                }
+                return Promise.resolve()
               }
-              return Promise.resolve()
-            }
-          })
+            })
         }) // end Promise.all AI checks
       }
 
@@ -842,7 +909,14 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
       })
       telemetry.completeBuildRecord(_buildId, {
         finalCodeSize: v2 ? v2.length : 0,
-        costData: costData.breakdown.length ? { rawCost: costData.rawCost, userPrice: costData.userPrice, totalInput: costData.totalInput, totalOutput: costData.totalOutput } : null,
+        costData: costData.breakdown.length
+          ? {
+              rawCost: costData.rawCost,
+              userPrice: costData.userPrice,
+              totalInput: costData.totalInput,
+              totalOutput: costData.totalOutput,
+            }
+          : null,
         approved: true,
       })
       return showFeedbackCard(appId, appName, prompt)
@@ -866,7 +940,10 @@ export function runGamePipeline(prompt, existingApp, customName, images) {
         return
       }
       if (err.message === 'CHANGES_REQUESTED') {
-        telemetry.emit('user.approval', { approved: false, timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null })
+        telemetry.emit('user.approval', {
+          approved: false,
+          timeMs: _approvalStartTs ? Date.now() - _approvalStartTs : null,
+        })
         telemetry.updateBuildRecord(_buildId, 'approvalDecision', 'rejected')
         telemetry.updateBuildRecord(_buildId, 'approvalTimeMs', _approvalStartTs ? Date.now() - _approvalStartTs : null)
         updatePS(pid, 8, 'error', 'Changes requested')

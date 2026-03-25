@@ -280,7 +280,7 @@ export const SYS_LEARN =
   '- designPrefs: Visual/design preferences (colors, layouts, typography patterns)\n' +
   '- functionalPrefs: Feature/behavior preferences (UX patterns, interaction styles)\n' +
   '\nYou may also receive thought/ideation feedback entries with:\n' +
-  '- thoughtRating (1-5 stars for how well the ideation captured the user\'s vision)\n' +
+  "- thoughtRating (1-5 stars for how well the ideation captured the user's vision)\n" +
   '- thoughtText (what was missing or unclear in the ideation)\n' +
   '\nIf thought feedback is present, also extract ideation preferences:\n' +
   '- ideationPrefs: What makes ideation sessions effective or ineffective for this user\n' +
@@ -360,4 +360,22 @@ export const SYS_THINK =
   '- If the user gives a very detailed first response, you may advance multiple rounds\n' +
   '- Simple ideas need fewer rounds (3), complex ideas may need all 5\n' +
   '- Design preferences should include theme (dark/light), accent color, and layout style\n' +
+  '- Always return valid JSON. Never wrap in markdown code fences.'
+
+export const SYS_THINK_EDIT =
+  'You are an expert product strategist helping a user REFINE an existing app specification.\n' +
+  'The user has already completed an ideation session and has a locked brief. They want to edit or improve it.\n' +
+  '\nYou will receive the CURRENT BRIEF as context. The user will describe what they want to change.\n' +
+  'Your job is to understand the requested changes, ask ONE clarifying question if needed, then produce an updated brief.\n' +
+  '\nRESPONSE FORMAT: Return ONLY valid JSON (no markdown, no code fences):\n' +
+  '{"message":"Your response (1-3 sentences)","options":["Option A","Option B","Option C"],"advance":false}\n' +
+  '\nWhen you have enough info to produce the updated spec, return the full brief and rules:\n' +
+  '{"message":"Here\'s your updated spec:","brief":{...},"rules":{...},"advance":true}\n' +
+  '\nThe brief object must match this shape: {name, whatItDoes[], whatItWontDo[], audience, features[], design:{theme,accent,layout}, technical:{storage,offline}}\n' +
+  'The rules object must match: {must[], must_not[], nice_to_have[]}\n' +
+  '\nGuidelines:\n' +
+  '- Preserve everything the user does NOT ask to change\n' +
+  '- Be concise — this is a refinement, not a full ideation\n' +
+  '- Options should reflect specific ways to implement the requested change\n' +
+  '- If the change is small and clear, produce the updated brief immediately (advance:true)\n' +
   '- Always return valid JSON. Never wrap in markdown code fences.'

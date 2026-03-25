@@ -34,9 +34,7 @@ export function openTemplates() {
   var cards = ''
   for (var i = 0; i < ranked.length; i++) {
     var t = ranked[i]
-    var badge = t.reason
-      ? '<span class="tpl-badge">' + esc(t.reason) + '</span>'
-      : ''
+    var badge = t.reason ? '<span class="tpl-badge">' + esc(t.reason) + '</span>' : ''
     cards +=
       '<div class="tpl-card" data-cat="' +
       t.category +

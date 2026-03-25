@@ -2,7 +2,12 @@ import { ST, persist, getActiveProfile } from './state.js'
 import { callClaudeRaw } from './ai.js'
 import { SYS_LEARN, SYS_EXTRACT_RULES } from '../config/prompts.js'
 import { getBuildRecords } from './build-record.js'
-import { computeQualityScore, computeSatisfactionScore, computeCompositeScore, getProfileScoreStats } from './scoring.js'
+import {
+  computeQualityScore,
+  computeSatisfactionScore,
+  computeCompositeScore,
+  getProfileScoreStats,
+} from './scoring.js'
 
 // --- Helpers ---
 
@@ -56,7 +61,10 @@ export function analyzeFeedback(profileId) {
     JSON.stringify(feedbackSummary, null, 2)
 
   if (thoughtFeedback.length) {
-    msg += '\n\nIDEATION/THOUGHT FEEDBACK (' + thoughtFeedback.length + ' entries):\n' +
+    msg +=
+      '\n\nIDEATION/THOUGHT FEEDBACK (' +
+      thoughtFeedback.length +
+      ' entries):\n' +
       JSON.stringify(thoughtFeedback, null, 2)
   }
 
@@ -173,7 +181,13 @@ export function analyzeBuilds(profileId) {
     profile.buildLearnedRules = rules
     persist()
 
-    console.log('[Learning] Extracted ' + (rules.mustRules.length + rules.mustNotRules.length) + ' rules from ' + records.length + ' builds')
+    console.log(
+      '[Learning] Extracted ' +
+        (rules.mustRules.length + rules.mustNotRules.length) +
+        ' rules from ' +
+        records.length +
+        ' builds'
+    )
     return rules
   })
 }
@@ -243,6 +257,7 @@ export function runFullAnalysis(profileId) {
     )
   }
 
-  if (!promises.length) return Promise.reject(new Error('Not enough data for analysis (need 3+ feedback entries or build records)'))
+  if (!promises.length)
+    return Promise.reject(new Error('Not enough data for analysis (need 3+ feedback entries or build records)'))
   return Promise.all(promises)
 }

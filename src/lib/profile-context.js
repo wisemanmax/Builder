@@ -237,7 +237,11 @@ export function formatBriefWithConversation(thought) {
   })
   userMsgs = userMsgs.slice(0, 15)
 
-  var lines = [specText, '\n### IDEATION CONTEXT', "Key points from the user's ideation session (use these to deeply understand intent, preferences, and nuances):"]
+  var lines = [
+    specText,
+    '\n### IDEATION CONTEXT',
+    "Key points from the user's ideation session (use these to deeply understand intent, preferences, and nuances):",
+  ]
   for (var j = 0; j < userMsgs.length; j++) {
     var excerpt = userMsgs[j].length > 300 ? userMsgs[j].slice(0, 300) + '\u2026' : userMsgs[j]
     lines.push('- "' + excerpt + '"')

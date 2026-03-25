@@ -14,18 +14,30 @@ export function renderChecklistResults(summary) {
     ? 'All ' + summary.total + ' features verified'
     : summary.verified + '/' + summary.total + ' features verified'
 
-  var html = '<div class="cl-card">' +
-    '<div class="cl-header">' + headerIcon + ' ' + headerText + '</div>' +
+  var html =
+    '<div class="cl-card">' +
+    '<div class="cl-header">' +
+    headerIcon +
+    ' ' +
+    headerText +
+    '</div>' +
     '<div class="cl-items">'
 
   for (var i = 0; i < summary.items.length; i++) {
     var item = summary.items[i]
-    var icon = item.verified ? '\u2705' : (item.required ? '\u274C' : '\u26AA')
-    var cls = item.verified ? 'cl-ok' : (item.required ? 'cl-miss' : 'cl-opt')
-    html += '<div class="cl-item ' + cls + '">' +
-      '<span class="cl-icon">' + icon + '</span>' +
+    var icon = item.verified ? '\u2705' : item.required ? '\u274C' : '\u26AA'
+    var cls = item.verified ? 'cl-ok' : item.required ? 'cl-miss' : 'cl-opt'
+    html +=
+      '<div class="cl-item ' +
+      cls +
+      '">' +
+      '<span class="cl-icon">' +
+      icon +
+      '</span>' +
       '<div class="cl-text">' +
-      '<span class="cl-feat">' + esc(item.text) + '</span>'
+      '<span class="cl-feat">' +
+      esc(item.text) +
+      '</span>'
     if (item.evidence) {
       html += '<span class="cl-evidence">' + esc(item.evidence) + '</span>'
     }

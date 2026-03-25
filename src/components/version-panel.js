@@ -7,7 +7,8 @@ function diffLines(oldText, newText) {
   var oldLines = (oldText || '').split('\n')
   var newLines = (newText || '').split('\n')
   var result = []
-  var oi = 0, ni = 0
+  var oi = 0,
+    ni = 0
 
   // Simple LCS-based diff using a greedy approach
   while (oi < oldLines.length || ni < newLines.length) {
@@ -23,7 +24,8 @@ function diffLines(oldText, newText) {
       ni++
     } else {
       // Look ahead to find next matching line
-      var foundOld = -1, foundNew = -1
+      var foundOld = -1,
+        foundNew = -1
       var maxLook = Math.min(20, Math.max(oldLines.length - oi, newLines.length - ni))
       for (var k = 1; k < maxLook; k++) {
         if (foundNew < 0 && ni + k < newLines.length && oldLines[oi] === newLines[ni + k]) foundNew = k
@@ -85,7 +87,8 @@ export function openVersionPanel() {
   var old = $('version-panel')
   if (old) old.remove()
 
-  var html = '<div id="version-panel" class="version-panel">' +
+  var html =
+    '<div id="version-panel" class="version-panel">' +
     '<div class="vp-inner">' +
     '<div class="vp-header">' +
     '<span class="vp-title">\u23F3 Version History</span>' +
@@ -93,30 +96,44 @@ export function openVersionPanel() {
     '</div>' +
     '<div class="vp-current">' +
     '<div class="vp-item-label">Current</div>' +
-    '<div class="vp-item-meta">' + codeSize(app.code) + ' \u00B7 ' + relativeTime(app.updatedAt) + '</div>' +
+    '<div class="vp-item-meta">' +
+    codeSize(app.code) +
+    ' \u00B7 ' +
+    relativeTime(app.updatedAt) +
+    '</div>' +
     '</div>' +
     '<div class="vp-list">'
 
   for (var i = 0; i < versions.length; i++) {
     var v = versions[i]
-    html += '<div class="vp-item" data-vi="' + i + '">' +
+    html +=
+      '<div class="vp-item" data-vi="' +
+      i +
+      '">' +
       '<div class="vp-item-row">' +
       '<div>' +
-      '<div class="vp-item-label">v' + (versions.length - i) + '</div>' +
-      '<div class="vp-item-meta">' + codeSize(v.code) + ' \u00B7 ' + relativeTime(v.ts) + '</div>' +
+      '<div class="vp-item-label">v' +
+      (versions.length - i) +
+      '</div>' +
+      '<div class="vp-item-meta">' +
+      codeSize(v.code) +
+      ' \u00B7 ' +
+      relativeTime(v.ts) +
+      '</div>' +
       '</div>' +
       '<div class="vp-item-btns">' +
-      '<button class="vp-btn vp-diff-btn" data-vi="' + i + '">Diff</button>' +
-      '<button class="vp-btn vp-restore-btn" data-vi="' + i + '">Restore</button>' +
+      '<button class="vp-btn vp-diff-btn" data-vi="' +
+      i +
+      '">Diff</button>' +
+      '<button class="vp-btn vp-restore-btn" data-vi="' +
+      i +
+      '">Restore</button>' +
       '</div>' +
       '</div>' +
       '</div>'
   }
 
-  html += '</div>' +
-    '<div id="vp-diff-view" class="vp-diff-view" style="display:none"></div>' +
-    '</div>' +
-    '</div>'
+  html += '</div>' + '<div id="vp-diff-view" class="vp-diff-view" style="display:none"></div>' + '</div>' + '</div>'
 
   document.body.insertAdjacentHTML('beforeend', html)
 
@@ -167,11 +184,18 @@ function showVersionDiff(versionIndex) {
     if (lines[i].type === 'del') stats.removed++
   }
 
-  var html = '<div class="vp-diff-header">' +
-    '<span>v' + (app.versions.length - versionIndex) + ' \u2192 Current</span>' +
+  var html =
+    '<div class="vp-diff-header">' +
+    '<span>v' +
+    (app.versions.length - versionIndex) +
+    ' \u2192 Current</span>' +
     '<span class="vp-diff-stats">' +
-    '<span style="color:#4caf50">+' + stats.added + '</span> ' +
-    '<span style="color:#f44336">-' + stats.removed + '</span>' +
+    '<span style="color:#4caf50">+' +
+    stats.added +
+    '</span> ' +
+    '<span style="color:#f44336">-' +
+    stats.removed +
+    '</span>' +
     '</span>' +
     '<button id="vp-diff-close" class="vp-btn">\u2715 Close</button>' +
     '</div>' +
@@ -185,7 +209,10 @@ function showVersionDiff(versionIndex) {
   }
 
   if (truncated) {
-    html += '<div class="vp-line-same" style="color:rgba(255,255,255,.3)">... ' + (lines.length - maxLines) + ' more lines</div>'
+    html +=
+      '<div class="vp-line-same" style="color:rgba(255,255,255,.3)">... ' +
+      (lines.length - maxLines) +
+      ' more lines</div>'
   }
   html += '</pre>'
 
@@ -204,7 +231,10 @@ function rollbackToVersion(versionIndex) {
 
   var idx = -1
   for (var i = 0; i < ST.apps.length; i++) {
-    if (ST.apps[i].id === app.id) { idx = i; break }
+    if (ST.apps[i].id === app.id) {
+      idx = i
+      break
+    }
   }
   if (idx < 0) return
 
