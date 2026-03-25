@@ -3253,7 +3253,6 @@ const DISTRICT_NARRATIVES = [
     story:"The Core. ARIA is waiting for you at the end of this district — not to fight you, but to tell you something she has been holding for three years. She left the path open on purpose. She did this terrible, necessary thing and then she waited, alone in the dark, for someone to come and ask her why. Here you are.",
     objective:"Clear the Core. And when ARIA speaks, let her finish. She's been saving it for a long time.",
   },
-,
   {
     num:"DISTRICT 6", title:"The Anchor Field", color:"#64a0ff",
     story:"The city's eastern zone has been physically locked down. Strange metallic constructs — anchors — have appeared across the grid, jamming shift mechanisms on critical rows and columns. Nobody knows who installed them.",
@@ -3335,7 +3334,7 @@ const OBJECTIVE_META = {
 /* Assign objectives to levels based on position within district */
 /* Positions 3,7 get special objectives; boss always standard */
 function getLevelObjective(levelDef) {
-  if(levelDef.boss||levelDef.isMaster||!levelDef.id||typeof levelDef.id!=="number") return "standard";
+  if(levelDef.boss||levelDef.isMaster||levelDef.id==null||typeof levelDef.id!=="number") return "standard";
   var pos = levelDef.id % 10; /* 0-9 within district */
   if(pos===3) return "timed";
   if(pos===6) return "collect";
@@ -3443,9 +3442,9 @@ function addSeasonXP(amount){
 }
 
 /* ─── CITY EVOLUTION ─────────────────────────────────────────────── */
-/* Returns visual state for each of the 5 districts */
+/* Returns visual state for each of the 10 districts */
 function getCityDistrictState(clearedIds) {
-  return [0,1,2,3,4].map(function(di){
+  return [0,1,2,3,4,5,6,7,8,9].map(function(di){
     var start=di*10, ids=Array.from({length:10},function(_,i){ return start+i; });
     var cleared=ids.filter(function(id){ return clearedIds.includes(id); }).length;
     if(cleared===0)        return "ruins";      /* gray, no lights */
@@ -3604,10 +3603,10 @@ function injectBlockers(grid, levelId, count, rng) {
   /* Determine which blocker types to use based on district */
   var dist = Math.min(10, Math.floor(levelId / 10));
   /* D6: anchor only; D7: overcharge+anchor; D8: fog+anchor; D9: chain+fog; D10: all 4 */
-  var available = dist >= 15 ? ["anchor","overcharge","fog","chain"] :
-                  dist >= 13 ? ["chain","fog","anchor"] :
-                  dist >= 12 ? ["fog","anchor","overcharge"] :
-                  dist >= 11 ? ["overcharge","anchor"] :
+  var available = dist >= 9 ? ["anchor","overcharge","fog","chain"] :
+                  dist >= 8 ? ["chain","fog","anchor"] :
+                  dist >= 7 ? ["fog","anchor","overcharge"] :
+                  dist >= 6 ? ["overcharge","anchor"] :
                                ["anchor"];
   var placed = 0, tries = 0;
   var chainId = 1;
@@ -4530,7 +4529,7 @@ function injectSpecialNodes(grid, levelId, rng){
 }
 function mkSeededRng(seed) {
   let s = ((seed ^ 0x9e3779b9) >>> 0) || 1;
-  return function() { s=((s^(s<<13))>>>0); s=((s^(s>>17))>>>0); s=((s^(s<<5))>>>0); return s/4294967296; };
+  return function() { s=((s^(s<<13))>>>0); s=((s^(s>>>17))>>>0); s=((s^(s<<5))>>>0); return s/4294967296; };
 }
 function todaySeed() { const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
 function makeGrid(rng) {
@@ -4607,7 +4606,8 @@ function applyGravity(grid,matched){
     for(let r=0;r<ROWS;r++){ if(g[r][c]&&g[r][c].blocker) fixed[r]=g[r][c]; }
     const col=[];
     for(let r=0;r<ROWS;r++){ if(g[r][c]&&!g[r][c].blocker) col.push(g[r][c]); }
-    while(col.length<ROWS) col.unshift(makeTile());
+    var fixedCount=Object.keys(fixed).length;
+    while(col.length<ROWS-fixedCount) col.unshift(makeTile());
     for(let r=0;r<ROWS;r++) g[r][c]= fixed[r]||col.shift()||makeTile();
   }
   return {g:g,cleared:cleared};
