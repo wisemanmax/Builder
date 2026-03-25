@@ -35,7 +35,9 @@ import {
   callClaudeMultiTurn,
   callClaudeRaw,
   callClaudeWithThinkingStream,
-  callClaudeAudit,
+  smartAudit,
+  groqPreCheck,
+  auditProviderLabel,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -306,14 +308,14 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
             : 'All checks passed' + passLabel + ' \u2713'
         )
 
-        // Step 3 — Claude Audit
-        updatePS(pid, 3, 'active', 'Claude auditing code' + passLabel + '\u2026')
+        // Step 3 — AI Audit (Gemini > GPT > Claude)
+        updatePS(pid, 3, 'active', auditProviderLabel() + ' auditing code' + passLabel + '\u2026')
         return retryStep(
           function () {
-            return callClaudeAudit(currentCode)
+            return smartAudit(currentCode)
           },
           2,
-          'ClaudeAudit'
+          'SmartAudit'
         )
           .then(function (bugs) {
             updatePS(
@@ -324,9 +326,9 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
                 ? 'Found ' + bugs.length + ' issue' + (bugs.length !== 1 ? 's' : '') + passLabel
                 : 'Code is clean' + passLabel + ' \u2713'
             )
-            if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: 'claude' })
+            if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: auditProviderLabel().toLowerCase() })
             if (passNum === 1) {
-              telemetry.emit('build.audit', { bugCount: bugs.length, auditor: 'claude' })
+              telemetry.emit('build.audit', { bugCount: bugs.length, auditor: auditProviderLabel().toLowerCase() })
               telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
             }
             return { criticalFails: criticalFails, bugs: bugs }
@@ -366,11 +368,21 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
                 })
                 .join('\n')
 
+              // Groq pre-check: fast scan for obvious issues to prepend to fix instructions
+              return groqPreCheck(currentCode).then(function (groqIssues) {
+              var groqHint = ''
+              if (groqIssues.length > 0) {
+                groqHint = '\n\nQUICK-SCAN FINDINGS (pre-check):\n' + groqIssues.map(function (g) {
+                  return '- [' + (g.severity || 'medium').toUpperCase() + '] ' + g.issue + (g.location ? ' (' + g.location + ')' : '')
+                }).join('\n')
+              }
+
               // Always include full code so the model has complete context
               var fm =
                 (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
                 ':\n' +
                 issueList +
+                groqHint +
                 '\n\nCURRENT CODE:\n' +
                 currentCode +
                 (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
@@ -454,6 +466,7 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
                   )
                   addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
                 })
+              }) // end groqPreCheck.then
             } else {
               v2 = currentCode
               if (passNum === 1) {

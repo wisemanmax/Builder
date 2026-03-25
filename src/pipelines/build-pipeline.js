@@ -38,8 +38,10 @@ import {
   callClaudeMultiTurn,
   callClaudeRaw,
   callClaudeWithThinkingStream,
-  callGPT,
-  callGPTReview,
+  smartAudit,
+  smartReview,
+  groqPreCheck,
+  auditProviderLabel,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -273,7 +275,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
         addMsg({ role: 'asst', type: 'thinking', text: thinkingText.trim() })
       }
 
-      var canAudit = !!(ST.gptKey && ST.auditEnabled)
+      var canAudit = !!((ST.geminiKey || ST.gptKey) && ST.auditEnabled)
       var currentCode = v1
       var passNum = 0
       var totalFixed = 0
@@ -311,8 +313,8 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
 
         var auditPromise
         if (canAudit) {
-          updatePS(pid, 4, 'active', 'GPT-4o reviewing' + passLabel + '\u2026')
-          auditPromise = callGPT(currentCode)
+          updatePS(pid, 4, 'active', auditProviderLabel() + ' reviewing' + passLabel + '\u2026')
+          auditPromise = smartAudit(currentCode)
             .then(function (bugs) {
               updatePS(
                 pid,
@@ -324,7 +326,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
               )
               addMsg({ role: 'asst', type: 'audit', bugs: bugs })
               if (passNum === 1) {
-                telemetry.emit('build.audit', { bugCount: bugs.length, auditor: 'gpt' })
+                telemetry.emit('build.audit', { bugCount: bugs.length, auditor: auditProviderLabel().toLowerCase() })
                 telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
               }
               return { criticalFails: criticalFails, bugs: bugs }
@@ -335,7 +337,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
               return { criticalFails: criticalFails, bugs: [] }
             })
         } else {
-          if (passNum === 1) updatePS(pid, 4, 'skip', ST.gptKey ? 'Audit disabled' : 'No OpenAI key \u2014 skipped')
+          if (passNum === 1) updatePS(pid, 4, 'skip', (ST.geminiKey || ST.gptKey) ? 'Audit disabled' : 'No review key \u2014 skipped')
           auditPromise = Promise.resolve({ criticalFails: criticalFails, bugs: [] })
         }
 
@@ -389,11 +391,21 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
                 })
                 .join('\n')
 
+              // Groq pre-check: fast scan for obvious issues to prepend to fix instructions
+              return groqPreCheck(currentCode).then(function (groqIssues) {
+              var groqHint = ''
+              if (groqIssues.length > 0) {
+                groqHint = '\n\nQUICK-SCAN FINDINGS (pre-check):\n' + groqIssues.map(function (g) {
+                  return '- [' + (g.severity || 'medium').toUpperCase() + '] ' + g.issue + (g.location ? ' (' + g.location + ')' : '')
+                }).join('\n')
+              }
+
               // Always include full code so the model has complete context (like a chat conversation)
               var fm =
                 (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
                 ':\n' +
                 issueList +
+                groqHint +
                 '\n\nCURRENT CODE:\n' +
                 currentCode +
                 (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
@@ -477,6 +489,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
                   )
                   addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
                 })
+              }) // end groqPreCheck.then
             }) // end checkpointPromise.then
           } else {
             v2 = currentCode
@@ -512,19 +525,19 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
       return runValidationPass()
     })
     .then(function () {
-      // Step 6 — GPT-4o Enhancement Review
+      // Step 6 — Enhancement Review (Gemini > GPT > Claude)
       checkPipelineCancel()
-      var canReview = !!(ST.gptKey && ST.auditEnabled)
+      var canReview = !!((ST.geminiKey || ST.gptKey) && ST.auditEnabled)
       if (!canReview) {
-        updatePS(pid, 6, 'skip', ST.gptKey ? 'Review disabled' : 'No OpenAI key — skipped')
+        updatePS(pid, 6, 'skip', (ST.geminiKey || ST.gptKey) ? 'Review disabled' : 'No review key — skipped')
         updatePS(pid, 7, 'skip', 'Skipped — no review')
         updatePS(pid, 8, 'skip', 'Skipped — no review')
         return Promise.resolve()
       }
-      updatePS(pid, 6, 'active', 'GPT-4o reviewing for enhancements…')
+      updatePS(pid, 6, 'active', auditProviderLabel() + ' reviewing for enhancements…')
       return retryStep(
         function () {
-          return callGPTReview(v2)
+          return smartReview(v2)
         },
         2,
         'EnhReview'
@@ -623,8 +636,8 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
             v2 = enhanced
             updatePS(pid, 7, 'done', 'Enhancements applied ✓')
 
-            // Step 8 — GPT-4o Final Review (bug gate)
-            updatePS(pid, 8, 'active', 'GPT-4o final bug review…')
+            // Step 8 — Final Review bug gate (Gemini > GPT > Claude)
+            updatePS(pid, 8, 'active', auditProviderLabel() + ' final bug review…')
             var MAX_REVIEW_PASSES = 2
             var reviewPass = 0
 
@@ -632,7 +645,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
               reviewPass++
               return retryStep(
                 function () {
-                  return callGPT(v2)
+                  return smartAudit(v2)
                 },
                 2,
                 'FinalReview'

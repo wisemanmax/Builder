@@ -19,6 +19,7 @@ import {
   SYS_BACKEND,
   SYS_PLAN,
   SYS_SPEC_COMPLIANCE,
+  SYS_ENHANCE_REVIEW,
 } from '../config/prompts.js'
 import { getTemplateSkeleton, customizeTemplateCss, extractTemplateCss } from '../lib/template-loader.js'
 import {
@@ -34,6 +35,7 @@ import {
   callClaudeRaw,
   callClaudeWithThinkingStream,
   callClaudeAudit,
+  callClaudeEnhanceReview,
   callGPT,
   callGPTReview,
   callGPTRaw2,
@@ -41,8 +43,12 @@ import {
   callGPTMultiTurn2,
   callGPTAudit2,
   callGPTTopRaw,
+  callGemini,
+  callGeminiFullAudit,
+  callGroq,
   resetCostAccum,
 } from '../lib/ai.js'
+import { SYS_GROQ_PRECHECK } from '../config/prompts.js'
 import { calculateBuildCost } from '../lib/cost.js'
 import {
   ghCreateBranch,
@@ -895,6 +901,82 @@ export function formatTemplateInjection(skeleton, designPrefs) {
   return injection
 }
 
+// --- Smart provider routing (Gemini > GPT > Claude) ---
+
+function normalizeAuditResult(result) {
+  // If already a flat array (GPT/Claude format), return as-is
+  if (Array.isArray(result)) return result
+  // Gemini format: {security:[], accessibility:[], performance:[], quality:[], suggestions:[]}
+  var flat = []
+  var cats = ['security', 'accessibility', 'performance', 'quality', 'suggestions']
+  for (var i = 0; i < cats.length; i++) {
+    var items = result[cats[i]]
+    if (!Array.isArray(items)) continue
+    for (var j = 0; j < items.length; j++) {
+      flat.push({
+        severity: items[j].severity || 'medium',
+        issue: items[j].issue || items[j].fix || '',
+        location: items[j].line || cats[i],
+      })
+    }
+  }
+  return flat
+}
+
+function auditProviderLabel() {
+  if (ST.geminiKey) return 'Gemini'
+  if (ST.gptKey) return 'GPT-4o'
+  return 'Claude'
+}
+
+function smartAudit(code) {
+  if (ST.geminiKey) return callGeminiFullAudit(code).then(normalizeAuditResult)
+  if (ST.gptKey) return callGPT(code)
+  return callClaudeAudit(code)
+}
+
+function smartReview(code) {
+  if (ST.geminiKey) {
+    return callGemini(
+      SYS_ENHANCE_REVIEW,
+      'Review this app and suggest enhancements and identify bugs:\n\n' + code.slice(0, 40000),
+      8192
+    ).then(function (raw) {
+      try {
+        var p = JSON.parse(raw)
+        return {
+          enhancements: Array.isArray(p.enhancements) ? p.enhancements : [],
+          bugs: Array.isArray(p.bugs) ? p.bugs : [],
+        }
+      } catch (e) {
+        return { enhancements: [], bugs: [] }
+      }
+    })
+  }
+  if (ST.gptKey) return callGPTReview(code)
+  return callClaudeEnhanceReview(code)
+}
+
+function smartRaw(sys, msg, maxTokens, images) {
+  if (ST.geminiKey) return callGemini(sys, msg, maxTokens)
+  if (ST.gptKey) return callGPTRaw2(sys, msg, maxTokens, images)
+  return callClaudeRaw(sys, msg, maxTokens, images)
+}
+
+function groqPreCheck(code) {
+  if (!ST.groqKey) return Promise.resolve([])
+  return callGroq(SYS_GROQ_PRECHECK, code.slice(0, 6000), 1024)
+    .then(function (raw) {
+      try {
+        var p = JSON.parse(raw)
+        return Array.isArray(p) ? p : []
+      } catch (e) {
+        return []
+      }
+    })
+    .catch(function () { return [] })
+}
+
 // Re-export commonly used imports so pipeline files don't need to import them separately
 export {
   ST,
@@ -919,6 +1001,7 @@ export {
   SYS_BACKEND,
   SYS_PLAN,
   SYS_SPEC_COMPLIANCE,
+  SYS_ENHANCE_REVIEW,
   callClaude,
   callClaudeMultiTurn,
   callClaudeRaw,
@@ -931,7 +1014,16 @@ export {
   callGPTMultiTurn2,
   callGPTAudit2,
   callGPTTopRaw,
+  callGemini,
+  callGeminiFullAudit,
+  callGroq,
   resetCostAccum,
+  smartAudit,
+  smartReview,
+  smartRaw,
+  groqPreCheck,
+  auditProviderLabel,
+  normalizeAuditResult,
   calculateBuildCost,
   ghCreateBranch,
   ghPushFile,

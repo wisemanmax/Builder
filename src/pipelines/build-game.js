@@ -30,11 +30,10 @@ import {
   callClaudeMultiTurn,
   callClaudeRaw,
   callClaudeWithThinkingStream,
-  callClaudeAudit,
-  callGPT,
-  callGPTReview,
-  callGPTRaw2,
-  callGPTTopRaw,
+  smartAudit,
+  smartRaw,
+  groqPreCheck,
+  auditProviderLabel,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -215,7 +214,7 @@ export function runGamePipeline(prompt, existingApp, resumeSession, images) {
     if (_resumeCtx) planMsg += '\n\n' + _resumeCtx
     return retryStep(
       function () {
-        return callGPTRaw2(SYS_PLAN_GAME, planMsg, 3000, images)
+        return smartRaw(SYS_PLAN_GAME, planMsg, 3000, images)
       },
       2,
       'GamePlan'
@@ -350,10 +349,10 @@ export function runGamePipeline(prompt, existingApp, resumeSession, images) {
         })
         addMsg({ role: 'asst', type: 'checks', checks: gameChecks })
 
-        // AI-powered game check using OpenAI top model
+        // AI-powered game check (Gemini > GPT > Claude)
         var aiGameCheckPromise = retryStep(
           function () {
-            return callGPTTopRaw(
+            return smartRaw(
               SYS_GAME_CHECK_AI,
               'GAME CONCEPT: ' + prompt + '\n\nGAME CODE:\n' + currentCode.slice(0, 50000),
               4000
@@ -396,10 +395,10 @@ export function runGamePipeline(prompt, existingApp, resumeSession, images) {
         })
         addMsg({ role: 'asst', type: 'checks', checks: stdChecks })
 
-        // AI-powered standard check using OpenAI top model
+        // AI-powered standard check (Gemini > GPT > Claude)
         var aiStdCheckPromise = retryStep(
           function () {
-            return callGPTTopRaw(SYS_STD_CHECK_AI, 'CODE:\n' + currentCode.slice(0, 50000), 3000).then(function (raw) {
+            return smartRaw(SYS_STD_CHECK_AI, 'CODE:\n' + currentCode.slice(0, 50000), 3000).then(function (raw) {
               try {
                 return JSON.parse(raw)
               } catch (e) {
