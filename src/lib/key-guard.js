@@ -1,12 +1,12 @@
 import { ST } from './state.js'
 
-var APPROVED_KEY_DOMAINS = ['api.anthropic.com', 'api.openai.com', 'api.github.com', 'stitch.googleapis.com']
+var APPROVED_KEY_DOMAINS = ['api.anthropic.com', 'api.openai.com', 'api.github.com', 'stitch.googleapis.com', 'api.groq.com', 'generativelanguage.googleapis.com']
 
 export var _nativeFetch = window.fetch
 
 export function _validateKeyedRequest(url, opts) {
   var headersObj = (opts && opts.headers) || {}
-  var sensitiveValues = [ST.key, ST.gptKey, ST.stitchKey, ST.ghToken, ST.sbAnon, ST.sbApiKey].filter(function (v) {
+  var sensitiveValues = [ST.key, ST.gptKey, ST.stitchKey, ST.groqKey, ST.geminiKey, ST.ghToken, ST.sbAnon, ST.sbApiKey].filter(function (v) {
     return v && v.length > 8
   })
   var hasKeyInHeaders = sensitiveValues.some(function (v) {

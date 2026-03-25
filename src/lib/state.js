@@ -5,6 +5,8 @@ export const ST = {
   key: '',
   gptKey: '',
   stitchKey: '',
+  groqKey: '',
+  geminiKey: '',
   ghToken: '',
   ghUser: '',
   ghRepo: '',
@@ -105,6 +107,8 @@ export function hydrate() {
   ST.key = localStorage.getItem(KEY_STORE.ANTH) || ''
   ST.gptKey = localStorage.getItem(KEY_STORE.GPT) || ''
   ST.stitchKey = localStorage.getItem(KEY_STORE.STITCH) || ''
+  ST.groqKey = localStorage.getItem(KEY_STORE.GROQ) || ''
+  ST.geminiKey = localStorage.getItem(KEY_STORE.GEMINI) || ''
   ST.ghToken = localStorage.getItem(KEY_STORE.GH_TOKEN) || ''
   ST.ghUser = localStorage.getItem(KEY_STORE.GH_USER) || ''
   ST.ghRepo = localStorage.getItem(KEY_STORE.GH_REPO) || ''
@@ -139,6 +143,8 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.ANTH, ST.key)
   localStorage.setItem(KEY_STORE.GPT, ST.gptKey)
   localStorage.setItem(KEY_STORE.STITCH, ST.stitchKey)
+  localStorage.setItem(KEY_STORE.GROQ, ST.groqKey)
+  localStorage.setItem(KEY_STORE.GEMINI, ST.geminiKey)
   localStorage.setItem(KEY_STORE.GH_TOKEN, ST.ghToken)
   localStorage.setItem(KEY_STORE.GH_USER, ST.ghUser)
   localStorage.setItem(KEY_STORE.GH_REPO, ST.ghRepo)
@@ -210,6 +216,8 @@ export function keyStatusHTML() {
     ['Anthropic', ST.key],
     ['OpenAI', ST.gptKey],
     ['Stitch', ST.stitchKey],
+    ['Groq', ST.groqKey],
+    ['Gemini', ST.geminiKey],
     ['GitHub Token', ST.ghToken],
     ['Supabase Anon', ST.sbAnon],
     ['Supabase API Key', ST.sbApiKey],
