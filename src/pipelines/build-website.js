@@ -21,6 +21,10 @@ import {
   scrubKeys,
   ghPageUrl,
   callClaudeRaw,
+  modelRaw,
+  selectedModelLabel,
+  hasSelectedModelKey,
+  selectedModelKeyName,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -178,7 +182,7 @@ export function runWebsitePipeline(prompt, existingApp, resumeSession, images) {
   function generateStep(sysPrompt, userMsg, maxTokens, label) {
     return retryStep(
       function () {
-        return callClaudeRaw(sysPrompt, userMsg, maxTokens || 12000, null)
+        return modelRaw(sysPrompt, userMsg, maxTokens || 12000, null)
       },
       2,
       label
@@ -270,7 +274,7 @@ export function runWebsitePipeline(prompt, existingApp, resumeSession, images) {
     if (_resumeCtx) decomposeMsg += '\n\n' + _resumeCtx
     return retryStep(
       function () {
-        return callClaudeRaw(effectiveDecomposeSys, decomposeMsg, 4000, images)
+        return modelRaw(effectiveDecomposeSys, decomposeMsg, 4000, images)
       },
       2,
       'Decompose'
@@ -457,7 +461,7 @@ export function runWebsitePipeline(prompt, existingApp, resumeSession, images) {
       }
       return retryStep(
         function () {
-          return callClaudeRaw(SYS_WEB_PREVIEW, allFilesStr, 16000, null)
+          return modelRaw(SYS_WEB_PREVIEW, allFilesStr, 16000, null)
         },
         2,
         'Preview'

@@ -72,14 +72,14 @@ export const EMOJIS = [
 
 export const PIPE_NAMES = [
   'Create Branch',
-  'Claude \u00B7 Plan',
-  'Claude \u00B7 Build',
+  'AI \u00B7 Plan',
+  'AI \u00B7 Build',
   'Automated Checks',
-  'GPT-4o \u00B7 Audit',
-  'Claude \u00B7 Fix',
-  'GPT-4o \u00B7 Enhancement Review',
-  'Claude \u00B7 Enhance',
-  'GPT-4o \u00B7 Final Review',
+  'AI \u00B7 Audit',
+  'AI \u00B7 Fix',
+  'AI \u00B7 Enhancement Review',
+  'AI \u00B7 Enhance',
+  'AI \u00B7 Final Review',
   '\uD83D\uDDC4 Backend Setup',
   'Push to Branch',
   'Preview',
@@ -124,16 +124,17 @@ export const KEY_STORE = {
   BACKEND: 'bldr_backend',
   PIPELINE: 'bldr_pipeline',
   W2_PROVIDER: 'bldr_w2provider',
+  BUILD_MODEL: 'bldr_buildModel',
   GROQ: 'bldr_groqKey',
   GEMINI: 'bldr_geminiKey',
 }
 
 export const PIPE2_NAMES = [
-  'Claude \u00B7 Plan',
-  'Claude \u00B7 Build',
+  'AI \u00B7 Plan',
+  'AI \u00B7 Build',
   'Automated Checks',
-  'Claude \u00B7 Audit',
-  'Claude \u00B7 Fix',
+  'AI \u00B7 Audit',
+  'AI \u00B7 Fix',
   'Push to Branch',
   'Preview',
   'Final Validation',
@@ -153,16 +154,16 @@ export const PIPE2_ICONS = [
 ]
 
 export const PIPE3_NAMES = [
-  'Claude \u00B7 Decompose',
-  'Claude \u00B7 Scaffold',
-  'Claude \u00B7 Design Tokens',
-  'Claude \u00B7 Data Layer',
-  'Claude \u00B7 Shared Components',
-  'Claude \u00B7 Feature Components',
-  'Claude \u00B7 Layout Components',
-  'Claude \u00B7 Pages',
-  'Claude \u00B7 Routing',
-  'Claude \u00B7 Documentation',
+  'AI \u00B7 Decompose',
+  'AI \u00B7 Scaffold',
+  'AI \u00B7 Design Tokens',
+  'AI \u00B7 Data Layer',
+  'AI \u00B7 Shared Components',
+  'AI \u00B7 Feature Components',
+  'AI \u00B7 Layout Components',
+  'AI \u00B7 Pages',
+  'AI \u00B7 Routing',
+  'AI \u00B7 Documentation',
   'Push to Branch',
   'Preview',
   'Final Validation',
@@ -246,12 +247,12 @@ export const PIPE5_STATUS = {
 }
 
 export const PIPE6_NAMES = [
-  'GPT \u00B7 Game Plan',
-  'Claude \u00B7 Build',
-  'GPT-5 \u00B7 Game Checks',
-  'GPT-5 \u00B7 Standard Checks',
-  'Claude \u00B7 Game Audit',
-  'Claude \u00B7 Fix',
+  'AI \u00B7 Game Plan',
+  'AI \u00B7 Build',
+  'AI \u00B7 Game Checks',
+  'AI \u00B7 Standard Checks',
+  'AI \u00B7 Game Audit',
+  'AI \u00B7 Fix',
   'Push to Branch',
   'Preview',
   'Final Validation',
@@ -286,6 +287,46 @@ export var COST_RATES = {
   'gemini-2.5-flash': { input: 0.15, output: 0.60 },
 }
 export var COST_MARKUP = 7
+
+// --- Model selection options ---
+export var MODEL_OPTIONS = [
+  {
+    id: 'claude-sonnet',
+    label: 'Claude Sonnet 4',
+    model: 'claude-sonnet-4-20250514',
+    provider: 'anthropic',
+    keyField: 'key',
+    desc: 'Best for code generation, complex logic & detailed instructions',
+    badge: 'Recommended',
+  },
+  {
+    id: 'gpt-4o',
+    label: 'GPT-4o',
+    model: 'gpt-4o',
+    provider: 'openai',
+    keyField: 'gptKey',
+    desc: 'Fast & versatile — great for creative content & multimodal tasks',
+    badge: 'Fast',
+  },
+  {
+    id: 'gpt-5',
+    label: 'GPT-5.4',
+    model: 'gpt-5.4',
+    provider: 'openai',
+    keyField: 'gptKey',
+    desc: 'Advanced reasoning & complex problem solving — top-tier quality',
+    badge: 'Premium',
+  },
+  {
+    id: 'gemini-flash',
+    label: 'Gemini 2.5 Flash',
+    model: 'gemini-2.5-flash',
+    provider: 'google',
+    keyField: 'geminiKey',
+    desc: '1M token context window — ideal for large projects, very cost-effective',
+    badge: 'Budget',
+  },
+]
 
 // --- Model & API constants ---
 export var CLAUDE_MODEL = 'claude-sonnet-4-20250514'
