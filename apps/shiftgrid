@@ -5053,7 +5053,7 @@ function GameBoard(props) {
   const lastChanceRef=useRef(false);
   const [nearWinData,setNearWinData]=useState(null);
   const [chargedBldgs,setChargedBldgs]=useState(new Set()); /* buildings that just received charge */
-  const [abilities,setAbilities]=useState(function(){ return loadAbilities(); });
+  const [abilities,setAbilities]=useState(function(){ return initialAbilities; });
   const [surgeActive,setSurgeActive]=useState(false);      /* next match charges all */
   const [freezeActive,setFreezeActive]=useState(0);        /* moves remaining frozen */
   const [wildfireActive,setWildfireActive]=useState(false); /* next shift = full row/col match */
@@ -5107,7 +5107,7 @@ function GameBoard(props) {
   useEffect(function(){
     if(objectiveType!=="timed") return;
     if(phase==="win"||phase==="lose"||phase==="nearwin") return;
-    if(timeLeft<=0){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return; }
+    if(timeLeft<=0){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return; }
     var t=setTimeout(function(){ setTimeLeft(function(s){ return s-1; }); },1000);
     return function(){ clearTimeout(t); };
   },[timeLeft,phase,objectiveType]);
@@ -5207,10 +5207,10 @@ function GameBoard(props) {
         var adjacentBlockerClears=clearAdjacentBlockers(g, m);
         adjacentBlockerClears.forEach(function(bk){
           if(bk.startsWith("fog:")) {
-            var bpos=bk.slice(4).split(","); var bfr=+bpos[0],bfc=+bpos[1];
+            var fogPos=bk.slice(4).split(","); var bfr=+fogPos[0],bfc=+fogPos[1];
             if(g[bfr]&&g[bfr][bfc]) g[bfr][bfc]=Object.assign({},g[bfr][bfc],{fogRevealed:true});
           } else {
-            var bpos=bk.split(","); var bbr=+bpos[0],bbc=+bpos[1];
+            var anchorPos=bk.split(","); var bbr=+anchorPos[0],bbc=+anchorPos[1];
             if(g[bbr]&&g[bbr][bbc]&&g[bbr][bbc].blocker==="anchor"){
               g[bbr][bbc]=Object.assign({},g[bbr][bbc],{blocker:null});
               addToast("🔓 ANCHOR BROKEN!","#64a0ff");
@@ -5354,8 +5354,10 @@ function GameBoard(props) {
             setCollectDone(function(d){ return d+cleared; });
             if(newCollect.size===0){
               /* All collect tiles cleared — WIN */
-              eagerSaveProgress(levelDef.id, stars);
+              var winStars=calcStars(levelDef.moves-newMoves,levelDef.moves);
+              eagerSaveProgress(levelDef.id, winStars);
               setPhase("win"); Haptics.win(); bumpStats({totalWins:1});
+              sessionStatsRef.current.consecutiveWins++;
               if(newMoves>0&&!lastChanceRef.current) setPerfectClear(true);
               saveRun();
               setTimeout(function(){ Audio.win(); },100);
@@ -5374,12 +5376,11 @@ function GameBoard(props) {
             setContainBreach(true);
             setTimeout(function(){ setContainBreach(false); },400);
             /* Containment fail = lose */
-            setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
+            setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
           }
         }
         /* Wrap-chain detection: check if any cleared tile is at edge col/row */
         var wrapDetected=false;
-        (Array.from ? Array.from(new Set()) : []);
         /* Simple heuristic: if shift moved a tile off an edge and it matched */
         if(frames.length>0){
           frames[0].m && frames[0].m.forEach(function(k){
@@ -5389,9 +5390,12 @@ function GameBoard(props) {
         }
         if(wrapDetected&&cascades>=1){ addToast("⚡ WRAP CHAIN!","#a855f7"); setWrapChain(true); setTimeout(function(){ setWrapChain(false); },1200); }
         if(newBldgs.every(function(b){ return b.on; })){
-          eagerSaveProgress(levelDef.id, stars);
-          setPhase("win");
+          var winStars=calcStars(levelDef.moves-newMoves,levelDef.moves);
+          eagerSaveProgress(levelDef.id, winStars);
+          setPhase("win"); Haptics.win(); bumpStats({totalWins:1});
+          sessionStatsRef.current.consecutiveWins++;
           if(newMoves>0 && !lastChanceRef.current){ setPerfectClear(true); }
+          saveRun();
           setTimeout(function(){ if(levelDef.boss) Audio.bossWin(); else Audio.win(); },100);
           return;
         }
@@ -5409,7 +5413,6 @@ function GameBoard(props) {
             setNearWinData(breakdown);
             setPhase("nearwin");
             Audio.nearWin();
-            setTimeout(onLose,300);
             return;
           }
           /* Normal lose */
@@ -5422,7 +5425,7 @@ function GameBoard(props) {
         setPhase("idle");
       }
 
-      if(!frames.length){ setGrid(finalG); if(newMoves<=0) setPhase("lose"); else setPhase("idle"); return; }
+      if(!frames.length){ setGrid(finalG); setBldgs(newBldgs); setMoves(newMoves); setMoveCount(newMC); if(newMoves<=0){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); } else { setPhase("idle"); } return; }
       let fi=0;
       function step(){
         if(fi>=frames.length){ finish(); return; }
@@ -5433,7 +5436,7 @@ function GameBoard(props) {
 
     }, SLIDE_MS);
 
-  },[grid,phase,moves,bldgs,moveCount,hazardSlow,comboAmp,freeChance,spreadEvery,levelDef,wildfireActive]);
+  },[grid,phase,moves,bldgs,moveCount,hazardSlow,comboAmp,freeChance,spreadEvery,levelDef,wildfireActive,surgeActive,freezeActive,collectTiles,collectDone]);
 
   /* ── SWIPE HANDLING ── */
   function onTouchStart(e){
@@ -5881,12 +5884,12 @@ function GameBoard(props) {
       </div>
 
       {/* ── GRID ── */}
-      <div className={"sg-grid-area"+(nudgeClass?" "+nudgeClass:"")} style={{position:"relative"}}
+      <div className={"sg-grid-area"+(nudgeClass?" "+nudgeClass:"")}
         ref={gridRef}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{touchAction:"none"}}
+        style={{position:"relative",touchAction:"none"}}
       >
         {/* SURGE glow overlay */}
         {surgeActive&&<div className="sg-grid-surge-overlay"/>}
@@ -6046,7 +6049,7 @@ function GameBoard(props) {
               WATCH AD · GET +2 MOVES FREE
             </button>
             <div className="sg-modal-row">
-              <button className="sg-modal-btn sg-modal-ghost" onClick={function(){ setPhase("lose"); }}>GIVE UP</button>
+              <button className="sg-modal-btn sg-modal-ghost" onClick={function(){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); }}>GIVE UP</button>
               <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)"}} onClick={retry}>RETRY</button>
             </div>
           </div>
@@ -6188,7 +6191,7 @@ function CityOverview(props) {
                       return (
                         <div key={row} style={{display:"flex",gap:2,justifyContent:"center",marginTop:4}}>
                           {[0,1].map(function(col){
-                            var on=Math.random()>0.25;
+                            var on=((row*3+col+bi*7)%4)!==0;
                             return <div key={col} style={{width:3,height:4,borderRadius:1,background:on?dc.theme+"cc":"rgba(255,255,255,0.05)"}}/>;
                           })}
                         </div>
