@@ -240,37 +240,56 @@ export function initStudio() {
   })
   $('se-send').addEventListener('click', studioSend)
 
-  // Drag handle
+  // Drag handle — supports vertical (mobile) and horizontal (desktop >=1024px) resizing
   ;(function () {
     var handle = $('se-drag'),
       editor = $('studio-editor'),
       body = $('studio-body')
-    var startY = 0,
-      startH = 0,
+    var startPos = 0,
+      startSize = 0,
       dragging = false
-    function onStart(clientY) {
-      dragging = true
-      startY = clientY
-      startH = editor.offsetHeight
-      editor.style.transition = 'none'
+
+    function isHorizontal() {
+      return window.innerWidth >= 1024
     }
-    function onMove(clientY) {
+
+    function onStart(clientX, clientY) {
+      dragging = true
+      editor.style.transition = 'none'
+      if (isHorizontal()) {
+        startPos = clientX
+        startSize = editor.offsetWidth
+      } else {
+        startPos = clientY
+        startSize = editor.offsetHeight
+      }
+    }
+
+    function onMove(clientX, clientY) {
       if (!dragging) return
-      var delta = startY - clientY
-      var newH = Math.max(52, Math.min(startH + delta, body.offsetHeight - 80))
-      editor.style.height = newH + 'px'
+      if (isHorizontal()) {
+        var delta = startPos - clientX
+        var newW = Math.max(200, Math.min(startSize + delta, body.offsetWidth - 200))
+        editor.style.width = newW + 'px'
+      } else {
+        var delta = startPos - clientY
+        var newH = Math.max(52, Math.min(startSize + delta, body.offsetHeight - 80))
+        editor.style.height = newH + 'px'
+      }
       editor.classList.remove('collapsed')
       $('se-collapse-btn').textContent = '\u25BC Hide'
     }
+
     function onEnd() {
       if (!dragging) return
       dragging = false
       editor.style.transition = ''
     }
+
     handle.addEventListener(
       'touchstart',
       function (e) {
-        if (e.touches[0]) onStart(e.touches[0].clientY)
+        if (e.touches[0]) onStart(e.touches[0].clientX, e.touches[0].clientY)
       },
       { passive: true }
     )
@@ -278,7 +297,7 @@ export function initStudio() {
       'touchmove',
       function (e) {
         if (e.touches[0]) {
-          onMove(e.touches[0].clientY)
+          onMove(e.touches[0].clientX, e.touches[0].clientY)
           e.preventDefault()
         }
       },
@@ -286,10 +305,10 @@ export function initStudio() {
     )
     handle.addEventListener('touchend', onEnd, { passive: true })
     handle.addEventListener('mousedown', function (e) {
-      onStart(e.clientY)
+      onStart(e.clientX, e.clientY)
     })
     document.addEventListener('mousemove', function (e) {
-      if (dragging) onMove(e.clientY)
+      if (dragging) onMove(e.clientX, e.clientY)
     })
     document.addEventListener('mouseup', onEnd)
   })()
