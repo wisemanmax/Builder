@@ -1,5 +1,5 @@
 /* ======== DESKTOP RESPONSIVE LAYOUT ======== */
-/* Breakpoints: 768px (tablet), 1024px (desktop), 1440px (wide desktop) */
+/* Breakpoints: 768px (tablet), 1024px (desktop), 1440px (wide desktop), 1920px (ultrawide) */
 
 /* --- Tablet and up (768px+) --- */
 @media (min-width: 768px) {
@@ -13,6 +13,11 @@
   /* Home header spacing */
   .home-hdr { padding: 14px 28px 6px }
   .statusbar { padding: 16px 28px 0 }
+
+  /* Home empty state */
+  .home-empty { max-width: 400px; margin: 0 auto }
+  .he-title { font-size: 20px }
+  .he-sub { max-width: 300px; font-size: 13px }
 
   /* Dock: centered, auto-width */
   .dock { margin: 0 auto 28px; max-width: 520px; padding-bottom: env(safe-area-inset-bottom, 0px) }
@@ -30,7 +35,7 @@
   /* Builder sheet: taller on bigger screens */
   .bs { max-height: 92dvh }
 
-  /* Chat bubbles: wider max-width */
+  /* Chat bubbles: constrain width */
   .ubub { max-width: 65% }
   .awrap { max-width: 85% }
 
@@ -80,6 +85,10 @@
   /* Emoji picker wider */
   .ebox { width: 340px }
   .egrid { grid-template-columns: repeat(8, 1fr) }
+
+  /* Thoughts grid: 2 columns */
+  .tf-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px }
+  .tf-card { padding: 16px }
 }
 
 /* --- Desktop (1024px+) --- */
@@ -91,43 +100,112 @@
   .aicon-img { width: 78px; height: 78px; border-radius: 20px; font-size: 34px }
   .aicon-label { max-width: 90px }
 
-  /* Home header */
-  .home-hdr { padding: 16px 40px 8px }
-  .home-title { font-size: 34px }
-  .statusbar { padding: 18px 40px 0 }
+  /* Home header — hide mobile statusbar on desktop */
+  .statusbar { display: none }
+  .home-hdr { padding: 24px 40px 8px }
+  .home-title { font-size: 36px; letter-spacing: -0.01em }
+  .home-sub { font-size: 13px }
+
+  /* Home empty state */
+  .home-empty { max-width: 480px; padding: 60px 24px }
+  .he-title { font-size: 22px }
+  .he-sub { max-width: 340px; font-size: 14px; line-height: 1.8 }
 
   /* Dock */
-  .dock { max-width: 600px }
-  .dock-inner { padding: 14px 28px; gap: 4px }
+  .dock { max-width: 600px; margin-bottom: 32px }
+  .dock-inner { padding: 16px 32px; gap: 6px }
   .di { padding: 8px 16px; border-radius: 16px }
   .di-img { width: 54px; height: 54px }
+  .di-lbl { font-size: 12px }
 
-  /* Builder sheet: sidebar style on desktop */
+  /* Builder sheet: centered modal on desktop */
   #builder-sheet.open { justify-content: center }
   .bs { max-width: 720px; max-height: 88dvh; border-radius: 26px; margin: 0 auto; box-shadow: 0 24px 80px rgba(0,0,0,.7) }
+  .bs-top { padding: 14px 20px 12px }
+  .bs-info .bs-title { font-size: 19px }
+  .bs-input { padding: 12px 20px; padding-bottom: 20px }
+  .ibox { padding: 10px 12px; border-radius: 18px }
+  .ia-btn { width: 36px; height: 36px; border-radius: 10px }
+  #send-btn { width: 36px; height: 36px; border-radius: 10px }
+  .name-row .fi { font-size: 14px; padding: 10px 14px }
 
   /* Chat area improvements */
   #chat-scroll { padding: 16px 8px 10px }
-  .ubub { max-width: 55% }
+  .ubub { max-width: 55%; font-size: 14px; padding: 11px 16px; line-height: 1.7 }
   .awrap { max-width: 75% }
-  .abub { font-size: 14px; padding: 11px 16px }
-  .ubub { font-size: 14px; padding: 11px 16px }
+  .abub { font-size: 14px; padding: 11px 16px; line-height: 1.7 }
+  .sysbub { font-size: 11px }
+  .mrow { padding: 4px 16px }
+
+  /* Chat welcome screen scaling */
+  .chat-welcome { padding: 32px 24px 16px; gap: 12px }
+  .cw-icon { font-size: 46px }
+  .cw-title { font-size: 24px }
+  .cw-sub { font-size: 14px; max-width: 400px; line-height: 1.8 }
+  .chips { gap: 8px; margin-top: 8px }
+  .chip { padding: 8px 14px; font-size: 12px }
+
+  /* Think welcome screen scaling */
+  .think-welcome { padding: 32px 24px 16px; gap: 12px }
+  .tw-icon { font-size: 46px }
+  .tw-title { font-size: 24px }
+  .tw-sub { font-size: 14px; max-width: 400px }
+  .think-options { gap: 10px; padding: 8px 20px 10px }
+  .think-opt { padding: 11px 18px; font-size: 13px }
+
+  /* Template gallery in chat */
+  .tpl-section { max-width: 560px }
+  .tpl-grid { grid-template-columns: repeat(3, 1fr); gap: 10px }
+  .tpl-card { padding: 14px; gap: 6px }
+  .tpl-card-name { font-size: 12px }
+  .tpl-card-desc { font-size: 11px }
+
+  /* Thinking card / File tree card scaling */
+  .thinking-card { border-radius: 16px }
+  .thinking-hdr { padding: 12px 16px }
+  .thinking-title { font-size: 13px }
+  .thinking-pre { font-size: 12px }
+  .file-tree-card { border-radius: 16px }
+  .ft-hdr { padding: 12px 16px }
+  .ft-list { padding: 8px 16px 12px }
+  .ft-row { font-size: 12px }
 
   /* Input area */
   #chat-input { font-size: 15px }
-  .bs-input { padding: 12px 18px; padding-bottom: max(18px, env(safe-area-inset-bottom, 18px)) }
 
   /* Wider settings */
   .ssheet { max-width: 620px; border-radius: 24px; margin: auto; max-height: 88dvh }
   #settings-overlay.on { align-items: center }
+  .sshead { padding: 16px 20px 14px }
+  .sshead-title { font-size: 21px }
+  .ssbody { padding: 20px 24px; gap: 16px }
+  .sscard { padding: 18px; gap: 14px }
 
   /* Project sheet centered */
   .psheet { max-width: 680px; border-radius: 24px; margin: auto; max-height: 88dvh }
   #project-sheet.open { align-items: center }
+  .psh-top { padding: 16px 20px 14px }
+  .psh-name { font-size: 19px }
+  .psh-url-line { font-size: 11px; max-width: 320px }
+  .psh-body { padding: 20px 24px }
+  .info-row { padding: 12px 16px }
+  .ir-label { font-size: 13px }
+  .ir-value { font-size: 12px; max-width: 300px }
+  .url-box { padding: 13px 16px }
+  .url-text { font-size: 12px }
+  .ph-item { padding: 14px 16px }
+  .ph-text { font-size: 13px }
 
   /* Build history centered */
   .bh-sheet { max-width: 680px; border-radius: 24px; margin: auto; max-height: 88dvh }
   #build-history-overlay.on { align-items: center }
+  .bh-top { padding: 16px 20px 14px }
+  .bh-name { font-size: 19px }
+  .bh-body { padding: 20px 24px; gap: 16px }
+  .bh-build-item { padding: 14px 18px }
+  .bh-build-prompt { font-size: 13px }
+  .bh-chat-hdr { padding: 13px 16px }
+  .bh-chat-prompt { font-size: 13px }
 
   /* Think sheet centered */
   #think-sheet.open { justify-content: center }
@@ -137,18 +215,35 @@
   #org-think-sheet.open { justify-content: center }
   #org-think-sheet .bs { max-width: 680px; border-radius: 26px; max-height: 88dvh }
 
+  /* Thoughts overlay */
+  #thoughts-overlay.on { align-items: center }
+  .tf-body { padding: 20px 24px; gap: 14px }
+  .tf-card-name { font-size: 14px }
+  .tf-card-prompt { font-size: 12px }
+
   /* Onboarding: wider and centered */
   .ob-wrap { max-width: 560px; padding: 72px 40px 64px }
   .ob-logo h1 { font-size: 48px }
   .lmark { width: 96px; height: 96px; border-radius: 28px; font-size: 46px }
   .section-card { padding: 20px }
+  .fi { font-size: 15px }
 
-  /* Viewer / Studio split layout */
+  /* ===== Viewer / Studio side-by-side layout ===== */
+  #studio-body { flex-direction: row }
+  #studio-preview { flex: 1; min-height: unset }
+  #studio-editor { width: 420px; height: auto; min-width: 280px; border-top: none; border-left: 2px solid rgba(255,255,255,.06); flex-shrink: 0 }
+  #studio-editor.collapsed { height: auto; width: 44px; min-width: 44px; overflow: hidden }
+  #studio-editor.fullscreen-mode { width: 0; min-width: 0; border-left: none }
+  .se-drag { width: 5px; height: 100%; cursor: ew-resize; position: absolute; left: 0; top: 0 }
+  .se-drag::after { width: 3px; height: 36px; left: 50%; top: 50%; transform: translate(-50%, -50%) }
+  .se-header { padding: 10px 16px 8px }
+  .se-input-row { padding: 0 16px 16px }
+  #se-textarea { font-size: 15px }
   .vbar { padding: max(16px, env(safe-area-inset-top, 16px)) 24px 12px }
-
-  /* Template grid: 3 columns, wider */
-  .tpl-grid { grid-template-columns: repeat(3, 1fr); gap: 10px }
-  .tpl-section { max-width: 560px }
+  .vbar-name { font-size: 15px }
+  .vbar-url { font-size: 10px }
+  .vbar-btn { padding: 9px 18px; font-size: 13px }
+  .vback { width: 38px; height: 38px; font-size: 18px }
 
   /* Template preview modal wider on desktop */
   .tpl-preview-modal { max-width: 800px }
@@ -156,9 +251,73 @@
 
   /* Stitch modal centered */
   .stitch-modal { max-width: 400px; padding: 32px 28px }
+  .stitch-node { width: 40px; height: 40px; border-radius: 11px }
+  .stitch-node-ico { font-size: 18px }
+  .stitch-stage-label { font-size: 10px }
 
   /* Tooltip wider */
   .aicon-tooltip { min-width: 200px; max-width: 280px }
+
+  /* Emoji picker */
+  .ebox { width: 380px; padding: 18px }
+  .ebox-title { font-size: 15px }
+  .egrid { grid-template-columns: repeat(9, 1fr); max-height: 260px }
+  .egi { font-size: 22px; padding: 7px }
+
+  /* Feedback card */
+  .fb-card { width: 440px; padding: 24px; gap: 14px }
+  .fb-title { font-size: 18px }
+  .fb-star { font-size: 32px }
+  .fb-tag { padding: 7px 14px; font-size: 12px }
+
+  /* Version panel */
+  .vp-inner { width: 420px }
+  .vp-title { font-size: 16px }
+  .vp-header { padding: 16px 20px }
+  .vp-item { padding: 12px 20px }
+  .vp-item-label { font-size: 13px }
+
+  /* Share modal */
+  .share-modal { width: 400px; padding: 24px }
+  .share-card-title { font-size: 17px }
+  .share-btn { padding: 10px 18px; font-size: 12px }
+
+  /* Profile cards */
+  .profile-picker { min-width: 240px }
+  .pp-item { padding: 11px 14px }
+  .pp-name { font-size: 13px }
+  .pp-desc { font-size: 11px }
+  .prof-card { padding: 18px; gap: 14px }
+  .prof-name { font-size: 15px }
+  .prof-section { padding: 12px 14px }
+
+  /* Pipeline card */
+  .pipe-card { min-width: 360px }
+  .pipe-hdr { padding: 12px 16px }
+  .pipe-hdr-title { font-size: 13px }
+  .pipe-hdr-timer { font-size: 18px }
+  .ps { padding: 10px 14px; gap: 10px }
+  .psname { font-size: 12px }
+  .psdet { font-size: 11px }
+  .psico { width: 30px; height: 30px; border-radius: 9px }
+
+  /* Checks/Audit cards */
+  .checks-card { border-radius: 6px 16px 16px 16px }
+  .chk-row { padding: 6px 14px; gap: 10px }
+  .chk-label { font-size: 12px }
+  .audit-card { border-radius: 6px 16px 16px 16px }
+  .ai { padding: 10px 14px }
+  .aitxt { font-size: 12px }
+
+  /* Preview card in chat */
+  .pcc-frame { height: 280px }
+
+  /* Cost card */
+  .cost-row { padding: 8px 16px; font-size: 11px }
+  .cost-hdr { padding: 13px 16px }
+
+  /* Template overlay body */
+  .tpl-sheet-body { padding: 20px 24px; gap: 16px }
 
   /* Hover states more prominent for mouse users */
   .aicon:hover .aicon-img { transform: scale(1.08); transition: transform .2s cubic-bezier(.34,1.56,.64,1) }
@@ -174,32 +333,79 @@
   .app-grid { grid-template-columns: repeat(10, 1fr); gap: 28px 18px; padding: 24px 60px 28px }
 
   /* Home header */
-  .home-hdr { padding: 20px 60px 10px }
-  .home-title { font-size: 38px }
-  .statusbar { padding: 20px 60px 0 }
+  .home-hdr { padding: 28px 60px 10px }
+  .home-title { font-size: 40px }
+  .home-sub { font-size: 14px }
+
+  /* Home empty state */
+  .home-empty { max-width: 520px; padding: 80px 32px }
 
   /* Dock */
   .dock { max-width: 680px }
+  .dock-inner { padding: 16px 36px; border-radius: 32px }
+  .di-img { width: 58px; height: 58px; border-radius: 16px; font-size: 25px }
 
   /* Wider sheets for large screens */
   .bs { max-width: 800px }
+  .bs-top { padding: 16px 24px 14px }
+  .bs-info .bs-title { font-size: 20px }
+  .bs-input { padding: 14px 24px; padding-bottom: 24px }
+
   .ssheet { max-width: 680px }
+  .ssbody { padding: 24px 28px }
+  .sscard { padding: 20px }
+
   .psheet { max-width: 740px }
+  .psh-body { padding: 24px 28px }
+  .psh-url-line { max-width: 400px }
+  .ir-value { max-width: 360px }
+
   .bh-sheet { max-width: 740px }
 
   /* Onboarding */
   .ob-wrap { max-width: 600px }
 
   /* Chat messages */
-  .ubub { max-width: 50% }
+  .ubub { max-width: 50%; font-size: 15px; padding: 13px 18px }
   .awrap { max-width: 65% }
+  .abub { font-size: 15px; padding: 13px 18px }
+
+  /* Chat welcome */
+  .cw-title { font-size: 26px }
+  .cw-sub { max-width: 440px }
+  .chip { padding: 9px 16px; font-size: 13px }
+
+  /* Studio editor wider */
+  #studio-editor { width: 480px }
+  .vbar { padding: max(18px, env(safe-area-inset-top, 18px)) 32px 14px }
+  .vbar-name { font-size: 16px }
+
+  /* Template gallery */
+  .tpl-section { max-width: 640px }
+  .tpl-card { padding: 16px }
+  .tpl-card-name { font-size: 13px }
+  .tpl-card-desc { font-size: 11px }
+
+  /* Thoughts grid: 3 columns */
+  .tf-grid { grid-template-columns: repeat(3, 1fr) }
+
+  /* Version panel */
+  .vp-inner { width: 480px }
+
+  /* Pipeline card */
+  .pipe-card { min-width: 400px }
+
+  /* Preview card taller */
+  .pcc-frame { height: 340px }
 }
 
 /* --- Ultrawide (1920px+) --- */
 @media (min-width: 1920px) {
   .app-grid { grid-template-columns: repeat(12, 1fr); padding: 28px 80px 32px }
-  .home-hdr { padding: 22px 80px 12px }
-  .statusbar { padding: 22px 80px 0 }
+  .home-hdr { padding: 28px 80px 12px }
+
+  /* Studio editor even wider */
+  #studio-editor { width: 540px }
 }
 
 /* --- Desktop hover & interaction improvements --- */
@@ -237,6 +443,21 @@
   /* Delete button visible on hover */
   .aicon:hover .aicon-del { display: flex; opacity: 0.6 }
   .aicon:hover .aicon-del:hover { opacity: 1 }
+
+  /* Subtle hover enhancements for cards and rows */
+  .bh-build-item:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.2) }
+  .info-row:hover { background: rgba(255,255,255,.06) }
+  .ph-item:hover { border-color: rgba(255,255,255,.14) }
+  .sscard:hover { border-color: rgba(255,255,255,.14) }
+  .prof-card:hover { border-color: rgba(255,255,255,.14) }
+  .tf-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.25) }
+  .vbar-btn:hover { transform: translateY(-1px) }
+  .share-btn:hover { transform: translateY(-1px) }
+  .se-hbtn:hover { transform: translateY(-1px) }
+  .think-opt:hover { box-shadow: 0 4px 16px rgba(170,255,0,.12) }
+  .psh-btn:hover { transform: translateY(-1px) }
+  .bh-chat-hdr:hover { background: rgba(255,255,255,.06) }
+  .ch-session-hdr:hover { background: rgba(255,255,255,.06) }
 }
 
 /* --- Print styles --- */
