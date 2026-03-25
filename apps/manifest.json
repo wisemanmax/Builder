@@ -1,61 +1,10 @@
 [
   {
-    "id": "subway-runners",
-    "name": "Subway runners",
-    "icon": "🎯",
-    "ci": 1,
-    "url": "https://Wisemanmax.github.io/Builder/apps/subway-runners.html",
-    "path": "apps/subway-runners.html",
-    "prompts": [
-      {
-        "ts": "2026-03-24T20:05:26.283Z",
-        "type": "initial",
-        "text": "Create subway surfer clone"
-      }
-    ],
-    "createdAt": "2026-03-24T20:05:26.283Z",
-    "updatedAt": "2026-03-24T20:05:26.283Z"
-  },
-  {
-    "id": "habit-tracker-2",
-    "name": "Habit Tracker",
-    "icon": "🎯",
-    "ci": 5,
-    "url": "https://Wisemanmax.github.io/Builder/apps/habit-tracker-2.html",
-    "path": "apps/habit-tracker-2.html",
-    "prompts": [
-      {
-        "ts": "2026-03-20T23:28:06.860Z",
-        "type": "initial",
-        "text": "Build a habit tracker"
-      }
-    ],
-    "createdAt": "2026-03-20T23:28:06.860Z",
-    "updatedAt": "2026-03-20T23:28:06.860Z"
-  },
-  {
-    "id": "habit-tracker",
-    "name": "Habit Tracker",
-    "icon": "🎯",
-    "ci": 4,
-    "url": "https://Wisemanmax.github.io/Builder/apps/habit-tracker.html",
-    "path": "apps/habit-tracker.html",
-    "prompts": [
-      {
-        "ts": "2026-03-20T22:11:19.006Z",
-        "type": "initial",
-        "text": "Build a habit tracker"
-      }
-    ],
-    "createdAt": "2026-03-20T22:11:19.006Z",
-    "updatedAt": "2026-03-20T22:11:19.006Z"
-  },
-  {
     "id": "2048bw",
     "name": "2048BW",
     "icon": "📦",
     "ci": 1,
-    "url": "https://Wisemanmax.github.io/Builder/apps/2048bw.html",
+    "url": "https://wisemanmax.github.io/builder/apps/2048bw.html",
     "path": "apps/2048bw.html",
     "prompts": [
       {
@@ -72,22 +21,95 @@
         "ts": "2026-03-18T01:24:30.629Z",
         "type": "update",
         "text": "Make game take up full screen"
-      },
-      {
-        "ts": "2026-03-21T15:57:32.941Z",
-        "type": "update",
-        "text": "Add crazy multipliers for extra point gathering, make the ui better and sleek"
       }
     ],
     "createdAt": "2026-03-17T00:39:04.950Z",
-    "updatedAt": "2026-03-21T15:57:32.941Z"
+    "updatedAt": "2026-03-18T01:24:30.629Z"
+  },
+  {
+    "id": "gradbridgeapp3",
+    "name": "Gradbridgeapp3",
+    "icon": "📦",
+    "ci": 1,
+    "url": "https://wisemanmax.github.io/builder/apps/gradbridgeapp3.html",
+    "path": "apps/gradbridgeapp3.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T16:31:58.785Z",
+        "type": "initial",
+        "text": "make this home page of gradbridge.com"
+      },
+      {
+        "ts": "2026-03-18T18:14:10.249Z",
+        "type": "update",
+        "text": "Keep structure the same just make it all assets desktop compatible and visually better"
+      }
+    ],
+    "createdAt": "2026-03-18T16:31:58.785Z",
+    "updatedAt": "2026-03-18T18:14:10.249Z"
+  },
+  {
+    "id": "gradbridgesite",
+    "name": "Gradbridgesite",
+    "icon": "📦",
+    "ci": 2,
+    "url": "https://wisemanmax.github.io/builder/apps/gradbridgesite.html",
+    "path": "apps/gradbridgesite.html",
+    "prompts": [
+      {
+        "ts": "2026-03-17T22:31:34.695Z",
+        "type": "initial",
+        "text": "Copy gradebridge.com home page"
+      }
+    ],
+    "createdAt": "2026-03-17T22:31:34.695Z",
+    "updatedAt": "2026-03-17T22:31:34.695Z"
+  },
+  {
+    "id": "lasttest",
+    "name": "Lasttest",
+    "icon": "📦",
+    "ci": 4,
+    "url": "https://wisemanmax.github.io/builder/apps/lasttest.html",
+    "path": "apps/lasttest.html",
+    "prompts": [
+      {
+        "ts": "2026-03-18T11:37:34.977Z",
+        "type": "initial",
+        "text": "Build a copy of gradbridge.com"
+      }
+    ],
+    "createdAt": "2026-03-18T11:37:34.977Z",
+    "updatedAt": "2026-03-18T11:37:34.977Z"
+  },
+  {
+    "id": "ti84bill",
+    "name": "ti84bill",
+    "icon": "📦",
+    "ci": 2,
+    "url": "https://wisemanmax.github.io/builder/apps/ti84bill.html",
+    "path": "apps/ti84bill.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.616Z",
+    "updatedAt": "2026-03-17T20:36:01.616Z"
+  },
+  {
+    "id": "waterapp",
+    "name": "waterapp",
+    "icon": "📦",
+    "ci": 0,
+    "url": "https://wisemanmax.github.io/builder/apps/waterapp.html",
+    "path": "apps/waterapp.html",
+    "prompts": [],
+    "createdAt": "2026-03-17T20:36:01.728Z",
+    "updatedAt": "2026-03-17T20:36:01.728Z"
   },
   {
     "id": "bashys",
     "name": "BashYs",
     "icon": "🎯",
     "ci": 3,
-    "url": "https://Wisemanmax.github.io/Builder/apps/bashys.html",
+    "url": "https://wisemanmax.github.io/builder/apps/bashys.html",
     "path": "apps/bashys.html",
     "prompts": [
       {
@@ -104,7 +126,7 @@
     "name": "Card Tracker",
     "icon": "🎯",
     "ci": 3,
-    "url": "https://Wisemanmax.github.io/Builder/apps/card-tracker.html",
+    "url": "https://wisemanmax.github.io/builder/apps/card-tracker.html",
     "path": "apps/card-tracker.html",
     "prompts": [
       {
@@ -122,55 +144,11 @@
     "updatedAt": "2026-03-20T02:34:04.465Z"
   },
   {
-    "id": "gradbridgeapp3",
-    "name": "Gradbridgeapp3",
-    "icon": "📦",
-    "ci": 1,
-    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgeapp3.html",
-    "path": "apps/gradbridgeapp3.html",
-    "prompts": [
-      {
-        "ts": "2026-03-18T16:31:58.785Z",
-        "type": "initial",
-        "text": "make this home page of gradbridge.com"
-      },
-      {
-        "ts": "2026-03-18T18:14:10.249Z",
-        "type": "update",
-        "text": "Keep structure the same just make it all assets desktop compatible and visually better"
-      },
-      {
-        "ts": "2026-03-18T18:17:08.214Z",
-        "type": "update",
-        "text": "Keep structure the same just make it all assets desktop compatible and visually better"
-      }
-    ],
-    "createdAt": "2026-03-18T16:31:58.785Z",
-    "updatedAt": "2026-03-18T18:17:08.214Z"
-  },
-  {
-    "id": "gradbridgesite",
-    "name": "Gradbridgesite",
-    "icon": "📦",
-    "ci": 2,
-    "url": "https://Wisemanmax.github.io/Builder/apps/gradbridgesite.html",
-    "path": "apps/gradbridgesite.html",
-    "prompts": [
-      {
-        "ts": "2026-03-17T22:31:34.695Z",
-        "type": "initial",
-        "text": "Copy gradebridge.com home page"
-      }
-    ],
-    "createdAt": "2026-03-17T22:31:34.695Z",
-    "updatedAt": "2026-03-17T22:31:34.695Z"
-  },
-  {
     "id": "knucklebones",
     "name": "Knucklebones",
     "icon": "🎯",
     "ci": 0,
-    "url": "https://Wisemanmax.github.io/Builder/apps/knucklebones.html",
+    "url": "https://wisemanmax.github.io/builder/apps/knucklebones.html",
     "path": "apps/knucklebones.html",
     "prompts": [
       {
@@ -188,42 +166,20 @@
     "updatedAt": "2026-03-19T23:15:44.170Z"
   },
   {
-    "id": "lasttest",
-    "name": "Lasttest",
-    "icon": "📦",
-    "ci": 4,
-    "url": "https://Wisemanmax.github.io/Builder/apps/lasttest.html",
-    "path": "apps/lasttest.html",
+    "id": "subway-runners",
+    "name": "Subway runners",
+    "icon": "🎯",
+    "ci": 1,
+    "url": "https://wisemanmax.github.io/builder/apps/subway-runners.html",
+    "path": "apps/subway-runners.html",
     "prompts": [
       {
-        "ts": "2026-03-18T11:37:34.977Z",
+        "ts": "2026-03-24T20:05:26.283Z",
         "type": "initial",
-        "text": "Build a copy of gradbridge.com"
+        "text": "Create subway surfer clone"
       }
     ],
-    "createdAt": "2026-03-18T11:37:34.977Z",
-    "updatedAt": "2026-03-18T11:37:34.977Z"
-  },
-  {
-    "id": "ti84bill",
-    "name": "ti84bill",
-    "icon": "📦",
-    "ci": 2,
-    "url": "https://Wisemanmax.github.io/Builder/apps/ti84bill.html",
-    "path": "apps/ti84bill.html",
-    "prompts": [],
-    "createdAt": "2026-03-17T20:36:01.616Z",
-    "updatedAt": "2026-03-17T20:36:01.616Z"
-  },
-  {
-    "id": "waterapp",
-    "name": "waterapp",
-    "icon": "📦",
-    "ci": 0,
-    "url": "https://Wisemanmax.github.io/Builder/apps/waterapp.html",
-    "path": "apps/waterapp.html",
-    "prompts": [],
-    "createdAt": "2026-03-17T20:36:01.728Z",
-    "updatedAt": "2026-03-17T20:36:01.728Z"
+    "createdAt": "2026-03-24T20:05:26.283Z",
+    "updatedAt": "2026-03-24T20:05:26.283Z"
   }
 ]
