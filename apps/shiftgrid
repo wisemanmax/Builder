@@ -3253,7 +3253,6 @@ const DISTRICT_NARRATIVES = [
     story:"The Core. ARIA is waiting for you at the end of this district — not to fight you, but to tell you something she has been holding for three years. She left the path open on purpose. She did this terrible, necessary thing and then she waited, alone in the dark, for someone to come and ask her why. Here you are.",
     objective:"Clear the Core. And when ARIA speaks, let her finish. She's been saving it for a long time.",
   },
-,
   {
     num:"DISTRICT 6", title:"The Anchor Field", color:"#64a0ff",
     story:"The city's eastern zone has been physically locked down. Strange metallic constructs — anchors — have appeared across the grid, jamming shift mechanisms on critical rows and columns. Nobody knows who installed them.",
@@ -3335,7 +3334,7 @@ const OBJECTIVE_META = {
 /* Assign objectives to levels based on position within district */
 /* Positions 3,7 get special objectives; boss always standard */
 function getLevelObjective(levelDef) {
-  if(levelDef.boss||levelDef.isMaster||!levelDef.id||typeof levelDef.id!=="number") return "standard";
+  if(levelDef.boss||levelDef.isMaster||levelDef.id==null||typeof levelDef.id!=="number") return "standard";
   var pos = levelDef.id % 10; /* 0-9 within district */
   if(pos===3) return "timed";
   if(pos===6) return "collect";
@@ -3443,9 +3442,9 @@ function addSeasonXP(amount){
 }
 
 /* ─── CITY EVOLUTION ─────────────────────────────────────────────── */
-/* Returns visual state for each of the 5 districts */
+/* Returns visual state for each of the 10 districts */
 function getCityDistrictState(clearedIds) {
-  return [0,1,2,3,4].map(function(di){
+  return [0,1,2,3,4,5,6,7,8,9].map(function(di){
     var start=di*10, ids=Array.from({length:10},function(_,i){ return start+i; });
     var cleared=ids.filter(function(id){ return clearedIds.includes(id); }).length;
     if(cleared===0)        return "ruins";      /* gray, no lights */
@@ -3604,10 +3603,10 @@ function injectBlockers(grid, levelId, count, rng) {
   /* Determine which blocker types to use based on district */
   var dist = Math.min(10, Math.floor(levelId / 10));
   /* D6: anchor only; D7: overcharge+anchor; D8: fog+anchor; D9: chain+fog; D10: all 4 */
-  var available = dist >= 15 ? ["anchor","overcharge","fog","chain"] :
-                  dist >= 13 ? ["chain","fog","anchor"] :
-                  dist >= 12 ? ["fog","anchor","overcharge"] :
-                  dist >= 11 ? ["overcharge","anchor"] :
+  var available = dist >= 9 ? ["anchor","overcharge","fog","chain"] :
+                  dist >= 8 ? ["chain","fog","anchor"] :
+                  dist >= 7 ? ["fog","anchor","overcharge"] :
+                  dist >= 6 ? ["overcharge","anchor"] :
                                ["anchor"];
   var placed = 0, tries = 0;
   var chainId = 1;
@@ -4530,7 +4529,7 @@ function injectSpecialNodes(grid, levelId, rng){
 }
 function mkSeededRng(seed) {
   let s = ((seed ^ 0x9e3779b9) >>> 0) || 1;
-  return function() { s=((s^(s<<13))>>>0); s=((s^(s>>17))>>>0); s=((s^(s<<5))>>>0); return s/4294967296; };
+  return function() { s=((s^(s<<13))>>>0); s=((s^(s>>>17))>>>0); s=((s^(s<<5))>>>0); return s/4294967296; };
 }
 function todaySeed() { const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
 function makeGrid(rng) {
@@ -4607,7 +4606,8 @@ function applyGravity(grid,matched){
     for(let r=0;r<ROWS;r++){ if(g[r][c]&&g[r][c].blocker) fixed[r]=g[r][c]; }
     const col=[];
     for(let r=0;r<ROWS;r++){ if(g[r][c]&&!g[r][c].blocker) col.push(g[r][c]); }
-    while(col.length<ROWS) col.unshift(makeTile());
+    var fixedCount=Object.keys(fixed).length;
+    while(col.length<ROWS-fixedCount) col.unshift(makeTile());
     for(let r=0;r<ROWS;r++) g[r][c]= fixed[r]||col.shift()||makeTile();
   }
   return {g:g,cleared:cleared};
@@ -5053,7 +5053,7 @@ function GameBoard(props) {
   const lastChanceRef=useRef(false);
   const [nearWinData,setNearWinData]=useState(null);
   const [chargedBldgs,setChargedBldgs]=useState(new Set()); /* buildings that just received charge */
-  const [abilities,setAbilities]=useState(function(){ return loadAbilities(); });
+  const [abilities,setAbilities]=useState(function(){ return initialAbilities; });
   const [surgeActive,setSurgeActive]=useState(false);      /* next match charges all */
   const [freezeActive,setFreezeActive]=useState(0);        /* moves remaining frozen */
   const [wildfireActive,setWildfireActive]=useState(false); /* next shift = full row/col match */
@@ -5107,7 +5107,7 @@ function GameBoard(props) {
   useEffect(function(){
     if(objectiveType!=="timed") return;
     if(phase==="win"||phase==="lose"||phase==="nearwin") return;
-    if(timeLeft<=0){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return; }
+    if(timeLeft<=0){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return; }
     var t=setTimeout(function(){ setTimeLeft(function(s){ return s-1; }); },1000);
     return function(){ clearTimeout(t); };
   },[timeLeft,phase,objectiveType]);
@@ -5207,10 +5207,10 @@ function GameBoard(props) {
         var adjacentBlockerClears=clearAdjacentBlockers(g, m);
         adjacentBlockerClears.forEach(function(bk){
           if(bk.startsWith("fog:")) {
-            var bpos=bk.slice(4).split(","); var bfr=+bpos[0],bfc=+bpos[1];
+            var fogPos=bk.slice(4).split(","); var bfr=+fogPos[0],bfc=+fogPos[1];
             if(g[bfr]&&g[bfr][bfc]) g[bfr][bfc]=Object.assign({},g[bfr][bfc],{fogRevealed:true});
           } else {
-            var bpos=bk.split(","); var bbr=+bpos[0],bbc=+bpos[1];
+            var anchorPos=bk.split(","); var bbr=+anchorPos[0],bbc=+anchorPos[1];
             if(g[bbr]&&g[bbr][bbc]&&g[bbr][bbc].blocker==="anchor"){
               g[bbr][bbc]=Object.assign({},g[bbr][bbc],{blocker:null});
               addToast("🔓 ANCHOR BROKEN!","#64a0ff");
@@ -5354,8 +5354,10 @@ function GameBoard(props) {
             setCollectDone(function(d){ return d+cleared; });
             if(newCollect.size===0){
               /* All collect tiles cleared — WIN */
-              eagerSaveProgress(levelDef.id, stars);
+              var winStars=calcStars(levelDef.moves-newMoves,levelDef.moves);
+              eagerSaveProgress(levelDef.id, winStars);
               setPhase("win"); Haptics.win(); bumpStats({totalWins:1});
+              sessionStatsRef.current.consecutiveWins++;
               if(newMoves>0&&!lastChanceRef.current) setPerfectClear(true);
               saveRun();
               setTimeout(function(){ Audio.win(); },100);
@@ -5374,12 +5376,11 @@ function GameBoard(props) {
             setContainBreach(true);
             setTimeout(function(){ setContainBreach(false); },400);
             /* Containment fail = lose */
-            setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
+            setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); return;
           }
         }
         /* Wrap-chain detection: check if any cleared tile is at edge col/row */
         var wrapDetected=false;
-        (Array.from ? Array.from(new Set()) : []);
         /* Simple heuristic: if shift moved a tile off an edge and it matched */
         if(frames.length>0){
           frames[0].m && frames[0].m.forEach(function(k){
@@ -5389,9 +5390,12 @@ function GameBoard(props) {
         }
         if(wrapDetected&&cascades>=1){ addToast("⚡ WRAP CHAIN!","#a855f7"); setWrapChain(true); setTimeout(function(){ setWrapChain(false); },1200); }
         if(newBldgs.every(function(b){ return b.on; })){
-          eagerSaveProgress(levelDef.id, stars);
-          setPhase("win");
+          var winStars=calcStars(levelDef.moves-newMoves,levelDef.moves);
+          eagerSaveProgress(levelDef.id, winStars);
+          setPhase("win"); Haptics.win(); bumpStats({totalWins:1});
+          sessionStatsRef.current.consecutiveWins++;
           if(newMoves>0 && !lastChanceRef.current){ setPerfectClear(true); }
+          saveRun();
           setTimeout(function(){ if(levelDef.boss) Audio.bossWin(); else Audio.win(); },100);
           return;
         }
@@ -5409,7 +5413,6 @@ function GameBoard(props) {
             setNearWinData(breakdown);
             setPhase("nearwin");
             Audio.nearWin();
-            setTimeout(onLose,300);
             return;
           }
           /* Normal lose */
@@ -5422,7 +5425,7 @@ function GameBoard(props) {
         setPhase("idle");
       }
 
-      if(!frames.length){ setGrid(finalG); if(newMoves<=0) setPhase("lose"); else setPhase("idle"); return; }
+      if(!frames.length){ setGrid(finalG); setBldgs(newBldgs); setMoves(newMoves); setMoveCount(newMC); if(newMoves<=0){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); } else { setPhase("idle"); } return; }
       let fi=0;
       function step(){
         if(fi>=frames.length){ finish(); return; }
@@ -5433,7 +5436,7 @@ function GameBoard(props) {
 
     }, SLIDE_MS);
 
-  },[grid,phase,moves,bldgs,moveCount,hazardSlow,comboAmp,freeChance,spreadEvery,levelDef,wildfireActive]);
+  },[grid,phase,moves,bldgs,moveCount,hazardSlow,comboAmp,freeChance,spreadEvery,levelDef,wildfireActive,surgeActive,freezeActive,collectTiles,collectDone]);
 
   /* ── SWIPE HANDLING ── */
   function onTouchStart(e){
@@ -5881,12 +5884,12 @@ function GameBoard(props) {
       </div>
 
       {/* ── GRID ── */}
-      <div className={"sg-grid-area"+(nudgeClass?" "+nudgeClass:"")} style={{position:"relative"}}
+      <div className={"sg-grid-area"+(nudgeClass?" "+nudgeClass:"")}
         ref={gridRef}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{touchAction:"none"}}
+        style={{position:"relative",touchAction:"none"}}
       >
         {/* SURGE glow overlay */}
         {surgeActive&&<div className="sg-grid-surge-overlay"/>}
@@ -6046,7 +6049,7 @@ function GameBoard(props) {
               WATCH AD · GET +2 MOVES FREE
             </button>
             <div className="sg-modal-row">
-              <button className="sg-modal-btn sg-modal-ghost" onClick={function(){ setPhase("lose"); }}>GIVE UP</button>
+              <button className="sg-modal-btn sg-modal-ghost" onClick={function(){ setPhase("lose"); Haptics.lose(); bumpStats({totalLosses:1}); sessionStatsRef.current.consecutiveWins=0; setTimeout(Audio.lose.bind(Audio),100); setTimeout(onLose,300); }}>GIVE UP</button>
               <button className="sg-modal-btn" style={{background:"linear-gradient(135deg,#ff2d95,#ffaa00)"}} onClick={retry}>RETRY</button>
             </div>
           </div>
@@ -6188,7 +6191,7 @@ function CityOverview(props) {
                       return (
                         <div key={row} style={{display:"flex",gap:2,justifyContent:"center",marginTop:4}}>
                           {[0,1].map(function(col){
-                            var on=Math.random()>0.25;
+                            var on=((row*3+col+bi*7)%4)!==0;
                             return <div key={col} style={{width:3,height:4,borderRadius:1,background:on?dc.theme+"cc":"rgba(255,255,255,0.05)"}}/>;
                           })}
                         </div>
@@ -7022,7 +7025,7 @@ function EndGame(props){
       <span className="sg-endgame-crown">👑</span>
       <img src={SG_LOGO} alt="SHIFTGRID" style={{width:160,height:160,objectFit:"contain",filter:"drop-shadow(0 0 30px rgba(255,170,0,0.6))"}}/>
       <div style={{fontFamily:"'Orbitron',monospace",fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#ffaa00",marginBottom:4}}>CITY FULLY RESTORED</div>
-      <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:24,textAlign:"center",lineHeight:1.7}}>All 50 districts powered. You are a LEGEND.<br/>The city stands because of you.</div>
+      <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:24,textAlign:"center",lineHeight:1.7}}>All 10 districts powered. You are a LEGEND.<br/>The city stands because of you.</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",maxWidth:320,marginBottom:24}}>
         {[
           {v:50,        lbl:"LEVELS",    c:"#00e5ff"},
@@ -7373,7 +7376,7 @@ function SquadTab(props){
         <div className="sg-squad-objective">
           <div className="sg-squad-obj-header">
             <div className="sg-squad-obj-title">⚡ WEEKLY SQUAD OBJECTIVE</div>
-            <div className="sg-squad-obj-reward">+{obj.reward.coins}⬡ {obj.reward.chest?"+ "+CHEST_DEFS[obj.reward.chest].icon:""}</div>
+            <div className="sg-squad-obj-reward">+{obj.reward.coins}⬡ {obj.reward.chest&&CHEST_DEFS[obj.reward.chest]?"+ "+CHEST_DEFS[obj.reward.chest].icon:""}</div>
           </div>
           <div className="sg-squad-obj-name">{obj.name}</div>
           <div className="sg-squad-obj-desc">{obj.desc}</div>
@@ -7636,7 +7639,7 @@ function BracketTab(props){
               <div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:700,color:"#ff2d95"}}>{result.oppScore.toLocaleString()}</div>
             </div>
           </div>
-          {result.won&&<div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>Reward: +{result.coins}⬡{result.chest?" + "+CHEST_DEFS[result.chest].icon:""}</div>}
+          {result.won&&<div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>Reward: +{result.coins}⬡{result.chest&&CHEST_DEFS[result.chest]?" + "+CHEST_DEFS[result.chest].icon:""}</div>}
         </div>
       )}
 
@@ -7855,7 +7858,7 @@ function CityTab(props) {
               <div className="sg-upg-name">{upg.label}</div>
               <div className="sg-upg-desc">{upg.desc}</div>
               <div className="sg-upg-pips">{upg.cost.map(function(_,i){ return <div key={i} className="sg-pip" style={{background:i<cur?"#00e5ff":"rgba(255,255,255,0.1)"}}/>; })}</div>
-              {maxed?<div className="sg-upg-max">MAX</div>:<button className="sg-upg-cost-btn" disabled={!can} style={{opacity:can?1:0.35}} onClick={function(){ buyUpgrade(upg.id,cur,cost); }}>{cost} coins</button>}
+              {maxed?<div className="sg-upg-max">MAX</div>:<button className="sg-upg-cost-btn" disabled={!can} style={{opacity:can?1:0.35,color:can?currColor:undefined,borderColor:can?currColor+"55":undefined}} onClick={function(){ buyUpgrade(upg.id,cur,cost,upCurrency); }}>{cost}{currIcon}</button>}
             </div>
           );
         })}
@@ -8143,7 +8146,7 @@ function StarChainMeter(props){
   var chain=loadStarChain();
   var stars=chain.stars||0;
   var pct=Math.min(100,(stars%STAR_CHAIN_GOAL)/STAR_CHAIN_GOAL*100);
-  var nextReward=STAR_CHAIN_REWARDS.find(function(r){ return !(chain.claimed||[]).includes(r.at)&&r.at>stars; });
+  var nextReward=STAR_CHAIN_REWARDS.find(function(r){ return !(chain.claimed||[]).includes(r.at)&&r.at>(stars%STAR_CHAIN_GOAL); });
   if(!nextReward) nextReward=STAR_CHAIN_REWARDS[STAR_CHAIN_REWARDS.length-1];
 
   return (
@@ -8159,7 +8162,7 @@ function StarChainMeter(props){
         {[1,2,3,4,5,6,7,8,9].map(function(n){
           var r=STAR_CHAIN_REWARDS.find(function(x){ return x.at===n; });
           return (
-            <span key={n} className={"sg-star-pip"+(stars%STAR_CHAIN_GOAL>=n||Math.floor(stars/STAR_CHAIN_GOAL)>0?" lit":"")}>
+            <span key={n} className={"sg-star-pip"+(stars%STAR_CHAIN_GOAL>=n?" lit":"")}>
               {r?r.icon:"·"}
             </span>
           );
@@ -8307,7 +8310,7 @@ function CampaignTab(props) {
 
       {/* ── OVERALL PROGRESS ── */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,marginTop:4}}>
-        <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>{cleared.length+"/50 CLEARED"}</div>
+        <div style={{fontFamily:"'Share Tech Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>{cleared.length+"/100 CLEARED"}</div>
         <div style={{display:"flex",gap:3}}>
           {ALL_DISTRICTS.map(function(d,i){
             var dc=d.ids.filter(function(id){ return cleared.includes(id); }).length;
@@ -8380,8 +8383,9 @@ function CampaignTab(props) {
               var localNum=(id%10)+1; /* 1–9 within district */
               return (
                 <div key={id}
-                  className={"sg-level-node"+(locked?" locked":"")+((id%10===4||id%10===8)&&!locked?" spike-level":"")} style={{position:"relative"}}
+                  className={"sg-level-node"+(locked?" locked":"")+((id%10===4||id%10===8)&&!locked?" spike-level":"")}
                   style={{
+                    position:"relative",
                     borderColor:done?dist.theme+"55":(locked?"rgba(255,255,255,0.06)":dist.theme+"25"),
                     background:done?dist.theme+"0a":(locked?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.03)"),
                   }}
@@ -8708,7 +8712,7 @@ function Shiftgrid() {
         return !newClaimed.includes(r.at) && sc.stars%STAR_CHAIN_GOAL>=r.at;
       });
       if(milestone){
-        newClaimed=newClaimed.concat([sc.stars]);
+        newClaimed=newClaimed.concat([milestone.at]);
         /* Award chest */
         setMeta(function(m){
           var nc=Object.assign({},m.chests||{});
