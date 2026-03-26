@@ -158,13 +158,9 @@
           <button class="pt-btn" data-mode="game">&#x1F3AE; Game</button>
           <button class="pt-btn pt-stitch" data-mode="stitch" id="pt-stitch-btn" title="Requires Stitch API key">&#x1F9F5; Flawless</button>
         </div>
-        <div class="model-select-wrap" id="model-select-wrap">
-          <button class="model-select-btn" id="model-select-btn">
-            <span class="ms-label" id="ms-label">Claude Sonnet 4</span>
-            <span class="ms-badge" id="ms-badge">Recommended</span>
-            <span class="ms-arrow">&#x25BE;</span>
-          </button>
-          <div class="model-dropdown" id="model-dropdown"></div>
+        <div class="model-toggle" id="model-toggle" style="display:none">
+          <button class="mt-btn active" data-provider="claude">Claude</button>
+          <button class="mt-btn" data-provider="chatgpt">ChatGPT</button>
         </div>
       </div>
       <div class="bs-actions">

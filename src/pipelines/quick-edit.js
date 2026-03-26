@@ -13,8 +13,6 @@ import {
   scrubKeys,
   SYS_UPDATE,
   callClaudeWithThinkingStream,
-  modelStream,
-  selectedModelLabel,
   resetCostAccum,
   calculateBuildCost,
   runLocalChecks,
@@ -47,7 +45,7 @@ var SYS_TEXT_EDIT =
   '4. Preserve all existing functionality and event handlers\n' +
   '5. All CSS inside <style>, all JS inside <script>'
 
-export var QUICK_EDIT_NAMES = ['AI \u00B7 Edit', 'Automated Checks', 'Save']
+export var QUICK_EDIT_NAMES = ['Claude \u00B7 Edit', 'Automated Checks', 'Save']
 export var QUICK_EDIT_ICONS = ['\u270F\uFE0F', '\uD83D\uDCCB', '\u2705']
 
 /**
@@ -211,7 +209,7 @@ export function runQuickEdit(prompt, existingApp, images, editMode) {
   }
 
   var thinkBudget = editMode === 'css-only' || editMode === 'text-only' ? 2000 : 4000
-  modelStream(
+  callClaudeWithThinkingStream(
     effectiveSys,
     userMsg,
     thinkBudget,

@@ -10,7 +10,7 @@ import {
 } from '../lib/state.js'
 import { $, esc, toast, grad, uniqueSlug, autoName, scrubKeys } from '../lib/utils.js'
 import { ghPageUrl } from '../lib/utils.js'
-import { MAX_FIX_PASSES, MODEL_OPTIONS } from '../config/constants.js'
+import { MAX_FIX_PASSES } from '../config/constants.js'
 import {
   SYS_BUILD,
   SYS_UPDATE,
@@ -977,86 +977,6 @@ function groqPreCheck(code) {
     .catch(function () { return [] })
 }
 
-// --- Model-aware routing (based on ST.buildModel) ---
-
-function getSelectedModel() {
-  var sel = ST.buildModel || 'claude-sonnet'
-  for (var i = 0; i < MODEL_OPTIONS.length; i++) {
-    if (MODEL_OPTIONS[i].id === sel) return MODEL_OPTIONS[i]
-  }
-  return MODEL_OPTIONS[0] // fallback to Claude Sonnet
-}
-
-function selectedModelLabel() {
-  var m = getSelectedModel()
-  return m.label
-}
-
-function modelRaw(sys, msg, maxTokens, images) {
-  var m = getSelectedModel()
-  if (m.provider === 'google') return callGemini(sys, msg, maxTokens)
-  if (m.provider === 'openai') {
-    if (m.id === 'gpt-5') return callGPTTopRaw(sys, msg, maxTokens)
-    return callGPTRaw2(sys, msg, maxTokens, images)
-  }
-  return callClaudeRaw(sys, msg, maxTokens, images)
-}
-
-function modelMultiTurn(sys, messages, temperature) {
-  var m = getSelectedModel()
-  if (m.provider === 'google') {
-    // Gemini doesn't have multi-turn helper — flatten to single message
-    var flat = ''
-    for (var i = 0; i < messages.length; i++) {
-      var r = messages[i].role === 'user' ? 'User' : 'Assistant'
-      flat += r + ': ' + (typeof messages[i].content === 'string' ? messages[i].content : '') + '\n\n'
-    }
-    return callGemini(sys, flat, 32768)
-  }
-  if (m.provider === 'openai') return callGPTMultiTurn2(sys, messages, temperature)
-  return callClaudeMultiTurn(sys, messages, temperature)
-}
-
-function modelStream(sys, msg, thinkingBudget, onChunk, images) {
-  var m = getSelectedModel()
-  if (m.provider === 'google') {
-    // Gemini doesn't support streaming in current setup — fall back to raw
-    return callGemini(sys, msg, 32768).then(function (result) {
-      if (onChunk) onChunk(result)
-      return result
-    })
-  }
-  if (m.provider === 'openai') return callGPTWithStream(sys, msg, onChunk, images)
-  return callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, images)
-}
-
-function modelAudit(code, customSysPrompt) {
-  // Audit always uses smart routing (Gemini > GPT > Claude) regardless of selected model
-  return smartAudit(code)
-}
-
-function modelBuild(sys, msg, temperature) {
-  var m = getSelectedModel()
-  if (m.provider === 'google') return callGemini(sys, msg, 32768)
-  if (m.provider === 'openai') {
-    if (m.id === 'gpt-5') return callGPTTopRaw(sys, msg, 32000)
-    return callGPTMultiTurn2(sys, [{ role: 'user', content: msg }], temperature)
-  }
-  return callClaude(sys, msg, temperature)
-}
-
-function hasSelectedModelKey() {
-  var m = getSelectedModel()
-  return !!ST[m.keyField]
-}
-
-function selectedModelKeyName() {
-  var m = getSelectedModel()
-  if (m.provider === 'google') return 'Gemini'
-  if (m.provider === 'openai') return 'OpenAI'
-  return 'Anthropic'
-}
-
 // Re-export commonly used imports so pipeline files don't need to import them separately
 export {
   ST,
@@ -1143,14 +1063,4 @@ export {
   getThoughtDesignOverrides,
   getTemplateSkeleton,
   customizeTemplateCss,
-  MODEL_OPTIONS,
-  getSelectedModel,
-  selectedModelLabel,
-  modelRaw,
-  modelMultiTurn,
-  modelStream,
-  modelBuild,
-  modelAudit,
-  hasSelectedModelKey,
-  selectedModelKeyName,
 }

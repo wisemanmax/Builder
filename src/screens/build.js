@@ -16,7 +16,6 @@ import {
   PIPE5_ICONS,
   PIPE6_NAMES,
   PIPE6_ICONS,
-  MODEL_OPTIONS,
 } from '../config/constants.js'
 import { _syncStitchGate } from './settings.js'
 import { TEMPLATES } from '../config/templates.js'
@@ -279,14 +278,8 @@ export function sendMsg() {
     return
   }
   if (ST._building) return
-  var _selModel = null
-  for (var mi = 0; mi < MODEL_OPTIONS.length; mi++) {
-    if (MODEL_OPTIONS[mi].id === ST.buildModel) { _selModel = MODEL_OPTIONS[mi]; break }
-  }
-  if (!_selModel) _selModel = MODEL_OPTIONS[0]
-  if (!ST[_selModel.keyField]) {
-    var _kn = _selModel.provider === 'google' ? 'Gemini' : _selModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'
-    toast('Add your ' + _kn + ' API key in Settings first', 4000)
+  if (!ST.key) {
+    toast('Add your Anthropic API key in Settings first', 4000)
     return
   }
   inp.value = ''
@@ -658,61 +651,16 @@ function _syncToggle() {
     else btns[i].classList.remove('active')
   }
   _syncStitchGate()
-  // Sync model selector display
-  _syncModelSelector()
-}
-
-function _syncModelSelector() {
-  var sel = ST.buildModel || 'claude-sonnet'
-  var current = null
-  for (var i = 0; i < MODEL_OPTIONS.length; i++) {
-    if (MODEL_OPTIONS[i].id === sel) { current = MODEL_OPTIONS[i]; break }
-  }
-  if (!current) current = MODEL_OPTIONS[0]
-  var labelEl = $('ms-label')
-  var badgeEl = $('ms-badge')
-  if (labelEl) labelEl.textContent = current.label
-  if (badgeEl) {
-    badgeEl.textContent = current.badge
-    badgeEl.setAttribute('data-badge', current.badge)
-  }
-  // Sync dropdown option highlights
-  var opts = document.querySelectorAll('#model-dropdown .md-option')
-  for (var j = 0; j < opts.length; j++) {
-    if (opts[j].dataset.modelId === sel) opts[j].classList.add('active')
-    else opts[j].classList.remove('active')
-  }
-  // Keep website2Provider in sync for backward compat
-  if (current.provider === 'openai') ST.website2Provider = 'chatgpt'
-  else ST.website2Provider = 'claude'
-}
-
-function _renderModelDropdown() {
-  var dd = $('model-dropdown')
-  if (!dd) return
-  var html = ''
-  for (var i = 0; i < MODEL_OPTIONS.length; i++) {
-    var m = MODEL_OPTIONS[i]
-    var isActive = m.id === (ST.buildModel || 'claude-sonnet')
-    var hasKey = !!ST[m.keyField]
-    var badgeColor = ''
-    if (m.badge === 'Recommended') badgeColor = 'background:rgba(99,102,241,.25);color:rgba(159,168,255,.9)'
-    else if (m.badge === 'Fast') badgeColor = 'background:rgba(16,163,127,.2);color:rgba(30,214,168,.9)'
-    else if (m.badge === 'Premium') badgeColor = 'background:rgba(217,119,6,.2);color:rgba(245,158,11,.9)'
-    else if (m.badge === 'Budget') badgeColor = 'background:rgba(0,229,255,.15);color:rgba(0,229,255,.9)'
-    html += '<div class="md-option' + (isActive ? ' active' : '') + '" data-model-id="' + m.id + '">'
-    html += '<div class="md-option-top">'
-    html += '<span class="md-option-name">' + esc(m.label) + '</span>'
-    html += '<span class="md-option-badge" style="' + badgeColor + '">' + esc(m.badge) + '</span>'
-    html += '</div>'
-    html += '<div class="md-option-desc">' + esc(m.desc) + '</div>'
-    if (!hasKey) {
-      var keyName = m.provider === 'google' ? 'Gemini' : m.provider === 'openai' ? 'OpenAI' : 'Anthropic'
-      html += '<div class="md-option-nokey">Requires ' + keyName + ' API key — add in Settings</div>'
+  // Show model toggle only for website2
+  var mt = $('model-toggle')
+  if (mt) {
+    mt.style.display = ST.pipelineMode === 'website2' ? 'flex' : 'none'
+    var mbtns = mt.querySelectorAll('.mt-btn')
+    for (var j = 0; j < mbtns.length; j++) {
+      if (mbtns[j].dataset.provider === ST.website2Provider) mbtns[j].classList.add('active')
+      else mbtns[j].classList.remove('active')
     }
-    html += '</div>'
   }
-  dd.innerHTML = html
 }
 
 // --- Interrupted build recovery ---
@@ -998,44 +946,21 @@ export function initPipelineToggle() {
       : null
     _updatePipelineSub(app)
   })
-  // Model selector dropdown
-  var msBtn = $('model-select-btn')
-  var msWrap = $('model-select-wrap')
-  _renderModelDropdown()
-  if (msBtn && msWrap) {
-    msBtn.addEventListener('click', function (e) {
-      e.stopPropagation()
-      msWrap.classList.toggle('open')
-    })
-    document.addEventListener('click', function (e) {
-      if (msWrap && !msWrap.contains(e.target)) {
-        msWrap.classList.remove('open')
+  // Model provider toggle (Claude vs ChatGPT for Website 2)
+  var mt = $('model-toggle')
+  if (mt) {
+    mt.addEventListener('click', function (e) {
+      var btn = e.target.closest('.mt-btn')
+      if (!btn || !btn.dataset.provider) return
+      ST.website2Provider = btn.dataset.provider
+      saveKeys()
+      _syncToggle()
+      var providerLabel = ST.website2Provider === 'chatgpt' ? 'ChatGPT (GPT-4o)' : 'Claude Sonnet'
+      toast('Website 2 model: ' + providerLabel)
+      if (ST.website2Provider === 'chatgpt' && !ST.gptKey) {
+        toast('Add your OpenAI key in Settings to use ChatGPT', 4000)
       }
     })
-    var dd = $('model-dropdown')
-    if (dd) {
-      dd.addEventListener('click', function (e) {
-        var opt = e.target.closest('.md-option')
-        if (!opt || !opt.dataset.modelId) return
-        var modelId = opt.dataset.modelId
-        var model = null
-        for (var i = 0; i < MODEL_OPTIONS.length; i++) {
-          if (MODEL_OPTIONS[i].id === modelId) { model = MODEL_OPTIONS[i]; break }
-        }
-        if (!model) return
-        // Check if user has the required key
-        if (!ST[model.keyField]) {
-          var keyName = model.provider === 'google' ? 'Gemini' : model.provider === 'openai' ? 'OpenAI' : 'Anthropic'
-          toast('Add your ' + keyName + ' API key in Settings first', 4000)
-          return
-        }
-        ST.buildModel = modelId
-        saveKeys()
-        _syncModelSelector()
-        msWrap.classList.remove('open')
-        toast('Model: ' + model.label + ' — ' + model.desc)
-      })
-    }
   }
   _syncToggle()
   // Stitch key modal

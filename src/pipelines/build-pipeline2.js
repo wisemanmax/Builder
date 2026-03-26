@@ -38,12 +38,6 @@ import {
   smartAudit,
   groqPreCheck,
   auditProviderLabel,
-  modelRaw,
-  modelMultiTurn,
-  modelStream,
-  selectedModelLabel,
-  hasSelectedModelKey,
-  selectedModelKeyName,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -191,7 +185,7 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
     if (_resumeCtx) planMsg += '\n\n' + _resumeCtx
     return retryStep(
       function () {
-        return modelRaw(SYS_PLAN, planMsg, 2000, images)
+        return callClaudeRaw(SYS_PLAN, planMsg, 2000, images)
       },
       2,
       'Plan'
@@ -245,7 +239,7 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
         var previewIframe = $('viewer-iframe')
         if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
 
-        return modelStream(
+        return callClaudeWithThinkingStream(
           effectiveSys,
           userMsg,
           10000,
@@ -396,7 +390,7 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
 
               return retryStep(
                 function () {
-                  return modelMultiTurn(fixSys, repairHistory)
+                  return callClaudeMultiTurn(fixSys, repairHistory)
                 },
                 2,
                 'Fix'
@@ -528,7 +522,7 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
         complianceInput += '\n\nGENERATED CODE:\n' + v2.slice(0, 40000)
         return retryStep(
           function () {
-            return modelRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
+            return callClaudeRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
           },
           1,
           'Compliance'
