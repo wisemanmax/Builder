@@ -32,13 +32,6 @@ import {
   callGPTAudit2,
   callGeminiFullAudit,
   normalizeAuditResult,
-  modelRaw,
-  modelMultiTurn,
-  modelStream,
-  modelAudit,
-  selectedModelLabel,
-  hasSelectedModelKey,
-  selectedModelKeyName,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -82,21 +75,30 @@ import {
 } from '../config/prompts-website2.js'
 import { SYS_AUDIT } from '../config/prompts.js'
 
-// Provider-aware wrappers — route based on global model selector
+// Provider-aware wrappers — route to Claude or GPT based on user toggle
 function _raw(sys, msg, maxTokens, images) {
-  return modelRaw(sys, msg, maxTokens, images)
+  return ST.website2Provider === 'chatgpt'
+    ? callGPTRaw2(sys, msg, maxTokens, images)
+    : callClaudeRaw(sys, msg, maxTokens, images)
 }
 function _multiTurn(sys, messages, temperature) {
-  return modelMultiTurn(sys, messages, temperature)
+  return ST.website2Provider === 'chatgpt'
+    ? callGPTMultiTurn2(sys, messages, temperature)
+    : callClaudeMultiTurn(sys, messages, temperature)
 }
 function _buildStream(sys, msg, thinkingBudget, onChunk, images) {
-  return modelStream(sys, msg, thinkingBudget, onChunk, images)
+  if (ST.website2Provider === 'chatgpt') return callGPTWithStream(sys, msg, onChunk, images)
+  return callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, images)
 }
 function _audit(code, customSysPrompt) {
-  return modelAudit(code, customSysPrompt)
+  // Prefer Gemini for audits — cheapest with 1M context window
+  if (ST.geminiKey) return callGeminiFullAudit(code).then(normalizeAuditResult)
+  return ST.website2Provider === 'chatgpt'
+    ? callGPTAudit2(code, customSysPrompt)
+    : callClaudeAudit(code, customSysPrompt)
 }
 function _providerName() {
-  return selectedModelLabel()
+  return ST.website2Provider === 'chatgpt' ? 'ChatGPT' : 'Claude'
 }
 
 /**
@@ -109,13 +111,17 @@ export function runWebsite2Pipeline(prompt, existingApp, resumeSession, images) 
   var customName = typeof resumeSession === 'string' ? resumeSession : null
   if (resumeSession && typeof resumeSession === 'string') resumeSession = null
   resetCostAccum()
-  // Validate API key for selected model
-  if (!hasSelectedModelKey()) {
+  // Validate API key for selected provider
+  if (ST.website2Provider === 'chatgpt' && !ST.gptKey) {
     addMsg({
       role: 'asst',
       type: 'text',
-      text: selectedModelKeyName() + ' API key is required for ' + selectedModelLabel() + '. Add it in Settings.',
+      text: 'OpenAI API key is required to use ChatGPT. Add it in Settings, or switch to Claude.',
     })
+    return
+  }
+  if (ST.website2Provider !== 'chatgpt' && !ST.key) {
+    addMsg({ role: 'asst', type: 'text', text: 'Anthropic API key is required. Add it in Settings.' })
     return
   }
   clearCurrentSession()

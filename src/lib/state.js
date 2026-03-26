@@ -18,7 +18,6 @@ export const ST = {
   auditEnabled: true,
   backendEnabled: false,
   website2Provider: 'claude',
-  buildModel: 'claude-sonnet',
   activeAppId: null,
   pendingIcon: '🎯',
   pendingColor: 0,
@@ -122,7 +121,6 @@ export function hydrate() {
   ST.backendEnabled = localStorage.getItem(KEY_STORE.BACKEND) === 'true'
   ST.pipelineMode = localStorage.getItem(KEY_STORE.PIPELINE) || 'builder1'
   ST.website2Provider = localStorage.getItem(KEY_STORE.W2_PROVIDER) || 'claude'
-  ST.buildModel = localStorage.getItem(KEY_STORE.BUILD_MODEL) || 'claude-sonnet'
 
   // Deferred pruning of telemetry + build records (async, non-blocking)
   setTimeout(function () {
@@ -159,7 +157,6 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled))
   localStorage.setItem(KEY_STORE.PIPELINE, ST.pipelineMode)
   localStorage.setItem(KEY_STORE.W2_PROVIDER, ST.website2Provider)
-  localStorage.setItem(KEY_STORE.BUILD_MODEL, ST.buildModel)
 }
 
 export function setActiveProfile(id) {

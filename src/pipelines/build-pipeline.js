@@ -42,13 +42,6 @@ import {
   smartReview,
   groqPreCheck,
   auditProviderLabel,
-  modelRaw,
-  modelMultiTurn,
-  modelStream,
-  modelBuild,
-  selectedModelLabel,
-  hasSelectedModelKey,
-  selectedModelKeyName,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -195,7 +188,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
         ' attached — use them to understand the desired design/layout]'
     return retryStep(
       function () {
-        return modelRaw(SYS_PLAN, planMsg, 2000, images)
+        return callClaudeRaw(SYS_PLAN, planMsg, 2000, images)
       },
       2,
       'Plan'
@@ -249,7 +242,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
         var previewIframe = $('viewer-iframe')
         if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
 
-        return modelStream(
+        return callClaudeWithThinkingStream(
           effectiveSys,
           userMsg,
           10000,
@@ -420,7 +413,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
 
               return retryStep(
                 function () {
-                  return modelMultiTurn(fixSys, repairHistory)
+                  return callClaudeMultiTurn(fixSys, repairHistory)
                 },
                 2,
                 'Fix'
@@ -635,7 +628,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
 
           return retryStep(
             function () {
-              return modelBuild(withContext(SYS_ENHANCE), enhanceMsg)
+              return callClaude(withContext(SYS_ENHANCE), enhanceMsg)
             },
             2,
             'Enhance'
@@ -717,7 +710,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
                     v2
                   return retryStep(
                     function () {
-                      return modelBuild(fixSys, fixMsg)
+                      return callClaude(fixSys, fixMsg)
                     },
                     2,
                     'ReviewFix'
@@ -762,7 +755,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
                         v2
                       return retryStep(
                         function () {
-                          return modelBuild(fixSys, retryFixMsg)
+                          return callClaude(fixSys, retryFixMsg)
                         },
                         2,
                         'RetryFix'
@@ -820,7 +813,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
         complianceInput += '\n\nGENERATED CODE:\n' + v2.slice(0, 40000)
         return retryStep(
           function () {
-            return modelRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
+            return callClaudeRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
           },
           1,
           'Compliance'
@@ -865,7 +858,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
                 fixMsg += '\n\nCURRENT CODE:\n' + v2
                 return retryStep(
                   function () {
-                    return modelBuild(withContext(SYS_FIX.replace('{INTENT}', prompt)), fixMsg)
+                    return callClaude(withContext(SYS_FIX.replace('{INTENT}', prompt)), fixMsg)
                   },
                   2,
                   'ComplianceFix'
@@ -907,7 +900,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
       checkPipelineCancel()
       if (ST.backendEnabled && ST.sbUrl) {
         updatePS(pid, 9, 'active', 'Generating Supabase backend\u2026')
-        return modelRaw(SYS_BACKEND, 'App code:\n\n' + v2.slice(0, 60000), 4000)
+        return callClaudeRaw(SYS_BACKEND, 'App code:\n\n' + v2.slice(0, 60000), 4000)
           .then(function (raw) {
             var backend = JSON.parse(raw)
             var tables = backend.tables || []

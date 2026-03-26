@@ -34,12 +34,6 @@ import {
   smartRaw,
   groqPreCheck,
   auditProviderLabel,
-  modelRaw,
-  modelMultiTurn,
-  modelStream,
-  selectedModelLabel,
-  hasSelectedModelKey,
-  selectedModelKeyName,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -298,7 +292,7 @@ export function runGamePipeline(prompt, existingApp, resumeSession, images) {
         var previewIframe = $('viewer-iframe')
         if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
 
-        return modelStream(
+        return callClaudeWithThinkingStream(
           effectiveSys,
           userMsg,
           10000,
@@ -494,7 +488,7 @@ export function runGamePipeline(prompt, existingApp, resumeSession, images) {
           updatePS(pid, 4, 'active', 'Auditing gameplay' + passLabel + '\u2026')
           return retryStep(
             function () {
-              return modelRaw(
+              return callClaudeRaw(
                 SYS_AUDIT_GAME,
                 'GAME CONCEPT: ' + prompt + '\n\nGAME CODE:\n' + currentCode.slice(0, 60000),
                 4000
@@ -587,7 +581,7 @@ export function runGamePipeline(prompt, existingApp, resumeSession, images) {
 
                 return retryStep(
                   function () {
-                    return modelMultiTurn(fixSys, repairHistory)
+                    return callClaudeMultiTurn(fixSys, repairHistory)
                   },
                   2,
                   'Fix'
@@ -714,7 +708,7 @@ export function runGamePipeline(prompt, existingApp, resumeSession, images) {
           v2.slice(0, 40000)
         return retryStep(
           function () {
-            return modelRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
+            return callClaudeRaw(SYS_SPEC_COMPLIANCE, complianceInput, 2000)
           },
           1,
           'Compliance'
