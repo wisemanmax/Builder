@@ -2,6 +2,25 @@ import { ST, persist } from './state.js'
 import { scrubKeys, toast } from './utils.js'
 import { renderGrid, renderGridSkeleton } from '../components/app-icon.js'
 
+// Use auth token if logged in, otherwise fall back to anon key
+function _sbHeaders() {
+  var token = ST.authToken || ST.sbAnon
+  return {
+    'Content-Type': 'application/json',
+    apikey: ST.sbAnon,
+    Authorization: 'Bearer ' + token,
+    Prefer: 'resolution=merge-duplicates',
+  }
+}
+
+function _sbReadHeaders() {
+  var token = ST.authToken || ST.sbAnon
+  return {
+    apikey: ST.sbAnon,
+    Authorization: 'Bearer ' + token,
+  }
+}
+
 export function pushToSupabase(app) {
   if (!ST.sbEnabled || !ST.sbUrl || !ST.sbAnon || !app || !app.id) return
   var safePayload = {
@@ -16,14 +35,11 @@ export function pushToSupabase(app) {
     created_at: app.createdAt,
     updated_at: app.updatedAt,
   }
+  // Attach user_id if logged in (for RLS-scoped storage)
+  if (ST.authUser) safePayload.user_id = ST.authUser
   fetch(ST.sbUrl + '/rest/v1/builder_apps', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: ST.sbAnon,
-      Authorization: 'Bearer ' + ST.sbAnon,
-      Prefer: 'resolution=merge-duplicates',
-    },
+    headers: _sbHeaders(),
     body: JSON.stringify(safePayload),
   }).catch(function (e) {
     console.warn('Supabase push failed:', scrubKeys(e.message))
@@ -36,8 +52,10 @@ export function pullFromSupabase() {
     return
   }
   renderGridSkeleton(6)
-  fetch(ST.sbUrl + '/rest/v1/builder_apps?select=*&order=created_at.desc', {
-    headers: { apikey: ST.sbAnon, Authorization: 'Bearer ' + ST.sbAnon },
+  // If logged in, RLS automatically scopes to the user's apps
+  var url = ST.sbUrl + '/rest/v1/builder_apps?select=*&order=created_at.desc'
+  fetch(url, {
+    headers: _sbReadHeaders(),
   })
     .then(function (r) {
       return r.json()

@@ -76,6 +76,8 @@ import { pullFromGitHub } from './lib/github.js'
 import { pullFromSupabase } from './lib/storage.js'
 import { decompressShareData } from './lib/share.js'
 import { openShareCard } from './screens/studio.js'
+import { initAuth, isLoggedIn } from './lib/auth.js'
+import { openAccount, closeAccount, initAccount } from './screens/account.js'
 
 export function init() {
   // Global namespace for dynamic HTML onclick handlers
@@ -84,6 +86,7 @@ export function init() {
   setupErrorHandlers()
   var pwaRef = setupPwa()
   hydrate()
+  initAuth()
 
   // Re-acquire Wake Lock when user returns to app during a build
   document.addEventListener('visibilitychange', function () {
@@ -134,6 +137,7 @@ export function init() {
   initThoughtsFolder()
   initMessageHandlers()
   initTemplateHandlers()
+  initAccount()
 
   // Events
   setupBuilderSheetEvents()
@@ -149,6 +153,7 @@ export function init() {
     openBuilder: openBuilder,
     openCustomizeBuilder: openCustomizeBuilder,
     openTemplates: openTemplates,
+    openAccount: openAccount,
     openSettings: openSettings,
     copyUrl: copyUrl,
     openCurrentInViewer: openCurrentInViewer,
@@ -168,6 +173,8 @@ export function init() {
     openBuilder: openBuilder,
     openApp: openApp,
     openThink: openThink,
+    openAccount: openAccount,
+    closeAccount: closeAccount,
     openSettings: openSettings,
     openTemplates: openTemplates,
     openProjectSheet: openProjectSheet,

@@ -3,6 +3,7 @@ import { $, toast, showScreen, validateKey } from '../lib/utils.js'
 import { saveKeys } from '../lib/state.js'
 import { testGitHub } from '../lib/github.js'
 import { renderGrid } from '../components/app-icon.js'
+import { signIn, isLoggedIn } from '../lib/auth.js'
 
 export function initOnboarding() {
   $('ob-gpt').addEventListener('input', function () {
@@ -94,4 +95,24 @@ export function initOnboarding() {
       3500
     )
   })
+
+  // Sign-in link on onboarding — opens account overlay after saving Supabase creds
+  var signinLink = $('ob-signin-link')
+  if (signinLink) {
+    signinLink.addEventListener('click', function () {
+      // Ensure Supabase creds are saved first
+      var url = $('ob-sb-url').value.trim()
+      var anon = $('ob-sb-anon').value.trim()
+      if (url) ST.sbUrl = url
+      if (anon) ST.sbAnon = anon
+      if (url || anon) saveKeys()
+
+      if (!ST.sbUrl || !ST.sbAnon) {
+        toast('Enable Supabase Sync above and enter your URL & key first', 4000)
+        return
+      }
+      // Open account overlay for sign-in
+      if (window.B && window.B.openAccount) window.B.openAccount()
+    })
+  }
 }

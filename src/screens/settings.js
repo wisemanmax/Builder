@@ -6,6 +6,7 @@ import { pullFromSupabase } from '../lib/storage.js'
 import { renderGrid } from '../components/app-icon.js'
 import { renderProfilesSettings } from './profiles.js'
 import { testSupabaseConnection } from '../lib/supabase-setup.js'
+import { isLoggedIn, saveKeysWithSync } from '../lib/auth.js'
 
 export function openSettings() {
   $('s-anth').value = ST.key
@@ -90,7 +91,7 @@ export function initSettings() {
     ST.stitchKey = $('s-stitch').value.trim()
     ST.groqKey = groqVal
     ST.geminiKey = geminiVal
-    saveKeys()
+    saveKeysWithSync()
     var ksc = $('key-safety-card')
     if (ksc) ksc.innerHTML = keyStatusHTML()
     // Test Stitch key if provided
@@ -134,7 +135,7 @@ export function initSettings() {
     ST.ghUser = ghU
     ST.ghRepo = ghR
     ST.ghCustomDomain = ghD
-    saveKeys()
+    saveKeysWithSync()
     var ksc = $('key-safety-card')
     if (ksc) ksc.innerHTML = keyStatusHTML()
     toast('Testing GitHub connection\u2026')
