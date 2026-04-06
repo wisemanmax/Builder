@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080812">
+<meta name="description" content="Browse and play apps built with WiseForge — AI-powered web app builder.">
+<meta property="og:title" content="WiseForge Apps">
+<meta property="og:description" content="Browse and play apps built with AI. Tap to launch instantly.">
+<title>WiseForge Apps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --fh:'Syne',sans-serif;
+  --fb:'DM Sans',sans-serif;
+  --pk:#FF3CAC;--bl:#3D5AFE;--cy:#00E5FF;--lm:#AAFF00;--gd:#FFD600;--co:#FF5252;--pu:#B44FFF;--am:#FF9F43;
+  --g1:linear-gradient(135deg,#FF3CAC,#784BA0,#2B86C5);
+  --g2:linear-gradient(135deg,#3D5AFE,#00E5FF);
+  --g3:linear-gradient(135deg,#FF5252,#FFD600);
+  --g4:linear-gradient(135deg,#AAFF00,#00C2FF);
+  --g5:linear-gradient(135deg,#FF9F43,#FF3CAC);
+  --g6:linear-gradient(135deg,#B44FFF,#3D5AFE);
+  --r:18px;--rs:12px;
+}
+html{background:#080812;color:#fff;font-family:var(--fb);-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;overflow-x:hidden}
+
+/* Animated wallpaper */
+#wp{position:fixed;inset:0;z-index:0;opacity:.35;
+  background:radial-gradient(ellipse at 20% 50%,rgba(255,60,172,.18),transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(61,90,254,.15),transparent 50%),
+             radial-gradient(ellipse at 50% 80%,rgba(0,229,255,.1),transparent 55%);
+  background-size:200% 200%;animation:wpShift 25s ease-in-out infinite alternate}
+@keyframes wpShift{0%{background-position:0% 0%}100%{background-position:100% 100%}}
+
+.page{position:relative;z-index:1;min-height:100dvh;display:flex;flex-direction:column;
+  max-width:1100px;margin:0 auto;padding:48px 20px 32px}
+
+/* Hero */
+.hero{text-align:center;margin-bottom:40px}
+.logo-mark{width:80px;height:80px;border-radius:22px;background:var(--g1);
+  display:inline-flex;align-items:center;justify-content:center;font-size:38px;
+  box-shadow:0 8px 32px rgba(255,60,172,.35);margin-bottom:20px;
+  animation:lp 3s ease-in-out infinite alternate}
+@keyframes lp{0%{box-shadow:0 8px 32px rgba(255,60,172,.35)}100%{box-shadow:0 8px 48px rgba(255,60,172,.55)}}
+.hero h1{font-family:var(--fh);font-weight:800;font-size:clamp(28px,5vw,44px);
+  background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;line-height:1.2;margin-bottom:8px}
+.hero .subtitle{color:rgba(255,255,255,.45);font-size:15px;font-weight:500}
+
+/* Grid */
+#app-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;flex:1}
+@media(min-width:640px){#app-grid{grid-template-columns:repeat(3,1fr);gap:20px}}
+@media(min-width:960px){#app-grid{grid-template-columns:repeat(4,1fr);gap:20px}}
+
+/* Card */
+.app-card{
+  background:rgba(255,255,255,.05);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1.5px solid rgba(255,255,255,.1);border-radius:var(--r);
+  padding:22px 16px 18px;text-decoration:none;color:#fff;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  transition:transform .22s,border-color .22s,box-shadow .22s;cursor:pointer;
+  opacity:0;animation:cardIn .45s cubic-bezier(.34,1.56,.64,1) forwards}
+.app-card:hover{transform:translateY(-4px);border-color:rgba(255,60,172,.3);
+  box-shadow:0 12px 40px rgba(255,60,172,.12)}
+.app-card:active{transform:scale(.97)}
+
+@keyframes cardIn{from{opacity:0;transform:scale(.85) translateY(24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* Card icon */
+.card-icon{width:68px;height:68px;border-radius:18px;display:flex;align-items:center;
+  justify-content:center;font-size:30px;position:relative;box-shadow:0 8px 26px rgba(0,0,0,.38);flex-shrink:0}
+.card-shine{position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(145deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 55%);pointer-events:none}
+
+/* Card text */
+.card-name{font-family:var(--fh);font-weight:700;font-size:14px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.card-desc{font-size:12px;color:rgba(255,255,255,.4);text-align:center;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  line-height:1.4;min-height:34px}
+.card-date{font-size:11px;color:rgba(255,255,255,.25);font-weight:500}
+
+/* Loading skeleton */
+.skeleton-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(min-width:640px){.skeleton-grid{grid-template-columns:repeat(3,1fr);gap:20px}}
+@media(min-width:960px){.skeleton-grid{grid-template-columns:repeat(4,1fr);gap:20px}}
+.skel-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.06);
+  border-radius:var(--r);padding:22px 16px 18px;display:flex;flex-direction:column;
+  align-items:center;gap:12px}
+.skel-icon{width:68px;height:68px;border-radius:18px;background:rgba(255,255,255,.06);
+  animation:shimmer 1.5s infinite}
+.skel-line{height:12px;border-radius:6px;background:rgba(255,255,255,.06);animation:shimmer 1.5s infinite}
+.skel-line.w1{width:60%}.skel-line.w2{width:80%}.skel-line.w3{width:40%}
+@keyframes shimmer{0%,100%{opacity:.4}50%{opacity:.8}}
+
+/* Empty & error states */
+.empty-state,.error-state{grid-column:1/-1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:60px 20px;text-align:center;gap:12px}
+.state-icon{font-size:48px;animation:bob 3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.state-title{font-family:var(--fh);font-weight:700;font-size:18px}
+.state-sub{color:rgba(255,255,255,.4);font-size:14px}
+.retry-btn{margin-top:8px;padding:10px 24px;border:none;border-radius:var(--rs);
+  background:var(--g1);color:#fff;font-family:var(--fh);font-weight:700;font-size:14px;
+  cursor:pointer;transition:transform .15s}
+.retry-btn:active{transform:scale(.95)}
+
+/* Footer */
+footer{text-align:center;padding:40px 0 8px;color:rgba(255,255,255,.2);font-size:13px}
+footer a{color:rgba(255,255,255,.35);text-decoration:none;transition:color .15s}
+footer a:hover{color:var(--pk)}
+</style>
+</head>
+<body>
+<div id="wp"></div>
+<div class="page">
+  <header class="hero">
+    <div class="logo-mark">&#9889;</div>
+    <h1>WiseForge Apps</h1>
+    <p class="subtitle">Built with AI. Play instantly.</p>
+  </header>
+
+  <main id="app-grid" style="display:none"></main>
+
+  <div id="loading">
+    <div class="skeleton-grid">
+      <div class="skel-card"><div class="skel-icon"></div><div class="skel-line w1"></div><div class="skel-line w2"></div><div class="skel-line w3"></div></div>
+      <div class="skel-card"><div class="skel-icon"></div><div class="skel-line w1"></div><div class="skel-line w2"></div><div class="skel-line w3"></div></div>
+      <div class="skel-card"><div class="skel-icon"></div><div class="skel-line w1"></div><div class="skel-line w2"></div><div class="skel-line w3"></div></div>
+      <div class="skel-card"><div class="skel-icon"></div><div class="skel-line w1"></div><div class="skel-line w2"></div><div class="skel-line w3"></div></div>
+      <div class="skel-card"><div class="skel-icon"></div><div class="skel-line w1"></div><div class="skel-line w2"></div><div class="skel-line w3"></div></div>
+      <div class="skel-card"><div class="skel-icon"></div><div class="skel-line w1"></div><div class="skel-line w2"></div><div class="skel-line w3"></div></div>
+    </div>
+  </div>
+
+  <div id="error" style="display:none"></div>
+
+  <footer>
+    <p>Built with <a href="../">The Builder</a> by WiseForge</p>
+  </footer>
+</div>
+
+<script>
+(function() {
+  var grid = document.getElementById('app-grid')
+  var loading = document.getElementById('loading')
+  var error = document.getElementById('error')
+
+  var gradients = [
+    'linear-gradient(135deg,#FF3CAC,#784BA0,#2B86C5)',
+    'linear-gradient(135deg,#3D5AFE,#00E5FF)',
+    'linear-gradient(135deg,#FF5252,#FFD600)',
+    'linear-gradient(135deg,#AAFF00,#00C2FF)',
+    'linear-gradient(135deg,#FF9F43,#FF3CAC)',
+    'linear-gradient(135deg,#B44FFF,#3D5AFE)'
+  ]
+
+  function escapeHtml(str) {
+    var d = document.createElement('div')
+    d.textContent = str
+    return d.innerHTML
+  }
+
+  function formatDate(iso) {
+    if (!iso) return ''
+    var d = new Date(iso)
+    var now = new Date()
+    var diff = Math.floor((now - d) / 1000)
+    if (diff < 60) return 'just now'
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago'
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago'
+    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago'
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    return months[d.getMonth()] + ' ' + d.getDate()
+  }
+
+  function renderApps(apps) {
+    loading.style.display = 'none'
+
+    if (!apps || !apps.length) {
+      grid.style.display = 'grid'
+      grid.innerHTML = '<div class="empty-state"><span class="state-icon">&#128640;</span><p class="state-title">No apps yet</p><p class="state-sub">Apps built with The Builder will appear here.</p></div>'
+      return
+    }
+
+    apps.sort(function(a, b) { return new Date(b.updatedAt) - new Date(a.updatedAt) })
+
+    var html = ''
+    for (var i = 0; i < apps.length; i++) {
+      var app = apps[i]
+      var desc = app.prompts && app.prompts[0] ? app.prompts[0].text : ''
+      if (desc.length > 65) desc = desc.slice(0, 62) + '...'
+      var grad = gradients[i % gradients.length]
+      var delay = i * 80
+
+      html += '<a href="./' + encodeURIComponent(app.id) + '.html" class="app-card" style="animation-delay:' + delay + 'ms">'
+        + '<div class="card-icon" style="background:' + grad + '"><span>' + escapeHtml(app.icon) + '</span><div class="card-shine"></div></div>'
+        + '<div class="card-name">' + escapeHtml(app.name) + '</div>'
+        + '<div class="card-desc">' + (desc ? escapeHtml(desc) : '<span style="opacity:.3">No description</span>') + '</div>'
+        + '<span class="card-date">' + formatDate(app.updatedAt) + '</span>'
+        + '</a>'
+    }
+
+    grid.innerHTML = html
+    grid.style.display = 'grid'
+  }
+
+  function showError() {
+    loading.style.display = 'none'
+    error.style.display = 'block'
+    error.innerHTML = '<div class="empty-state"><span class="state-icon">&#9888;&#65039;</span><p class="state-title">Could not load apps</p><p class="state-sub">Check your connection and try again.</p><button class="retry-btn" onclick="location.reload()">Retry</button></div>'
+  }
+
+  fetch('./manifest.json')
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status)
+      return res.json()
+    })
+    .then(renderApps)
+    .catch(showError)
+})()
+</script>
+</body>
+</html>
