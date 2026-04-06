@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Target Planner</title>
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQXR0ZW5kYW5jZSBUYXJnZXQgUGxhbm5lciIsInNob3J0X25hbWUiOiJBdHRlbmRhbmNlIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjMjU2M2ViIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOWZhZmIiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhkcFpIUm9QU0l4T1RJaUlHaGxhV2RvZEQwaU1Ua3lJaUJtYVd4c1BTSWpNalUyTTJWaUlqNDhjbVZqZENCM2FXUjBhRDBpTVRreUlpQm9aV2xuYUhROUlqRTVNaUlnWm1sc2JEMGlJek5rTkdJMlppSXZQand2YzNabkBnIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-hover: #f1f5f9;
+            --text: #1e293b;
+            --text-muted: #475569;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-light: #dbeafe;
+            --border: #e2e8f0;
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 1200px;
+                padding: 2rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .app-container {
+                animation: fadeIn 300ms ease-out;
+            }
+            
+            .quarter-card {
+                animation: slideUp 400ms ease-out;
+                animation-fill-mode: both;
+            }
+            
+            .quarter-card:nth-child(1) { animation-delay: 50ms; }
+            .quarter-card:nth-child(2) { animation-delay: 100ms; }
+            .quarter-card:nth-child(3) { animation-delay: 150ms; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem 0;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .target-info {
+            text-align: center;
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        .target-info strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .quarter-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .quarter-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .quarter-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+        }
+
+        .quarter-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .quarter-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .progress-bar {
+            background: var(--bg-hover);
+            border-radius: var(--radius-sm);
+            height: 8px;
+            margin: 1rem 0 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+            height: 100%;
+            border-radius: var(--radius-sm);
+            transition: width 300ms ease;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .calendar-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-nav {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.5rem;
+            cursor: pointer;
+            color: var(--text);
+            transition: all 150ms ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .calendar-nav:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .calendar-nav:focus,
+        .calendar-nav:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .calendar-nav:active {
+            transform: scale(0.97);
+        }
+
+        .calendar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-grid {
+                gap: 6px;
+            }
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 150ms ease;
+            background: var(--bg-card);
+            font-weight: 500;
+            position: relative;
+            min-height: 44px;
+        }
+
+        @media (min-width: 480px) {
+            .calendar-day {
+                min-height: 48px;
+            }
+        }
+
+        .calendar-day:hover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .calendar-day:focus,
+        .calendar-day:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .calendar-day:active {
+            transform: scale(0.95);
+        }
+
+        .calendar-day.other-month {
+            color: var(--text-muted);
+            background: var(--bg-hover);
+            cursor: default;
+        }
+
+        .calendar-day.other-month:hover {
+            border-color: var(--border);
+            background: var(--bg-hover);
+        }
+
+        .calendar-day.today {
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .calendar-day.office {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .calendar-day.pto {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: var(--radius-sm);
+        }
+
+        .legend-color.office { background: var(--accent); }
+        .legend-color.pto { background: var(--success); }
+
+        .forecast-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+        }
+
+        .forecast-section h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        @media (min-width: 1024px) {
+            .forecast-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .forecast-month {
+            background: var(--bg-hover);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .forecast-month.current {
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+        }
+
+        .forecast-month-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .forecast-days {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .forecast-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(-50%) translateY(1rem);
+            transition: all 300ms ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            color: var(--text);
+            transition: all 150ms ease;
+            font-size: 0.875rem;
+        }
+
+        .control-button:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .control-button:focus,
+        .control-button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .control-button.danger {
+            color: var(--error);
+            border-color: var(--error);
+        }
+
+        .control-button.danger:hover {
+            background: #fef2f2;
+        }
+
+        .control-button.danger:focus,
+        .control-button.danger:focus-visible {
+            outline: 2px solid var(--error);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>Attendance Target Planner</h1>
+            <p>Track your office days and PTO to meet your monthly target</p>
+        </header>
+
+        <div class="target-info">
+            Monthly Target: <strong id="targetDisplay">13 days</strong> | Quarterly Target: <strong id="quarterlyTargetDisplay">39 days</strong>
+        </div>
+
+        <section class="quarter-cards" id="quarterCards" role="region" aria-label="Quarterly progress summary">
+            <!-- Quarter summary cards will be generated here -->
+        </section>
+
+        <div class="controls">
+            <button class="control-button" id="todayButton">Go to Today</button>
+            <button class="control-button danger" id="clearAllData">Clear All Data</button>
+        </div>
+
+        <section class="calendar-section" role="region" aria-label="Monthly calendar">
+            <div class="calendar-header">
+                <button class="calendar-nav" id="prevMonth" aria-label="Previous month">‹</button>
+                <h2 class="calendar-title" id="calendarTitle"></h2>
+                <button class="calendar-nav" id="nextMonth" aria-label="Next month">›</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar days">
+                <!-- Calendar will be generated here -->
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color office"></div>
+                    <span>Office</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color pto"></div>
+                    <span>PTO</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="forecast-section" role="region" aria-label="Monthly forecast">
+            <h3>Monthly Progress Overview</h3>
+            <div class="forecast-grid" id="forecastGrid">
+                <!-- Forecast will be generated here -->
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        // Application state
+        const state = {
+            attendanceData: {}, // { "2024-01-15": "Office", "2024-01-16": "PTO", ... }
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            monthlyTarget: 13,
+            hasInitializedDemo: false
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            initializeDemoData();
+            setupEventListeners();
+            render();
+        });
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('attendanceTargetPlanner');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.attendanceData = parsed.attendanceData || {};
+                    state.currentMonth = parsed.currentMonth !== undefined ? parsed.currentMonth : new Date().getMonth();
+                    state.currentYear = parsed.currentYear !== undefined ? parsed.currentYear : new Date().getFullYear();
+                    state.hasInitializedDemo = parsed.hasInitializedDemo || false;
+                }
+            } catch (error) {
+                console.error('Error loading state:', error);
+                // Continue with empty state
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('attendanceTargetPlanner', JSON.stringify({
+                    attendanceData: state.attendanceData,
+                    currentMonth: state.currentMonth,
+                    currentYear: state.currentYear,
+                    hasInitializedDemo: state.hasInitializedDemo
+                }));
+            } catch (error) {
+                console.error('Error saving state:', error);
+                showToast('Failed to save data');
+            }
+        }
+
+        function initializeDemoData() {
+            // Only add demo data if no existing data AND we haven't initialized demo before
+            if (Object.keys(state.attendanceData).length === 0 && !state.hasInitializedDemo) {
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+                
+                // Add some demo office days and PTO
+                const demoEntries = [
+                    { offset: -20, type: 'Office' },
+                    { offset: -19, type: 'Office' },
+                    { offset: -18, type: 'PTO' },
+                    { offset: -15, type: 'Office' },
+                    { offset: -14, type: 'Office' },
+                    { offset: -13, type: 'Office' },
+                    { offset: -10, type: 'PTO' },
+                    { offset: -8, type: 'Office' },
+                    { offset: -7, type: 'Office' },
+                    { offset: -6, type: 'Office' },
+                    { offset: -3, type: 'Office' },
+                    { offset: -1, type: 'Office' }
+                ];
+
+                demoEntries.forEach(entry => {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() + entry.offset);
+                    const dateKey = formatDateKey(date);
+                    state.attendanceData[dateKey] = entry.type;
+                });
+                
+                state.hasInitializedDemo = true;
+                saveState();
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                state.currentMonth--;
+                if (state.currentMonth < 0) {
+                    state.currentMonth = 11;
+                    state.currentYear--;
+                }
+                saveState();
+                render();
+            });
+
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                state.currentMonth++;
+                if (state.currentMonth > 11) {
+                    state.currentMonth = 0;
+                    state.currentYear++;
+                }
+                saveState();
+                render();
+            });
+
+            // Today button
+            document.getElementById('todayButton').addEventListener('click', () => {
+                const today = new Date();
+                state.currentMonth = today.getMonth();
+                state.currentYear = today.getFullYear();
+                saveState();
+                render();
+                showToast('Navigated to current month');
+            });
+
+            // Calendar day clicks and keyboard navigation
+            document.getElementById('calendarGrid').addEventListener('click', (e) => {
+                if (e.target.classList.contains('calendar-day') && !e.target.classList.contains('other-month')) {
+                    const date = e.target.dataset.date;
+                    if (date) {
+                        toggleDayStatus(date);
+                    }
+                }
+            });
+
+            document.getElementById('calendarGrid').addEventListener('keydown', (e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('calendar-day') && !e.target.classList.contains('other-month')) {
+                    e.preventDefault();
+                    const date = e.target.dataset.date;
+                    if (date) {
+                        toggleDayStatus(date);
+                    }
+                }
+            });
+
+            // Clear all data button
+            document.getElementById('clearAllData').addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear all attendance data? This cannot be undone.')) {
+                    state.attendanceData = {};
+                    saveState();
+                    render();
+                    showToast('All data cleared');
+                }
+            });
+        }
+
+        function toggleDayStatus(dateKey) {
+            const current = state.attendanceData[dateKey];
+            
+            if (!current) {
+                state.attendanceData[dateKey] = 'Office';
+                showToast('Marked as Office day');
+            } else if (current === 'Office') {
+                state.attendanceData[dateKey] = 'PTO';
+                showToast('Marked as PTO day');
+            } else if (current === 'PTO') {
+                delete state.attendanceData[dateKey];
+                showToast('Attendance removed');
+            }
+            
+            saveState();
+            render();
+        }
+
+        function render() {
+            try {
+                renderTargetInfo();
+                renderQuarterCards();
+                renderCalendar();
+                renderForecast();
+            } catch (error) {
+                console.error('Render error:', error);
+                showToast('Display error occurred');
+            }
+        }
+
+        function renderTargetInfo() {
+            document.getElementById('targetDisplay').textContent = `${state.monthlyTarget} days`;
+            document.getElementById('quarterlyTargetDisplay').textContent = `${state.monthlyTarget * 3} days`;
+        }
+
+        function renderQuarterCards() {
+            const container = document.getElementById('quarterCards');
+            const quarters = getQuarterlyData();
+            
+            container.innerHTML = quarters.map((quarter, index) => {
+                const progressPercentage = quarter.target > 0 ? Math.min(100, (quarter.completed / quarter.target) * 100) : 0;
+                const progressRounded = quarter.target > 0 ? Math.round((quarter.completed / quarter.target) * 100) : 0;
+                
+                return `
+                    <div class="quarter-card">
+                        <h3>${quarter.name}</h3>
+                        <div class="quarter-stats">
+                            <div class="stat">
+                                <span class="stat-value">${quarter.completed}</span>
+                                <div class="stat-label">Completed Days</div>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">${quarter.target}</span>
+                                <div class="stat-label">Target Days</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+                        </div>
+                        <div class="progress-text">${quarter.completed} / ${quarter.target} days (${progressRounded}%)</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderCalendar() {
+            const title = document.getElementById('calendarTitle');
+            const grid = document.getElementById('calendarGrid');
+            
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            title.textContent = `${monthNames[state.currentMonth]} ${state.currentYear}`;
+            
+            const firstDay = new Date(state.currentYear, state.currentMonth, 1);
+            const lastDay = new Date(state.currentYear, state.currentMonth + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            const today = new Date();
+            const todayKey = formatDateKey(today);
+            
+            let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                .map(day => `<div class="calendar-day-header">${day}</div>`)
+                .join('');
+            
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dateKey = formatDateKey(date);
+                const isCurrentMonth = date.getMonth() === state.currentMonth;
+                const isToday = dateKey === todayKey;
+                const status = state.attendanceData[dateKey];
+                
+                let classes = ['calendar-day'];
+                if (!isCurrentMonth) classes.push('other-month');
+                if (isToday) classes.push('today');
+                if (status === 'Office') classes.push('office');
+                if (status === 'PTO') classes.push('pto');
+                
+                const tabindex = isCurrentMonth ? '0' : '-1';
+                const role = isCurrentMonth ? 'button' : '';
+                const statusText = status ? `${status} day` : 'click to mark attendance';
+                const ariaLabel = isCurrentMonth ? `${monthNames[date.getMonth()]} ${date.getDate()}, ${statusText}` : '';
+                
+                html += `<div class="${classes.join(' ')}" data-date="${dateKey}" tabindex="${tabindex}" role="${role}" aria-label="${ariaLabel}">${date.getDate()}</div>`;
+            }
+            
+            grid.innerHTML = html;
+        }
+
+        function renderForecast() {
+            const container = document.getElementById('forecastGrid');
+            const currentQuarter = getCurrentQuarter();
+            const forecast = calculateForecast(currentQuarter);
+            
+            container.innerHTML = forecast.map(month => {
+                let label;
+                if (month.isRemaining) {
+                    label = month.needed > 0 ? 'to reach target' : 'target reached';
+                } else {
+                    label = month.needed > 0 ? 'behind target' : 'target met';
+                }
+                
+                return `
+                    <div class="forecast-month ${month.isCurrent ? 'current' : ''}">
+                        <div class="forecast-month-name">${month.name}</div>
+                        <div class="forecast-days">${month.needed}</div>
+                        <div class="forecast-label">${label}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getQuarterlyData() {
+            const quarters = [
+                { name: `Q1 ${state.currentYear}`, months: [0, 1, 2], target: state.monthlyTarget * 3 },
+                { name: `Q2 ${state.currentYear}`, months: [3, 4, 5], target: state.monthlyTarget * 3 },
+                { name: `Q3 ${state.currentYear}`, months: [6, 7, 8], target: state.monthlyTarget * 3 },
+                { name: `Q4 ${state.currentYear}`, months: [9, 10, 11], target: state.monthlyTarget * 3 }
+            ];
+            
+            return quarters.map(quarter => {
+                let completed = 0;
+                quarter.months.forEach(month => {
+                    completed += getMonthlyCount(state.currentYear, month);
+                });
+                
+                return {
+                    ...quarter,
+                    completed
+                };
+            });
+        }
+
+        function getCurrentQuarter() {
+            const currentMonth = state.currentMonth;
+            const quarterMonths = [
+                [0, 1, 2],   // Q1
+                [3, 4, 5],   // Q2
+                [6, 7, 8],   // Q3
+                [9, 10, 11]  // Q4
+            ];
+            
+            return quarterMonths.find(months => months.includes(currentMonth));
+        }
+
+        function calculateForecast(quarterMonths) {
+            const currentMonth = state.currentMonth;
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            // Calculate total completed days in current quarter
+            let quarterCompleted = 0;
+            quarterMonths.forEach(month => {
+                quarterCompleted += getMonthlyCount(state.currentYear, month);
+            });
+            
+            // Calculate remaining days needed for quarter
+            const quarterTarget = state.monthlyTarget * 3;
+            const remainingForQuarter = Math.max(0, quarterTarget - quarterCompleted);
+            
+            // Get remaining months in quarter
+            const remainingMonths = quarterMonths.filter(month => month >= currentMonth);
+            
+            // Distribute remaining days across remaining months
+            const daysPerMonth = remainingMonths.length > 0 ? 
+                Math.ceil(remainingForQuarter / remainingMonths.length) : 0;
+            
+            return quarterMonths.map(month => {
+                const isRemaining = month >= currentMonth;
+                const completed = getMonthlyCount(state.currentYear, month);
+                let needed;
+                
+                if (!isRemaining) {
+                    // Past months - show how much they're behind target
+                    needed = Math.max(0, state.monthlyTarget - completed);
+                } else {
+                    // Remaining months - distribute remaining quarter days
+                    needed = Math.max(0, daysPerMonth);
+                }
+                
+                return {
+                    name: monthNames[month],
+                    needed,
+                    isCurrent: month === currentMonth,
+                    isRemaining
+                };
+            });
+        }
+
+        function getMonthlyCount(year, month) {
+            let count = 0;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateKey = formatDateKey(date);
+                const status = state.attendanceData[dateKey];
+                
+                if (status === 'Office' || status === 'PTO') {
+                    count++;
+                }
+            }
+            
+            return count;
+        }
+
+        function formatDateKey(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
