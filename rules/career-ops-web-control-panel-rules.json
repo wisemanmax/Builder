@@ -1,0 +1,23 @@
+{
+  "id": "06853fb5-bcf5-4ee2-b687-1a097de66071",
+  "name": "Career-Ops Web Control Panel Rules",
+  "linkedThoughtId": "adc267ed-0d19-4fbf-a0f2-81747652e12d",
+  "mustRules": [
+    "Use the local repository checkout as the only source of truth for jobs, outputs, config, and logs",
+    "Invoke existing scripts and workflows instead of reimplementing pipeline business logic in the web layer",
+    "Surface logs and failures from repo paths like batch/logs in the UI for diagnostics",
+    "Allow editing of cv.md and config/profile.yml from the browser with explicit save actions",
+    "Extend the existing dashboard Go application structure under dashboard/ where feasible, following current internal package patterns"
+  ],
+  "mustNotRules": [
+    "Add cloud storage, hosted sync, or remote shared workspace behavior",
+    "Introduce multi-user accounts, collaboration features, or team pipeline ownership",
+    "Rewrite core scoring, PDF generation, tracking, or batch logic already handled by existing Node.js, Go, and prompt-based workflows"
+  ],
+  "niceToHave": [
+    "Step-level run progress indicators while a pipeline is executing",
+    "Duplicate-job warning based on URL or normalized job metadata before launch"
+  ],
+  "createdAt": "2026-04-07T22:29:54.654Z",
+  "updatedAt": "2026-04-07T22:29:54.654Z"
+}
