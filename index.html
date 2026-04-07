@@ -97,6 +97,12 @@
       <div class="fl"><label>Supabase Anon Key</label><input class="fi fi-mono" type="password" id="ob-sb-anon" placeholder="eyJ..."></div>
     </div>
   </div>
+  <div class="ob-account-row" id="ob-account-row">
+    <div class="ob-account-info">
+      <span style="font-size:14px">&#x1F464;</span>
+      <span style="font-size:12px;color:rgba(255,255,255,.6)">Have an account? <strong style="color:var(--mn);cursor:pointer" id="ob-signin-link">Sign in</strong> to sync keys &amp; apps across devices</span>
+    </div>
+  </div>
   <button class="btn-p" id="ob-submit">Launch The Builder &rarr;</button>
 </div>
 </div>
@@ -133,6 +139,10 @@
       <div class="di" data-action="openTemplates" role="button" tabindex="0" aria-label="Templates">
         <div class="di-img" style="background:linear-gradient(135deg,#FF3CAC,#784BA0)">&#x1F4C2;</div>
         <div class="di-lbl">Templates</div>
+      </div>
+      <div class="di" data-action="openAccount" role="button" tabindex="0" aria-label="Account">
+        <div class="di-img" id="dock-acct-img" style="background:linear-gradient(135deg,#3D5AFE,#00E5FF)">&#x1F464;</div>
+        <div class="di-lbl" id="dock-acct-lbl">Account</div>
       </div>
       <div class="di" data-action="openSettings" role="button" tabindex="0" aria-label="Settings">
         <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
@@ -383,6 +393,18 @@
         <button class="se-send" id="se-send">&uarr;</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ACCOUNT -->
+<div id="account-overlay" role="dialog" aria-label="Account">
+  <div class="ssheet">
+    <div class="ssh"></div>
+    <div class="sshead">
+      <span class="sshead-title">&#x1F464; Account</span>
+      <button class="ssclose" id="acct-close" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="ssbody" id="acct-content"></div>
   </div>
 </div>
 

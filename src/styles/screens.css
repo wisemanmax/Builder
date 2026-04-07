@@ -163,3 +163,45 @@
 /* Self-update card */
 .update-card{background:rgba(180,79,255,.06);border:1.5px solid rgba(180,79,255,.25);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 .update-info{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7}
+
+/* ACCOUNT OVERLAY */
+#account-overlay{position:fixed;inset:0;z-index:71;background:rgba(0,0,0,.6);backdrop-filter:blur(14px);display:none;align-items:flex-end}
+#account-overlay.on{display:flex}
+
+/* Account auth form */
+.acct-auth-form{display:flex;flex-direction:column;gap:14px}
+.acct-tabs{display:flex;gap:0;background:rgba(255,255,255,.05);border-radius:10px;padding:3px;border:1px solid rgba(255,255,255,.08)}
+.acct-tab{flex:1;padding:9px 14px;border-radius:8px;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:var(--fh);font-size:12px;font-weight:700;cursor:pointer;transition:all .18s}
+.acct-tab.active{background:rgba(61,90,254,.18);color:#fff;box-shadow:0 2px 8px rgba(61,90,254,.2)}
+.acct-form-body{display:flex;flex-direction:column;gap:12px}
+.acct-sb-note{font-size:11px;color:rgba(255,255,255,.4);line-height:1.6;padding:10px 12px;background:rgba(255,214,0,.06);border:1px solid rgba(255,214,0,.15);border-radius:10px}
+.acct-status{font-size:11px;padding:8px 12px;border-radius:8px;text-align:center;color:rgba(255,255,255,.5);transition:all .2s}
+.acct-status.err{background:rgba(255,82,82,.08);border:1px solid rgba(255,82,82,.2);color:rgba(255,82,82,.9)}
+.acct-status.ok{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);color:rgba(0,230,118,.9)}
+
+/* Account logged-in view */
+.acct-logged-in{display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0 10px}
+.acct-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#3D5AFE,#00E5FF);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:28px;font-weight:800;color:#fff;box-shadow:0 4px 20px rgba(61,90,254,.3)}
+.acct-email{font-family:var(--fh);font-size:15px;font-weight:700;color:#fff}
+.acct-uid{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.25);word-break:break-all;text-align:center;max-width:280px}
+.acct-actions{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:6px}
+.btn-s{width:100%;padding:11px;border-radius:var(--rs);border:none;font-family:var(--fh);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+.acct-sync-btn{background:linear-gradient(135deg,#3D5AFE,#00E5FF);color:#fff;box-shadow:0 3px 12px rgba(61,90,254,.3)}
+.acct-sync-btn:hover{box-shadow:0 5px 20px rgba(61,90,254,.4);transform:translateY(-1px)}
+.acct-setup-btn{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12) !important;color:rgba(255,255,255,.6)}
+.acct-setup-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.acct-signout-btn{background:rgba(255,82,82,.07);border:1.5px solid rgba(255,82,82,.2) !important;color:var(--co)}
+.acct-signout-btn:hover{background:rgba(255,82,82,.15)}
+.btn-xs{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);font-size:10px;font-weight:600;cursor:pointer;margin-top:4px}
+.btn-xs:hover{background:rgba(255,255,255,.12);color:#fff}
+
+/* SQL panel */
+.acct-sql-panel{margin-top:8px;padding:14px;background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.08);border-radius:var(--r);display:flex;flex-direction:column;gap:14px;text-align:left}
+.acct-sql-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.04em}
+.acct-sql-section{display:flex;flex-direction:column;gap:4px}
+.acct-sql-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em}
+.acct-sql-code{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.4);background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px;overflow-x:auto;white-space:pre-wrap;max-height:160px;line-height:1.5}
+
+/* Onboarding account row */
+.ob-account-row{display:flex;align-items:center;padding:10px 13px;background:rgba(61,90,254,.06);border:1.5px solid rgba(61,90,254,.18);border-radius:var(--rs)}
+.ob-account-info{display:flex;align-items:center;gap:8px}

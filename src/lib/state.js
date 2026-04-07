@@ -36,6 +36,11 @@ export const ST = {
   pipelineMode: 'builder1',
   _pipelineCancelRequested: false,
   _resumeSession: null,
+  // Auth
+  authToken: '',
+  authRefresh: '',
+  authUser: '',
+  authEmail: '',
 }
 
 export function persist() {
@@ -240,12 +245,24 @@ export function keyStatusHTML() {
       '</span>' +
       '</div>'
   }
+  var storageMode = ST.authUser
+    ? '\uD83D\uDD10 <strong style="color:#fff">Cloud-synced (encrypted)</strong><br>Keys are AES-256 encrypted and stored in your Supabase account. Accessible on any device.'
+    : '\uD83D\uDD12 <strong style="color:#fff">Device only \u2014 localStorage</strong><br>Keys are never uploaded, synced, logged, or included in any file pushed to GitHub.'
+  var storageBg = ST.authUser ? 'rgba(61,90,254,.08)' : 'rgba(0,230,118,.08)'
+  var storageBorder = ST.authUser ? 'rgba(61,90,254,.2)' : 'rgba(0,230,118,.2)'
+
+  var accountRow = ST.authEmail
+    ? '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:rgba(61,90,254,.08);border:1.5px solid rgba(61,90,254,.2);border-radius:10px;margin-bottom:2px">' +
+      '<span style="font-size:11px;color:rgba(255,255,255,.5)">Account</span>' +
+      '<span style="font-size:11px;color:var(--mn)">' + ST.authEmail + '</span></div>'
+    : ''
+
   return (
     '<div style="display:flex;flex-direction:column;gap:8px">' +
     '<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px">Where keys are stored</div>' +
-    '<div style="background:rgba(0,230,118,.08);border:1.5px solid rgba(0,230,118,.2);border-radius:10px;padding:11px 13px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.7">' +
-    '\uD83D\uDD12 <strong style="color:#fff">Device only \u2014 localStorage</strong><br>' +
-    'Keys are never uploaded, synced, logged, or included in any file pushed to GitHub.</div>' +
+    accountRow +
+    '<div style="background:' + storageBg + ';border:1.5px solid ' + storageBorder + ';border-radius:10px;padding:11px 13px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.7">' +
+    storageMode + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:6px">' +
     rows +
     '</div></div>'

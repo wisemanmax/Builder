@@ -126,7 +126,25 @@ export const KEY_STORE = {
   W2_PROVIDER: 'bldr_w2provider',
   GROQ: 'bldr_groqKey',
   GEMINI: 'bldr_geminiKey',
+  // Auth
+  AUTH_TOKEN: 'bldr_authToken',
+  AUTH_REFRESH: 'bldr_authRefresh',
+  AUTH_USER: 'bldr_authUser',
+  AUTH_EMAIL: 'bldr_authEmail',
 }
+
+// Supabase Auth endpoints (appended to sbUrl)
+export var AUTH_ENDPOINTS = {
+  SIGN_UP: '/auth/v1/signup',
+  SIGN_IN: '/auth/v1/token?grant_type=password',
+  SIGN_OUT: '/auth/v1/logout',
+  REFRESH: '/auth/v1/token?grant_type=refresh_token',
+  USER: '/auth/v1/user',
+}
+
+// Key vault table name in Supabase
+export var VAULT_TABLE = 'builder_key_vault'
+export var APPS_TABLE = 'builder_apps'
 
 export const PIPE2_NAMES = [
   'Claude \u00B7 Plan',
