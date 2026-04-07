@@ -38,6 +38,197 @@ export function ghFetch(url, opts) {
   })
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// External repo linking (Think screen): fetch an arbitrary repo the user's
+// PAT can access, build a compact "tree + key files" context blob to inject
+// into SYS_THINK. Does NOT use ghApiUrl() because that is hardcoded to the
+// user's deploy repo (ST.ghUser/ST.ghRepo).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function ghParseRepoUrl(input) {
+  if (!input) return null
+  var s = String(input).trim()
+  if (!s) return null
+  s = s.replace(/\.git$/i, '')
+  var m = s.match(/^git@github\.com:([^/]+)\/([^/]+?)$/i)
+  if (m) return _validateOwnerRepo(m[1], m[2])
+  m = s.match(/^https?:\/\/github\.com\/([^/]+)\/([^/?#]+)/i)
+  if (m) return _validateOwnerRepo(m[1], m[2])
+  m = s.match(/^([^/\s]+)\/([^/\s]+)$/)
+  if (m) return _validateOwnerRepo(m[1], m[2])
+  return null
+}
+
+function _validateOwnerRepo(owner, repo) {
+  var re = /^[\w.-]+$/
+  if (!re.test(owner) || !re.test(repo)) return null
+  return { owner: owner, repo: repo }
+}
+
+function _ghApiRepoBase(owner, repo) {
+  return 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo)
+}
+
+export function ghFetchExternalTree(owner, repo, branch) {
+  var base = _ghApiRepoBase(owner, repo)
+  var getTree = function (br) {
+    return ghFetch(base + '/git/trees/' + encodeURIComponent(br) + '?recursive=1').then(function (d) {
+      return { tree: (d && d.tree) || [], truncated: !!(d && d.truncated), branch: br }
+    })
+  }
+  if (branch) return getTree(branch)
+  return ghFetch(base).then(function (d) {
+    var br = (d && d.default_branch) || 'main'
+    return getTree(br)
+  })
+}
+
+export function ghFetchExternalFile(owner, repo, path, branch) {
+  var url =
+    _ghApiRepoBase(owner, repo) +
+    '/contents/' +
+    path.split('/').map(encodeURIComponent).join('/') +
+    '?ref=' +
+    encodeURIComponent(branch)
+  return ghFetch(url)
+    .then(function (d) {
+      if (!d || !d.content) return null
+      if (d.size && d.size > 50000) return null
+      try {
+        var bin = atob(String(d.content).replace(/\s+/g, ''))
+        var bytes = new Uint8Array(bin.length)
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+        return new TextDecoder('utf-8').decode(bytes)
+      } catch (e) {
+        return null
+      }
+    })
+    .catch(function () {
+      return null
+    })
+}
+
+function _pickKeyFiles(tree) {
+  var paths = []
+  for (var i = 0; i < tree.length; i++) {
+    if (tree[i].type === 'blob' && tree[i].path) paths.push(tree[i])
+  }
+  var lower = paths.map(function (e) {
+    return { e: e, p: e.path.toLowerCase() }
+  })
+  var picked = []
+  var seen = {}
+  var add = function (entry) {
+    if (entry && !seen[entry.path]) {
+      seen[entry.path] = true
+      picked.push(entry)
+    }
+  }
+  var findFirst = function (predicate) {
+    for (var j = 0; j < lower.length; j++) if (predicate(lower[j].p, lower[j].e)) return lower[j].e
+    return null
+  }
+  add(
+    findFirst(function (p) {
+      return p === 'readme.md'
+    })
+  )
+  add(
+    findFirst(function (p) {
+      return /^readme(\.|$)/.test(p)
+    })
+  )
+  add(
+    findFirst(function (p) {
+      return p === 'package.json'
+    })
+  )
+  add(
+    findFirst(function (p) {
+      return p === 'index.html'
+    })
+  )
+  add(
+    findFirst(function (p) {
+      return /^vite\.config\.(js|ts|mjs|cjs)$/.test(p)
+    })
+  )
+  add(
+    findFirst(function (p) {
+      return /^src\/main\.(js|ts|jsx|tsx)$/.test(p)
+    })
+  )
+  add(
+    findFirst(function (p) {
+      return /^src\/app\.(js|ts|jsx|tsx)$/.test(p)
+    })
+  )
+  add(
+    findFirst(function (p) {
+      return /^src\/index\.(js|ts)$/.test(p)
+    })
+  )
+  // Largest remaining .md
+  var mds = lower.filter(function (x) {
+    return /\.md$/.test(x.p) && !seen[x.e.path]
+  })
+  mds.sort(function (a, b) {
+    return (b.e.size || 0) - (a.e.size || 0)
+  })
+  if (mds[0]) add(mds[0].e)
+  return picked
+}
+
+function _trimTo(str, max) {
+  if (!str) return ''
+  if (str.length <= max) return str
+  return str.slice(0, max) + '\n[\u2026trimmed]'
+}
+
+export function ghFetchRepoContext(owner, repo) {
+  return ghFetchExternalTree(owner, repo).then(function (res) {
+    var tree = res.tree
+    var branch = res.branch
+    var truncated = res.truncated
+    // Tree summary: paths only, cap at 300 entries
+    var paths = []
+    for (var i = 0; i < tree.length && paths.length < 300; i++) {
+      if (tree[i].path) paths.push(tree[i].path)
+    }
+    var treeSummary = paths.join('\n')
+    if (truncated || tree.length > paths.length) treeSummary += '\n[truncated \u2014 repo too large]'
+
+    var picks = _pickKeyFiles(tree)
+    var fetches = picks.map(function (p) {
+      return ghFetchExternalFile(owner, repo, p.path, branch).then(function (body) {
+        return { path: p.path, body: body }
+      })
+    })
+    return Promise.all(fetches).then(function (files) {
+      var blocks = ['=== FILE TREE ===\n' + treeSummary]
+      var fileCount = 0
+      for (var j = 0; j < files.length; j++) {
+        if (files[j].body) {
+          blocks.push('=== ' + files[j].path + ' ===\n' + _trimTo(files[j].body, 1500))
+          fileCount++
+        }
+      }
+      var context = blocks.join('\n\n')
+      if (context.length > 8000) context = context.slice(0, 8000) + '\n[context truncated for token budget]'
+      return {
+        owner: owner,
+        repo: repo,
+        branch: branch,
+        fileCount: fileCount,
+        treeSize: tree.length,
+        truncated: truncated,
+        context: context,
+        fetchedAt: Date.now(),
+      }
+    })
+  })
+}
+
 export function ghGetMainSha() {
   return ghFetch('https://api.github.com/repos/' + ST.ghUser + '/' + ST.ghRepo + '/branches/main').then(function (d) {
     var sha = d && d.commit && d.commit.sha

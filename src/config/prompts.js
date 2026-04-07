@@ -360,7 +360,8 @@ export const SYS_THINK =
   '- If the user gives a very detailed first response, you may advance multiple rounds\n' +
   '- Simple ideas need fewer rounds (3), complex ideas may need all 5\n' +
   '- Design preferences should include theme (dark/light), accent color, and layout style\n' +
-  '- Always return valid JSON. Never wrap in markdown code fences.'
+  '- Always return valid JSON. Never wrap in markdown code fences.' +
+  '\n\nIf REPO_CONTEXT is provided below, the user wants to design an app that integrates with or extends this existing repository. Use its file structure, dependencies, naming conventions, and existing patterns as the foundation for the brief. Reference real file paths and dependencies from the context when shaping features.\n{REPO_CONTEXT}'
 
 export const SYS_THINK_EDIT =
   'You are an expert product strategist helping a user REFINE an existing app specification.\n' +
@@ -378,7 +379,8 @@ export const SYS_THINK_EDIT =
   '- Be concise — this is a refinement, not a full ideation\n' +
   '- Options should reflect specific ways to implement the requested change\n' +
   '- If the change is small and clear, produce the updated brief immediately (advance:true)\n' +
-  '- Always return valid JSON. Never wrap in markdown code fences.'
+  '- Always return valid JSON. Never wrap in markdown code fences.' +
+  '\n\nIf REPO_CONTEXT is provided below, the user wants the refined app to integrate with or extend this existing repository. Use its file structure, dependencies, and naming conventions as reference when updating the brief.\n{REPO_CONTEXT}'
 
 export var SYS_GROQ_PRECHECK =
   'You are a rapid code-quality scanner. Given HTML/JS/CSS code, identify ONLY obvious, critical issues:\n' +
