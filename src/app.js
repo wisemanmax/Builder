@@ -46,6 +46,8 @@ import {
   editThought,
   viewThoughtVersions,
   initThinkSheet,
+  linkThinkRepo,
+  unlinkThinkRepo,
 } from './screens/think.js'
 import {
   openApp,
@@ -194,6 +196,8 @@ export function init() {
     confirmThinkBrief: confirmThinkBrief,
     editThinkBrief: editThinkBrief,
     sendThinkMsg: sendThinkMsg,
+    linkThinkRepo: linkThinkRepo,
+    unlinkThinkRepo: unlinkThinkRepo,
     studioSend: studioSend,
     studioSetFullscreen: studioSetFullscreen,
     openCurrentInViewer: openCurrentInViewer,

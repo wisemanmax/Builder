@@ -124,6 +124,14 @@
 #send-btn:disabled{opacity:.28;cursor:not-allowed;transform:none}
 .ihint{font-size:10px;color:rgba(255,255,255,.22);text-align:center;margin-top:5px}
 
+/* link-repo chip (Think screen) */
+.think-repo-row{display:flex;gap:6px;padding:0 4px 7px;flex-wrap:wrap;align-items:center}
+.think-repo-chip{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.75);font-size:11px;font-family:var(--fb);padding:6px 11px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.think-repo-chip:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.24);color:#fff}
+.think-repo-chip.linked{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.45);color:#7bf3bf}
+.think-repo-chip.linked:hover{background:rgba(52,211,153,.18)}
+.think-repo-chip:disabled{opacity:.5;cursor:wait}
+
 /* image upload */
 .img-preview-row{display:flex;gap:6px;padding:0 4px 7px;flex-wrap:wrap;align-items:center}
 .img-thumb{position:relative;width:52px;height:52px;border-radius:10px;overflow:hidden;border:1.5px solid rgba(255,255,255,.15);flex-shrink:0}

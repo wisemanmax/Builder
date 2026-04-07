@@ -5,7 +5,7 @@ import { SYS_THINK, SYS_THINK_EDIT } from '../config/prompts.js'
 import { callGPTThink, resetCostAccum } from '../lib/ai.js'
 import { injectProfileContext } from '../lib/profile-context.js'
 import { calculateBuildCost } from '../lib/cost.js'
-import { ghSyncThoughtAndRules } from '../lib/github.js'
+import { ghSyncThoughtAndRules, ghParseRepoUrl, ghFetchRepoContext } from '../lib/github.js'
 import { openBuilder } from './build.js'
 
 var _thinkState = {
@@ -49,6 +49,7 @@ export function openThink(resumeId) {
         addThinkMsg(c.role === 'user' ? { type: 'user', text: c.text } : { type: 'ai', text: c.text })
       }
       $('think-sheet').classList.add('open')
+      renderThinkRepoChip()
       setTimeout(function () {
         $('think-input').focus()
       }, 420)
@@ -74,6 +75,7 @@ export function openThink(resumeId) {
     '<div class="tw-sub">Describe your app idea and I\'ll help you flesh it out in a few quick rounds before building.</div>' +
     '</div>'
   $('think-sheet').classList.add('open')
+  renderThinkRepoChip()
   setTimeout(function () {
     $('think-input').focus()
   }, 420)
@@ -83,6 +85,63 @@ export function closeThink() {
   if (_thinkState.conversation.length > 0) saveThought('draft')
   $('think-sheet').classList.remove('open')
   ST._thinking = false
+  ST.linkedRepo = null
+  renderThinkRepoChip()
+}
+
+export function renderThinkRepoChip() {
+  var btn = $('think-link-repo-btn')
+  if (!btn) return
+  if (ST.linkedRepo && ST.linkedRepo.context) {
+    var lr = ST.linkedRepo
+    btn.className = 'think-repo-chip linked'
+    btn.innerHTML = '\u2713 ' + esc(lr.owner + '/' + lr.repo) + ' (' + lr.fileCount + ' files) \u00D7'
+    btn.setAttribute('onclick', 'B.unlinkThinkRepo()')
+    btn.disabled = false
+  } else {
+    btn.className = 'think-repo-chip'
+    btn.innerHTML = '+ Link GitHub repo'
+    btn.setAttribute('onclick', 'B.linkThinkRepo()')
+    btn.disabled = false
+  }
+}
+
+export function linkThinkRepo() {
+  if (!ST.ghToken) {
+    toast('Add a GitHub token in Settings first')
+    return
+  }
+  var url = window.prompt('Paste GitHub repo URL or owner/repo')
+  if (url === null) return
+  var parsed = ghParseRepoUrl(url)
+  if (!parsed) {
+    toast('Invalid GitHub URL')
+    return
+  }
+  var btn = $('think-link-repo-btn')
+  if (btn) {
+    btn.disabled = true
+    btn.innerHTML = '\u2026 Fetching ' + esc(parsed.owner + '/' + parsed.repo)
+  }
+  ghFetchRepoContext(parsed.owner, parsed.repo)
+    .then(function (result) {
+      ST.linkedRepo = result
+      renderThinkRepoChip()
+      if (result.truncated) toast('Repo is large \u2014 context was truncated', 3500)
+      else toast('Linked ' + result.owner + '/' + result.repo + ' (' + result.fileCount + ' files)')
+    })
+    .catch(function (e) {
+      var msg = scrubKeys(e && e.message ? e.message : String(e))
+      if (/401|403/.test(msg)) toast('GitHub token lacks access \u2014 check PAT scopes')
+      else if (/404|Not Found/i.test(msg)) toast('Repo not found')
+      else toast('Failed to fetch repo: ' + msg)
+      renderThinkRepoChip()
+    })
+}
+
+export function unlinkThinkRepo() {
+  ST.linkedRepo = null
+  renderThinkRepoChip()
 }
 
 export function renderThinkProgress(round) {
@@ -203,6 +262,11 @@ export function sendThinkMsg() {
     if (_thinkState.editRules) baseSys += '\n\nCURRENT RULES:\n' + JSON.stringify(_thinkState.editRules)
   }
   var effectiveSys = injectProfileContext(baseSys)
+  var repoCtxStr =
+    ST.linkedRepo && ST.linkedRepo.context
+      ? '\n\nLINKED REPO CONTEXT (' + ST.linkedRepo.owner + '/' + ST.linkedRepo.repo + '):\n' + ST.linkedRepo.context
+      : ''
+  effectiveSys = effectiveSys.replace('{REPO_CONTEXT}', repoCtxStr)
   var aiCall = callGPTThink(effectiveSys, apiMessages, 2000)
 
   aiCall

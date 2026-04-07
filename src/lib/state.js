@@ -36,6 +36,7 @@ export const ST = {
   pipelineMode: 'builder1',
   _pipelineCancelRequested: false,
   _resumeSession: null,
+  linkedRepo: null,
 }
 
 export function persist() {
