@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career-Ops Control Panel</title>
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2FyZWVyLU9wcyBDb250cm9sIFBhbmVsIiwic2hvcnRfbmFtZSI6IkNhcmVlck9wcyIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInRoZW1lX2NvbG9yIjoiIzBmMTcyYSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxNzJhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1Ua3lJaUJvWldsbmFIUTlJakU1TWlJZ2RtbGxkMEp2ZUQwaU1DQXdJREU1TWlBeE9USWlJSGh0Ykc1elBTSm9kSFJ3T2k4dmQzZDNMbmN6TG05eVp5OHlNREF3TDNOMlp5SWdabWxzYkQwaUkwSTJRMU5HSWo0S1BHTnBjbU5zWlNCamVEMGlPVFlpSUdONVBTSTVOaUlnY2owaU16UWlJR1pwYkd3OUlpTXpRalJHUmtZaUx6NEtQSEJoZEdnZ1pEMGlUVFEwTGpSc05ESXRPAKUWTGPZEVRQZEJOREEWVERNM0xqWWlJR1pwYkd3OUlpTTNRek15UXlJdkNnPT0iLCJzaXplcyI6ImFueSIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #cbd5e1;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            font-size: 16px;
+        }
+
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+            color: var(--accent);
+        }
+
+        .nav {
+            display: none;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .nav {
+                display: flex;
+            }
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 14px;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: var(--text);
+            background: var(--bg-hover);
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-menu-btn { display: none; }
+        }
+
+        .mobile-nav {
+            display: none;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            flex-direction: column;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 200ms ease, transform 200ms ease;
+        }
+
+        .mobile-nav.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-nav { display: none !important; }
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        @media (min-width: 1440px) {
+            .main {
+                max-width: 1400px;
+            }
+        }
+
+        .dashboard {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            .job-intake { grid-column: 1 / -1; }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            animation: fadeInUp 300ms ease;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Job Intake Form */
+        .intake-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .intake-form {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            .job-description { grid-column: 1 / -1; }
+            .form-actions { grid-column: 1 / -1; }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input, .form-textarea {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            font-family: inherit;
+            font-size: 16px;
+            color: var(--text);
+            transition: border-color 150ms ease;
+            min-height: 44px;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input:invalid, .form-textarea:invalid {
+            border-color: var(--error);
+        }
+
+        .form-input:invalid:focus, .form-textarea:invalid:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            min-height: 44px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-hover);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 12px;
+            min-height: 36px;
+        }
+
+        /* Queue Items */
+        .queue-list, .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        @media (max-height: 600px) {
+            .queue-list, .history-list {
+                max-height: 300px;
+            }
+        }
+
+        .queue-item, .history-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            transition: all 150ms ease;
+        }
+
+        .queue-item:hover, .history-item:hover {
+            border-color: var(--accent);
+        }
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            gap: 1rem;
+        }
+
+        .item-title {
+            font-weight: 500;
+            color: var(--text);
+            font-size: 14px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-meta {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--warning);
+        }
+
+        .status-processing {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+        }
+
+        .status-completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        /* Progress */
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            transition: width 300ms ease;
+            animation: shimmer 2s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+
+        .progress-bar.processing {
+            background: linear-gradient(90deg, var(--accent) 25%, rgba(59, 130, 246, 0.3) 50%, var(--accent) 75%);
+            background-size: 200px 100%;
+        }
+
+        /* Artifacts */
+        .artifacts-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 480px) {
+            .artifacts-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        .artifact-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .artifact-item:hover, .artifact-item:focus {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .artifact-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .artifact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .artifact-name {
+            font-weight: 500;
+            font-size: 14px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .artifact-meta {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* Diagnostics */
+        .diagnostics {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        .diagnostics-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            border-radius: var(--radius-sm);
+            transition: background-color 150ms ease;
+        }
+
+        .diagnostics-header:hover, .diagnostics-header:focus {
+            background: var(--bg-hover);
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .diagnostics-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .diagnostics-arrow {
+            transition: transform 150ms ease;
+        }
+
+        .diagnostics-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .diagnostics-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: transform 300ms ease, opacity 300ms ease;
+            z-index: 1000;
+            max-width: 90vw;
+        }
+
+        @media (min-width: 480px) {
+            .toast {
+                max-width: 400px;
+                transform: translateX(400px);
+            }
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--error);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalEnter 200ms ease;
+        }
+
+        @media (min-width: 880px) {
+            .modal {
+                max-width: 800px;
+            }
+        }
+
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Duplicate Job Dialog */
+        .duplicate-dialog {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .duplicate-dialog-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 90vw;
+            width: 100%;
+            max-width: 400px;
+            animation: modalEnter 200ms ease;
+        }
+
+        .duplicate-dialog h3 {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .duplicate-dialog p {
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .duplicate-dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* File Editor */
+        .editor-textarea {
+            width: 100%;
+            min-height: 400px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text);
+            resize: vertical;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .editor-placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            white-space: pre-line;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stagger-1 { animation-delay: 0ms; }
+        .stagger-2 { animation-delay: 50ms; }
+        .stagger-3 { animation-delay: 100ms; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1 class="logo">
+                <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Career-Ops Control Panel
+            </h1>
+            <nav class="nav">
+                <button class="nav-btn active" data-view="dashboard" aria-label="Switch to Dashboard view">Dashboard</button>
+                <button class="nav-btn" data-view="editor" aria-label="Switch to CV Editor view">Editor</button>
+                <button class="nav-btn" data-view="config" aria-label="Switch to Configuration view">Config</button>
+            </nav>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle mobile navigation menu" aria-expanded="false">
+                <svg width="24" height="24" fill="currentColor" aria-hidden="true">
+                    <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </header>
+
+        <nav class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
+            <button class="nav-btn active" data-view="dashboard" aria-label="Switch to Dashboard view">Dashboard</button>
+            <button class="nav-btn" data-view="editor" aria-label="Switch to CV Editor view">Editor</button>
+            <button class="nav-btn" data-view="config" aria-label="Switch to Configuration view">Config</button>
+        </nav>
+
+        <main class="main" role="main">
+            <div id="dashboard-view">
+                <div class="dashboard">
+                    <div class="card job-intake stagger-1">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Job Intake
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <form class="intake-form" id="intake-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="job-url">Job URL</label>
+                                    <input type="url" id="job-url" class="form-input" placeholder="https://company.com/jobs/123" required aria-describedby="job-url-help">
+                                    <div id="job-url-help" class="sr-only">Enter the full URL of the job posting</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="job-title">Job Title</label>
+                                    <input type="text" id="job-title" class="form-input" placeholder="Senior Software Engineer" required aria-describedby="job-title-help">
+                                    <div id="job-title-help" class="sr-only">Enter the job title as listed in the posting</div>
+                                </div>
+                                <div class="form-group job-description">
+                                    <label class="form-label" for="job-description">Job Description</label>
+                                    <textarea id="job-description" class="form-textarea" placeholder="Paste the full job description here..." required aria-describedby="job-description-help"></textarea>
+                                    <div id="job-description-help" class="sr-only">Paste the complete job description text for analysis</div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary" id="run-pipeline-btn" aria-describedby="run-pipeline-help">
+                                        <svg width="16" height="16" fill="currentColor" aria-hidden="true">
+                                            <path d="M4 12l8-8 8 8M6 10.5V19a1 1 0 001 1h10a1 1 0 001-1v-8.5"/>
+                                        </svg>
+                                        Run Pipeline
+                                    </button>
+                                    <div id="run-pipeline-help" class="sr-only">Start the job analysis and CV tailoring pipeline</div>
+                                    <button type="button" class="btn btn-secondary" id="clear-form" aria-label="Clear all form fields">Clear</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card stagger-2">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Queue Status
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="queue-list" id="queue-list" role="region" aria-label="Job processing queue">
+                                <div class="empty-state">
+                                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <p>No jobs in queue</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card stagger-3">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Generated Artifacts
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="artifacts-grid" id="artifacts-grid" role="region" aria-label="Generated files and reports">
+                                <div class="empty-state">
+                                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                    <p>No artifacts generated yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                Pipeline History
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="history-list" id="history-list" role="region" aria-label="Completed pipeline runs">
+                                <div class="empty-state">
+                                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <p>No pipeline runs yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="editor-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+                                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            CV Editor (cv.md)
+                        </h2>
+                        <button class="btn btn-primary btn-small" id="save-cv" aria-describedby="save-cv-help">Save Changes</button>
+                        <div id="save-cv-help" class="sr-only">Save your CV changes to local storage</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="editor-placeholder" id="cv-placeholder">
+# Your Name
+
+## Experience
+
+### Senior Software Engineer | Company Name
+*Jan 2020 - Present*
+
+- Led development of...
+- Implemented...
+
+## Skills
+
+- JavaScript, Python, Go
+- React, Node.js
+- AWS, Docker
+                        </div>
+                        <textarea id="cv-editor" class="editor-textarea" aria-label="CV content editor" aria-describedby="cv-editor-help"></textarea>
+                        <div id="cv-editor-help" class="sr-only">Edit your CV content in Markdown format. The example above shows the expected structure.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="config-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+                                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Profile Config (profile.yml)
+                        </h2>
+                        <button class="btn btn-primary btn-small" id="save-config" aria-describedby="save-config-help">Save Changes</button>
+                        <div id="save-config-help" class="sr-only">Save your configuration changes to local storage</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="editor-placeholder" id="config-placeholder">
+# Profile Configuration
+name: "John Doe"
+email: "john@example.com"
+location: "San Francisco, CA"
+phone: "+1 (555) 123-4567"
+
+# Skills
+skills:
+  - JavaScript
+  - Python
+  - React
+  - Node.js
+
+# Preferences  
+preferences:
+  remote: true
+  salary_range: "$120k-150k"
+  job_types:
+    - full-time
+    - contract
+                        </div>
+                        <textarea id="config-editor" class="editor-textarea" aria-label="Configuration editor" aria-describedby="config-editor-help"></textarea>
+                        <div id="config-editor-help" class="sr-only">Edit your profile configuration in YAML format. The example above shows the expected structure.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <!-- Modal -->
+    <div id="modal-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal">
+            <div class="card-header">
+                <h3 class="card-title" id="modal-title">Modal Title</h3>
+                <button class="btn btn-secondary btn-small" id="close-modal" aria-label="Close modal">Close</button>
+            </div>
+            <div class="card-content" id="modal-content">
+                Modal content goes here
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let state = {
+            currentView: 'dashboard',
+            queue: [],
+            artifacts: [],
+            history: [],
+            cv: '',
+            config: '',
+            lastFocusedElement: null
+        };
+
+        // Utility functions for XSS prevention
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function createElementSafely(tag, content, className = '') {
+            const element = document.createElement(tag);
+            if (className) element.className = className;
+            element.textContent = content;
+            return element;
+        }
+
+        // Generate unique IDs to prevent collisions
+        function generateUniqueId() {
+            return Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Load initial data
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('career-ops-state');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                }
+
+                // Load demo data if empty
+                if (state.history.length === 0) {
+                    loadDemoData();
+                }
+                
+                // Load default CV and config
+                if (!state.cv) {
+                    state.cv = `# John Doe
+Senior Software Engineer
+
+## Contact
+- Email: john@example.com
+- Phone: +1 (555) 123-4567
+- Location: San Francisco, CA
+- LinkedIn: linkedin.com/in/johndoe
+
+## Experience
+
+### Senior Software Engineer | TechCorp
+*January 2020 - Present*
+
+- Led development of microservices architecture serving 10M+ requests/day
+- Implemented CI/CD pipelines reducing deployment time by 75%
+- Mentored junior developers and conducted code reviews
+- Technologies: JavaScript, Python, React, Node.js, AWS
+
+### Software Engineer | StartupInc  
+*June 2018 - December 2019*
+
+- Built responsive web applications using React and TypeScript
+- Integrated third-party APIs and payment systems
+- Optimized database queries improving performance by 40%
+- Technologies: React, TypeScript, PostgreSQL, Docker
+
+## Skills
+- **Languages:** JavaScript, Python, TypeScript, Go
+- **Frontend:** React, Vue.js, HTML5, CSS3
+- **Backend:** Node.js, Express, FastAPI
+- **Cloud:** AWS, GCP, Docker, Kubernetes
+- **Databases:** PostgreSQL, MongoDB, Redis
+
+## Education
+**Bachelor of Science in Computer Science**  
+University of California, Berkeley | 2014-2018`;
+                }
+
+                if (!state.config) {
+                    state.config = `# Profile Configuration
+name: "John Doe"
+email: "john@example.com"
+location: "San Francisco, CA"
+phone: "+1 (555) 123-4567"
+
+# Skills
+skills:
+  - JavaScript
+  - Python
+  - React
+  - Node.js
+  - AWS
+  - Docker
+
+# Preferences
+preferences:
+  remote: true
+  salary_range: "$120k-180k"
+  job_types:
+    - full-time
+    - contract
+  
+# Scoring Weights
+scoring:
+  technology_match: 0.3
+  experience_level: 0.2
+  company_culture: 0.2
+  compensation: 0.15
+  location: 0.15`;
+                }
+
+            } catch (error) {
+                console.error('Failed to load state:', error);
+                loadDemoData();
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('career-ops-state', JSON.stringify(state));
+            } catch (error) {
+                console.error('Failed to save state:', error);
+                showToast('Warning: Changes may not persist due to storage limits', 'error');
+            }
+        }
+
+        function loadDemoData() {
+            const demoHistory = [
+                {
+                    id: '1',
+                    title: 'Senior Frontend Engineer - Stripe',
+                    url: 'https://stripe.com/jobs/senior-frontend-engineer',
+                    status: 'completed',
+                    timestamp: new Date(Date.now() - 86400000).toISOString(),
+                    score: 'A-',
+                    description: 'We are looking for a Senior Frontend Engineer to join our team...',
+                    steps: [
+                        { name: 'Job Analysis', status: 'completed', duration: 2.3 },
+                        { name: 'CV Tailoring', status: 'completed', duration: 1.8 },
+                        { name: 'PDF Generation', status: 'completed', duration: 0.5 },
+                        { name: 'Tracker Update', status: 'completed', duration: 0.2 }
+                    ],
+                    artifacts: ['stripe_report.json', 'stripe_cv.pdf', 'tracker_entry.json']
+                },
+                {
+                    id: '2',
+                    title: 'Principal Engineer - Airbnb',
+                    url: 'https://airbnb.com/careers/principal-engineer',
+                    status: 'completed',
+                    timestamp: new Date(Date.now() - 172800000).toISOString(),
+                    score: 'B+',
+                    description: 'Join our engineering team as a Principal Engineer...',
+                    steps: [
+                        { name: 'Job Analysis', status: 'completed', duration: 1.9 },
+                        { name: 'CV Tailoring', status: 'completed', duration: 2.1 },
+                        { name: 'PDF Generation', status: 'completed', duration: 0.4 },
+                        { name: 'Tracker Update', status: 'completed', duration: 0.3 }
+                    ],
+                    artifacts: ['airbnb_report.json', 'airbnb_cv.pdf', 'tracker_entry.json']
+                },
+                {
+                    id: '3',
+                    title: 'Staff Engineer - Google',
+                    url: 'https://careers.google.com/jobs/staff-engineer',
+                    status: 'failed',
+                    timestamp: new Date(Date.now() - 259200000).toISOString(),
+                    score: 'N/A',
+                    description: 'Google is seeking a Staff Engineer for our cloud platform...',
+                    steps: [
+                        { name: 'Job Analysis', status: 'completed', duration: 2.1 },
+                        { name: 'CV Tailoring', status: 'failed', error: 'Template parsing error' },
+                        { name: 'PDF Generation', status: 'skipped' },
+                        { name: 'Tracker Update', status: 'skipped' }
+                    ],
+                    artifacts: ['google_report.json']
+                }
+            ];
+
+            const demoArtifacts = [
+                {
+                    id: '1',
+                    name: 'stripe_report.json',
+                    type: 'report',
+                    size: '24.3 KB',
+                    modified: new Date(Date.now() - 86400000).toISOString(),
+                    jobId: '1'
+                },
+                {
+                    id: '2',
+                    name: 'stripe_cv.pdf',
+                    type: 'pdf',
+                    size: '156.7 KB',
+                    modified: new Date(Date.now() - 86400000).toISOString(),
+                    jobId: '1'
+                },
+                {
+                    id: '3',
+                    name: 'airbnb_report.json',
+                    type: 'report',
+                    size: '31.2 KB',
+                    modified: new Date(Date.now() - 172800000).toISOString(),
+                    jobId: '2'
+                },
+                {
+                    id: '4',
+                    name: 'airbnb_cv.pdf',
+                    type: 'pdf',
+                    size: '162.4 KB',
+                    modified: new Date(Date.now() - 172800000).toISOString(),
+                    jobId: '2'
+                },
+                {
+                    id: '5',
+                    name: 'job_tracker.csv',
+                    type: 'tracker',
+                    size: '8.9 KB',
+                    modified: new Date(Date.now() - 86400000).toISOString()
+                }
+            ];
+
+            state.history = demoHistory;
+            state.artifacts = demoArtifacts;
+            saveState();
+        }
+
+        // UI Functions
+        function showView(viewName) {
+            // Reset scroll position
+            document.querySelector('.main').scrollTop = 0;
+
+            // Hide all views
+            document.querySelectorAll('[id$="-view"]').forEach(view => {
+                view.classList.add('hidden');
+            });
+
+            // Show selected view
+            document.getElementById(`${viewName}-view`).classList.remove('hidden');
+
+            // Update nav
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll(`[data-view="${viewName}"]`).forEach(btn => {
+                btn.classList.add('active');
+            });
+
+            state.currentView = viewName;
+
+            // Load view-specific data
+            if (viewName === 'editor') {
+                const editor = document.getElementById('cv-editor');
+                const placeholder = document.getElementById('cv-placeholder');
+                editor.value = state.cv;
+                placeholder.style.display = state.cv ? 'none' : 'block';
+            } else if (viewName === 'config') {
+                const editor = document.getElementById('config-editor');
+                const placeholder = document.getElementById('config-placeholder');
+                editor.value = state.config;
+                placeholder.style.display = state.config ? 'none' : 'block';
+            }
+
+            // Hide mobile nav
+            document.getElementById('mobile-nav').classList.remove('show');
+            document.getElementById('mobile-menu-btn').setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleMobileNav() {
+            const mobileNav = document.getElementById('mobile-nav');
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const isOpen = mobileNav.classList.contains('show');
+            
+            if (isOpen) {
+                mobileNav.classList.remove('show');
+                menuBtn.setAttribute('aria-expanded', 'false');
+            } else {
+                mobileNav.classList.add('show');
+                menuBtn.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        // Render Functions
+        function renderQueue() {
+            const container = document.getElementById('queue-list');
+            
+            if (state.queue.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p>No jobs in queue</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Clear container and rebuild with safe DOM manipulation
+            container.innerHTML = '';
+            
+            state.queue.forEach(job => {
+                const queueItem = document.createElement('div');
+                queueItem.className = 'queue-item';
+
+                const itemHeader = document.createElement('div');
+                itemHeader.className = 'item-header';
+
+                const itemTitle = createElementSafely('div', job.title, 'item-title');
+                
+                const statusBadge = createElementSafely('span', job.status, `status-badge status-${job.status}`);
+                
+                itemHeader.appendChild(itemTitle);
+                itemHeader.appendChild(statusBadge);
+
+                const itemMeta = createElementSafely('div', `Added ${formatDate(job.timestamp)}`, 'item-meta');
+
+                queueItem.appendChild(itemHeader);
+                queueItem.appendChild(itemMeta);
+
+                if (job.status === 'processing') {
+                    const progress = document.createElement('div');
+                    progress.className = 'progress';
+                    
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'progress-bar processing';
+                    progressBar.style.width = `${job.progress}%`;
+                    progressBar.setAttribute('role', 'progressbar');
+                    progressBar.setAttribute('aria-valuenow', job.progress);
+                    progressBar.setAttribute('aria-valuemin', '0');
+                    progressBar.setAttribute('aria-valuemax', '100');
+                    
+                    progress.appendChild(progressBar);
+                    
+                    const currentStepMeta = createElementSafely('div', job.currentStep, 'item-meta');
+                    currentStepMeta.style.marginTop = '0.5rem';
+                    
+                    queueItem.appendChild(progress);
+                    queueItem.appendChild(currentStepMeta);
+                }
+
+                container.appendChild(queueItem);
+            });
+        }
+
+        function renderArtifacts() {
+            const container = document.getElementById('artifacts-grid');
+            
+            if (state.artifacts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        <p>No artifacts generated yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const getIcon = (type) => {
+                switch (type) {
+                    case 'pdf':
+                        return `<svg width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`;
+                    case 'report':
+                        return `<svg width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
+                    case 'tracker':
+                        return `<svg width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>`;
+                    default:
+                        return `<svg width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
+                }
+            };
+
+            // Clear container and rebuild with safe DOM manipulation
+            container.innerHTML = '';
+            
+            state.artifacts.forEach(artifact => {
+                const artifactItem = document.createElement('button');
+                artifactItem.className = 'artifact-item';
+                artifactItem.setAttribute('data-artifact-id', artifact.id);
+                artifactItem.setAttribute('aria-label', `Open ${artifact.name}`);
+
+                const artifactIcon = document.createElement('div');
+                artifactIcon.className = 'artifact-icon';
+                artifactIcon.innerHTML = getIcon(artifact.type);
+
+                const artifactInfo = document.createElement('div');
+                artifactInfo.className = 'artifact-info';
+
+                const artifactName = createElementSafely('div', artifact.name, 'artifact-name');
+                const artifactMeta = createElementSafely('div', `${artifact.size} • ${formatDate(artifact.modified)}`, 'artifact-meta');
+
+                artifactInfo.appendChild(artifactName);
+                artifactInfo.appendChild(artifactMeta);
+
+                artifactItem.appendChild(artifactIcon);
+                artifactItem.appendChild(artifactInfo);
+
+                container.appendChild(artifactItem);
+            });
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            
+            if (state.history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p>No pipeline runs yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Clear container and rebuild with safe DOM manipulation
+            container.innerHTML = '';
+            
+            state.history.forEach(run => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+
+                const itemHeader = document.createElement('div');
+                itemHeader.className = 'item-header';
+
+                const itemTitle = createElementSafely('div', run.title, 'item-title');
+                
+                const statusText = run.status + (run.score !== 'N/A' ? ` • ${run.score}` : '');
+                const statusBadge = createElementSafely('span', statusText, `status-badge status-${run.status}`);
+                
+                itemHeader.appendChild(itemTitle);
+                itemHeader.appendChild(statusBadge);
+
+                const completedSteps = run.steps.filter(s => s.status === 'completed').length;
+                const itemMeta = createElementSafely('div', `${formatDate(run.timestamp)} • ${completedSteps}/${run.steps.length} steps`, 'item-meta');
+
+                historyItem.appendChild(itemHeader);
+                historyItem.appendChild(itemMeta);
+
+                // Diagnostics section
+                const diagnostics = document.createElement('div');
+                diagnostics.className = 'diagnostics';
+
+                const diagnosticsHeader = document.createElement('button');
+                diagnosticsHeader.className = 'diagnostics-header';
+                diagnosticsHeader.setAttribute('data-run-id', run.id);
+                diagnosticsHeader.setAttribute('aria-expanded', 'false');
+                diagnosticsHeader.setAttribute('aria-controls', `diagnostics-${run.id}`);
+
+                const diagnosticsToggle = document.createElement('div');
+                diagnosticsToggle.className = 'diagnostics-toggle';
+
+                const toggleText = createElementSafely('span', 'View Diagnostics');
+                const arrowIcon = document.createElement('svg');
+                arrowIcon.className = 'diagnostics-arrow';
+                arrowIcon.setAttribute('width', '16');
+                arrowIcon.setAttribute('height', '16');
+                arrowIcon.setAttribute('fill', 'currentColor');
+                arrowIcon.setAttribute('aria-hidden', 'true');
+                arrowIcon.innerHTML = '<path d="M6 9l6 6 6-6"/>';
+
+                diagnosticsToggle.appendChild(toggleText);
+                diagnosticsToggle.appendChild(arrowIcon);
+
+                diagnosticsHeader.appendChild(diagnosticsToggle);
+
+                if (run.status === 'failed') {
+                    const retryBtn = document.createElement('button');
+                    retryBtn.className = 'btn btn-secondary btn-small';
+                    retryBtn.setAttribute('data-retry-id', run.id);
+                    retryBtn.setAttribute('aria-label', `Retry job ${run.title}`);
+                    retryBtn.textContent = 'Retry';
+                    diagnosticsHeader.appendChild(retryBtn);
+                }
+
+                const diagnosticsContent = document.createElement('div');
+                diagnosticsContent.id = `diagnostics-${run.id}`;
+                diagnosticsContent.className = 'diagnostics-content hidden';
+                diagnosticsContent.setAttribute('role', 'region');
+                diagnosticsContent.setAttribute('aria-label', 'Pipeline diagnostics');
+
+                let diagnosticsText = '';
+                run.steps.forEach(step => {
+                    diagnosticsText += `[${step.status.toUpperCase()}] ${step.name}`;
+                    if (step.duration) diagnosticsText += ` (${step.duration}s)`;
+                    if (step.error) diagnosticsText += `\n  Error: ${step.error}`;
+                    diagnosticsText += '\n';
+                });
+
+                if (run.artifacts && run.artifacts.length > 0) {
+                    diagnosticsText += '\nGenerated Files:\n';
+                    run.artifacts.forEach(f => {
+                        diagnosticsText += `- ${f}\n`;
+                    });
+                }
+
+                diagnosticsContent.textContent = diagnosticsText;
+
+                diagnostics.appendChild(diagnosticsHeader);
+                diagnostics.appendChild(diagnosticsContent);
+                historyItem.appendChild(diagnostics);
+
+                container.appendChild(historyItem);
+            });
+        }
+
+        function render() {
+            renderQueue();
+            renderArtifacts();
+            renderHistory();
+        }
+
+        // Duplicate Job Dialog
+        function showDuplicateDialog(existingJob, callback) {
+            const dialog = document.createElement('div');
+            dialog.className = 'duplicate-dialog';
+            dialog.setAttribute('role', 'dialog');
+            dialog.setAttribute('aria-modal', 'true');
+            dialog.setAttribute('aria-labelledby', 'duplicate-dialog-title');
+
+            const content = document.createElement('div');
+            content.className = 'duplicate-dialog-content';
+
+            const title = document.createElement('h3');
+            title.id = 'duplicate-dialog-title';
+            title.textContent = 'Duplicate Job URL';
+
+            const message = document.createElement('p');
+            message.textContent = `A job with this URL already exists: "${existingJob.title}". Continue anyway?`;
+
+            const actions = document.createElement('div');
+            actions.className = 'duplicate-dialog-actions';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-secondary';
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.addEventListener('click', () => {
+                document.body.removeChild(dialog);
+            });
+
+            const continueBtn = document.createElement('button');
+            continueBtn.className = 'btn btn-primary';
+            continueBtn.textContent = 'Continue';
+            continueBtn.addEventListener('click', () => {
+                document.body.removeChild(dialog);
+                callback();
+            });
+
+            actions.appendChild(cancelBtn);
+            actions.appendChild(continueBtn);
+
+            content.appendChild(title);
+            content.appendChild(message);
+            content.appendChild(actions);
+
+            dialog.appendChild(content);
+            document.body.appendChild(dialog);
+
+            // Focus the continue button
+            continueBtn.focus();
+        }
+
+        // Event Handlers
+        function submitJob(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('run-pipeline-btn');
+            if (submitBtn.disabled) return;
+
+            const jobUrl = document.getElementById('job-url').value.trim();
+            const jobTitle = document.getElementById('job-title').value.trim();
+            const jobDescription = document.getElementById('job-description').value.trim();
+
+            if (!jobUrl || !jobTitle || !jobDescription) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            // Check for duplicate URL
+            const existingJob = [...state.queue, ...state.history].find(job => job.url === jobUrl);
+            if (existingJob) {
+                showDuplicateDialog(existingJob, () => {
+                    createAndProcessJob(jobUrl, jobTitle, jobDescription, e.target);
+                });
+                
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <svg width="16" height="16" fill="currentColor" aria-hidden="true">
+                        <path d="M4 12l8-8 8 8M6 10.5V19a1 1 0 001 1h10a1 1 0 001-1v-8.5"/>
+                    </svg>
+                    Run Pipeline
+                `;
+                return;
+            }
+
+            createAndProcessJob(jobUrl, jobTitle, jobDescription, e.target);
+        }
+
+        function createAndProcessJob(jobUrl, jobTitle, jobDescription, form) {
+            const job = {
+                id: generateUniqueId(),
+                title: jobTitle,
+                url: jobUrl,
+                description: jobDescription,
+                status: 'pending',
+                timestamp: new Date().toISOString(),
+                progress: 0,
+                currentStep: 'Initializing...'
+            };
+
+            state.queue.push(job);
+            saveState();
+            render();
+
+            // Clear form
+            form.reset();
+            
+            // Re-enable submit button
+            const submitBtn = document.getElementById('run-pipeline-btn');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+                <svg width="16" height="16" fill="currentColor" aria-hidden="true">
+                    <path d="M4 12l8-8 8 8M6 10.5V19a1 1 0 001 1h10a1 1 0 001-1v-8.5"/>
+                </svg>
+                Run Pipeline
+            `;
+            
+            // Start processing
+            setTimeout(() => processJob(job.id), 1000);
+            
+            showToast(`Job "${jobTitle}" added to pipeline queue`);
+        }
+
+        function processJob(jobId) {
+            const jobIndex = state.queue.findIndex(j => j.id === jobId);
+            if (jobIndex === -1) return;
+
+            const job = state.queue[jobIndex];
+            job.status = 'processing';
+
+            const steps = [
+                { name: 'Job Analysis', duration: 2000 },
+                { name: 'CV Tailoring', duration: 1500 },
+                { name: 'PDF Generation', duration: 800 },
+                { name: 'Tracker Update', duration: 500 }
+            ];
+
+            let currentStepIndex = 0;
+
+            function runStep() {
+                if (currentStepIndex >= steps.length) {
+                    completeJob(jobId);
+                    return;
+                }
+
+                const step = steps[currentStepIndex];
+                job.currentStep = step.name;
+                job.progress = Math.min(95, (currentStepIndex / steps.length) * 100);
+                
+                render();
+
+                setTimeout(() => {
+                    currentStepIndex++;
+                    runStep();
+                }, step.duration);
+            }
+
+            runStep();
+        }
+
+        function completeJob(jobId) {
+            const jobIndex = state.queue.findIndex(j => j.id === jobId);
+            if (jobIndex === -1) return;
+
+            const job = state.queue[jobIndex];
+            
+            // Simulate job scoring with fixed seed for consistency
+            const scores = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C'];
+            const scoreIndex = Math.abs(job.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % scores.length;
+            const score = scores[scoreIndex];
+
+            // 90% success rate based on job ID hash
+            const successRate = Math.abs(job.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 10;
+            const isSuccess = successRate < 9;
+
+            // Create history entry
+            const historyEntry = {
+                ...job,
+                status: isSuccess ? 'completed' : 'failed',
+                score: isSuccess ? score : 'N/A',
+                steps: [
+                    { name: 'Job Analysis', status: 'completed', duration: 2.1 },
+                    { name: 'CV Tailoring', status: 'completed', duration: 1.8 },
+                    { name: 'PDF Generation', status: 'completed', duration: 0.5 },
+                    { name: 'Tracker Update', status: 'completed', duration: 0.3 }
+                ],
+                artifacts: [
+                    `${job.title.toLowerCase().replace(/\s+/g, '_')}_report.json`,
+                    `${job.title.toLowerCase().replace(/\s+/g, '_')}_cv.pdf`,
+                    'tracker_entry.json'
+                ]
+            };
+
+            if (!isSuccess) {
+                const failedStepIndex = Math.abs(job.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 4;
+                historyEntry.steps[failedStepIndex].status = 'failed';
+                historyEntry.steps[failedStepIndex].error = 'Connection timeout';
+                historyEntry.artifacts = historyEntry.artifacts.slice(0, 1); // Only report generated
+            }
+
+            // Generate artifacts
+            if (isSuccess) {
+                historyEntry.artifacts.forEach(filename => {
+                    const artifact = {
+                        id: generateUniqueId(),
+                        name: filename,
+                        type: filename.endsWith('.pdf') ? 'pdf' : filename.endsWith('.json') ? 'report' : 'tracker',
+                        size: `${Math.floor(Math.abs(filename.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 200) + 10} KB`,
+                        modified: new Date().toISOString(),
+                        jobId: job.id
+                    };
+                    state.artifacts.unshift(artifact);
+                });
+            }
+
+            // Move to history
+            state.history.unshift(historyEntry);
+            state.queue.splice(jobIndex, 1);
+
+            saveState();
+            render();
+
+            showToast(
+                isSuccess 
+                    ? `Pipeline completed for "${job.title}" (Score: ${score})`
+                    : `Pipeline failed for "${job.title}"`,
+                isSuccess ? 'success' : 'error'
+            );
+        }
+
+        function retryJob(runId) {
+            const run = state.history.find(r => r.id === runId);
+            if (!run) return;
+
+            const job = {
+                id: generateUniqueId(),
+                title: run.title,
+                url: run.url,
+                description: run.description,
+                status: 'pending',
+                timestamp: new Date().toISOString(),
+                progress: 0,
+                currentStep: 'Initializing retry...'
+            };
+
+            state.queue.push(job);
+            saveState();
+            render();
+
+            setTimeout(() => processJob(job.id), 1000);
+            showToast(`Retrying job "${run.title}"`);
+        }
+
+        function clearForm() {
+            document.getElementById('intake-form').reset();
+        }
+
+        function toggleDiagnostics(runId) {
+            const diagnostics = document.getElementById(`diagnostics-${runId}`);
+            const header = document.querySelector(`[data-run-id="${runId}"]`);
+            const arrow = header.querySelector('.diagnostics-arrow');
+            
+            const isHidden = diagnostics.classList.contains('hidden');
+            
+            if (isHidden) {
+                diagnostics.classList.remove('hidden');
+                header.setAttribute('aria-expanded', 'true');
+                arrow.classList.add('expanded');
+            } else {
+                diagnostics.classList.add('hidden');
+                header.setAttribute('aria-expanded', 'false');
+                arrow.classList.remove('expanded');
+            }
+        }
+
+        function openArtifact(artifactId) {
+            const artifact = state.artifacts.find(a => a.id === artifactId);
+            if (!artifact) return;
+
+            // Store the focused element for later restoration
+            state.lastFocusedElement = document.activeElement;
+
+            let content = '';
+            
+            if (artifact.type === 'report') {
+                // Generate job-specific simulated data
+                const jobTitle = artifact.jobId ? 
+                    (state.history.find(h => h.id === artifact.jobId)?.title || 'Unknown Job') : 
+                    'Sample Job';
+                const company = jobTitle.includes(' - ') ? jobTitle.split(' - ')[1] : 'TechCorp';
+                
+                // Create safe JSON content without HTML escaping in <pre>
+                const reportData = {
+                    job_title: jobTitle.split(' - ')[0] || jobTitle,
+                    company: company,
+                    compatibility_score: "A-",
+                    analysis: {
+                        technology_match: 0.85,
+                        experience_level: 0.92,
+                        company_culture: 0.78,
+                        compensation: 0.88
+                    },
+                    recommendations: [
+                        "Emphasize React and TypeScript experience",
+                        "Highlight leadership and mentoring skills",
+                        "Include specific performance metrics"
+                    ],
+                    tailored_keywords: ["microservices", "React", "TypeScript", "mentoring"]
+                };
+                
+                content = `
+                    <div style="font-family: monospace; background: var(--bg); padding: 1rem; border-radius: var(--radius-md); margin-top: 1rem;">
+                        <h4>${escapeHtml(artifact.name)}</h4>
+                        <pre>${JSON.stringify(reportData, null, 2)}</pre>
+                    </div>
+                `;
+            } else if (artifact.type === 'pdf') {
+                content = `
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <div style="background: var(--bg); padding: 2rem; border-radius: var(--radius-md); border: 2px dashed var(--border);">
+                            <svg width="64" height="64" fill="currentColor" style="color: var(--accent); margin-bottom: 1rem;" aria-hidden="true">
+                                <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            <p style="color: var(--text-muted);">PDF Preview</p>
+                            <p><strong>${escapeHtml(artifact.name)}</strong></p>
+                            <p>${escapeHtml(artifact.size)}</p>
+                            <button class="btn btn-primary" style="margin-top: 1rem;" data-download-id="${artifact.id}" aria-label="Download ${escapeHtml(artifact.name)} PDF file">Download PDF</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content = `
+                    <div style="font-family: monospace; background: var(--bg); padding: 1rem; border-radius: var(--radius-md); margin-top: 1rem;">
+                        <h4>${escapeHtml(artifact.name)}</h4>
+                        <pre>Date,Job Title,Company,Status,Score
+2024-01-15,Senior Frontend Engineer,Stripe,Applied,A-
+2024-01-14,Principal Engineer,Airbnb,Interview Scheduled,B+
+2024-01-13,Staff Engineer,Google,Rejected,B
+2024-01-12,Senior Engineer,Netflix,Offer,A+</pre>
+                    </div>
+                `;
+            }
+
+            showModal(artifact.name, content);
+        }
+
+        function downloadArtifact(artifactId) {
+            const artifact = state.artifacts.find(a => a.id === artifactId);
+            if (!artifact) return;
+            
+            // Create a blob with sample content
+            let content = '';
+            let mimeType = 'text/plain';
+            
+            if (artifact.type === 'pdf') {
+                content = 'Sample PDF content - this would be the actual tailored CV';
+                mimeType = 'application/pdf';
+            } else if (artifact.type === 'report') {
+                content = JSON.stringify({
+                    job_title: "Sample Job",
+                    compatibility_score: "A-",
+                    analysis: { technology_match: 0.85 }
+                }, null, 2);
+                mimeType = 'application/json';
+            } else {
+                content = 'Date,Job Title,Company,Status,Score\n2024-01-15,Sample Job,Company,Applied,A-';
+                mimeType = 'text/csv';
+            }
+            
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = artifact.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast(`Downloaded ${artifact.name}`, 'success');
+            
+            // Delay modal close slightly to allow download to initiate
+            setTimeout(() => {
+                closeModal();
+            }, 100);
+        }
+
+        function showModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal-overlay').classList.add('show');
+            
+            // Focus management
+            document.getElementById('close-modal').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('show');
+            
+            // Restore focus to the element that opened the modal
+            if (state.lastFocusedElement) {
+                state.lastFocusedElement.focus();
+                state.lastFocusedElement = null;
+            }
+        }
+
+        function saveCV() {
+            const cvContent = document.getElementById('cv-editor').value;
+            const placeholder = document.getElementById('cv-placeholder');
+            
+            state.cv = cvContent;
+            saveState();
+            
+            placeholder.style.display = cvContent ? 'none' : 'block';
+            showToast('CV saved successfully');
+        }
+
+        function saveConfig() {
+            const configContent = document.getElementById('config-editor').value;
+            const placeholder = document.getElementById('config-placeholder');
+            
+            // Enhanced YAML validation
+            try {
+                if (configContent) {
+                    // Check for basic YAML structure
+                    if (!configContent.match(/^[\s]*[a-zA-Z_]/m)) {
+                        throw new Error('Invalid YAML format: must start with a key');
+                    }
+                    
+                    // Check for common YAML syntax issues
+                    const lines = configContent.split('\n');
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line && !line.startsWith('#')) {
+                            // Check for missing colons in key-value pairs
+                            if (line.match(/^[a-zA-Z_][a-zA-Z0-9_]*\s*[^:]/) && !line.startsWith('-')) {
+                                throw new Error(`Invalid YAML format at line ${i + 1}: missing colon`);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                showToast(`Configuration validation warning: ${error.message}`, 'error');
+            }
+            
+            state.config = configContent;
+            saveState();
+            
+            placeholder.style.display = configContent ? 'none' : 'block';
+            showToast('Configuration saved successfully');
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadState();
+            render();
+
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileNav);
+
+            // Navigation - use direct event listeners for better performance
+            document.querySelectorAll('[data-view]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showView(this.getAttribute('data-view'));
+                });
+            });
+
+            // Form submission
+            document.getElementById('intake-form').addEventListener('submit', submitJob);
+
+            // Clear form button
+            document.getElementById('clear-form').addEventListener('click', clearForm);
+
+            // Modal controls
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+            document.getElementById('modal-overlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            // Save buttons
+            document.getElementById('save-cv').addEventListener('click', saveCV);
+            document.getElementById('save-config').addEventListener('click', saveConfig);
+
+            // Editor placeholder management
+            document.getElementById('cv-editor').addEventListener('input', function() {
+                const placeholder = document.getElementById('cv-placeholder');
+                placeholder.style.display = this.value ? 'none' : 'block';
+            });
+
+            document.getElementById('config-editor').addEventListener('input', function() {
+                const placeholder = document.getElementById('config-placeholder');
+                placeholder.style.display = this.value ? 'none' : 'block';
+            });
+
+            // Delegated event handling for dynamic content
+            document.addEventListener('click', function(e) {
+                // Artifact items
+                if (e.target.closest('.artifact-item')) {
+                    const artifactId = e.target.closest('.artifact-item').getAttribute('data-artifact-id');
+                    if (artifactId) {
+                        openArtifact(artifactId);
+                    }
+                }
+
+                // Diagnostics headers
+                if (e.target.closest('.diagnostics-header')) {
+                    const runId = e.target.closest('.diagnostics-header').getAttribute('data-run-id');
+                    if (runId) {
+                        toggleDiagnostics(runId);
+                    }
+                }
+
+                // Retry buttons
+                if (e.target.matches('[data-retry-id]')) {
+                    e.stopPropagation();
+                    const runId = e.target.getAttribute('data-retry-id');
+                    retryJob(runId);
+                }
+
+                // Download buttons
+                if (e.target.matches('[data-download-id]')) {
+                    const artifactId = e.target.getAttribute('data-download-id');
+                    downloadArtifact(artifactId);
+                }
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    // Close mobile nav if open
+                    const mobileNav = document.getElementById('mobile-nav');
+                    if (mobileNav.classList.contains('show')) {
+                        toggleMobileNav();
+                    }
+                }
+
+                // Keyboard shortcuts for views
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case '1':
+                            e.preventDefault();
+                            showView('dashboard');
+                            break;
+                        case '2':
+                            e.preventDefault();
+                            showView('editor');
+                            break;
+                        case '3':
+                            e.preventDefault();
+                            showView('config');
+                            break;
+                    }
+                }
+            });
+
+            // Keyboard support for artifact items and diagnostics
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.target.matches('.artifact-item')) {
+                        e.preventDefault();
+                        const artifactId = e.target.getAttribute('data-artifact-id');
+                        if (artifactId) {
+                            openArtifact(artifactId);
+                        }
+                    }
+
+                    if (e.target.matches('.diagnostics-header')) {
+                        e.preventDefault();
+                        const runId = e.target.getAttribute('data-run-id');
+                        if (runId) {
+                            toggleDiagnostics(runId);
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
