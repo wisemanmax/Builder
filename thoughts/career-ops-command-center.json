@@ -1,0 +1,290 @@
+{
+  "id": "523ba109-5d6d-4ae7-a1f6-465e114dd794",
+  "name": "Career-Ops Command Center",
+  "status": "complete",
+  "originalPrompt": "Make me a career ops website using this repo",
+  "rounds": 6,
+  "conversation": [
+    {
+      "role": "user",
+      "text": "Make me a career ops website using this repo",
+      "round": 1
+    },
+    {
+      "role": "ai",
+      "text": "Great starting point. Since this repo already has a Go dashboard, pipeline data models, and PDF/job-search tooling, what should the website mainly help a user do first: monitor their pipeline, review scored job matches, generate application assets, or run automations from the browser?",
+      "round": 1
+    },
+    {
+      "role": "user",
+      "text": "Browser control panel for scans and batch runs",
+      "round": 1
+    },
+    {
+      "role": "ai",
+      "text": "Nice — so the website should extend this repo into a browser-based control panel for launching scans and batch jobs. To shape it well, what’s the main outcome on a normal day: trigger automations, watch progress live, or review the results after runs finish?",
+      "round": 1
+    },
+    {
+      "role": "user",
+      "text": "Do all three in one workflow",
+      "round": 1
+    },
+    {
+      "role": "ai",
+      "text": "Got it — a browser control panel that lets users launch scans and batch runs, watch them progress, and review outputs in one flow. What’s the primary end-to-end workflow you want on the main screen: start from job sources, start from pending tracker items, or start from a command center dashboard with everything in one place?",
+      "round": 1
+    },
+    {
+      "role": "user",
+      "text": "Single command center with live activity feed",
+      "round": 2
+    },
+    {
+      "role": "ai",
+      "text": "Perfect — a single command center with a live activity feed fits this repo well. Who is the main user, and how should they interact with runs: mostly a solo operator on desktop, or a small team needing shared visibility and approvals?",
+      "round": 2
+    },
+    {
+      "role": "user",
+      "text": "Solo job seeker on desktop browser",
+      "round": 2
+    },
+    {
+      "role": "ai",
+      "text": "Nice — this is for a solo job seeker using a desktop browser as a command center over the existing repo. How should the site talk to the underlying Career-Ops workflows: directly launch local scripts like batch-runner.sh and Node tools, read tracker/report files from the repo, or also support editing inputs like profile.yml and portal configs in-browser?",
+      "round": 2
+    },
+    {
+      "role": "user",
+      "text": "Do all three from one local web app",
+      "round": 2
+    },
+    {
+      "role": "ai",
+      "text": "Makes sense — one local web app that launches runs, shows live progress, and lets you review results from this repo. Which repo data should the app read and edit directly in-browser versus just display?",
+      "round": 2
+    },
+    {
+      "role": "user",
+      "text": "Read pipeline data, edit job sources and configs",
+      "round": 2
+    },
+    {
+      "role": "ai",
+      "text": "Clear. For this local web app, who exactly is it for and what are the main things they should be able to edit safely in-browser versus only view?",
+      "round": 2
+    },
+    {
+      "role": "user",
+      "text": "Solo applicant edits profile and portal sources",
+      "round": 2
+    },
+    {
+      "role": "ai",
+      "text": "Good — the user is a solo applicant using a local desktop web app over this repo. Beyond profile and portal sources, how should they interact with runs and results day to day: queue jobs manually, use presets, and inspect generated reports/PDFs from the browser?",
+      "round": 2
+    },
+    {
+      "role": "user",
+      "text": "Manual run buttons for each workflow",
+      "round": 2
+    },
+    {
+      "role": "ai",
+      "text": "Nice — manual run buttons per workflow is a strong fit for a solo desktop command center. Which workflows need first-class buttons in the UI based on this repo: portal scan, batch evaluate, PDF generate, tracker merge/verify, or all of them with clear status and logs?",
+      "round": 2
+    },
+    {
+      "role": "user",
+      "text": "Full suite: scan, batch, merge, verify, normalize",
+      "round": 3
+    },
+    {
+      "role": "ai",
+      "text": "Great — the website is a local command center for this repo with first-class actions for scan, batch, merge, verify, and normalize. What will make it feel distinctly better than just using the CLI: live activity streaming, guided run setup, repo-aware safety checks, or rich result review?",
+      "round": 3
+    },
+    {
+      "role": "user",
+      "text": "Guided forms for scan and batch inputs",
+      "round": 3
+    },
+    {
+      "role": "ai",
+      "text": "Good differentiator. Besides guided forms, what should make this command center feel uniquely useful over the CLI for this repo: live logs, preflight validation against files like config/profile.yml and templates/portals.yml, or rich review of reports/output after each run?",
+      "round": 3
+    },
+    {
+      "role": "user",
+      "text": "Review reports and tracker diffs after runs",
+      "round": 3
+    },
+    {
+      "role": "ai",
+      "text": "Nice — guided run setup plus post-run report review and tracker diffs gives this a clear edge over the CLI. What design personality and key interaction style should this local command center have, especially since the repo already has a Catppuccin-inspired Go dashboard theme under dashboard/internal/theme?",
+      "round": 3
+    },
+    {
+      "role": "user",
+      "text": "Dense operator console with collapsible sections",
+      "round": 3
+    },
+    {
+      "role": "ai",
+      "text": "That fits well: a dense operator console with collapsible sections, guided forms, and post-run review. Which differentiators matter most in this repo-aware UI: live logs from scripts, visual tracker diffs before/after merge, or one-click report/PDF preview from output and reports folders?",
+      "round": 3
+    },
+    {
+      "role": "user",
+      "text": "All three in one command center",
+      "round": 3
+    },
+    {
+      "role": "ai",
+      "text": "Perfect — for Round 3, we’ve got the core differentiator: one command center that combines launch, monitoring, and review for this repo. To lock this round, which repo-aware features make it feel truly better than the CLI for your solo workflow?",
+      "round": 3
+    },
+    {
+      "role": "user",
+      "text": "One-click PDF and report previews",
+      "round": 3
+    },
+    {
+      "role": "ai",
+      "text": "Strong addition. To lock the differentiators, what should happen when a run finishes: show an inline summary with links, open a side-by-side report and tracker diff, or drop the user into a run detail view with logs, artifacts, and next actions?",
+      "round": 3
+    },
+    {
+      "role": "user",
+      "text": "Inline completion summary with quick actions",
+      "round": 3
+    },
+    {
+      "role": "ai",
+      "text": "Perfect — that locks Round 3 well: guided forms, live logs, report/PDF previews, tracker diffs, and an inline completion summary with quick actions. For boundaries next, what should this local web app explicitly NOT do so we keep scope tight and safe?",
+      "round": 3
+    },
+    {
+      "role": "user",
+      "text": "No multi-user accounts or cloud sync",
+      "round": 4
+    },
+    {
+      "role": "ai",
+      "text": "Good boundary. What else should stay out of scope for v1 so this local web app stays focused and safe on top of the repo?",
+      "round": 4
+    },
+    {
+      "role": "user",
+      "text": "No autonomous auto-apply or job submissions",
+      "round": 4
+    },
+    {
+      "role": "ai",
+      "text": "Good boundary set. To keep v1 tight on this repo, what else should the app avoid: editing generated artifacts like reports/PDFs, replacing the existing CLI scripts, or running remote agents/cloud services?",
+      "round": 4
+    },
+    {
+      "role": "user",
+      "text": "No cloud services or remote execution",
+      "round": 4
+    },
+    {
+      "role": "ai",
+      "text": "Clear boundaries so far: no multi-user accounts, no cloud sync, no auto-apply, and no remote execution. One more boundary to lock scope: should the app avoid editing generated outputs like reports/PDFs, avoid replacing the existing CLI scripts, or avoid mobile-first support in v1?",
+      "round": 4
+    },
+    {
+      "role": "user",
+      "text": "CLI remains source of truth underneath",
+      "round": 4
+    },
+    {
+      "role": "ai",
+      "text": "Perfect boundary for v1: the web app is a local control layer over the existing repo, while the CLI and repo files remain the source of truth underneath. One last scope limit: should v1 avoid editing generated artifacts like reports/PDFs, avoid mobile support, or both?",
+      "round": 4
+    },
+    {
+      "role": "user",
+      "text": "Read-only output review with download links",
+      "round": 4
+    },
+    {
+      "role": "ai",
+      "text": "Good call — outputs will be review-only with download links, not editable in-browser. To finish boundaries, should v1 also skip mobile/tablet optimization and stay desktop-first for the dense operator console?",
+      "round": 4
+    },
+    {
+      "role": "user",
+      "text": "Desktop first, mobile unsupported in v1",
+      "round": 4
+    },
+    {
+      "role": "ai",
+      "text": "Locked. Boundaries for v1 are clear: local-only, desktop-first, CLI-backed, and output review is read-only. Before I draft the spec next, is there any hard technical limit I should honor in this repo—like keeping the existing Go dashboard as the foundation, or adding a separate local web server beside it?",
+      "round": 4
+    },
+    {
+      "role": "user",
+      "text": "Reuse Go backend, add new web UI layer",
+      "round": 5
+    },
+    {
+      "role": "ai",
+      "text": "Here's your draft spec — review each section and tell me what to change:",
+      "round": 5
+    },
+    {
+      "role": "user",
+      "text": "Confirmed. Lock in this specification.",
+      "round": 5
+    },
+    {
+      "role": "ai",
+      "text": "Locked — this spec is now finalized for the repo-based local web app.",
+      "round": 5
+    }
+  ],
+  "brief": {
+    "name": "Career-Ops Command Center",
+    "whatItDoes": [
+      "Adds a local browser-based command center on top of the existing Go backend in dashboard/ for launching Career-Ops workflows",
+      "Provides guided forms to run scan and batch workflows, then streams live activity and logs while scripts execute locally",
+      "Lets a solo applicant review reports, tracker diffs, and generated PDFs from repo folders with quick actions after each run"
+    ],
+    "whatItWontDo": [
+      "No multi-user accounts, shared workspaces, or approval flows",
+      "No cloud sync, remote execution, or external hosted services",
+      "No autonomous auto-apply or direct job submissions to portals",
+      "No in-browser editing of generated reports, tracker outputs, or PDFs",
+      "No mobile-first experience; desktop is the only supported v1 target"
+    ],
+    "audience": "Solo job seekers running this repository locally on a desktop browser to manage scans, batch evaluations, and tracker maintenance",
+    "features": [
+      "Command center homepage with dense operator-console layout, collapsible sections, workflow status cards, and a live activity feed for recent and active runs",
+      "Guided run forms for scan and batch workflows that validate local repo prerequisites such as config/profile.yml, templates/portals.yml, required folders, and expected input files before execution",
+      "Manual action buttons for first-class workflows mapped to existing repo operations: scan, batch, merge, verify, and normalize, with each action invoking the underlying local scripts or Go-backed handlers rather than replacing CLI behavior",
+      "Live run detail panel that streams stdout/stderr logs, shows current phase, start time, exit status, generated artifacts, and actionable next steps when a run completes",
+      "Post-run review experience with inline completion summary, quick links to artifacts, one-click preview for reports in reports/ and PDFs generated via generate-pdf.mjs, and side-by-side tracker diff views for merge-related changes",
+      "Repo file management views for safely editing user-controlled inputs such as profile configuration and portal source definitions, while treating generated files and CLI-owned outputs as read-only",
+      "Artifact browser for pipeline-related data and outputs, including readable views over tracker data, report markdown, output files, and logs under batch/logs with download links where appropriate",
+      "Preflight safety checks and guardrails that warn before risky actions, surface missing files or invalid config shape, and preserve the repo as the single source of truth under the UI"
+    ],
+    "design": {
+      "theme": "dark",
+      "accent": "mauve",
+      "layout": "desktop-first dense operator console with a top command bar, collapsible left navigation for workflows and repo sections, central live activity and run workspace, and right-side contextual detail panels for logs, previews, and diffs"
+    },
+    "technical": {
+      "storage": "repo files on local disk with Go handlers reading/writing approved config files; no separate cloud datastore",
+      "offline": true
+    }
+  },
+  "linkedRulesId": "df3d2ccb-5bc0-416d-9b0b-996fe895f99f",
+  "linkedAppId": null,
+  "version": 1,
+  "versions": [],
+  "createdAt": "2026-04-08T11:55:46.116Z",
+  "updatedAt": "2026-04-08T12:01:00.249Z"
+}
