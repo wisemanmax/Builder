@@ -41,6 +41,10 @@ export function openThink(resumeId) {
         brief: t.brief || null,
         rules: null,
       }
+      // Restore any previously-linked repo snapshot so the chip shows it.
+      if (t.linkedRepo && t.linkedRepo.context) {
+        ST.linkedRepo = t.linkedRepo
+      }
       renderThinkProgress(_thinkState.round)
       var ts = $('think-scroll')
       ts.innerHTML = ''
@@ -433,6 +437,20 @@ export function extractFeatureChecklist(brief) {
 
 export function saveThought(status) {
   var featureChecklist = extractFeatureChecklist(_thinkState.brief)
+  // Snapshot the linked repo (file tree + key file excerpts) so the build pipeline
+  // can inject it into the build prompt. Without this, closeThink() discards it.
+  var linkedRepoSnapshot = null
+  if (ST.linkedRepo && ST.linkedRepo.context) {
+    linkedRepoSnapshot = {
+      owner: ST.linkedRepo.owner,
+      repo: ST.linkedRepo.repo,
+      fileCount: ST.linkedRepo.fileCount,
+      context: ST.linkedRepo.context,
+      truncated: !!ST.linkedRepo.truncated,
+      fileTree: ST.linkedRepo.fileTree || null,
+      capturedAt: new Date().toISOString(),
+    }
+  }
   var thought = {
     id: _thinkState.thoughtId,
     name: _thinkState.brief ? _thinkState.brief.name : (_thinkState.originalPrompt || 'Untitled').slice(0, 40),
@@ -444,6 +462,7 @@ export function saveThought(status) {
     featureChecklist: featureChecklist,
     linkedRulesId: null,
     linkedAppId: null,
+    linkedRepo: linkedRepoSnapshot,
     version: 1,
     versions: [],
     createdAt: new Date().toISOString(),
@@ -463,6 +482,11 @@ export function saveThought(status) {
     thought.linkedAppId = existing.linkedAppId
     thought.version = existing.version || 1
     thought.versions = existing.versions || []
+    // Preserve an existing linkedRepo if the current session doesn't have one
+    // (e.g. user edits a saved thought without re-linking the repo).
+    if (!thought.linkedRepo && existing.linkedRepo) {
+      thought.linkedRepo = existing.linkedRepo
+    }
     ST.thoughts[idx] = thought
   } else {
     ST.thoughts.unshift(thought)

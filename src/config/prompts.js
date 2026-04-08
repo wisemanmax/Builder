@@ -192,6 +192,7 @@ export const SYS_SPEC_COMPLIANCE =
   '- Items in "MUST EXCLUDE" that should NOT be present\n' +
   '- Technical constraints (storage, offline)\n' +
   '- MUST DO / MUST NOT DO rules\n' +
+  '\nGITHUB-AS-RUNTIME: If the generated code calls GH.readFile, GH.writeFile, GH.listDir, GH.dispatchAction, GH.getRun, GH.getRunLogs, or GH.listRuns against a path / action that satisfies a rule (e.g. "read data/", "invoke generate-pdf.mjs", "surface batch/logs/"), count that rule as MATCHED, not missing. Do NOT flag use of the GH runtime client or the injection of runtime/gh-client.js as a violation — it is the sanctioned way for generated apps to interact with the attached GitHub repo at runtime. Using GH.* for repo-backed rules is the CORRECT pattern; using localStorage to mock repo data is the violation.\n' +
   '\nReturn ONLY valid JSON. No markdown, no explanation.'
 
 export const SYS_SELFUPDATE =

@@ -43,7 +43,9 @@ export function initOnboarding() {
         }
         $('gh-dot').className = 'gh-dot ' + (ok ? 'ok' : 'err')
         $('gh-st-m').textContent = ok ? '\u2713 Connected: ' + u + '/' + r : '\u2717 Connection failed'
-        $('gh-st-s').textContent = ok ? 'Apps will push to github.com/' + u + '/' + r : 'Check token has "repo" scope'
+        $('gh-st-s').textContent = ok
+          ? 'Apps will push to github.com/' + u + '/' + r
+          : 'Check token has "repo" + "workflow" scopes'
       })
     }, 900)
   }

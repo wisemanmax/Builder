@@ -1,0 +1,117 @@
+# Builder bridge workflow — provisioned by The Builder.
+#
+# This workflow lets generated apps invoke scripts in this repository via
+# workflow_dispatch. The generated app calls POST /repos/{owner}/{repo}/
+# actions/workflows/builder-bridge.yml/dispatches with an `action` input and
+# an optional JSON `args` input. The job below dispatches to the matching
+# script, commits any new outputs back to a dedicated branch, and echoes a
+# structured ::notice:: line so the app can scrape the result without
+# downloading the log zip.
+#
+# Add new scripts by editing the `case` below and committing this file.
+
+name: Builder Bridge
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Script identifier (e.g. generate-pdf, verify-pipeline)"
+        required: true
+        type: string
+      args:
+        description: "JSON args blob passed to the script via BRIDGE_ARGS env"
+        required: false
+        type: string
+        default: "{}"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (if package.json)
+        run: |
+          if [ -f package.json ]; then
+            npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          fi
+
+      - name: Run requested action
+        id: action
+        env:
+          BRIDGE_ACTION: ${{ inputs.action }}
+          BRIDGE_ARGS: ${{ inputs.args }}
+        run: |
+          set -e
+          echo "::notice::builder-bridge start action=$BRIDGE_ACTION"
+          case "$BRIDGE_ACTION" in
+            generate-pdf)
+              if [ -f scripts/generate-pdf.mjs ]; then
+                node scripts/generate-pdf.mjs
+              else
+                echo "::error::scripts/generate-pdf.mjs not found"; exit 1
+              fi
+              ;;
+            verify-pipeline)
+              if [ -f scripts/verify-pipeline.mjs ]; then
+                node scripts/verify-pipeline.mjs
+              else
+                echo "::error::scripts/verify-pipeline.mjs not found"; exit 1
+              fi
+              ;;
+            score-job)
+              if [ -f scripts/score-job.mjs ]; then
+                node scripts/score-job.mjs
+              else
+                echo "::error::scripts/score-job.mjs not found"; exit 1
+              fi
+              ;;
+            *)
+              echo "::error::Unknown action: $BRIDGE_ACTION"
+              exit 1
+              ;;
+          esac
+          echo "::notice::builder-bridge result action=$BRIDGE_ACTION status=ok"
+
+      - name: Commit outputs to bridge branch
+        if: always()
+        run: |
+          set -e
+          BRANCH="builder-bridge/${GITHUB_RUN_ID}"
+          git config user.name "builder-bridge[bot]"
+          git config user.email "builder-bridge@users.noreply.github.com"
+          # Only commit if there are changes under the expected output dirs.
+          if git status --porcelain reports/ output/ data/ batch/logs/ 2>/dev/null | grep -q .; then
+            git checkout -b "$BRANCH"
+            git add reports/ output/ data/ batch/logs/ 2>/dev/null || true
+            git commit -m "builder-bridge: ${{ inputs.action }} run ${GITHUB_RUN_ID}" || true
+            git push origin "$BRANCH" || true
+            echo "::notice::builder-bridge branch=$BRANCH"
+          else
+            echo "::notice::builder-bridge no-changes"
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-bridge-${{ github.run_id }}
+          path: |
+            reports/
+            output/
+            data/
+            batch/logs/
+          if-no-files-found: ignore
+          retention-days: 14

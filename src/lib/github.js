@@ -780,3 +780,129 @@ export function pullFromGitHub() {
       _syncing = false
     })
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-repo Contents API write + Actions API wrappers.
+// These power the "GitHub-as-runtime" mode: the Builder commits a bridge
+// workflow to an arbitrary target repo, then the generated app dispatches it
+// via workflow_dispatch and polls for status/logs.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function ghPushExternalFile(owner, repo, path, content, message, branch, existingSha) {
+  var url = _ghApiRepoBase(owner, repo) + '/contents/' + path.split('/').map(encodeURIComponent).join('/')
+  var body = { message: message, content: safeBase64(content), branch: branch || 'main' }
+  if (existingSha) body.sha = existingSha
+  return ghFetch(url, { method: 'PUT', body: JSON.stringify(body) })
+}
+
+export function ghGetExternalFileSha(owner, repo, path, branch) {
+  var url =
+    _ghApiRepoBase(owner, repo) +
+    '/contents/' +
+    path.split('/').map(encodeURIComponent).join('/') +
+    '?ref=' +
+    encodeURIComponent(branch || 'main')
+  return fetchWithRetry(url, { headers: ghHeaders() }, 30000)
+    .then(function (res) {
+      if (res.status === 404) return null
+      if (!res.ok) return null
+      return res.json().then(function (d) {
+        return (d && d.sha) || null
+      })
+    })
+    .catch(function () {
+      return null
+    })
+}
+
+/**
+ * Ensure the builder-bridge workflow file exists in the target repo. Idempotent:
+ * if the file already exists (any sha), returns { alreadyExists: true } without
+ * overwriting. Returns { created: true } if we just committed it.
+ */
+export function ghEnsureBridgeWorkflow(owner, repo, workflowYaml) {
+  var path = '.github/workflows/builder-bridge.yml'
+  return ghGetExternalFileSha(owner, repo, path, 'main').then(function (existingSha) {
+    if (existingSha) return { alreadyExists: true, path: path }
+    return ghPushExternalFile(
+      owner,
+      repo,
+      path,
+      workflowYaml,
+      'Add builder-bridge workflow (via The Builder)',
+      'main',
+      null
+    ).then(function () {
+      return { created: true, path: path }
+    })
+  })
+}
+
+export function ghDispatchWorkflow(owner, repo, workflowFile, ref, inputs) {
+  var url = _ghApiRepoBase(owner, repo) + '/actions/workflows/' + encodeURIComponent(workflowFile) + '/dispatches'
+  var body = { ref: ref || 'main' }
+  if (inputs && typeof inputs === 'object') body.inputs = inputs
+  // POST returns 204 No Content on success; ghFetch already maps 204 → {}
+  return ghFetch(url, { method: 'POST', body: JSON.stringify(body) })
+}
+
+export function ghListWorkflowRuns(owner, repo, workflowFile, opts) {
+  opts = opts || {}
+  var qs = []
+  if (opts.status) qs.push('status=' + encodeURIComponent(opts.status))
+  if (opts.perPage) qs.push('per_page=' + encodeURIComponent(opts.perPage))
+  if (opts.branch) qs.push('branch=' + encodeURIComponent(opts.branch))
+  var url =
+    _ghApiRepoBase(owner, repo) +
+    '/actions/workflows/' +
+    encodeURIComponent(workflowFile) +
+    '/runs' +
+    (qs.length ? '?' + qs.join('&') : '')
+  return ghFetch(url)
+}
+
+export function ghGetWorkflowRun(owner, repo, runId) {
+  return ghFetch(_ghApiRepoBase(owner, repo) + '/actions/runs/' + encodeURIComponent(runId))
+}
+
+export function ghGetWorkflowRunJobs(owner, repo, runId) {
+  return ghFetch(_ghApiRepoBase(owner, repo) + '/actions/runs/' + encodeURIComponent(runId) + '/jobs')
+}
+
+/**
+ * Fetch plain-text logs for a single job. Unlike the run-level logs endpoint
+ * (which returns a zip), the per-job endpoint returns text and works from the
+ * browser without needing a zip decoder.
+ */
+export function ghGetWorkflowJobLogs(owner, repo, jobId) {
+  var url = _ghApiRepoBase(owner, repo) + '/actions/jobs/' + encodeURIComponent(jobId) + '/logs'
+  return fetchWithRetry(url, { headers: ghHeaders() }, 30000).then(function (res) {
+    if (!res.ok) throw new Error('Job logs HTTP ' + res.status)
+    return res.text()
+  })
+}
+
+/**
+ * Introspect the user's PAT to determine whether it has the `workflow` scope.
+ * Returns a promise resolving to { hasWorkflow, hasRepo, scopes } or { unknown: true }
+ * if scopes can't be read (fine-grained PATs don't expose X-OAuth-Scopes).
+ */
+export function ghCheckTokenScopes() {
+  return fetchWithRetry('https://api.github.com/user', { headers: ghHeaders() }, 15000).then(function (res) {
+    if (!res.ok) throw new Error('Token check HTTP ' + res.status)
+    var scopesHeader = res.headers.get && res.headers.get('x-oauth-scopes')
+    if (scopesHeader == null) return { unknown: true, hasWorkflow: false, hasRepo: false, scopes: [] }
+    var scopes = scopesHeader
+      .split(',')
+      .map(function (s) {
+        return s.trim()
+      })
+      .filter(Boolean)
+    return {
+      unknown: false,
+      hasRepo: scopes.indexOf('repo') >= 0,
+      hasWorkflow: scopes.indexOf('workflow') >= 0,
+      scopes: scopes,
+    }
+  })
+}

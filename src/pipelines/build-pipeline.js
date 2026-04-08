@@ -12,6 +12,7 @@ import {
   renderComplianceCard,
   verifyFeatureChecklist,
   formatTemplateInjection,
+  computeAvailableBridgeActions,
   ST,
   persist,
   persistBuildSession,
@@ -50,6 +51,11 @@ import {
   ghMergeBranch,
   ghDeleteBranch,
   ghPushManifest,
+  ghEnsureBridgeWorkflow,
+  ghPushExternalFile,
+  ghGetExternalFileSha,
+  ghCheckTokenScopes,
+  getRuntimeAsset,
   runLocalChecks,
   addMsg,
   updatePS,
@@ -102,6 +108,11 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
     (hasGitHub ? 'builder/app-' + appId + '-' + Date.now().toString(36) : '')
 
   var v1, v2, specText, rulesText, fixSys, thinkingText, _streamPreview
+  var _compliance = null
+  var _verifiedChecklist = null
+  var _linkedRepo = null
+  var _availableActions = []
+  var _bridgeProvisioned = false
   var _buildId = telemetry.startBuild(appId, 'builder1')
   var _br = telemetry.createBuildRecord(appId, 'builder1', prompt, {
     isUpdate: !!existingApp,
@@ -212,52 +223,150 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
       var thoughtCtx = resolveThoughtContext()
       specText = thoughtCtx.specText
       rulesText = thoughtCtx.rulesText
-      var userMsg = buildUserMessage(prompt, existingApp, customName, thoughtCtx)
+      _linkedRepo = thoughtCtx.linkedRepo || null
 
-      // Resolve template skeleton with design customization
-      var tplPromise = existingApp
-        ? Promise.resolve()
-        : resolveTemplateWithDesign(userMsg, thoughtCtx.thoughtDesign).then(function (msg) {
-            userMsg = msg
-          })
-
-      return tplPromise.then(function () {
-        var effectiveSys = buildEffectiveSys(existingApp ? SYS_UPDATE : SYS_BUILD, thoughtCtx)
-
-        if (planJSON) {
-          userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON
+      // GitHub-as-runtime bridge setup: if the thought has a linked repo, make
+      // sure the bridge workflow is committed and compute which actions the
+      // generated app is allowed to dispatch. Failures here are non-fatal —
+      // the build continues, just without runtime-helper capabilities.
+      var bridgePromise = Promise.resolve()
+      if (_linkedRepo && _linkedRepo.owner && _linkedRepo.repo && ST.ghToken) {
+        var activeRules =
+          thoughtCtx.activeThought && thoughtCtx.activeThought.linkedRulesId
+            ? ST.rules.find(function (r) {
+                return r.id === thoughtCtx.activeThought.linkedRulesId
+              })
+            : null
+        _availableActions = computeAvailableBridgeActions(_linkedRepo, activeRules)
+        if (_availableActions.length) {
+          bridgePromise = ghCheckTokenScopes()
+            .catch(function () {
+              return { unknown: true, hasWorkflow: false }
+            })
+            .then(function (scopes) {
+              if (!scopes.unknown && !scopes.hasWorkflow) {
+                addMsg({
+                  role: 'asst',
+                  type: 'text',
+                  text: '\u26A0 Your GitHub token is missing the `workflow` scope. The generated app will ship without runtime-helper capabilities. Regenerate your PAT with both `repo` and `workflow` scopes to enable bridge-workflow dispatch.',
+                })
+                _availableActions = []
+                return null
+              }
+              return getRuntimeAsset('builder-bridge.workflow.yml').then(function (workflowYaml) {
+                return ghEnsureBridgeWorkflow(_linkedRepo.owner, _linkedRepo.repo, workflowYaml)
+                  .then(function (result) {
+                    _bridgeProvisioned = true
+                    if (result && result.created) {
+                      addMsg({
+                        role: 'asst',
+                        type: 'text',
+                        text:
+                          '\u2699 Provisioned bridge workflow in ' +
+                          _linkedRepo.owner +
+                          '/' +
+                          _linkedRepo.repo +
+                          ' (' +
+                          _availableActions.join(', ') +
+                          ')',
+                      })
+                    }
+                  })
+                  .catch(function (e) {
+                    addMsg({
+                      role: 'asst',
+                      type: 'text',
+                      text: '\u26A0 Bridge workflow provisioning failed: ' + scrubKeys(e.message || String(e)),
+                    })
+                    _availableActions = []
+                  })
+              })
+            })
         }
-        if (images && images.length) {
-          userMsg +=
-            '\n\n[' +
-            images.length +
-            ' reference image' +
-            (images.length > 1 ? 's' : '') +
-            ' attached — study them carefully and replicate the design, layout, colors, and style as closely as possible]'
-        }
-        var charCount = 0
-        thinkingText = ''
-        // Set up streaming live preview
-        _streamPreview = null
-        var previewIframe = $('viewer-iframe')
-        if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
+      }
 
-        return callClaudeWithThinkingStream(
-          effectiveSys,
-          userMsg,
-          10000,
-          function (type, text) {
-            if (type === 'text') {
-              charCount += text.length
-              updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars')
-              if (_streamPreview) _streamPreview.pushChunk(text)
-            } else if (type === 'thinking') {
-              thinkingText += text
-            }
-          },
-          images
-        )
-      }) // end tplPromise.then
+      return bridgePromise.then(function () {
+        // Annotate the system prompt with runtime-helper capabilities so the
+        // model uses GH.readFile/writeFile/dispatchAction instead of localStorage
+        // when a rule references repo content.
+        if (_availableActions.length && thoughtCtx) {
+          thoughtCtx.sysExtras =
+            (thoughtCtx.sysExtras || '') +
+            '\n\nRUNTIME CAPABILITIES (GitHub-as-runtime mode):\n' +
+            'The generated app has access to a global `GH` client (loaded from ./runtime/gh-client.js)\n' +
+            'that talks to ' +
+            _linkedRepo.owner +
+            '/' +
+            _linkedRepo.repo +
+            ' at runtime via the GitHub API. Use these instead of localStorage when rules\n' +
+            'reference repo paths or scripts:\n' +
+            '  await GH.readFile(path)              // read any file in the repo\n' +
+            '  await GH.writeFile(path, content, msg)  // commit a file back\n' +
+            '  await GH.listDir(path)               // list a directory\n' +
+            '  await GH.dispatchAction(action, args)   // run a script via the bridge workflow\n' +
+            '  await GH.getRun(runId) / GH.getRunLogs(runId) / GH.listRuns(opts)  // track runs\n\n' +
+            'Available bridge actions for this build: ' +
+            _availableActions.join(', ') +
+            '\n\n' +
+            'Rules of engagement:\n' +
+            '  1. When a rule references a repo path, use GH.readFile / writeFile / listDir.\n' +
+            '     Do NOT duplicate the data in localStorage.\n' +
+            '  2. When a rule references a script, call GH.dispatchAction(...) with the matching\n' +
+            '     action name. Do NOT reimplement the script logic in JS.\n' +
+            '  3. For pipeline history panels use GH.listRuns; for diagnostics use GH.getRunLogs.\n' +
+            '  4. Include <script type="module" src="./runtime/gh-client.js"></script> in the HTML head.\n' +
+            '     The bridge workflow and auth bootstrap are already provisioned by the Builder.\n' +
+            '  5. If a rule genuinely cannot be satisfied with these helpers, prefer a minimal\n' +
+            '     implementation over silent mocking, and note the limitation in the UI.\n'
+        }
+
+        var userMsg = buildUserMessage(prompt, existingApp, customName, thoughtCtx)
+
+        // Resolve template skeleton with design customization
+        var tplPromise = existingApp
+          ? Promise.resolve()
+          : resolveTemplateWithDesign(userMsg, thoughtCtx.thoughtDesign).then(function (msg) {
+              userMsg = msg
+            })
+
+        return tplPromise.then(function () {
+          var effectiveSys = buildEffectiveSys(existingApp ? SYS_UPDATE : SYS_BUILD, thoughtCtx)
+
+          if (planJSON) {
+            userMsg += '\n\nARCHITECTURE PLAN:\n' + planJSON
+          }
+          if (images && images.length) {
+            userMsg +=
+              '\n\n[' +
+              images.length +
+              ' reference image' +
+              (images.length > 1 ? 's' : '') +
+              ' attached — study them carefully and replicate the design, layout, colors, and style as closely as possible]'
+          }
+          var charCount = 0
+          thinkingText = ''
+          // Set up streaming live preview
+          _streamPreview = null
+          var previewIframe = $('viewer-iframe')
+          if (previewIframe) _streamPreview = createStreamingPreview('viewer-iframe')
+
+          return callClaudeWithThinkingStream(
+            effectiveSys,
+            userMsg,
+            10000,
+            function (type, text) {
+              if (type === 'text') {
+                charCount += text.length
+                updatePS(pid, 2, 'active', 'Building\u2026 ' + Math.round(charCount / 1000) + 'k chars')
+                if (_streamPreview) _streamPreview.pushChunk(text)
+              } else if (type === 'thinking') {
+                thinkingText += text
+              }
+            },
+            images
+          )
+        }) // end tplPromise.then
+      }) // end bridgePromise.then
     })
     .then(function (code) {
       v1 = code
@@ -337,7 +446,8 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
               return { criticalFails: criticalFails, bugs: [] }
             })
         } else {
-          if (passNum === 1) updatePS(pid, 4, 'skip', (ST.geminiKey || ST.gptKey) ? 'Audit disabled' : 'No review key \u2014 skipped')
+          if (passNum === 1)
+            updatePS(pid, 4, 'skip', ST.geminiKey || ST.gptKey ? 'Audit disabled' : 'No review key \u2014 skipped')
           auditPromise = Promise.resolve({ criticalFails: criticalFails, bugs: [] })
         }
 
@@ -393,102 +503,112 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
 
               // Groq pre-check: fast scan for obvious issues to prepend to fix instructions
               return groqPreCheck(currentCode).then(function (groqIssues) {
-              var groqHint = ''
-              if (groqIssues.length > 0) {
-                groqHint = '\n\nQUICK-SCAN FINDINGS (pre-check):\n' + groqIssues.map(function (g) {
-                  return '- [' + (g.severity || 'medium').toUpperCase() + '] ' + g.issue + (g.location ? ' (' + g.location + ')' : '')
-                }).join('\n')
-              }
+                var groqHint = ''
+                if (groqIssues.length > 0) {
+                  groqHint =
+                    '\n\nQUICK-SCAN FINDINGS (pre-check):\n' +
+                    groqIssues
+                      .map(function (g) {
+                        return (
+                          '- [' +
+                          (g.severity || 'medium').toUpperCase() +
+                          '] ' +
+                          g.issue +
+                          (g.location ? ' (' + g.location + ')' : '')
+                        )
+                      })
+                      .join('\n')
+                }
 
-              // Always include full code so the model has complete context (like a chat conversation)
-              var fm =
-                (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
-                ':\n' +
-                issueList +
-                groqHint +
-                '\n\nCURRENT CODE:\n' +
-                currentCode +
-                (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
-              repairHistory.push({ role: 'user', content: fm })
+                // Always include full code so the model has complete context (like a chat conversation)
+                var fm =
+                  (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
+                  ':\n' +
+                  issueList +
+                  groqHint +
+                  '\n\nCURRENT CODE:\n' +
+                  currentCode +
+                  (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
+                repairHistory.push({ role: 'user', content: fm })
 
-              return retryStep(
-                function () {
-                  return callClaudeMultiTurn(fixSys, repairHistory)
-                },
-                2,
-                'Fix'
-              )
-                .then(function (fixed) {
-                  repairHistory.push({ role: 'assistant', content: fixed })
-                  currentCode = fixed
-                  totalFixed += allIssues.length
-                  telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
-                  var _existingPasses = (_br && _br.fixPasses) || []
-                  _existingPasses.push({ passNum: passNum, issuesBefore: allIssues.length })
-                  telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
-                  if (passNum < MAX_FIX_PASSES) {
-                    updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
-                    return runValidationPass()
-                  } else {
-                    var finalChecks = runLocalChecks(currentCode)
-                    var finalFails = finalChecks.filter(function (c) {
-                      return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
-                    })
-                    if (finalFails.length > 0) {
-                      updatePS(
-                        pid,
-                        5,
-                        'warn',
-                        finalFails.length +
-                          ' issue' +
-                          (finalFails.length !== 1 ? 's' : '') +
-                          ' remain after ' +
-                          MAX_FIX_PASSES +
-                          ' passes'
-                      )
+                return retryStep(
+                  function () {
+                    return callClaudeMultiTurn(fixSys, repairHistory)
+                  },
+                  2,
+                  'Fix'
+                )
+                  .then(function (fixed) {
+                    repairHistory.push({ role: 'assistant', content: fixed })
+                    currentCode = fixed
+                    totalFixed += allIssues.length
+                    telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
+                    var _existingPasses = (_br && _br.fixPasses) || []
+                    _existingPasses.push({ passNum: passNum, issuesBefore: allIssues.length })
+                    telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
+                    if (passNum < MAX_FIX_PASSES) {
+                      updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
+                      return runValidationPass()
                     } else {
-                      updatePS(
-                        pid,
-                        5,
-                        'done',
-                        'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
-                      )
-                    }
-                    v2 = currentCode
-                    addMsg({
-                      role: 'asst',
-                      type: 'text',
-                      text:
-                        'Validation summary: ' +
-                        totalFixed +
-                        ' issue' +
-                        (totalFixed !== 1 ? 's' : '') +
-                        ' addressed across ' +
-                        passNum +
-                        ' pass' +
-                        (passNum !== 1 ? 'es' : '') +
-                        '.' +
-                        (finalFails.length > 0
-                          ? ' ' +
-                            finalFails.length +
-                            ' minor issue' +
+                      var finalChecks = runLocalChecks(currentCode)
+                      var finalFails = finalChecks.filter(function (c) {
+                        return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
+                      })
+                      if (finalFails.length > 0) {
+                        updatePS(
+                          pid,
+                          5,
+                          'warn',
+                          finalFails.length +
+                            ' issue' +
                             (finalFails.length !== 1 ? 's' : '') +
-                            ' may remain.'
-                          : ''),
-                    })
-                  }
-                })
-                .catch(function (e) {
-                  v2 = currentCode
-                  var errMsg = scrubKeys(e.message || String(e))
-                  updatePS(
-                    pid,
-                    5,
-                    'error',
-                    'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
-                  )
-                  addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
-                })
+                            ' remain after ' +
+                            MAX_FIX_PASSES +
+                            ' passes'
+                        )
+                      } else {
+                        updatePS(
+                          pid,
+                          5,
+                          'done',
+                          'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
+                        )
+                      }
+                      v2 = currentCode
+                      addMsg({
+                        role: 'asst',
+                        type: 'text',
+                        text:
+                          'Validation summary: ' +
+                          totalFixed +
+                          ' issue' +
+                          (totalFixed !== 1 ? 's' : '') +
+                          ' addressed across ' +
+                          passNum +
+                          ' pass' +
+                          (passNum !== 1 ? 'es' : '') +
+                          '.' +
+                          (finalFails.length > 0
+                            ? ' ' +
+                              finalFails.length +
+                              ' minor issue' +
+                              (finalFails.length !== 1 ? 's' : '') +
+                              ' may remain.'
+                            : ''),
+                      })
+                    }
+                  })
+                  .catch(function (e) {
+                    v2 = currentCode
+                    var errMsg = scrubKeys(e.message || String(e))
+                    updatePS(
+                      pid,
+                      5,
+                      'error',
+                      'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
+                    )
+                    addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
+                  })
               }) // end groqPreCheck.then
             }) // end checkpointPromise.then
           } else {
@@ -529,7 +649,7 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
       checkPipelineCancel()
       var canReview = !!((ST.geminiKey || ST.gptKey) && ST.auditEnabled)
       if (!canReview) {
-        updatePS(pid, 6, 'skip', (ST.geminiKey || ST.gptKey) ? 'Review disabled' : 'No review key — skipped')
+        updatePS(pid, 6, 'skip', ST.geminiKey || ST.gptKey ? 'Review disabled' : 'No review key — skipped')
         updatePS(pid, 7, 'skip', 'Skipped — no review')
         updatePS(pid, 8, 'skip', 'Skipped — no review')
         return Promise.resolve()
@@ -822,6 +942,8 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
             try {
               var compliance = JSON.parse(raw)
               var verifiedChecklist = verifyFeatureChecklist(featureChecklist, compliance)
+              _compliance = compliance
+              _verifiedChecklist = verifiedChecklist
               addMsg({ role: 'asst', type: 'text', html: renderComplianceCard(compliance, verifiedChecklist) })
 
               // Auto-fix if required features are missing and score is below threshold
@@ -864,6 +986,10 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
                   'ComplianceFix'
                 ).then(function (fixed) {
                   v2 = fixed
+                  // Auto-fix mutated the code but we don't re-run the auditor; clear stale
+                  // compliance so the merge gate doesn't hard-fail on pre-fix violations.
+                  _compliance = null
+                  _verifiedChecklist = null
                   addMsg({
                     role: 'asst',
                     type: 'text',
@@ -951,6 +1077,37 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
           'Push'
         )
           .then(function () {
+            // If this build runs in GitHub-as-runtime mode, ship the runtime
+            // client + auth bootstrap alongside the app HTML. They live at
+            // apps/runtime/ so the deployed app can fetch them with relative
+            // URLs like ./runtime/gh-client.js. Idempotent: skipped if they
+            // already exist on the branch with matching sha.
+            if (!_availableActions.length || !_linkedRepo) return null
+            return Promise.all([
+              getRuntimeAsset('gh-client.js').catch(function () {
+                return null
+              }),
+              getRuntimeAsset('auth-bootstrap.html').catch(function () {
+                return null
+              }),
+            ]).then(function (assets) {
+              var clientJs = assets[0]
+              var bootstrapHtml = assets[1]
+              if (!clientJs || !bootstrapHtml) return null
+              var owner = _linkedRepo.owner
+              var repo = _linkedRepo.repo
+              var clientJsFilled = clientJs.replace(/\{OWNER\}/g, owner).replace(/\{REPO\}/g, repo)
+              var pushOne = function (path, content, label) {
+                return ghGetFileSha(path, branchName).then(function (existingSha) {
+                  return ghPushFile(path, content, 'Add runtime ' + label + ' [branch]', branchName, existingSha)
+                })
+              }
+              return pushOne('apps/runtime/gh-client.js', clientJsFilled, 'gh-client.js').then(function () {
+                return pushOne('apps/runtime/auth-bootstrap.html', bootstrapHtml, 'auth-bootstrap.html')
+              })
+            })
+          })
+          .then(function () {
             updatePS(pid, 10, 'done', 'Pushed to branch \u2713')
             _persistProgress(10)
           })
@@ -979,7 +1136,15 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
 
       // Step 12 — Approval gate
       updatePS(pid, 12, 'wait', 'Waiting for your approval\u2026')
-      addMsg({ role: 'asst', type: 'approval', id: 'appr-' + Date.now(), pid: pid, branch: branchName || 'local' })
+      addMsg({
+        role: 'asst',
+        type: 'approval',
+        id: 'appr-' + Date.now(),
+        pid: pid,
+        branch: branchName || 'local',
+        compliance: _compliance,
+        checklist: _verifiedChecklist,
+      })
       notifyUser('Build Ready for Review', appName + ' is waiting for your approval.')
       _approvalStartTs = Date.now()
 

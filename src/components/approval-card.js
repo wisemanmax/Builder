@@ -69,6 +69,13 @@ export function waitForApproval(pid) {
 }
 
 export function approveAndMerge(pid) {
+  // Defensive guard: if a hard-fail approval card is live for this pid, the DOM
+  // button is already data-blocked. This catches callers that bypass the card.
+  var hardFail = document.querySelector('.appr-btn.approve[data-pid="' + pid + '"][data-blocked="1"]')
+  if (hardFail) {
+    toast('Resolve audit violations before merging', 2500)
+    return
+  }
   _previewPid = null
   if (_approvalGates[pid]) _approvalGates[pid].resolve('approved')
   delete _approvalGates[pid]
