@@ -3,6 +3,29 @@ import { resolveThemeVars, resolveAccentColor } from './design-tokens.js'
 // Lazy-fetch template skeletons from external HTML files with in-memory cache
 var _cache = {}
 
+// Separate cache for runtime assets (bridge workflow YAML, gh-client.js, etc.)
+// shipped under public/templates/runtime/.
+var _runtimeCache = {}
+
+/**
+ * Fetch a runtime asset by filename (e.g. 'builder-bridge.workflow.yml',
+ * 'gh-client.js', 'auth-bootstrap.html'). Files live at ./templates/runtime/
+ * and are used by the GitHub-as-runtime pipeline (C1–C6 in the implementation plan).
+ * Returns a Promise resolving to the file contents as a string.
+ */
+export function getRuntimeAsset(filename) {
+  if (_runtimeCache[filename]) return Promise.resolve(_runtimeCache[filename])
+  return fetch('./templates/runtime/' + filename)
+    .then(function (res) {
+      if (!res.ok) throw new Error('Runtime asset not found: ' + filename)
+      return res.text()
+    })
+    .then(function (text) {
+      _runtimeCache[filename] = text
+      return text
+    })
+}
+
 /**
  * Fetch a template skeleton HTML by id.
  * Files live at ./templates/{id}.html (served from public/).

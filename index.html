@@ -1,16 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="The Builder">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#080812">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 180 180%22%3E%3Crect width=%22180%22 height=%22180%22 rx=%2240%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%2290%22 y=%22120%22 font-size=%2290%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
-<meta http-equiv="Content-Security-Policy" content="
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="The Builder" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#080812" />
+    <link rel="manifest" href="manifest.json" />
+    <link
+      rel="apple-touch-icon"
+      href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 180 180%22%3E%3Crect width=%22180%22 height=%22180%22 rx=%2240%22 fill=%22%23FF3CAC%22/%3E%3Ctext x=%2290%22 y=%22120%22 font-size=%2290%22 text-anchor=%22middle%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E"
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
   default-src 'self' 'unsafe-inline' data: blob:;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.tailwindcss.com;
@@ -28,520 +33,784 @@
   font-src https://fonts.gstatic.com data: https:;
   img-src 'self' data: blob: https:;
   frame-src 'self' blob: data: https:;
-">
-<title>The Builder</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-</head>
-<body>
-<div id="app">
-<div id="wp"></div>
+"
+    />
+    <title>The Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div id="wp"></div>
 
-<!-- ONBOARDING -->
-<div class="screen" id="s-onboard">
-<div class="ob-wrap">
-  <div class="ob-logo">
-    <div class="lmark">&#x26A1;</div>
-    <h1>The Builder</h1>
-    <p>Build &middot; Push &middot; Deploy &middot; Repeat</p>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(0,230,118,.07);border:1.5px solid rgba(0,230,118,.2);border-radius:var(--rs)">
-    <span style="font-size:16px">&#x1F512;</span>
-    <span style="font-size:11px;color:rgba(255,255,255,.65);line-height:1.6">All API keys are stored <strong style="color:#fff">on this device only</strong> in localStorage. They are never uploaded, synced, logged, or included in any file pushed to GitHub.</span>
-  </div>
-  <div class="section-card">
-    <div class="sec-title">&#x1F916; AI Keys</div>
-    <div class="fl">
-      <label>Anthropic API Key <span style="color:var(--co)">*</span></label>
-      <input class="fi fi-mono" type="password" id="ob-anth" placeholder="sk-ant-..." autocomplete="off">
-      <span class="fhint">Required &mdash; sent only to <span style="color:var(--cy)">api.anthropic.com</span>, stored locally on this device</span>
-    </div>
-    <div class="fl">
-      <label>OpenAI API Key <span style="color:rgba(255,255,255,.28)">(recommended)</span></label>
-      <input class="fi fi-mono" type="password" id="ob-gpt" placeholder="sk-..." autocomplete="off">
-      <div class="gpt-row">
-        <div class="gdot" id="gpt-dot"></div>
-        <div class="grt"><div class="gm" id="gst-m">GPT-4o Audit: Off</div><div class="gs" id="gst-s">Add OpenAI key to enable bug scanning</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="section-card">
-    <div class="sec-title">&#x1F419; GitHub &mdash; Push to Repo</div>
-    <div class="fl">
-      <label>Personal Access Token <span style="color:var(--co)">*</span></label>
-      <input class="fi fi-mono" type="password" id="ob-gh-token" placeholder="ghp_..." autocomplete="off">
-      <span class="fhint">Needs <strong style="color:rgba(255,255,255,.6)">repo</strong> scope. Sent only to <span style="color:var(--cy)">api.github.com</span>. <a href="https://github.com/settings/tokens/new" target="_blank">Create token &#x2197;</a></span>
-    </div>
-    <div class="fl">
-      <label>GitHub Username</label>
-      <input class="fi fi-mono" type="text" id="ob-gh-user" placeholder="yourusername" autocomplete="off">
-    </div>
-    <div class="fl">
-      <label>Repository Name</label>
-      <input class="fi fi-mono" type="text" id="ob-gh-repo" placeholder="my-builder-apps" autocomplete="off">
-      <span class="fhint">Must exist &amp; have GitHub Pages enabled (Settings &rarr; Pages &rarr; main branch)</span>
-    </div>
-    <div class="gh-status" id="gh-status">
-      <div class="gh-dot" id="gh-dot"></div>
-      <div class="gh-status-txt"><div class="gm" id="gh-st-m">GitHub: Not connected</div><div class="gs" id="gh-st-s">Enter your token, username &amp; repo</div></div>
-    </div>
-  </div>
-  <div class="section-card">
-    <div class="toggle-row" id="ob-sb-tog">
-      <div class="tl"><div class="tm">Supabase Sync</div><div class="ts">Optional &mdash; cross-device backup</div></div>
-      <div class="pill" id="ob-sb-pill"></div>
-    </div>
-    <div class="exp" id="ob-sb-exp">
-      <div class="fl"><label>Supabase URL</label><input class="fi fi-mono" type="text" id="ob-sb-url" placeholder="https://xxx.supabase.co"></div>
-      <div class="fl"><label>Supabase Anon Key</label><input class="fi fi-mono" type="password" id="ob-sb-anon" placeholder="eyJ..."></div>
-    </div>
-  </div>
-  <button class="btn-p" id="ob-submit">Launch The Builder &rarr;</button>
-</div>
-</div>
-
-<!-- HOME SCREEN -->
-<div class="screen" id="s-home">
-  <div class="statusbar">
-    <div class="sb-time" id="clock">12:00</div>
-    <div class="sb-icons">&#x26A1;&#x1F50B;</div>
-  </div>
-  <div class="home-hdr">
-    <div class="home-title-row">
-      <div class="home-title">The Builder</div>
-      <div id="profile-chip" class="profile-chip" data-action="showProfilePicker">No Profile</div>
-    </div>
-    <div class="home-sub" id="home-sub">Tap to open &middot; Hold for options &middot; &#x2726; to build</div>
-  </div>
-  <div id="profile-picker" class="profile-picker"></div>
-  <div class="app-grid" id="app-grid"></div>
-  <div class="dock">
-    <div class="dock-inner">
-      <div class="di" data-action="openThink" role="button" tabindex="0" aria-label="Think">
-        <div class="di-img" style="background:var(--g4)">&#x1F4AD;</div>
-        <div class="di-lbl">Think</div>
-      </div>
-      <div class="di di-build" data-action="openBuilder" role="button" tabindex="0" aria-label="Build">
-        <div class="di-img">&#x2726;</div>
-        <div class="di-lbl">Build</div>
-      </div>
-      <div class="di" data-action="openCustomizeBuilder" role="button" tabindex="0" aria-label="Builder+">
-        <div class="di-img" style="background:linear-gradient(135deg,#B44FFF,#3D5AFE)">&#x1F527;</div>
-        <div class="di-lbl">Builder+</div>
-      </div>
-      <div class="di" data-action="openTemplates" role="button" tabindex="0" aria-label="Templates">
-        <div class="di-img" style="background:linear-gradient(135deg,#FF3CAC,#784BA0)">&#x1F4C2;</div>
-        <div class="di-lbl">Templates</div>
-      </div>
-      <div class="di" data-action="openSettings" role="button" tabindex="0" aria-label="Settings">
-        <div class="di-img" style="background:rgba(255,255,255,.12)">&#x2699;&#xFE0F;</div>
-        <div class="di-lbl">Settings</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- BUILDER SHEET -->
-<div id="builder-sheet">
-  <div class="bs" id="bs-inner">
-    <div class="bs-handle" id="bs-handle"></div>
-    <div class="bs-top">
-      <div class="bs-info">
-        <div class="bs-title" id="bs-title">Build an App</div>
-        <div class="bs-sub" id="bs-sub">Branch &rarr; Build &rarr; Checks &rarr; Audit &rarr; Fix &rarr; Preview &rarr; Approve &rarr; Merge</div>
-        <div class="pipe-toggle" id="pipe-toggle">
-          <button class="pt-btn active" data-mode="builder1">Standard</button>
-          <button class="pt-btn" data-mode="builder2">Claude-Only</button>
-          <button class="pt-btn" data-mode="website">Website</button>
-          <button class="pt-btn" data-mode="website2">Website 2</button>
-          <button class="pt-btn" data-mode="game">&#x1F3AE; Game</button>
-          <button class="pt-btn pt-stitch" data-mode="stitch" id="pt-stitch-btn" title="Requires Stitch API key">&#x1F9F5; Flawless</button>
-        </div>
-        <div class="model-toggle" id="model-toggle" style="display:none">
-          <button class="mt-btn active" data-provider="claude">Claude</button>
-          <button class="mt-btn" data-provider="chatgpt">ChatGPT</button>
+      <!-- ONBOARDING -->
+      <div class="screen" id="s-onboard">
+        <div class="ob-wrap">
+          <div class="ob-logo">
+            <div class="lmark">&#x26A1;</div>
+            <h1>The Builder</h1>
+            <p>Build &middot; Push &middot; Deploy &middot; Repeat</p>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              padding: 10px 13px;
+              background: rgba(0, 230, 118, 0.07);
+              border: 1.5px solid rgba(0, 230, 118, 0.2);
+              border-radius: var(--rs);
+            "
+          >
+            <span style="font-size: 16px">&#x1F512;</span>
+            <span style="font-size: 11px; color: rgba(255, 255, 255, 0.65); line-height: 1.6"
+              >All API keys are stored <strong style="color: #fff">on this device only</strong> in localStorage. They
+              are never uploaded, synced, logged, or included in any file pushed to GitHub.</span
+            >
+          </div>
+          <div class="section-card">
+            <div class="sec-title">&#x1F916; AI Keys</div>
+            <div class="fl">
+              <label>Anthropic API Key <span style="color: var(--co)">*</span></label>
+              <input class="fi fi-mono" type="password" id="ob-anth" placeholder="sk-ant-..." autocomplete="off" />
+              <span class="fhint"
+                >Required &mdash; sent only to <span style="color: var(--cy)">api.anthropic.com</span>, stored locally
+                on this device</span
+              >
+            </div>
+            <div class="fl">
+              <label>OpenAI API Key <span style="color: rgba(255, 255, 255, 0.28)">(recommended)</span></label>
+              <input class="fi fi-mono" type="password" id="ob-gpt" placeholder="sk-..." autocomplete="off" />
+              <div class="gpt-row">
+                <div class="gdot" id="gpt-dot"></div>
+                <div class="grt">
+                  <div class="gm" id="gst-m">GPT-4o Audit: Off</div>
+                  <div class="gs" id="gst-s">Add OpenAI key to enable bug scanning</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="section-card">
+            <div class="sec-title">&#x1F419; GitHub &mdash; Push to Repo</div>
+            <div class="fl">
+              <label>Personal Access Token <span style="color: var(--co)">*</span></label>
+              <input class="fi fi-mono" type="password" id="ob-gh-token" placeholder="ghp_..." autocomplete="off" />
+              <span class="fhint"
+                >Needs <strong style="color: rgba(255, 255, 255, 0.6)">repo</strong> +
+                <strong style="color: rgba(255, 255, 255, 0.6)">workflow</strong> scopes. Sent only to
+                <span style="color: var(--cy)">api.github.com</span>.
+                <a href="https://github.com/settings/tokens/new" target="_blank">Create token &#x2197;</a></span
+              >
+            </div>
+            <div class="fl">
+              <label>GitHub Username</label>
+              <input class="fi fi-mono" type="text" id="ob-gh-user" placeholder="yourusername" autocomplete="off" />
+            </div>
+            <div class="fl">
+              <label>Repository Name</label>
+              <input class="fi fi-mono" type="text" id="ob-gh-repo" placeholder="my-builder-apps" autocomplete="off" />
+              <span class="fhint"
+                >Must exist &amp; have GitHub Pages enabled (Settings &rarr; Pages &rarr; main branch)</span
+              >
+            </div>
+            <div class="gh-status" id="gh-status">
+              <div class="gh-dot" id="gh-dot"></div>
+              <div class="gh-status-txt">
+                <div class="gm" id="gh-st-m">GitHub: Not connected</div>
+                <div class="gs" id="gh-st-s">Enter your token, username &amp; repo</div>
+              </div>
+            </div>
+          </div>
+          <div class="section-card">
+            <div class="toggle-row" id="ob-sb-tog">
+              <div class="tl">
+                <div class="tm">Supabase Sync</div>
+                <div class="ts">Optional &mdash; cross-device backup</div>
+              </div>
+              <div class="pill" id="ob-sb-pill"></div>
+            </div>
+            <div class="exp" id="ob-sb-exp">
+              <div class="fl">
+                <label>Supabase URL</label
+                ><input class="fi fi-mono" type="text" id="ob-sb-url" placeholder="https://xxx.supabase.co" />
+              </div>
+              <div class="fl">
+                <label>Supabase Anon Key</label
+                ><input class="fi fi-mono" type="password" id="ob-sb-anon" placeholder="eyJ..." />
+              </div>
+            </div>
+          </div>
+          <button class="btn-p" id="ob-submit">Launch The Builder &rarr;</button>
         </div>
       </div>
-      <div class="bs-actions">
-        <button class="bs-btn bs-stop" id="bs-stop-btn" title="Stop pipeline" style="display:none">&#x23F9; Stop</button>
-        <button class="bs-btn" id="bs-proj-btn" title="View project" style="display:none">&#x1F4CB;</button>
-        <button class="bs-btn bs-close" id="bs-close" aria-label="Close">&#x2715;</button>
-      </div>
-    </div>
-    <div class="thought-selector" id="thought-selector" style="display:none"></div>
-    <div id="chat-scroll"></div>
-    <div class="bs-input">
-      <div class="name-row" id="name-row">
-        <input class="fi" type="text" id="app-name-input" placeholder="App name (optional)" maxlength="40" autocomplete="off">
-      </div>
-      <div id="img-preview-row" class="img-preview-row" style="display:none"></div>
-      <div class="ibox">
-        <textarea id="chat-input" rows="1" placeholder="Describe an app to build, or ask to update the current one..."></textarea>
-        <div class="iacts">
-          <button class="ia-btn" id="img-upload-btn" title="Upload reference images">&#x1F4F7;</button>
-          <button class="ia-btn" id="emoji-pick-btn" title="Pick icon">&#x1F3AF;</button>
-          <button id="send-btn">&uarr;</button>
-        </div>
-        <input type="file" id="img-file-input" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden>
-      </div>
-      <div class="ihint" id="ihint">&#x1F33F; Branch &rarr; &#x1F528; Build &rarr; &#x1F4CB; Checks &rarr; &#x1F50D; Audit &rarr; &#x1F6E0; Fix &rarr; &#x1F441; Preview &rarr; &#x2705; Approve &rarr; &#x1F500; Merge</div>
-    </div>
-  </div>
-</div>
 
-<!-- THINK SHEET -->
-<div id="think-sheet">
-  <div class="bs" id="ts-inner">
-    <div class="bs-handle" id="ts-handle"></div>
-    <div class="bs-top">
-      <div class="bs-info">
-        <div class="bs-title" id="ts-title">Think It Through</div>
-        <div class="bs-sub" id="ts-sub">Round 1 of 5 &middot; What to Build</div>
-      </div>
-      <div class="bs-actions">
-        <button class="bs-btn bs-close" id="ts-close" aria-label="Close">&#x2715;</button>
-      </div>
-    </div>
-    <div class="ts-progress" id="ts-progress"></div>
-    <div id="think-scroll"></div>
-    <div class="bs-input">
-      <div class="think-repo-row" id="think-repo-row">
-        <button id="think-link-repo-btn" class="think-repo-chip" onclick="B.linkThinkRepo()">+ Link GitHub repo</button>
-      </div>
-      <div class="ibox">
-        <textarea id="think-input" rows="2" placeholder="Type your thoughts here..."></textarea>
-        <div class="iacts">
-          <button id="think-send-btn">&uarr;</button>
+      <!-- HOME SCREEN -->
+      <div class="screen" id="s-home">
+        <div class="statusbar">
+          <div class="sb-time" id="clock">12:00</div>
+          <div class="sb-icons">&#x26A1;&#x1F50B;</div>
+        </div>
+        <div class="home-hdr">
+          <div class="home-title-row">
+            <div class="home-title">The Builder</div>
+            <div id="profile-chip" class="profile-chip" data-action="showProfilePicker">No Profile</div>
+          </div>
+          <div class="home-sub" id="home-sub">Tap to open &middot; Hold for options &middot; &#x2726; to build</div>
+        </div>
+        <div id="profile-picker" class="profile-picker"></div>
+        <div class="app-grid" id="app-grid"></div>
+        <div class="dock">
+          <div class="dock-inner">
+            <div class="di" data-action="openThink" role="button" tabindex="0" aria-label="Think">
+              <div class="di-img" style="background: var(--g4)">&#x1F4AD;</div>
+              <div class="di-lbl">Think</div>
+            </div>
+            <div class="di di-build" data-action="openBuilder" role="button" tabindex="0" aria-label="Build">
+              <div class="di-img">&#x2726;</div>
+              <div class="di-lbl">Build</div>
+            </div>
+            <div class="di" data-action="openCustomizeBuilder" role="button" tabindex="0" aria-label="Builder+">
+              <div class="di-img" style="background: linear-gradient(135deg, #b44fff, #3d5afe)">&#x1F527;</div>
+              <div class="di-lbl">Builder+</div>
+            </div>
+            <div class="di" data-action="openTemplates" role="button" tabindex="0" aria-label="Templates">
+              <div class="di-img" style="background: linear-gradient(135deg, #ff3cac, #784ba0)">&#x1F4C2;</div>
+              <div class="di-lbl">Templates</div>
+            </div>
+            <div class="di" data-action="openSettings" role="button" tabindex="0" aria-label="Settings">
+              <div class="di-img" style="background: rgba(255, 255, 255, 0.12)">&#x2699;&#xFE0F;</div>
+              <div class="di-lbl">Settings</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="ihint" id="think-hint">&#x1F4AD; Tap an option or type your own response</div>
-    </div>
-  </div>
-</div>
 
-<!-- ORG THINK SHEET -->
-<div id="org-think-sheet">
-  <div class="bs" id="org-ts-inner">
-    <div class="bs-handle" id="org-ts-handle"></div>
-    <div class="bs-top">
-      <div class="bs-info">
-        <div class="bs-title" id="org-ts-title">Organization Profile</div>
-        <div class="bs-sub" id="org-ts-sub">Round 1 of 4 &middot; Vision &amp; Mission</div>
-      </div>
-      <div class="bs-actions">
-        <button class="bs-btn bs-close" id="org-ts-close" aria-label="Close">&#x2715;</button>
-      </div>
-    </div>
-    <div class="ts-progress" id="org-ts-progress"></div>
-    <div id="org-think-scroll"></div>
-    <div class="bs-input">
-      <div class="ibox">
-        <textarea id="org-think-input" rows="2" placeholder="Tell me about your organization..."></textarea>
-        <div class="iacts">
-          <button id="org-think-send-btn">&uarr;</button>
+      <!-- BUILDER SHEET -->
+      <div id="builder-sheet">
+        <div class="bs" id="bs-inner">
+          <div class="bs-handle" id="bs-handle"></div>
+          <div class="bs-top">
+            <div class="bs-info">
+              <div class="bs-title" id="bs-title">Build an App</div>
+              <div class="bs-sub" id="bs-sub">
+                Branch &rarr; Build &rarr; Checks &rarr; Audit &rarr; Fix &rarr; Preview &rarr; Approve &rarr; Merge
+              </div>
+              <div class="pipe-toggle" id="pipe-toggle">
+                <button class="pt-btn active" data-mode="builder1">Standard</button>
+                <button class="pt-btn" data-mode="builder2">Claude-Only</button>
+                <button class="pt-btn" data-mode="website">Website</button>
+                <button class="pt-btn" data-mode="website2">Website 2</button>
+                <button class="pt-btn" data-mode="game">&#x1F3AE; Game</button>
+                <button class="pt-btn pt-stitch" data-mode="stitch" id="pt-stitch-btn" title="Requires Stitch API key">
+                  &#x1F9F5; Flawless
+                </button>
+              </div>
+              <div class="model-toggle" id="model-toggle" style="display: none">
+                <button class="mt-btn active" data-provider="claude">Claude</button>
+                <button class="mt-btn" data-provider="chatgpt">ChatGPT</button>
+              </div>
+            </div>
+            <div class="bs-actions">
+              <button class="bs-btn bs-stop" id="bs-stop-btn" title="Stop pipeline" style="display: none">
+                &#x23F9; Stop
+              </button>
+              <button class="bs-btn" id="bs-proj-btn" title="View project" style="display: none">&#x1F4CB;</button>
+              <button class="bs-btn bs-close" id="bs-close" aria-label="Close">&#x2715;</button>
+            </div>
+          </div>
+          <div class="thought-selector" id="thought-selector" style="display: none"></div>
+          <div id="chat-scroll"></div>
+          <div class="bs-input">
+            <div class="name-row" id="name-row">
+              <input
+                class="fi"
+                type="text"
+                id="app-name-input"
+                placeholder="App name (optional)"
+                maxlength="40"
+                autocomplete="off"
+              />
+            </div>
+            <div id="img-preview-row" class="img-preview-row" style="display: none"></div>
+            <div class="ibox">
+              <textarea
+                id="chat-input"
+                rows="1"
+                placeholder="Describe an app to build, or ask to update the current one..."
+              ></textarea>
+              <div class="iacts">
+                <button class="ia-btn" id="img-upload-btn" title="Upload reference images">&#x1F4F7;</button>
+                <button class="ia-btn" id="emoji-pick-btn" title="Pick icon">&#x1F3AF;</button>
+                <button id="send-btn">&uarr;</button>
+              </div>
+              <input
+                type="file"
+                id="img-file-input"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                multiple
+                hidden
+              />
+            </div>
+            <div class="ihint" id="ihint">
+              &#x1F33F; Branch &rarr; &#x1F528; Build &rarr; &#x1F4CB; Checks &rarr; &#x1F50D; Audit &rarr; &#x1F6E0;
+              Fix &rarr; &#x1F441; Preview &rarr; &#x2705; Approve &rarr; &#x1F500; Merge
+            </div>
+          </div>
         </div>
       </div>
-      <div class="ihint">&#x1F3E2; Your org profile will guide every future build</div>
-    </div>
-  </div>
-</div>
 
-<!-- FEEDBACK OVERLAY -->
-<div id="feedback-overlay" role="dialog" aria-label="Rate this build">
-  <div class="fb-card">
-    <div class="fb-title">&#x2B50; Rate this build</div>
-    <div class="fb-app-name" id="fb-app-name">App</div>
-    <div class="fb-stars">
-      <span class="fb-star" data-val="1">&#x2605;</span>
-      <span class="fb-star" data-val="2">&#x2605;</span>
-      <span class="fb-star" data-val="3">&#x2605;</span>
-      <span class="fb-star" data-val="4">&#x2605;</span>
-      <span class="fb-star" data-val="5">&#x2605;</span>
-    </div>
-    <div class="fl"><label>What did you like?</label><textarea class="fi" id="fb-liked" rows="2" placeholder="Optional..."></textarea></div>
-    <div class="fl"><label>What would you change?</label><textarea class="fi" id="fb-disliked" rows="2" placeholder="Optional..."></textarea></div>
-    <div class="fb-tags">
-      <span class="fb-tag">Design</span>
-      <span class="fb-tag">Functionality</span>
-      <span class="fb-tag">Responsive</span>
-      <span class="fb-tag">Performance</span>
-    </div>
-    <div class="fb-actions">
-      <button class="btn-p" id="fb-submit">Save Feedback</button>
-      <button class="fb-skip" id="fb-skip">Skip</button>
-    </div>
-  </div>
-</div>
-
-<!-- THOUGHT FEEDBACK OVERLAY -->
-<div id="thought-fb-overlay" role="dialog" aria-label="Rate ideation">
-  <div class="fb-card">
-    <div class="fb-title">&#x1F4AD; Rate this ideation</div>
-    <div class="fb-app-name" id="tfb-thought-name">Thought</div>
-    <div class="fb-stars tfb-stars">
-      <span class="fb-star tfb-star" data-val="1">&#x2605;</span>
-      <span class="fb-star tfb-star" data-val="2">&#x2605;</span>
-      <span class="fb-star tfb-star" data-val="3">&#x2605;</span>
-      <span class="fb-star tfb-star" data-val="4">&#x2605;</span>
-      <span class="fb-star tfb-star" data-val="5">&#x2605;</span>
-    </div>
-    <div class="fl"><label>What was missing or unclear?</label><textarea class="fi" id="tfb-text" rows="2" placeholder="Optional..."></textarea></div>
-    <div class="fb-actions">
-      <button class="btn-p" id="tfb-submit">Save</button>
-      <button class="fb-skip" id="tfb-skip">Skip</button>
-    </div>
-  </div>
-</div>
-
-<!-- PROJECT SHEET -->
-<div id="project-sheet">
-  <div class="psheet">
-    <div class="psh-handle"></div>
-    <div class="psh-top">
-      <div class="psh-app-info">
-        <div class="psh-icon" id="psh-icon">&#x1F3AF;</div>
-        <div>
-          <div class="psh-name" id="psh-name">App Name</div>
-          <div class="psh-url-line" id="psh-url-line" data-action="copyUrl">...</div>
+      <!-- THINK SHEET -->
+      <div id="think-sheet">
+        <div class="bs" id="ts-inner">
+          <div class="bs-handle" id="ts-handle"></div>
+          <div class="bs-top">
+            <div class="bs-info">
+              <div class="bs-title" id="ts-title">Think It Through</div>
+              <div class="bs-sub" id="ts-sub">Round 1 of 5 &middot; What to Build</div>
+            </div>
+            <div class="bs-actions">
+              <button class="bs-btn bs-close" id="ts-close" aria-label="Close">&#x2715;</button>
+            </div>
+          </div>
+          <div class="ts-progress" id="ts-progress"></div>
+          <div id="think-scroll"></div>
+          <div class="bs-input">
+            <div class="think-repo-row" id="think-repo-row">
+              <button id="think-link-repo-btn" class="think-repo-chip" onclick="B.linkThinkRepo()">
+                + Link GitHub repo
+              </button>
+            </div>
+            <div class="ibox">
+              <textarea id="think-input" rows="2" placeholder="Type your thoughts here..."></textarea>
+              <div class="iacts">
+                <button id="think-send-btn">&uarr;</button>
+              </div>
+            </div>
+            <div class="ihint" id="think-hint">&#x1F4AD; Tap an option or type your own response</div>
+          </div>
         </div>
       </div>
-      <div class="psh-top-btns">
-        <button class="psh-btn" data-action="openCurrentInViewer">&#x1F680; Open</button>
-        <button class="psh-btn primary" data-action="editCurrentApp">&#x270F;&#xFE0F; Edit</button>
-        <button class="psh-btn" data-action="closeProject">&#x2715;</button>
-      </div>
-    </div>
-    <div class="psh-body">
-      <div class="psec">
-        <div class="psec-title">Live URL</div>
-        <div class="url-box">
-          <div class="url-text" id="proj-url-display">&mdash;</div>
-          <button class="url-copy" data-action="copyUrl">Copy</button>
+
+      <!-- ORG THINK SHEET -->
+      <div id="org-think-sheet">
+        <div class="bs" id="org-ts-inner">
+          <div class="bs-handle" id="org-ts-handle"></div>
+          <div class="bs-top">
+            <div class="bs-info">
+              <div class="bs-title" id="org-ts-title">Organization Profile</div>
+              <div class="bs-sub" id="org-ts-sub">Round 1 of 4 &middot; Vision &amp; Mission</div>
+            </div>
+            <div class="bs-actions">
+              <button class="bs-btn bs-close" id="org-ts-close" aria-label="Close">&#x2715;</button>
+            </div>
+          </div>
+          <div class="ts-progress" id="org-ts-progress"></div>
+          <div id="org-think-scroll"></div>
+          <div class="bs-input">
+            <div class="ibox">
+              <textarea id="org-think-input" rows="2" placeholder="Tell me about your organization..."></textarea>
+              <div class="iacts">
+                <button id="org-think-send-btn">&uarr;</button>
+              </div>
+            </div>
+            <div class="ihint">&#x1F3E2; Your org profile will guide every future build</div>
+          </div>
         </div>
       </div>
-      <div class="psec">
-        <div class="psec-title">Details</div>
-        <div class="info-row"><span class="ir-label">Status</span><span class="ir-value" id="proj-status">&mdash;</span></div>
-        <div class="info-row"><span class="ir-label">GitHub Path</span><span class="ir-value" id="proj-path">&mdash;</span></div>
-        <div class="info-row"><span class="ir-label">Created</span><span class="ir-value" id="proj-created">&mdash;</span></div>
-        <div class="info-row"><span class="ir-label">Last Updated</span><span class="ir-value" id="proj-updated">&mdash;</span></div>
-        <div class="info-row"><span class="ir-label">Build Count</span><span class="ir-value" id="proj-builds">&mdash;</span></div>
-      </div>
-      <div class="psec">
-        <div class="psec-title">Prompt History</div>
-        <div class="prompt-history" id="prompt-history"></div>
-      </div>
-      <div class="psec" id="proj-cost-section" style="display:none">
-        <div class="psec-title">Build Costs</div>
-        <div id="proj-cost-details"></div>
-      </div>
-      <div class="psec">
-        <div class="psec-title">Conversation History</div>
-        <div class="chat-history" id="chat-history"></div>
-      </div>
-      <div style="margin-top:8px">
-        <button class="btn-full" data-action="editCurrentApp">&#x270F;&#xFE0F; Update This App</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- STUDIO -->
-<div class="screen" id="s-viewer">
-  <div class="vbar">
-    <button class="vback" id="vback">&larr;</button>
-    <div class="vbar-center">
-      <div class="vbar-name" id="vbar-name">App</div>
-      <div class="vbar-url" id="vbar-url" data-action="copyViewerUrl">&mdash;</div>
-    </div>
-    <div class="vbar-btns" id="vbar-btns">
-      <button class="vbar-btn" id="vbar-proj">&#x1F4CB;</button>
-      <button class="vbar-btn" id="vbar-history-btn" title="Version history">&#x23F3;</button>
-      <button class="vbar-btn" id="vbar-share-btn" title="Share app">&#x1F517;</button>
-      <button class="vbar-btn" id="vbar-fs-toggle" title="Full screen preview">&#x26F6;</button>
-    </div>
-  </div>
-  <div id="vbar-approve-row" style="display:none;align-items:center;gap:8px;padding:10px 14px;background:rgba(61,90,254,.1);border-bottom:1.5px solid rgba(61,90,254,.25);flex-shrink:0">
-    <span style="flex:1;font-size:11px;color:rgba(255,255,255,.6)">Review the app, then approve or request changes</span>
-    <button id="vbar-req-changes" style="padding:7px 13px;border-radius:9px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">&#x270F;&#xFE0F; Changes</button>
-    <button id="vbar-approve" style="padding:7px 14px;border-radius:9px;background:linear-gradient(135deg,#FF3CAC,#784BA0);border:none;color:#fff;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(255,60,172,.35)">&#x1F500; Approve &amp; Merge</button>
-  </div>
-  <div id="studio-body">
-    <div id="studio-preview">
-      <iframe id="viewer-iframe" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock"></iframe>
-    </div>
-    <div id="studio-editor">
-      <div class="se-drag" id="se-drag"></div>
-      <div class="se-header" id="se-header-toggle">
-        <span class="se-header-title">&#x270F;&#xFE0F; Edit App</span>
-        <div class="se-header-btns">
-          <button class="se-hbtn" id="se-proj-btn">&#x1F4CB; Project</button>
-          <button class="se-hbtn" id="se-liveurl-btn" style="display:none">&#x1F310; Live URL</button>
-          <button class="se-hbtn" id="se-collapse-btn">&#x25BC; Hide</button>
+      <!-- FEEDBACK OVERLAY -->
+      <div id="feedback-overlay" role="dialog" aria-label="Rate this build">
+        <div class="fb-card">
+          <div class="fb-title">&#x2B50; Rate this build</div>
+          <div class="fb-app-name" id="fb-app-name">App</div>
+          <div class="fb-stars">
+            <span class="fb-star" data-val="1">&#x2605;</span>
+            <span class="fb-star" data-val="2">&#x2605;</span>
+            <span class="fb-star" data-val="3">&#x2605;</span>
+            <span class="fb-star" data-val="4">&#x2605;</span>
+            <span class="fb-star" data-val="5">&#x2605;</span>
+          </div>
+          <div class="fl">
+            <label>What did you like?</label
+            ><textarea class="fi" id="fb-liked" rows="2" placeholder="Optional..."></textarea>
+          </div>
+          <div class="fl">
+            <label>What would you change?</label
+            ><textarea class="fi" id="fb-disliked" rows="2" placeholder="Optional..."></textarea>
+          </div>
+          <div class="fb-tags">
+            <span class="fb-tag">Design</span>
+            <span class="fb-tag">Functionality</span>
+            <span class="fb-tag">Responsive</span>
+            <span class="fb-tag">Performance</span>
+          </div>
+          <div class="fb-actions">
+            <button class="btn-p" id="fb-submit">Save Feedback</button>
+            <button class="fb-skip" id="fb-skip">Skip</button>
+          </div>
         </div>
       </div>
-      <div class="se-input-row">
-        <textarea id="se-textarea" rows="1" placeholder="Describe a change &mdash; I'll rebuild with your update..."></textarea>
-        <button class="se-send" id="se-send">&uarr;</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- SETTINGS -->
-<div id="settings-overlay" role="dialog" aria-label="Settings">
-  <div class="ssheet">
-    <div class="ssh"></div>
-    <div class="sshead">
-      <span class="sshead-title">&#x2699;&#xFE0F; Settings</span>
-      <button class="ssclose" id="ssclose" aria-label="Close">&#x2715;</button>
-    </div>
-    <div class="ssbody">
-      <span class="ssec">AI Keys</span>
-      <div class="sscard">
-        <div class="fl"><label>Anthropic API Key</label><input class="fi fi-mono" type="password" id="s-anth" placeholder="sk-ant-..."></div>
-        <div class="fl"><label>OpenAI API Key (GPT-4o Audit)</label><input class="fi fi-mono" type="password" id="s-gpt" placeholder="sk-..."></div>
-        <div class="fl"><label>Stitch API Key <span style="font-size:10px;color:rgba(255,255,255,.35)">(Flawless Pipeline)</span></label><div class="fi-pw-wrap"><input class="fi fi-mono" type="password" id="s-stitch" placeholder="stitch_..."><button type="button" class="fi-pw-toggle" id="s-stitch-toggle">&#x1F441;</button></div></div>
-        <div class="fl"><label>Groq API Key <span style="font-size:10px;color:rgba(255,255,255,.35)">(Fast Inference)</span></label><input class="fi fi-mono" type="password" id="s-groq" placeholder="gsk_..."></div>
-        <div class="fl"><label>Gemini API Key <span style="font-size:10px;color:rgba(255,255,255,.35)">(Full AI Scan)</span></label><input class="fi fi-mono" type="password" id="s-gemini" placeholder="AIza..."></div>
-        <button class="btn-p" id="s-save-ai">Save AI Keys</button>
-      </div>
-      <span class="ssec">GitHub</span>
-      <div class="sscard">
-        <div class="fl"><label>Personal Access Token</label><input class="fi fi-mono" type="password" id="s-gh-token" placeholder="ghp_..."></div>
-        <div class="fl"><label>GitHub Username</label><input class="fi fi-mono" type="text" id="s-gh-user" placeholder="yourusername"></div>
-        <div class="fl"><label>Repository Name</label><input class="fi fi-mono" type="text" id="s-gh-repo" placeholder="my-builder-apps"></div>
-        <div class="fl"><label>Custom Domain <span style="font-size:10px;color:rgba(255,255,255,.35)">(optional)</span></label><input class="fi fi-mono" type="text" id="s-gh-domain" placeholder="www.example.com"></div>
-        <button class="btn-p" id="s-save-gh" style="background:var(--gh);box-shadow:none">Save &amp; Test GitHub</button>
-        <button class="btn-p" id="s-gh-sync" style="background:rgba(255,255,255,.08);box-shadow:none;font-size:12px;padding:11px;border:1.5px solid rgba(255,255,255,.12);margin-top:6px">&#x1F504; Sync Apps from GitHub</button>
-      </div>
-      <span class="ssec">Profiles</span>
-      <div class="sscard" id="profiles-section"></div>
-      <span class="ssec">Pipeline</span>
-      <div class="sscard">
-        <div class="ssrow"><div class="ssrl"><div class="sl">GPT-4o Audit Step</div><div class="ss">Scan for bugs between builds</div></div><div class="pill" id="s-audit-pill"></div></div>
-        <div class="ssrow"><div class="ssrl"><div class="sl">&#x1F5C4;&#xFE0F; Supabase Backend Step</div><div class="ss">Auto-generate tables + RLS for each app</div></div><div class="pill" id="s-backend-pill"></div></div>
-        <div class="ssrow"><div class="ssrl"><div class="sl">Supabase Cloud Sync</div><div class="ss">Cross-device backup of your apps list</div></div><div class="pill" id="s-sync-pill"></div></div>
-        <div id="s-sb-exp" style="display:none;flex-direction:column;gap:9px">
-          <input class="fi fi-mono" type="text" id="s-sb-url" placeholder="Supabase URL">
-          <input class="fi fi-mono" type="password" id="s-sb-anon" placeholder="Supabase Anon Key">
-          <input class="fi fi-mono" type="password" id="s-sb-apikey" placeholder="Supabase API Key (service_role)">
-          <div id="s-sb-apikey-status" style="display:none;font-size:11px;padding:6px 10px;border-radius:8px"></div>
-          <button class="btn-p" id="s-save-sb" style="background:var(--g2);box-shadow:none;font-size:12px;padding:11px">&#x1F4BE; Save Supabase Credentials</button>
-          <button class="btn-p" id="s-pull" style="background:rgba(255,255,255,.08);box-shadow:none;font-size:12px;padding:11px;border:1.5px solid rgba(255,255,255,.12)">&#x2601;&#xFE0F; Pull from Cloud</button>
+      <!-- THOUGHT FEEDBACK OVERLAY -->
+      <div id="thought-fb-overlay" role="dialog" aria-label="Rate ideation">
+        <div class="fb-card">
+          <div class="fb-title">&#x1F4AD; Rate this ideation</div>
+          <div class="fb-app-name" id="tfb-thought-name">Thought</div>
+          <div class="fb-stars tfb-stars">
+            <span class="fb-star tfb-star" data-val="1">&#x2605;</span>
+            <span class="fb-star tfb-star" data-val="2">&#x2605;</span>
+            <span class="fb-star tfb-star" data-val="3">&#x2605;</span>
+            <span class="fb-star tfb-star" data-val="4">&#x2605;</span>
+            <span class="fb-star tfb-star" data-val="5">&#x2605;</span>
+          </div>
+          <div class="fl">
+            <label>What was missing or unclear?</label
+            ><textarea class="fi" id="tfb-text" rows="2" placeholder="Optional..."></textarea>
+          </div>
+          <div class="fb-actions">
+            <button class="btn-p" id="tfb-submit">Save</button>
+            <button class="fb-skip" id="tfb-skip">Skip</button>
+          </div>
         </div>
       </div>
-      <span class="ssec">Key Safety</span>
-      <div class="sscard" id="key-safety-card"></div>
-      <span class="ssec">Danger Zone</span>
-      <div class="sscard">
-        <button class="dbtn" id="s-clear">&#x1F5D1;&#xFE0F; Delete All Apps Locally</button>
-        <button class="dbtn" id="s-signout">&#x1F6AA; Sign Out &amp; Clear All Keys</button>
-      </div>
-    </div>
-    <div class="ssfooter">The Builder &middot; Claude + GPT-4o + Gemini + Groq + DALL-E &middot; PWA</div>
-  </div>
-</div>
 
-<!-- TEMPLATE GALLERY -->
-<div id="template-overlay" role="dialog" aria-label="Templates">
-  <div class="ssheet">
-    <div class="ssh"></div>
-    <div class="sshead">
-      <span class="sshead-title">&#x1F4C2; Templates</span>
-      <button class="ssclose" id="tpl-sheet-close" aria-label="Close">&#x2715;</button>
-    </div>
-    <div class="tpl-sheet-body">
-      <div class="tpl-cats" id="tpl-sheet-cats"></div>
-      <div class="tpl-grid" id="tpl-sheet-grid"></div>
-    </div>
-  </div>
-  <div class="tpl-preview-overlay" id="tpl-sheet-preview" data-action-self="closeTplSheetPreview">
-    <div class="tpl-preview-modal">
-      <div class="tpl-preview-hdr"><span class="tpl-preview-name" id="tpl-sheet-preview-name"></span><div class="tpl-preview-hdr-right"><button class="tpl-preview-fullscreen" data-action="toggleTplSheetPreviewFullscreen" id="tpl-sheet-preview-fs" title="Toggle fullscreen">&#x26F6;</button><button class="tpl-preview-close" data-action="closeTplSheetPreview">&#x2715;</button></div></div>
-      <div class="tpl-preview-frame" id="tpl-sheet-preview-frame"></div>
-      <div class="tpl-preview-info">Structural preview &mdash; AI fills in full content when built</div>
-      <div class="tpl-preview-actions"><button class="tpl-preview-use" id="tpl-sheet-preview-use">Use This Template</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- THOUGHTS FOLDER -->
-<div id="thoughts-overlay">
-  <div class="ssheet">
-    <div class="ssh"></div>
-    <div class="sshead">
-      <span class="sshead-title">&#x1F4AD; Thoughts</span>
-      <button class="ssclose" id="tf-close">&#x2715;</button>
-    </div>
-    <div class="tf-body">
-      <div class="tpl-cats" id="tf-sort-tabs"></div>
-      <div class="tf-grid" id="tf-grid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- EMOJI PICKER -->
-<div id="emoji-overlay" role="dialog" aria-label="Pick an Icon">
-  <div class="ebox">
-    <div class="ebox-title">Pick an Icon</div>
-    <div class="egrid" id="emoji-grid"></div>
-  </div>
-</div>
-
-<!-- BUILD HISTORY OVERLAY -->
-<div id="build-history-overlay" role="dialog" aria-label="Build History">
-  <div class="bh-sheet">
-    <div class="bh-handle"></div>
-    <div class="bh-top">
-      <div class="bh-app-info">
-        <div class="bh-icon" id="bh-icon">&#x1F3AF;</div>
-        <div>
-          <div class="bh-name" id="bh-name">App Name</div>
-          <div class="bh-sub" id="bh-sub">Build History</div>
+      <!-- PROJECT SHEET -->
+      <div id="project-sheet">
+        <div class="psheet">
+          <div class="psh-handle"></div>
+          <div class="psh-top">
+            <div class="psh-app-info">
+              <div class="psh-icon" id="psh-icon">&#x1F3AF;</div>
+              <div>
+                <div class="psh-name" id="psh-name">App Name</div>
+                <div class="psh-url-line" id="psh-url-line" data-action="copyUrl">...</div>
+              </div>
+            </div>
+            <div class="psh-top-btns">
+              <button class="psh-btn" data-action="openCurrentInViewer">&#x1F680; Open</button>
+              <button class="psh-btn primary" data-action="editCurrentApp">&#x270F;&#xFE0F; Edit</button>
+              <button class="psh-btn" data-action="closeProject">&#x2715;</button>
+            </div>
+          </div>
+          <div class="psh-body">
+            <div class="psec">
+              <div class="psec-title">Live URL</div>
+              <div class="url-box">
+                <div class="url-text" id="proj-url-display">&mdash;</div>
+                <button class="url-copy" data-action="copyUrl">Copy</button>
+              </div>
+            </div>
+            <div class="psec">
+              <div class="psec-title">Details</div>
+              <div class="info-row">
+                <span class="ir-label">Status</span><span class="ir-value" id="proj-status">&mdash;</span>
+              </div>
+              <div class="info-row">
+                <span class="ir-label">GitHub Path</span><span class="ir-value" id="proj-path">&mdash;</span>
+              </div>
+              <div class="info-row">
+                <span class="ir-label">Created</span><span class="ir-value" id="proj-created">&mdash;</span>
+              </div>
+              <div class="info-row">
+                <span class="ir-label">Last Updated</span><span class="ir-value" id="proj-updated">&mdash;</span>
+              </div>
+              <div class="info-row">
+                <span class="ir-label">Build Count</span><span class="ir-value" id="proj-builds">&mdash;</span>
+              </div>
+            </div>
+            <div class="psec">
+              <div class="psec-title">Prompt History</div>
+              <div class="prompt-history" id="prompt-history"></div>
+            </div>
+            <div class="psec" id="proj-cost-section" style="display: none">
+              <div class="psec-title">Build Costs</div>
+              <div id="proj-cost-details"></div>
+            </div>
+            <div class="psec">
+              <div class="psec-title">Conversation History</div>
+              <div class="chat-history" id="chat-history"></div>
+            </div>
+            <div style="margin-top: 8px">
+              <button class="btn-full" data-action="editCurrentApp">&#x270F;&#xFE0F; Update This App</button>
+            </div>
+          </div>
         </div>
       </div>
-      <button class="bh-close" id="bh-close" aria-label="Close">&#x2715;</button>
+
+      <!-- STUDIO -->
+      <div class="screen" id="s-viewer">
+        <div class="vbar">
+          <button class="vback" id="vback">&larr;</button>
+          <div class="vbar-center">
+            <div class="vbar-name" id="vbar-name">App</div>
+            <div class="vbar-url" id="vbar-url" data-action="copyViewerUrl">&mdash;</div>
+          </div>
+          <div class="vbar-btns" id="vbar-btns">
+            <button class="vbar-btn" id="vbar-proj">&#x1F4CB;</button>
+            <button class="vbar-btn" id="vbar-history-btn" title="Version history">&#x23F3;</button>
+            <button class="vbar-btn" id="vbar-share-btn" title="Share app">&#x1F517;</button>
+            <button class="vbar-btn" id="vbar-fs-toggle" title="Full screen preview">&#x26F6;</button>
+          </div>
+        </div>
+        <div
+          id="vbar-approve-row"
+          style="
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(61, 90, 254, 0.1);
+            border-bottom: 1.5px solid rgba(61, 90, 254, 0.25);
+            flex-shrink: 0;
+          "
+        >
+          <span style="flex: 1; font-size: 11px; color: rgba(255, 255, 255, 0.6)"
+            >Review the app, then approve or request changes</span
+          >
+          <button
+            id="vbar-req-changes"
+            style="
+              padding: 7px 13px;
+              border-radius: 9px;
+              background: rgba(255, 255, 255, 0.08);
+              border: 1.5px solid rgba(255, 255, 255, 0.14);
+              color: rgba(255, 255, 255, 0.7);
+              font-family: var(--fh);
+              font-size: 11px;
+              font-weight: 700;
+              cursor: pointer;
+              white-space: nowrap;
+            "
+          >
+            &#x270F;&#xFE0F; Changes
+          </button>
+          <button
+            id="vbar-approve"
+            style="
+              padding: 7px 14px;
+              border-radius: 9px;
+              background: linear-gradient(135deg, #ff3cac, #784ba0);
+              border: none;
+              color: #fff;
+              font-family: var(--fh);
+              font-size: 11px;
+              font-weight: 700;
+              cursor: pointer;
+              white-space: nowrap;
+              box-shadow: 0 4px 14px rgba(255, 60, 172, 0.35);
+            "
+          >
+            &#x1F500; Approve &amp; Merge
+          </button>
+        </div>
+        <div id="studio-body">
+          <div id="studio-preview">
+            <iframe
+              id="viewer-iframe"
+              sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock"
+            ></iframe>
+          </div>
+          <div id="studio-editor">
+            <div class="se-drag" id="se-drag"></div>
+            <div class="se-header" id="se-header-toggle">
+              <span class="se-header-title">&#x270F;&#xFE0F; Edit App</span>
+              <div class="se-header-btns">
+                <button class="se-hbtn" id="se-proj-btn">&#x1F4CB; Project</button>
+                <button class="se-hbtn" id="se-liveurl-btn" style="display: none">&#x1F310; Live URL</button>
+                <button class="se-hbtn" id="se-collapse-btn">&#x25BC; Hide</button>
+              </div>
+            </div>
+            <div class="se-input-row">
+              <textarea
+                id="se-textarea"
+                rows="1"
+                placeholder="Describe a change &mdash; I'll rebuild with your update..."
+              ></textarea>
+              <button class="se-send" id="se-send">&uarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="settings-overlay" role="dialog" aria-label="Settings">
+        <div class="ssheet">
+          <div class="ssh"></div>
+          <div class="sshead">
+            <span class="sshead-title">&#x2699;&#xFE0F; Settings</span>
+            <button class="ssclose" id="ssclose" aria-label="Close">&#x2715;</button>
+          </div>
+          <div class="ssbody">
+            <span class="ssec">AI Keys</span>
+            <div class="sscard">
+              <div class="fl">
+                <label>Anthropic API Key</label
+                ><input class="fi fi-mono" type="password" id="s-anth" placeholder="sk-ant-..." />
+              </div>
+              <div class="fl">
+                <label>OpenAI API Key (GPT-4o Audit)</label
+                ><input class="fi fi-mono" type="password" id="s-gpt" placeholder="sk-..." />
+              </div>
+              <div class="fl">
+                <label
+                  >Stitch API Key
+                  <span style="font-size: 10px; color: rgba(255, 255, 255, 0.35)">(Flawless Pipeline)</span></label
+                >
+                <div class="fi-pw-wrap">
+                  <input class="fi fi-mono" type="password" id="s-stitch" placeholder="stitch_..." /><button
+                    type="button"
+                    class="fi-pw-toggle"
+                    id="s-stitch-toggle"
+                  >
+                    &#x1F441;
+                  </button>
+                </div>
+              </div>
+              <div class="fl">
+                <label
+                  >Groq API Key
+                  <span style="font-size: 10px; color: rgba(255, 255, 255, 0.35)">(Fast Inference)</span></label
+                ><input class="fi fi-mono" type="password" id="s-groq" placeholder="gsk_..." />
+              </div>
+              <div class="fl">
+                <label
+                  >Gemini API Key
+                  <span style="font-size: 10px; color: rgba(255, 255, 255, 0.35)">(Full AI Scan)</span></label
+                ><input class="fi fi-mono" type="password" id="s-gemini" placeholder="AIza..." />
+              </div>
+              <button class="btn-p" id="s-save-ai">Save AI Keys</button>
+            </div>
+            <span class="ssec">GitHub</span>
+            <div class="sscard">
+              <div class="fl">
+                <label>Personal Access Token</label
+                ><input class="fi fi-mono" type="password" id="s-gh-token" placeholder="ghp_..." />
+              </div>
+              <div class="fl">
+                <label>GitHub Username</label
+                ><input class="fi fi-mono" type="text" id="s-gh-user" placeholder="yourusername" />
+              </div>
+              <div class="fl">
+                <label>Repository Name</label
+                ><input class="fi fi-mono" type="text" id="s-gh-repo" placeholder="my-builder-apps" />
+              </div>
+              <div class="fl">
+                <label
+                  >Custom Domain
+                  <span style="font-size: 10px; color: rgba(255, 255, 255, 0.35)">(optional)</span></label
+                ><input class="fi fi-mono" type="text" id="s-gh-domain" placeholder="www.example.com" />
+              </div>
+              <button class="btn-p" id="s-save-gh" style="background: var(--gh); box-shadow: none">
+                Save &amp; Test GitHub
+              </button>
+              <button
+                class="btn-p"
+                id="s-gh-sync"
+                style="
+                  background: rgba(255, 255, 255, 0.08);
+                  box-shadow: none;
+                  font-size: 12px;
+                  padding: 11px;
+                  border: 1.5px solid rgba(255, 255, 255, 0.12);
+                  margin-top: 6px;
+                "
+              >
+                &#x1F504; Sync Apps from GitHub
+              </button>
+            </div>
+            <span class="ssec">Profiles</span>
+            <div class="sscard" id="profiles-section"></div>
+            <span class="ssec">Pipeline</span>
+            <div class="sscard">
+              <div class="ssrow">
+                <div class="ssrl">
+                  <div class="sl">GPT-4o Audit Step</div>
+                  <div class="ss">Scan for bugs between builds</div>
+                </div>
+                <div class="pill" id="s-audit-pill"></div>
+              </div>
+              <div class="ssrow">
+                <div class="ssrl">
+                  <div class="sl">&#x1F5C4;&#xFE0F; Supabase Backend Step</div>
+                  <div class="ss">Auto-generate tables + RLS for each app</div>
+                </div>
+                <div class="pill" id="s-backend-pill"></div>
+              </div>
+              <div class="ssrow">
+                <div class="ssrl">
+                  <div class="sl">Supabase Cloud Sync</div>
+                  <div class="ss">Cross-device backup of your apps list</div>
+                </div>
+                <div class="pill" id="s-sync-pill"></div>
+              </div>
+              <div id="s-sb-exp" style="display: none; flex-direction: column; gap: 9px">
+                <input class="fi fi-mono" type="text" id="s-sb-url" placeholder="Supabase URL" />
+                <input class="fi fi-mono" type="password" id="s-sb-anon" placeholder="Supabase Anon Key" />
+                <input
+                  class="fi fi-mono"
+                  type="password"
+                  id="s-sb-apikey"
+                  placeholder="Supabase API Key (service_role)"
+                />
+                <div
+                  id="s-sb-apikey-status"
+                  style="display: none; font-size: 11px; padding: 6px 10px; border-radius: 8px"
+                ></div>
+                <button
+                  class="btn-p"
+                  id="s-save-sb"
+                  style="background: var(--g2); box-shadow: none; font-size: 12px; padding: 11px"
+                >
+                  &#x1F4BE; Save Supabase Credentials
+                </button>
+                <button
+                  class="btn-p"
+                  id="s-pull"
+                  style="
+                    background: rgba(255, 255, 255, 0.08);
+                    box-shadow: none;
+                    font-size: 12px;
+                    padding: 11px;
+                    border: 1.5px solid rgba(255, 255, 255, 0.12);
+                  "
+                >
+                  &#x2601;&#xFE0F; Pull from Cloud
+                </button>
+              </div>
+            </div>
+            <span class="ssec">Key Safety</span>
+            <div class="sscard" id="key-safety-card"></div>
+            <span class="ssec">Danger Zone</span>
+            <div class="sscard">
+              <button class="dbtn" id="s-clear">&#x1F5D1;&#xFE0F; Delete All Apps Locally</button>
+              <button class="dbtn" id="s-signout">&#x1F6AA; Sign Out &amp; Clear All Keys</button>
+            </div>
+          </div>
+          <div class="ssfooter">The Builder &middot; Claude + GPT-4o + Gemini + Groq + DALL-E &middot; PWA</div>
+        </div>
+      </div>
+
+      <!-- TEMPLATE GALLERY -->
+      <div id="template-overlay" role="dialog" aria-label="Templates">
+        <div class="ssheet">
+          <div class="ssh"></div>
+          <div class="sshead">
+            <span class="sshead-title">&#x1F4C2; Templates</span>
+            <button class="ssclose" id="tpl-sheet-close" aria-label="Close">&#x2715;</button>
+          </div>
+          <div class="tpl-sheet-body">
+            <div class="tpl-cats" id="tpl-sheet-cats"></div>
+            <div class="tpl-grid" id="tpl-sheet-grid"></div>
+          </div>
+        </div>
+        <div class="tpl-preview-overlay" id="tpl-sheet-preview" data-action-self="closeTplSheetPreview">
+          <div class="tpl-preview-modal">
+            <div class="tpl-preview-hdr">
+              <span class="tpl-preview-name" id="tpl-sheet-preview-name"></span>
+              <div class="tpl-preview-hdr-right">
+                <button
+                  class="tpl-preview-fullscreen"
+                  data-action="toggleTplSheetPreviewFullscreen"
+                  id="tpl-sheet-preview-fs"
+                  title="Toggle fullscreen"
+                >
+                  &#x26F6;</button
+                ><button class="tpl-preview-close" data-action="closeTplSheetPreview">&#x2715;</button>
+              </div>
+            </div>
+            <div class="tpl-preview-frame" id="tpl-sheet-preview-frame"></div>
+            <div class="tpl-preview-info">Structural preview &mdash; AI fills in full content when built</div>
+            <div class="tpl-preview-actions">
+              <button class="tpl-preview-use" id="tpl-sheet-preview-use">Use This Template</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THOUGHTS FOLDER -->
+      <div id="thoughts-overlay">
+        <div class="ssheet">
+          <div class="ssh"></div>
+          <div class="sshead">
+            <span class="sshead-title">&#x1F4AD; Thoughts</span>
+            <button class="ssclose" id="tf-close">&#x2715;</button>
+          </div>
+          <div class="tf-body">
+            <div class="tpl-cats" id="tf-sort-tabs"></div>
+            <div class="tf-grid" id="tf-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMOJI PICKER -->
+      <div id="emoji-overlay" role="dialog" aria-label="Pick an Icon">
+        <div class="ebox">
+          <div class="ebox-title">Pick an Icon</div>
+          <div class="egrid" id="emoji-grid"></div>
+        </div>
+      </div>
+
+      <!-- BUILD HISTORY OVERLAY -->
+      <div id="build-history-overlay" role="dialog" aria-label="Build History">
+        <div class="bh-sheet">
+          <div class="bh-handle"></div>
+          <div class="bh-top">
+            <div class="bh-app-info">
+              <div class="bh-icon" id="bh-icon">&#x1F3AF;</div>
+              <div>
+                <div class="bh-name" id="bh-name">App Name</div>
+                <div class="bh-sub" id="bh-sub">Build History</div>
+              </div>
+            </div>
+            <button class="bh-close" id="bh-close" aria-label="Close">&#x2715;</button>
+          </div>
+          <div class="bh-body" id="bh-body"></div>
+        </div>
+      </div>
+
+      <!-- CONTEXT MENU -->
+      <div id="ctx-menu" role="menu" aria-label="App actions">
+        <div class="cmi" id="ctx-open" role="menuitem" tabindex="0">&#x1F680; Open App</div>
+        <div class="cmi" id="ctx-proj" role="menuitem" tabindex="0">&#x1F4CB; Project Details</div>
+        <div class="cmi" id="ctx-history" role="menuitem" tabindex="0">&#x1F4DA; Build History</div>
+        <div class="cmi" id="ctx-edit" role="menuitem" tabindex="0">&#x270F;&#xFE0F; Edit / Update</div>
+        <div class="cmsep" role="separator"></div>
+        <div class="cmi danger" id="ctx-del" role="menuitem" tabindex="0">&#x1F5D1;&#xFE0F; Delete</div>
+      </div>
+
+      <!-- INSTALL BANNER -->
+      <div id="install-banner">
+        <div class="ib-icon">&#x26A1;</div>
+        <div class="ib-info">
+          <div class="ib-title">Install The Builder</div>
+          <div class="ib-sub">Add to home screen for full PWA experience</div>
+        </div>
+        <button class="ib-add" id="ib-add">Add</button>
+        <button class="ib-x" id="ib-x">&#x2715;</button>
+      </div>
+
+      <!-- STITCH KEY MODAL -->
+      <div id="stitch-key-modal" class="stitch-modal-overlay" role="alertdialog" aria-label="Stitch API Key Required">
+        <div class="stitch-modal">
+          <div class="stitch-modal-icon">&#x1F512;</div>
+          <div class="stitch-modal-title">Stitch API Key Required</div>
+          <div class="stitch-modal-sub">
+            The Flawless Pipeline requires a Stitch API key. Add your key in Settings to unlock this pipeline.
+          </div>
+          <div class="stitch-modal-btns">
+            <button class="btn-p" id="stitch-modal-settings">&#x2699;&#xFE0F; Open Settings</button>
+            <button class="stitch-modal-dismiss" id="stitch-modal-close">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
     </div>
-    <div class="bh-body" id="bh-body"></div>
-  </div>
-</div>
 
-<!-- CONTEXT MENU -->
-<div id="ctx-menu" role="menu" aria-label="App actions">
-  <div class="cmi" id="ctx-open" role="menuitem" tabindex="0">&#x1F680; Open App</div>
-  <div class="cmi" id="ctx-proj" role="menuitem" tabindex="0">&#x1F4CB; Project Details</div>
-  <div class="cmi" id="ctx-history" role="menuitem" tabindex="0">&#x1F4DA; Build History</div>
-  <div class="cmi" id="ctx-edit" role="menuitem" tabindex="0">&#x270F;&#xFE0F; Edit / Update</div>
-  <div class="cmsep" role="separator"></div>
-  <div class="cmi danger" id="ctx-del" role="menuitem" tabindex="0">&#x1F5D1;&#xFE0F; Delete</div>
-</div>
-
-<!-- INSTALL BANNER -->
-<div id="install-banner">
-  <div class="ib-icon">&#x26A1;</div>
-  <div class="ib-info"><div class="ib-title">Install The Builder</div><div class="ib-sub">Add to home screen for full PWA experience</div></div>
-  <button class="ib-add" id="ib-add">Add</button>
-  <button class="ib-x" id="ib-x">&#x2715;</button>
-</div>
-
-<!-- STITCH KEY MODAL -->
-<div id="stitch-key-modal" class="stitch-modal-overlay" role="alertdialog" aria-label="Stitch API Key Required">
-  <div class="stitch-modal">
-    <div class="stitch-modal-icon">&#x1F512;</div>
-    <div class="stitch-modal-title">Stitch API Key Required</div>
-    <div class="stitch-modal-sub">The Flawless Pipeline requires a Stitch API key. Add your key in Settings to unlock this pipeline.</div>
-    <div class="stitch-modal-btns">
-      <button class="btn-p" id="stitch-modal-settings">&#x2699;&#xFE0F; Open Settings</button>
-      <button class="stitch-modal-dismiss" id="stitch-modal-close">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-</div>
-
-<script type="module" src="/src/main.js"></script>
-</body>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>

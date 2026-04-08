@@ -532,19 +532,89 @@ export function addMsg(cfg) {
     } else if (cfg.type === 'approval') {
       row.id = cfg.id
       var apid = esc(cfg.pid || '')
+      // Compute gate state from compliance audit result (if present).
+      // hard fail: violations, or any required feature unverified → block merge
+      // soft fail: score < 90 → show both buttons, demote Approve emphasis
+      // pass: no compliance info, or clean audit → original "All checks passed" card
+      var gateCompliance = cfg.compliance || null
+      var gateChecklist = cfg.checklist || []
+      var gateViolations = gateCompliance && gateCompliance.violations ? gateCompliance.violations : []
+      var gateMissing = gateCompliance && gateCompliance.missing ? gateCompliance.missing : []
+      var gateScore = gateCompliance && typeof gateCompliance.score === 'number' ? gateCompliance.score : null
+      var gateMissingRequired = []
+      for (var gri = 0; gri < gateChecklist.length; gri++) {
+        if (gateChecklist[gri].required && !gateChecklist[gri].verified) {
+          gateMissingRequired.push(gateChecklist[gri])
+        }
+      }
+      var gateHardFail = gateViolations.length > 0 || gateMissingRequired.length > 0
+      var gateSoftFail = !gateHardFail && gateScore !== null && gateScore < 90
+      var gateTitle, gateSub, gateApproveClass, gateChangesClass, gateApproveDisabled
+      if (gateHardFail) {
+        gateTitle = 'Changes Required'
+        var gateSubParts = []
+        if (gateScore !== null) gateSubParts.push('Spec compliance: <strong>' + gateScore + '/100</strong>')
+        if (gateViolations.length)
+          gateSubParts.push(
+            '<strong>' + gateViolations.length + '</strong> violation' + (gateViolations.length !== 1 ? 's' : '')
+          )
+        if (gateMissingRequired.length)
+          gateSubParts.push(
+            '<strong>' +
+              gateMissingRequired.length +
+              '</strong> required feature' +
+              (gateMissingRequired.length !== 1 ? 's' : '') +
+              ' missing'
+          )
+        gateSub = gateSubParts.join(' \u2014 ') + '. Resolve before merging.'
+        gateApproveClass = 'appr-btn approve disabled'
+        gateChangesClass = 'appr-btn changes primary'
+        gateApproveDisabled = ' disabled'
+      } else if (gateSoftFail) {
+        gateTitle = 'Ready to Merge (with warnings)'
+        gateSub =
+          'Spec compliance: <strong>' +
+          gateScore +
+          '/100</strong>. Review the audit above before merging into <strong>main</strong>.'
+        gateApproveClass = 'appr-btn approve'
+        gateChangesClass = 'appr-btn changes primary'
+        gateApproveDisabled = ''
+      } else {
+        gateTitle = 'Ready to Merge'
+        gateSub =
+          gateScore !== null
+            ? 'Spec compliance: <strong>' + gateScore + '/100</strong>. Approve to merge into <strong>main</strong>.'
+            : 'All checks passed. Approve to merge into <strong>main</strong>.'
+        gateApproveClass = 'appr-btn approve'
+        gateChangesClass = 'appr-btn changes'
+        gateApproveDisabled = ''
+      }
       row.innerHTML =
         '<div class="awrap"><div class="aav" style="background:linear-gradient(135deg,#3D5AFE,#00E5FF)">\u2705</div>' +
-        '<div style="flex:1;min-width:0"><div class="approval-card">' +
-        '<div class="appr-title">Ready to Merge</div>' +
-        '<div class="appr-sub">All checks passed. Approve to merge into <strong>main</strong>.</div>' +
+        '<div style="flex:1;min-width:0"><div class="approval-card' +
+        (gateHardFail ? ' approval-hard-fail' : gateSoftFail ? ' approval-soft-fail' : '') +
+        '">' +
+        '<div class="appr-title">' +
+        esc(gateTitle) +
+        '</div>' +
+        '<div class="appr-sub">' +
+        gateSub +
+        '</div>' +
         '<div class="appr-branch">' +
         esc(cfg.branch || '') +
         '</div>' +
         '<div class="appr-btns">' +
-        '<button class="appr-btn approve" data-pid="' +
+        '<button class="' +
+        gateApproveClass +
+        '" data-pid="' +
         apid +
-        '" data-action="approve">\uD83D\uDD00 Approve &amp; Merge</button>' +
-        '<button class="appr-btn changes" data-pid="' +
+        '" data-action="approve"' +
+        gateApproveDisabled +
+        (gateHardFail ? ' data-blocked="1"' : '') +
+        '>\uD83D\uDD00 Approve &amp; Merge</button>' +
+        '<button class="' +
+        gateChangesClass +
+        '" data-pid="' +
         apid +
         '" data-action="changes">\u270F\uFE0F Request Changes</button>' +
         '</div></div></div></div>'
@@ -552,8 +622,13 @@ export function addMsg(cfg) {
         var btns = row.querySelectorAll('.appr-btn[data-pid]')
         for (var bi2 = 0; bi2 < btns.length; bi2++) {
           btns[bi2].addEventListener('click', function () {
+            if (this.disabled) return
             var pid2 = this.dataset.pid
             var action = this.dataset.action
+            if (action === 'approve' && this.dataset.blocked === '1') {
+              this.textContent = 'Resolve violations first'
+              return
+            }
             var allBtns = row.querySelectorAll('.appr-btn')
             for (var k = 0; k < allBtns.length; k++) allBtns[k].disabled = true
             if (action === 'approve') {

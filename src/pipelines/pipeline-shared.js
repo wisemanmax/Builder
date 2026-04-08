@@ -58,7 +58,12 @@ import {
   ghDeleteBranch,
   ghPushManifest,
   ghSyncBuildHistory,
+  ghEnsureBridgeWorkflow,
+  ghPushExternalFile,
+  ghGetExternalFileSha,
+  ghCheckTokenScopes,
 } from '../lib/github.js'
+import { getRuntimeAsset } from '../lib/template-loader.js'
 import { runLocalChecks } from '../lib/checks.js'
 import {
   addMsg,
@@ -401,6 +406,20 @@ export function resolveThoughtContext() {
       specText = formatBriefWithConversation(activeThought)
       sysExtras += '\n\nAPP SPECIFICATION (from user ideation session):\n' + specText
     }
+    // Inject linked-repo context (file tree + key file excerpts) into the build
+    // prompt so the model can reference real paths instead of inventing them.
+    if (activeThought.linkedRepo && activeThought.linkedRepo.context) {
+      var lr = activeThought.linkedRepo
+      sysExtras +=
+        '\n\nATTACHED REPOSITORY (' +
+        lr.owner +
+        '/' +
+        lr.repo +
+        (lr.truncated ? ' — truncated' : '') +
+        '):\n' +
+        'When a rule references a file or path, use its real path from the tree below. Do NOT invent paths or reimplement existing files in localStorage.\n\n' +
+        lr.context
+    }
     thoughtDesign = getThoughtDesignOverrides(activeThought)
 
     // Process supplementary thoughts (summary only)
@@ -436,7 +455,42 @@ export function resolveThoughtContext() {
     rulesText: rulesText,
     thoughtDesign: thoughtDesign,
     sysExtras: sysExtras,
+    linkedRepo: activeThought && activeThought.linkedRepo ? activeThought.linkedRepo : null,
   }
+}
+
+/**
+ * Derive the list of GitHub-Actions bridge action identifiers the generated
+ * app can dispatch. Scans the repo's file tree for scripts under scripts/ and
+ * intersects them with the bridge workflow's known cases + any rules that
+ * mention "invoke"/"run"/"execute".
+ *
+ * Returns an array of short identifiers like ['generate-pdf', 'verify-pipeline'].
+ */
+export function computeAvailableBridgeActions(linkedRepo, rules) {
+  if (!linkedRepo || !linkedRepo.context) return []
+  // Hardcoded set that the shipped builder-bridge.yml handles today.
+  var knownCases = ['generate-pdf', 'verify-pipeline', 'score-job']
+  var contextLower = String(linkedRepo.context).toLowerCase()
+  var rulesBlob = rules
+    ? []
+        .concat(rules.mustRules || [], rules.mustNotRules || [], rules.niceToHave || [])
+        .join(' ')
+        .toLowerCase()
+    : ''
+  var available = []
+  for (var i = 0; i < knownCases.length; i++) {
+    var action = knownCases[i]
+    // Script filename the bridge workflow maps this action to
+    var scriptName = action + '.mjs'
+    var scriptInTree = contextLower.indexOf(scriptName) >= 0
+    var mentionedInRules =
+      rulesBlob.indexOf(action) >= 0 ||
+      rulesBlob.indexOf(scriptName) >= 0 ||
+      rulesBlob.indexOf(action.replace(/-/g, ' ')) >= 0
+    if (scriptInTree || mentionedInRules) available.push(action)
+  }
+  return available
 }
 
 /**
@@ -974,7 +1028,9 @@ function groqPreCheck(code) {
         return []
       }
     })
-    .catch(function () { return [] })
+    .catch(function () {
+      return []
+    })
 }
 
 // Re-export commonly used imports so pipeline files don't need to import them separately
@@ -1031,6 +1087,11 @@ export {
   ghMergeBranch,
   ghDeleteBranch,
   ghPushManifest,
+  ghEnsureBridgeWorkflow,
+  ghPushExternalFile,
+  ghGetExternalFileSha,
+  ghCheckTokenScopes,
+  getRuntimeAsset,
   runLocalChecks,
   addMsg,
   updatePS,
