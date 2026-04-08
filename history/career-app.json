@@ -1,0 +1,19 @@
+{
+  "appId": "career-app",
+  "sessions": [
+    {
+      "id": "s1775649021833",
+      "ts": "2026-04-07T22:49:05.389Z",
+      "prompt": "(Interrupted) Build me a website that helps me find jobs",
+      "messages": [
+        {
+          "role": "system",
+          "type": "text",
+          "ts": "2026-04-08T11:50:21.832Z",
+          "text": "Build interrupted — showing recovered progress for \"Career App\""
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-04-08T11:50:21.834Z"
+}
