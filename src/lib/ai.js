@@ -175,9 +175,15 @@ function geminiCatch(e) {
 
 // Extract text from Gemini response
 function extractGeminiText(d) {
-  return (d.candidates && d.candidates[0] && d.candidates[0].content &&
-    d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
-    d.candidates[0].content.parts[0].text) || ''
+  return (
+    (d.candidates &&
+      d.candidates[0] &&
+      d.candidates[0].content &&
+      d.candidates[0].content.parts &&
+      d.candidates[0].content.parts[0] &&
+      d.candidates[0].content.parts[0].text) ||
+    ''
+  )
 }
 
 // Check if an error is retryable (network/timeout)
@@ -1105,10 +1111,12 @@ export function callGemini(sys, msg, maxTokens) {
   )
     .then(handleGeminiError)
     .then(function (d) {
-      var usage = (d.usageMetadata) ? {
-        input_tokens: d.usageMetadata.promptTokenCount || 0,
-        output_tokens: d.usageMetadata.candidatesTokenCount || 0,
-      } : null
+      var usage = d.usageMetadata
+        ? {
+            input_tokens: d.usageMetadata.promptTokenCount || 0,
+            output_tokens: d.usageMetadata.candidatesTokenCount || 0,
+          }
+        : null
       trackUsage('Gemini', GEMINI_MODEL, usage)
       return stripFences(extractGeminiText(d))
     })
@@ -1116,20 +1124,21 @@ export function callGemini(sys, msg, maxTokens) {
 }
 
 export function callGeminiFullAudit(code) {
-  var sys = SYS_AUDIT + '\n\nIMPORTANT: You have the FULL source code — analyze every line. Return a JSON object with these categories:\n{"security":[],"accessibility":[],"performance":[],"quality":[],"suggestions":[]}\nEach item: {"severity":"critical|warning|info","line":"(approx line or section)","issue":"description","fix":"how to fix"}'
-  return callGemini(sys, 'Full audit of the complete application:\n\n' + code, 16384)
-    .then(function (raw) {
-      try {
-        var p = JSON.parse(raw)
-        return {
-          security: Array.isArray(p.security) ? p.security : [],
-          accessibility: Array.isArray(p.accessibility) ? p.accessibility : [],
-          performance: Array.isArray(p.performance) ? p.performance : [],
-          quality: Array.isArray(p.quality) ? p.quality : [],
-          suggestions: Array.isArray(p.suggestions) ? p.suggestions : [],
-        }
-      } catch (e) {
-        return { security: [], accessibility: [], performance: [], quality: [], suggestions: [] }
+  var sys =
+    SYS_AUDIT +
+    '\n\nIMPORTANT: You have the FULL source code — analyze every line. Return a JSON object with these categories:\n{"security":[],"accessibility":[],"performance":[],"quality":[],"suggestions":[]}\nEach item: {"severity":"critical|warning|info","line":"(approx line or section)","issue":"description","fix":"how to fix"}'
+  return callGemini(sys, 'Full audit of the complete application:\n\n' + code, 16384).then(function (raw) {
+    try {
+      var p = JSON.parse(raw)
+      return {
+        security: Array.isArray(p.security) ? p.security : [],
+        accessibility: Array.isArray(p.accessibility) ? p.accessibility : [],
+        performance: Array.isArray(p.performance) ? p.performance : [],
+        quality: Array.isArray(p.quality) ? p.quality : [],
+        suggestions: Array.isArray(p.suggestions) ? p.suggestions : [],
       }
-    })
+    } catch (e) {
+      return { security: [], accessibility: [], performance: [], quality: [], suggestions: [] }
+    }
+  })
 }

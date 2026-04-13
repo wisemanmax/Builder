@@ -1,5 +1,5 @@
 import { ST, hydrate } from './lib/state.js'
-import { showScreen, toast, copyToClipboard } from './lib/utils.js'
+import { $, showScreen, toast, copyToClipboard } from './lib/utils.js'
 import { setupErrorHandlers, setupPwa } from './lib/bootstrap.js'
 import {
   setupBuilderSheetEvents,
@@ -17,7 +17,7 @@ import { openPreview } from './components/approval-card.js'
 import { resetChat, initMessageHandlers } from './components/message.js'
 import { detachThought, detachThoughtById, showThoughtPicker, pickThought } from './components/thought-card.js'
 
-import { initOnboarding } from './screens/login.js'
+import { initLogin, initOnboarding } from './screens/login.js'
 import { initHome } from './screens/home.js'
 import {
   openBuilder,
@@ -78,6 +78,8 @@ import { pullFromGitHub } from './lib/github.js'
 import { pullFromSupabase } from './lib/storage.js'
 import { decompressShareData } from './lib/share.js'
 import { openShareCard } from './screens/studio.js'
+import { getSupabase } from './lib/supabase.js'
+import { syncAllToSupabase, pullAllFromSupabase, migrateLocalData } from './lib/sync.js'
 
 export function init() {
   // Global namespace for dynamic HTML onclick handlers
@@ -97,28 +99,40 @@ export function init() {
   initEmojiPicker()
   _handleShareUrl()
 
-  // Initial screen
-  if (ST.key) {
-    showScreen('home')
-    renderGrid()
-    renderProfileChip()
-    setTimeout(function () {
-      var interrupted = checkInterruptedBuild()
-      if (interrupted) {
-        toast('Recovering interrupted build\u2026', 3000)
-        recoverInterruptedBuild(interrupted)
+  // --- Auth-aware startup ---
+  var sb = getSupabase()
+  if (sb) {
+    // Supabase is configured — use auth flow
+    sb.auth.getSession().then(function (result) {
+      var session = result.data.session
+      if (session) {
+        _onSignIn(session)
+      } else {
+        showScreen('login')
       }
-    }, 600)
-  } else showScreen('onboard')
-
-  // Auto-sync from GitHub on startup if credentials exist but no local apps
-  if (ST.key && ST.ghToken && ST.ghUser && ST.ghRepo && ST.apps.length === 0) {
-    pullFromGitHub().then(function () {
-      renderGrid()
     })
+
+    // Listen for auth state changes (sign in, sign out, token refresh)
+    sb.auth.onAuthStateChange(function (event, session) {
+      if (event === 'SIGNED_IN' && session) {
+        _onSignIn(session)
+      } else if (event === 'SIGNED_OUT') {
+        _onSignOut()
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        ST._session = session
+      }
+    })
+  } else {
+    // No Supabase configured — fall back to legacy API-key gating
+    if (ST.key) {
+      _enterApp()
+    } else {
+      showScreen('onboard')
+    }
   }
 
   // Init modules
+  initLogin()
   initOnboarding()
   initHome()
   initThinkSheet()
@@ -237,6 +251,66 @@ export function init() {
     },
     openShareCard: openShareCard,
   })
+}
+
+// Called when user has a valid session
+function _onSignIn(session) {
+  ST._session = session
+  ST.userId = session.user.id
+  ST.userEmail = session.user.email || session.user.user_metadata.email || ''
+
+  // Show email in status bar
+  var sbUser = $('sb-user')
+  if (sbUser) sbUser.textContent = ST.userEmail
+
+  // If user has no Anthropic key yet, show onboarding for key setup
+  if (!ST.key) {
+    showScreen('onboard')
+    return
+  }
+
+  _enterApp()
+
+  // Migrate existing localStorage data on first auth, then pull
+  migrateLocalData()
+    .then(function () {
+      return pullAllFromSupabase()
+    })
+    .then(function () {
+      renderGrid()
+    })
+    .catch(function (e) {
+      console.warn('Initial sync failed:', e.message)
+    })
+}
+
+function _onSignOut() {
+  ST._session = null
+  ST.userId = null
+  ST.userEmail = null
+  var sbUser = $('sb-user')
+  if (sbUser) sbUser.textContent = ''
+  showScreen('login')
+}
+
+function _enterApp() {
+  showScreen('home')
+  renderGrid()
+  renderProfileChip()
+  setTimeout(function () {
+    var interrupted = checkInterruptedBuild()
+    if (interrupted) {
+      toast('Recovering interrupted build\u2026', 3000)
+      recoverInterruptedBuild(interrupted)
+    }
+  }, 600)
+
+  // Auto-sync from GitHub on startup if credentials exist but no local apps
+  if (ST.key && ST.ghToken && ST.ghUser && ST.ghRepo && ST.apps.length === 0) {
+    pullFromGitHub().then(function () {
+      renderGrid()
+    })
+  }
 }
 
 function _handleShareUrl() {

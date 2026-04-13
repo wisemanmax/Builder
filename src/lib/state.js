@@ -1,6 +1,11 @@
 import { KEY_STORE } from '../config/constants.js'
 
 export const ST = {
+  // Auth state
+  userId: null,
+  userEmail: null,
+  _session: null,
+  // App data
   apps: [],
   key: '',
   gptKey: '',

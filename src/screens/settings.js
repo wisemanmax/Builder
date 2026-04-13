@@ -6,6 +6,7 @@ import { pullFromSupabase } from '../lib/storage.js'
 import { renderGrid } from '../components/app-icon.js'
 import { renderProfilesSettings } from './profiles.js'
 import { testSupabaseConnection } from '../lib/supabase-setup.js'
+import { getSupabase } from '../lib/supabase.js'
 
 export function openSettings() {
   $('s-anth').value = ST.key
@@ -27,6 +28,25 @@ export function openSettings() {
   $('s-sb-exp').style.display = ST.sbEnabled ? 'flex' : 'none'
   var ksc = $('key-safety-card')
   if (ksc) ksc.innerHTML = keyStatusHTML()
+  // Show session info if authenticated
+  var sessionCard = $('s-session-card')
+  if (sessionCard) {
+    if (ST.userId && ST.userEmail) {
+      sessionCard.style.display = 'block'
+      var emailEl = $('s-session-email')
+      if (emailEl) emailEl.textContent = ST.userEmail
+      var providerEl = $('s-session-provider')
+      if (providerEl) {
+        var provider =
+          ST._session && ST._session.user && ST._session.user.app_metadata
+            ? ST._session.user.app_metadata.provider || 'email'
+            : 'email'
+        providerEl.textContent = 'Signed in via ' + provider
+      }
+    } else {
+      sessionCard.style.display = 'none'
+    }
+  }
   renderProfilesSettings()
   $('settings-overlay').classList.add('on')
 }
@@ -219,8 +239,16 @@ export function initSettings() {
   })
   $('s-signout').addEventListener('click', function () {
     if (!confirm('Sign out and clear all keys?')) return
-    localStorage.clear()
-    location.reload()
+    var sb = getSupabase()
+    if (sb) {
+      sb.auth.signOut().then(function () {
+        localStorage.clear()
+        location.reload()
+      })
+    } else {
+      localStorage.clear()
+      location.reload()
+    }
   })
 }
 
@@ -300,9 +328,7 @@ function _testGroqKey(key) {
 }
 
 function _testGeminiKey(key) {
-  fetch(
-    'https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key)
-  )
+  fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key))
     .then(function (res) {
       if (res.ok) toast('\u2713 Gemini API key verified', 3000)
       else if (res.status === 400 || res.status === 401 || res.status === 403)
