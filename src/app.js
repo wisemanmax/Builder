@@ -57,7 +57,7 @@ import {
   copyViewerUrl,
   initStudio,
 } from './screens/studio.js'
-import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp } from './screens/project.js'
+import { openProjectSheet, closeProject, copyUrl, editCurrentApp, delApp, initProjectSheet } from './screens/project.js'
 import { openSettings, initSettings } from './screens/settings.js'
 import { openTemplates, closeTemplates, initTemplateSheet, initTemplateHandlers } from './screens/templates.js'
 import {
@@ -144,6 +144,7 @@ export function init() {
   initProfilePicker()
   initProfilesSettings()
   initContextMenu(openApp, openProjectSheet, openBuilder, delApp)
+  initProjectSheet()
   initPipelineToggle()
   initBuildHistory()
   initTemplateSheet()

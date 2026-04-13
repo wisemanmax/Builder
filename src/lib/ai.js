@@ -17,9 +17,30 @@ import {
   OPENAI_IMAGES_URL,
   GROQ_API_URL,
   GEMINI_API_URL,
+  CLAUDE_PROXY_URL,
+  OPENAI_PROXY_URL,
 } from '../config/constants.js'
 
+// Returns true when calls should go through the proxy (not BYOK)
+function useProxy() {
+  return !ST.byokMode && CLAUDE_PROXY_URL && ST._session
+}
+
+function _proxyToken() {
+  return (ST._session && ST._session.access_token) || ''
+}
+
+function claudeUrl() {
+  return useProxy() ? CLAUDE_PROXY_URL : ANTHROPIC_API_URL
+}
+
 function claudeHeaders() {
+  if (useProxy()) {
+    return {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + _proxyToken(),
+    }
+  }
   return {
     'Content-Type': 'application/json',
     'x-api-key': ST.key,
@@ -29,7 +50,17 @@ function claudeHeaders() {
   }
 }
 
+function gptUrl() {
+  return useProxy() ? OPENAI_PROXY_URL : OPENAI_API_URL
+}
+
 function gptHeaders() {
+  if (useProxy()) {
+    return {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + _proxyToken(),
+    }
+  }
   return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + ST.gptKey }
 }
 
@@ -316,7 +347,7 @@ export function classifyFetchError(e, api) {
 export function callClaude(sys, msg, temperature) {
   temperature = temperature !== undefined ? temperature : 0.6
   return fetchWithRetry(
-    ANTHROPIC_API_URL,
+    claudeUrl(),
     {
       method: 'POST',
       headers: claudeHeaders(),
@@ -343,7 +374,7 @@ export function callClaudeWithThinking(sys, msg, thinkingBudget) {
   thinkingBudget = thinkingBudget || 10000
   var maxTokens = thinkingBudget + 32000
   return fetchWithRetry(
-    ANTHROPIC_API_URL,
+    claudeUrl(),
     {
       method: 'POST',
       headers: claudeHeaders(),
@@ -379,7 +410,7 @@ export function callClaudeRaw(sys, msg, maxTokens, images) {
   maxTokens = maxTokens || 4000
   var userContent = _buildUserContent(msg, images)
   return fetchWithRetry(
-    ANTHROPIC_API_URL,
+    claudeUrl(),
     {
       method: 'POST',
       headers: claudeHeaders(),
@@ -404,7 +435,7 @@ export function callClaudeRaw(sys, msg, maxTokens, images) {
 export function callClaudeMultiTurn(sys, messages, temperature) {
   temperature = temperature !== undefined ? temperature : 0.3
   return fetchWithRetry(
-    ANTHROPIC_API_URL,
+    claudeUrl(),
     {
       method: 'POST',
       headers: claudeHeaders(),
@@ -430,7 +461,7 @@ export function callClaudeMultiTurn(sys, messages, temperature) {
 export function callClaudeRawMultiTurn(sys, messages, maxTokens) {
   maxTokens = maxTokens || 4000
   return fetchWithRetry(
-    ANTHROPIC_API_URL,
+    claudeUrl(),
     {
       method: 'POST',
       headers: claudeHeaders(),
@@ -522,7 +553,7 @@ export function callClaudeWithThinkingStream(sys, msg, thinkingBudget, onChunk, 
   }
 
   var userContent = _buildUserContent(msg, images)
-  var url = ANTHROPIC_API_URL
+  var url = claudeUrl()
   var opts = {
     method: 'POST',
     headers: claudeHeaders(),
@@ -616,7 +647,7 @@ export function callClaudeEnhanceReview(code) {
 export function callGPTRawMultiTurn(sys, messages, maxTokens) {
   maxTokens = maxTokens || 4000
   return fetchWithRetry(
-    OPENAI_API_URL,
+    gptUrl(),
     {
       method: 'POST',
       headers: gptHeaders(),
@@ -640,7 +671,7 @@ export function callGPTRawMultiTurn(sys, messages, maxTokens) {
 export function callGPTThink(sys, messages, maxTokens) {
   maxTokens = maxTokens || 4000
   return fetchWithRetry(
-    OPENAI_API_URL,
+    gptUrl(),
     {
       method: 'POST',
       headers: gptHeaders(),
@@ -662,7 +693,7 @@ export function callGPTThink(sys, messages, maxTokens) {
 
 export function callGPTReview(code) {
   return fetchWithRetry(
-    OPENAI_API_URL,
+    gptUrl(),
     {
       method: 'POST',
       headers: gptHeaders(),
@@ -700,7 +731,7 @@ export function callGPTReview(code) {
 
 export function callGPT(code) {
   return fetchWithRetry(
-    OPENAI_API_URL,
+    gptUrl(),
     {
       method: 'POST',
       headers: gptHeaders(),
@@ -749,7 +780,7 @@ export function callGPTRaw2(sys, msg, maxTokens, images) {
   maxTokens = maxTokens || 4000
   var userContent = images && images.length ? _gptBuildUserContent(msg, images) : msg
   return fetchWithRetry(
-    OPENAI_API_URL,
+    gptUrl(),
     {
       method: 'POST',
       headers: gptHeaders(),
@@ -776,7 +807,7 @@ export function callGPTRaw2(sys, msg, maxTokens, images) {
 export function callGPTMultiTurn2(sys, messages, temperature) {
   temperature = temperature !== undefined ? temperature : 0.6
   return fetchWithRetry(
-    OPENAI_API_URL,
+    gptUrl(),
     {
       method: 'POST',
       headers: gptHeaders(),
@@ -799,7 +830,7 @@ export function callGPTMultiTurn2(sys, messages, temperature) {
 
 export function callGPTWithStream(sys, msg, onChunk, images) {
   var userContent = images && images.length ? _gptBuildUserContent(msg, images) : msg
-  var url = OPENAI_API_URL
+  var url = gptUrl()
   var opts = {
     method: 'POST',
     headers: gptHeaders(),
@@ -899,7 +930,7 @@ export function callGPTWithStream(sys, msg, onChunk, images) {
 export function callGPTTopRaw(sys, msg, maxTokens) {
   maxTokens = maxTokens || 4000
   return fetchWithRetry(
-    OPENAI_API_URL,
+    gptUrl(),
     {
       method: 'POST',
       headers: gptHeaders(),
@@ -975,7 +1006,7 @@ export function callClaudeClarify(msg, images) {
 export function callClaudeHaiku(sys, msg, maxTokens) {
   maxTokens = maxTokens || 2000
   return fetchWithRetry(
-    ANTHROPIC_API_URL,
+    claudeUrl(),
     {
       method: 'POST',
       headers: claudeHeaders(),

@@ -453,6 +453,31 @@
                 <button class="url-copy" data-action="copyUrl">Copy</button>
               </div>
             </div>
+            <div class="psec" id="proj-publish-section">
+              <div class="psec-title">Publish</div>
+              <div class="toggle-row" id="proj-publish-tog">
+                <div class="tl">
+                  <div class="tm" id="proj-pub-label">Published</div>
+                  <div class="ts" id="proj-pub-hint">Make this app publicly accessible via link</div>
+                </div>
+                <div class="pill" id="proj-pub-pill"></div>
+              </div>
+              <div id="proj-slug-row" style="display:none">
+                <div class="fl" style="margin-top:8px">
+                  <label>Slug</label>
+                  <div style="display:flex;gap:6px">
+                    <input class="fi fi-mono" type="text" id="proj-slug" placeholder="my-app-name" style="flex:1" />
+                    <button class="btn-s" id="proj-slug-save" style="width:auto;padding:8px 12px;font-size:10px;flex-shrink:0">Save</button>
+                  </div>
+                </div>
+                <div id="proj-public-url" style="margin-top:8px;display:none">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="url-text" id="proj-pub-url" style="font-size:11px;flex:1"></div>
+                    <button class="url-copy" id="proj-copy-pub">Copy</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="psec">
               <div class="psec-title">Details</div>
               <div class="info-row">
@@ -604,6 +629,17 @@
                 </div>
               </div>
             </div>
+            <!-- BYOK toggle -->
+            <div class="sscard">
+              <div class="toggle-row" id="s-byok-tog">
+                <div class="tl">
+                  <div class="tm">Bring Your Own Keys</div>
+                  <div class="ts">Use your own API keys instead of the built-in proxy</div>
+                </div>
+                <div class="pill" id="s-byok-pill"></div>
+              </div>
+            </div>
+            <div id="s-byok-keys" style="display:none">
             <span class="ssec">AI Keys</span>
             <div class="sscard">
               <div class="fl">
@@ -642,6 +678,17 @@
                 ><input class="fi fi-mono" type="password" id="s-gemini" placeholder="AIza..." />
               </div>
               <button class="btn-p" id="s-save-ai">Save AI Keys</button>
+            </div>
+            </div><!-- /s-byok-keys -->
+            <!-- Usage dashboard link -->
+            <div class="sscard" id="s-usage-card">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:#fff">API Usage</div>
+                  <div id="s-usage-summary" style="font-size:10px;color:rgba(255,255,255,.4);margin-top:3px">Loading...</div>
+                </div>
+                <button class="btn-s" id="s-usage-btn" style="width:auto;padding:8px 14px;font-size:11px">View Details</button>
+              </div>
             </div>
             <span class="ssec">GitHub</span>
             <div class="sscard">
@@ -863,6 +910,20 @@
           <div class="stitch-modal-btns">
             <button class="btn-p" id="stitch-modal-settings">&#x2699;&#xFE0F; Open Settings</button>
             <button class="stitch-modal-dismiss" id="stitch-modal-close">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- USAGE DASHBOARD -->
+      <div id="usage-overlay" role="dialog" aria-label="API Usage" style="display:none">
+        <div class="ssheet" style="max-height:80vh">
+          <div class="ssh"></div>
+          <div class="sshead">
+            <span class="sshead-title">&#x1F4CA; API Usage</span>
+            <button class="ssclose" id="usage-close" aria-label="Close">&#x2715;</button>
+          </div>
+          <div class="ssbody" id="usage-body">
+            <div style="text-align:center;padding:30px;color:rgba(255,255,255,.4)">Loading usage data...</div>
           </div>
         </div>
       </div>

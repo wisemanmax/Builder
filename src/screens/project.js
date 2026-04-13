@@ -5,6 +5,8 @@ import { renderGrid } from '../components/app-icon.js'
 import { openBuilder } from './build.js'
 import { costSummaryHTML } from '../lib/cost.js'
 import { generateShareUrl } from '../lib/share.js'
+import { pushToSupabase } from '../lib/storage.js'
+import { SERVE_APP_URL } from '../config/constants.js'
 
 export function openProjectSheet(id) {
   ST.projectAppId = id
@@ -125,7 +127,100 @@ export function openProjectSheet(id) {
     }
   }
 
+  // Publish section
+  var pubPill = $('proj-pub-pill')
+  var slugRow = $('proj-slug-row')
+  if (pubPill) pubPill.classList.toggle('on', !!app.published)
+  if (slugRow) slugRow.style.display = app.published ? 'block' : 'none'
+  var slugInput = $('proj-slug')
+  if (slugInput) slugInput.value = app.slug || _autoSlug(app.name)
+  _updatePublicUrl(app)
+
   $('project-sheet').classList.add('open')
+}
+
+function _autoSlug(name) {
+  return (name || 'app')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60)
+}
+
+function _updatePublicUrl(app) {
+  var urlEl = $('proj-pub-url')
+  var urlRow = $('proj-public-url')
+  if (!urlEl || !urlRow) return
+  if (app.published && app.slug && SERVE_APP_URL) {
+    var pubUrl = SERVE_APP_URL + '?slug=' + encodeURIComponent(app.slug)
+    urlEl.textContent = pubUrl
+    urlRow.style.display = 'block'
+  } else {
+    urlRow.style.display = 'none'
+  }
+}
+
+export function initProjectSheet() {
+  var pubTog = $('proj-publish-tog')
+  if (pubTog) {
+    pubTog.addEventListener('click', function () {
+      var app = _getProjectApp()
+      if (!app) return
+      app.published = !app.published
+      if (app.published && !app.slug) {
+        app.slug = _autoSlug(app.name)
+        var si = $('proj-slug')
+        if (si) si.value = app.slug
+      }
+      $('proj-pub-pill').classList.toggle('on', !!app.published)
+      $('proj-slug-row').style.display = app.published ? 'block' : 'none'
+      _updatePublicUrl(app)
+      app.updatedAt = new Date().toISOString()
+      persist()
+      pushToSupabase(app)
+      toast(app.published ? 'App published' : 'App unpublished')
+    })
+  }
+  var slugSave = $('proj-slug-save')
+  if (slugSave) {
+    slugSave.addEventListener('click', function () {
+      var app = _getProjectApp()
+      if (!app) return
+      var slug = ($('proj-slug').value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '')
+        .slice(0, 60)
+      if (!slug) {
+        toast('Slug cannot be empty')
+        return
+      }
+      app.slug = slug
+      app.updatedAt = new Date().toISOString()
+      persist()
+      pushToSupabase(app)
+      _updatePublicUrl(app)
+      toast('Slug saved')
+    })
+  }
+  var copyPub = $('proj-copy-pub')
+  if (copyPub) {
+    copyPub.addEventListener('click', function () {
+      var app = _getProjectApp()
+      if (!app || !app.slug || !SERVE_APP_URL) return
+      var pubUrl = SERVE_APP_URL + '?slug=' + encodeURIComponent(app.slug)
+      copyToClipboard(pubUrl, 'Public URL')
+    })
+  }
+}
+
+function _getProjectApp() {
+  var id = ST.projectAppId
+  if (!id) return null
+  for (var i = 0; i < ST.apps.length; i++) {
+    if (ST.apps[i].id === id) return ST.apps[i]
+  }
+  return null
 }
 
 export function closeProject() {

@@ -126,6 +126,7 @@ export const KEY_STORE = {
   W2_PROVIDER: 'bldr_w2provider',
   GROQ: 'bldr_groqKey',
   GEMINI: 'bldr_geminiKey',
+  BYOK: 'bldr_byok',
 }
 
 export const PIPE2_NAMES = [
@@ -301,3 +302,9 @@ export var OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
 export var OPENAI_IMAGES_URL = 'https://api.openai.com/v1/images/generations'
 export var GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 export var GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/'
+
+// Proxy URLs — derived from Supabase project URL (set via VITE_SUPABASE_URL env var)
+var _sbProxyBase = import.meta.env.VITE_SUPABASE_URL || ''
+export var CLAUDE_PROXY_URL = _sbProxyBase ? _sbProxyBase + '/functions/v1/claude-proxy' : ''
+export var OPENAI_PROXY_URL = _sbProxyBase ? _sbProxyBase + '/functions/v1/openai-proxy' : ''
+export var SERVE_APP_URL = _sbProxyBase ? _sbProxyBase + '/functions/v1/serve-app' : ''
