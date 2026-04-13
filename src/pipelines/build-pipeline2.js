@@ -326,7 +326,8 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
                 ? 'Found ' + bugs.length + ' issue' + (bugs.length !== 1 ? 's' : '') + passLabel
                 : 'Code is clean' + passLabel + ' \u2713'
             )
-            if (bugs.length) addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: auditProviderLabel().toLowerCase() })
+            if (bugs.length)
+              addMsg({ role: 'asst', type: 'audit', bugs: bugs, source: auditProviderLabel().toLowerCase() })
             if (passNum === 1) {
               telemetry.emit('build.audit', { bugCount: bugs.length, auditor: auditProviderLabel().toLowerCase() })
               telemetry.updateBuildRecord(_buildId, 'auditBugs', bugs)
@@ -370,102 +371,112 @@ export function runPipeline2(prompt, existingApp, resumeSession, images) {
 
               // Groq pre-check: fast scan for obvious issues to prepend to fix instructions
               return groqPreCheck(currentCode).then(function (groqIssues) {
-              var groqHint = ''
-              if (groqIssues.length > 0) {
-                groqHint = '\n\nQUICK-SCAN FINDINGS (pre-check):\n' + groqIssues.map(function (g) {
-                  return '- [' + (g.severity || 'medium').toUpperCase() + '] ' + g.issue + (g.location ? ' (' + g.location + ')' : '')
-                }).join('\n')
-              }
+                var groqHint = ''
+                if (groqIssues.length > 0) {
+                  groqHint =
+                    '\n\nQUICK-SCAN FINDINGS (pre-check):\n' +
+                    groqIssues
+                      .map(function (g) {
+                        return (
+                          '- [' +
+                          (g.severity || 'medium').toUpperCase() +
+                          '] ' +
+                          g.issue +
+                          (g.location ? ' (' + g.location + ')' : '')
+                        )
+                      })
+                      .join('\n')
+                }
 
-              // Always include full code so the model has complete context
-              var fm =
-                (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
-                ':\n' +
-                issueList +
-                groqHint +
-                '\n\nCURRENT CODE:\n' +
-                currentCode +
-                (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
-              repairHistory.push({ role: 'user', content: fm })
+                // Always include full code so the model has complete context
+                var fm =
+                  (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
+                  ':\n' +
+                  issueList +
+                  groqHint +
+                  '\n\nCURRENT CODE:\n' +
+                  currentCode +
+                  (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
+                repairHistory.push({ role: 'user', content: fm })
 
-              return retryStep(
-                function () {
-                  return callClaudeMultiTurn(fixSys, repairHistory)
-                },
-                2,
-                'Fix'
-              )
-                .then(function (fixed) {
-                  repairHistory.push({ role: 'assistant', content: fixed })
-                  currentCode = fixed
-                  totalFixed += allIssues.length
-                  telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
-                  var _ep = (_br && _br.fixPasses) || []
-                  _ep.push({ passNum: passNum, issuesBefore: allIssues.length })
-                  telemetry.updateBuildRecord(_buildId, 'fixPasses', _ep)
-                  if (passNum < MAX_FIX_PASSES) {
-                    updatePS(pid, 4, 'active', 'Re-validating fixes' + passLabel + '\u2026')
-                    return runValidationPass()
-                  } else {
-                    var finalChecks = runLocalChecks(currentCode)
-                    var finalFails = finalChecks.filter(function (c) {
-                      return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
-                    })
-                    if (finalFails.length > 0) {
-                      updatePS(
-                        pid,
-                        4,
-                        'warn',
-                        finalFails.length +
-                          ' issue' +
-                          (finalFails.length !== 1 ? 's' : '') +
-                          ' remain after ' +
-                          MAX_FIX_PASSES +
-                          ' passes'
-                      )
+                return retryStep(
+                  function () {
+                    return callClaudeMultiTurn(fixSys, repairHistory)
+                  },
+                  2,
+                  'Fix'
+                )
+                  .then(function (fixed) {
+                    repairHistory.push({ role: 'assistant', content: fixed })
+                    currentCode = fixed
+                    totalFixed += allIssues.length
+                    telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
+                    var _ep = (_br && _br.fixPasses) || []
+                    _ep.push({ passNum: passNum, issuesBefore: allIssues.length })
+                    telemetry.updateBuildRecord(_buildId, 'fixPasses', _ep)
+                    if (passNum < MAX_FIX_PASSES) {
+                      updatePS(pid, 4, 'active', 'Re-validating fixes' + passLabel + '\u2026')
+                      return runValidationPass()
                     } else {
-                      updatePS(
-                        pid,
-                        4,
-                        'done',
-                        'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
-                      )
-                    }
-                    v2 = currentCode
-                    addMsg({
-                      role: 'asst',
-                      type: 'text',
-                      text:
-                        'Validation summary: ' +
-                        totalFixed +
-                        ' issue' +
-                        (totalFixed !== 1 ? 's' : '') +
-                        ' addressed across ' +
-                        passNum +
-                        ' pass' +
-                        (passNum !== 1 ? 'es' : '') +
-                        '.' +
-                        (finalFails.length > 0
-                          ? ' ' +
-                            finalFails.length +
-                            ' minor issue' +
+                      var finalChecks = runLocalChecks(currentCode)
+                      var finalFails = finalChecks.filter(function (c) {
+                        return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
+                      })
+                      if (finalFails.length > 0) {
+                        updatePS(
+                          pid,
+                          4,
+                          'warn',
+                          finalFails.length +
+                            ' issue' +
                             (finalFails.length !== 1 ? 's' : '') +
-                            ' may remain.'
-                          : ''),
-                    })
-                  }
-                })
-                .catch(function (e) {
-                  v2 = currentCode
-                  var errMsg = scrubKeys(e.message || String(e))
-                  updatePS(
-                    pid,
-                    4,
-                    'error',
-                    'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
-                  )
-                  addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
-                })
+                            ' remain after ' +
+                            MAX_FIX_PASSES +
+                            ' passes'
+                        )
+                      } else {
+                        updatePS(
+                          pid,
+                          4,
+                          'done',
+                          'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
+                        )
+                      }
+                      v2 = currentCode
+                      addMsg({
+                        role: 'asst',
+                        type: 'text',
+                        text:
+                          'Validation summary: ' +
+                          totalFixed +
+                          ' issue' +
+                          (totalFixed !== 1 ? 's' : '') +
+                          ' addressed across ' +
+                          passNum +
+                          ' pass' +
+                          (passNum !== 1 ? 'es' : '') +
+                          '.' +
+                          (finalFails.length > 0
+                            ? ' ' +
+                              finalFails.length +
+                              ' minor issue' +
+                              (finalFails.length !== 1 ? 's' : '') +
+                              ' may remain.'
+                            : ''),
+                      })
+                    }
+                  })
+                  .catch(function (e) {
+                    v2 = currentCode
+                    var errMsg = scrubKeys(e.message || String(e))
+                    updatePS(
+                      pid,
+                      4,
+                      'error',
+                      'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
+                    )
+                    addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
+                  })
               }) // end groqPreCheck.then
             } else {
               v2 = currentCode

@@ -6,8 +6,20 @@ import { pullFromSupabase } from '../lib/storage.js'
 import { renderGrid } from '../components/app-icon.js'
 import { renderProfilesSettings } from './profiles.js'
 import { testSupabaseConnection } from '../lib/supabase-setup.js'
+import { getSupabase } from '../lib/supabase.js'
+import { CLAUDE_PROXY_URL } from '../config/constants.js'
 
 export function openSettings() {
+  // BYOK toggle state
+  var byokPill = $('s-byok-pill')
+  if (byokPill) byokPill.classList.toggle('on', ST.byokMode)
+  var byokKeys = $('s-byok-keys')
+  if (byokKeys) byokKeys.style.display = ST.byokMode ? 'block' : 'none'
+  // Hide BYOK toggle if proxy is not configured
+  var byokTog = $('s-byok-tog')
+  if (byokTog) byokTog.parentElement.style.display = CLAUDE_PROXY_URL ? '' : 'none'
+  // Load usage summary
+  _loadUsageSummary()
   $('s-anth').value = ST.key
   $('s-gpt').value = ST.gptKey
   $('s-stitch').value = ST.stitchKey
@@ -27,6 +39,25 @@ export function openSettings() {
   $('s-sb-exp').style.display = ST.sbEnabled ? 'flex' : 'none'
   var ksc = $('key-safety-card')
   if (ksc) ksc.innerHTML = keyStatusHTML()
+  // Show session info if authenticated
+  var sessionCard = $('s-session-card')
+  if (sessionCard) {
+    if (ST.userId && ST.userEmail) {
+      sessionCard.style.display = 'block'
+      var emailEl = $('s-session-email')
+      if (emailEl) emailEl.textContent = ST.userEmail
+      var providerEl = $('s-session-provider')
+      if (providerEl) {
+        var provider =
+          ST._session && ST._session.user && ST._session.user.app_metadata
+            ? ST._session.user.app_metadata.provider || 'email'
+            : 'email'
+        providerEl.textContent = 'Signed in via ' + provider
+      }
+    } else {
+      sessionCard.style.display = 'none'
+    }
+  }
   renderProfilesSettings()
   $('settings-overlay').classList.add('on')
 }
@@ -210,6 +241,36 @@ export function initSettings() {
       toast(ST.backendEnabled ? 'Backend step enabled' : 'Backend step disabled')
     })
   }
+  // BYOK toggle
+  var byokTogBtn = $('s-byok-tog')
+  if (byokTogBtn) {
+    byokTogBtn.addEventListener('click', function () {
+      ST.byokMode = !ST.byokMode
+      saveKeys()
+      $('s-byok-pill').classList.toggle('on', ST.byokMode)
+      $('s-byok-keys').style.display = ST.byokMode ? 'block' : 'none'
+      toast(ST.byokMode ? 'Using your own API keys' : 'Using built-in proxy')
+    })
+  }
+  // Usage dashboard
+  var usageBtn = $('s-usage-btn')
+  if (usageBtn) {
+    usageBtn.addEventListener('click', function () {
+      _openUsageDashboard()
+    })
+  }
+  var usageClose = $('usage-close')
+  if (usageClose) {
+    usageClose.addEventListener('click', function () {
+      $('usage-overlay').style.display = 'none'
+    })
+  }
+  var usageOverlay = $('usage-overlay')
+  if (usageOverlay) {
+    usageOverlay.addEventListener('click', function (e) {
+      if (e.target.id === 'usage-overlay') usageOverlay.style.display = 'none'
+    })
+  }
   $('s-clear').addEventListener('click', function () {
     if (!confirm('Delete all apps locally?')) return
     ST.apps = []
@@ -219,8 +280,16 @@ export function initSettings() {
   })
   $('s-signout').addEventListener('click', function () {
     if (!confirm('Sign out and clear all keys?')) return
-    localStorage.clear()
-    location.reload()
+    var sb = getSupabase()
+    if (sb) {
+      sb.auth.signOut().then(function () {
+        localStorage.clear()
+        location.reload()
+      })
+    } else {
+      localStorage.clear()
+      location.reload()
+    }
   })
 }
 
@@ -300,9 +369,7 @@ function _testGroqKey(key) {
 }
 
 function _testGeminiKey(key) {
-  fetch(
-    'https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key)
-  )
+  fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key))
     .then(function (res) {
       if (res.ok) toast('\u2713 Gemini API key verified', 3000)
       else if (res.status === 400 || res.status === 401 || res.status === 403)
@@ -320,4 +387,132 @@ export function _syncStitchGate() {
   var hasKey = !!ST.stitchKey
   btn.classList.toggle('pt-locked', !hasKey)
   btn.title = hasKey ? 'Stitch-Claude Chat Builder \u00B7 Flawless Pipeline' : 'Requires Stitch API key'
+}
+
+function _loadUsageSummary() {
+  var el = $('s-usage-summary')
+  if (!el) return
+  var sb = getSupabase()
+  if (!sb || !ST.userId) {
+    el.textContent = 'Sign in to view usage'
+    return
+  }
+  var todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  sb.from('builder_usage')
+    .select('tokens_in, tokens_out, cost_cents')
+    .eq('user_id', ST.userId)
+    .gte('created_at', todayStart.toISOString())
+    .then(function (result) {
+      if (result.error || !result.data) {
+        el.textContent = 'Could not load usage'
+        return
+      }
+      var totalTokens = 0
+      var totalCost = 0
+      result.data.forEach(function (r) {
+        totalTokens += (r.tokens_in || 0) + (r.tokens_out || 0)
+        totalCost += r.cost_cents || 0
+      })
+      el.textContent =
+        'Today: ' +
+        _fmtNum(totalTokens) +
+        ' tokens, $' +
+        (totalCost / 100).toFixed(2) +
+        ' (' +
+        result.data.length +
+        ' calls)'
+    })
+}
+
+function _openUsageDashboard() {
+  var overlay = $('usage-overlay')
+  var body = $('usage-body')
+  if (!overlay || !body) return
+  overlay.style.display = 'flex'
+  body.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,.4)">Loading usage data...</div>'
+
+  var sb = getSupabase()
+  if (!sb || !ST.userId) {
+    body.innerHTML =
+      '<div style="text-align:center;padding:30px;color:rgba(255,255,255,.4)">Sign in to view usage</div>'
+    return
+  }
+
+  sb.from('builder_usage')
+    .select('*')
+    .eq('user_id', ST.userId)
+    .order('created_at', { ascending: false })
+    .limit(100)
+    .then(function (result) {
+      if (result.error || !result.data) {
+        body.innerHTML =
+          '<div style="text-align:center;padding:30px;color:rgba(255,82,82,.7)">Failed to load usage</div>'
+        return
+      }
+      var rows = result.data
+      if (rows.length === 0) {
+        body.innerHTML =
+          '<div style="text-align:center;padding:30px;color:rgba(255,255,255,.4)">No usage data yet</div>'
+        return
+      }
+      // Aggregate by day
+      var days = {}
+      var totalTokens = 0
+      var totalCost = 0
+      rows.forEach(function (r) {
+        var day = (r.created_at || '').slice(0, 10)
+        if (!days[day]) days[day] = { tokens: 0, cost: 0, calls: 0 }
+        var t = (r.tokens_in || 0) + (r.tokens_out || 0)
+        days[day].tokens += t
+        days[day].cost += r.cost_cents || 0
+        days[day].calls += 1
+        totalTokens += t
+        totalCost += r.cost_cents || 0
+      })
+
+      var html =
+        '<div class="sscard" style="background:rgba(0,230,118,.06);border:1.5px solid rgba(0,230,118,.15);margin-bottom:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div><div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em">Total Usage</div>' +
+        '<div style="font-size:18px;font-weight:700;margin-top:4px">' +
+        _fmtNum(totalTokens) +
+        ' tokens</div></div>' +
+        '<div style="text-align:right"><div style="font-size:10px;color:rgba(255,255,255,.4)">Est. Cost</div>' +
+        '<div style="font-size:18px;font-weight:700;margin-top:4px;color:var(--mn)">$' +
+        (totalCost / 100).toFixed(2) +
+        '</div></div>' +
+        '</div></div>'
+
+      html += '<span class="ssec">Daily Breakdown</span>'
+      var sortedDays = Object.keys(days).sort().reverse()
+      for (var i = 0; i < sortedDays.length; i++) {
+        var d = sortedDays[i]
+        var dd = days[d]
+        html +=
+          '<div class="sscard" style="padding:10px 13px;margin-bottom:6px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<div><span style="font-size:12px;font-weight:600">' +
+          d +
+          '</span>' +
+          '<span style="font-size:10px;color:rgba(255,255,255,.35);margin-left:8px">' +
+          dd.calls +
+          ' calls</span></div>' +
+          '<div style="text-align:right"><span style="font-size:12px;font-weight:600">' +
+          _fmtNum(dd.tokens) +
+          '</span>' +
+          '<span style="font-size:10px;color:rgba(255,255,255,.35);margin-left:6px">$' +
+          (dd.cost / 100).toFixed(2) +
+          '</span></div>' +
+          '</div></div>'
+      }
+
+      body.innerHTML = html
+    })
+}
+
+function _fmtNum(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M'
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K'
+  return String(n)
 }

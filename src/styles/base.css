@@ -35,6 +35,21 @@ html,body{height:100%;font-family:var(--fb);background:#080812;color:#fff;overfl
 .screen.active{display:flex}
 
 /* ONBOARDING */
+/* LOGIN (Supabase Auth) */
+#s-login{align-items:center;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.login-wrap{max-width:380px;gap:16px}
+.login-gh-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:var(--rs);border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-family:var(--fh);font-size:14px;font-weight:700;cursor:pointer;transition:all .18s}
+.login-gh-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28)}
+.login-gh-btn:active{transform:scale(.97)}
+.login-divider{display:flex;align-items:center;gap:12px;padding:4px 0}
+.login-divider-line{flex:1;height:1px;background:rgba(255,255,255,.1)}
+.login-divider-text{font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em}
+.login-error{padding:10px 14px;background:rgba(255,82,82,.1);border:1.5px solid rgba(255,82,82,.25);border-radius:var(--rs);font-size:12px;color:rgba(255,82,82,.9);line-height:1.6}
+.btn-s{width:100%;padding:12px;border-radius:var(--rs);border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-family:var(--fh);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s}
+.btn-s:hover{background:rgba(255,255,255,.12);color:#fff}
+.btn-s:active{transform:scale(.97)}
+.btn-s:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
 #s-onboard{align-items:center;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
 .ob-wrap{width:100%;max-width:430px;margin:0 auto;padding:56px 22px 48px;display:flex;flex-direction:column;gap:18px;flex-shrink:0}
 .ob-logo{text-align:center;padding-bottom:4px}

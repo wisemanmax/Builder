@@ -1,6 +1,11 @@
 import { KEY_STORE } from '../config/constants.js'
 
 export const ST = {
+  // Auth state
+  userId: null,
+  userEmail: null,
+  _session: null,
+  // App data
   apps: [],
   key: '',
   gptKey: '',
@@ -15,6 +20,7 @@ export const ST = {
   sbAnon: '',
   sbApiKey: '',
   sbEnabled: false,
+  byokMode: false,
   auditEnabled: true,
   backendEnabled: false,
   website2Provider: 'claude',
@@ -118,6 +124,7 @@ export function hydrate() {
   ST.sbAnon = localStorage.getItem(KEY_STORE.SB_ANON) || ''
   ST.sbApiKey = localStorage.getItem(KEY_STORE.SB_API_KEY) || ''
   ST.sbEnabled = localStorage.getItem(KEY_STORE.SB_ON) === 'true'
+  ST.byokMode = localStorage.getItem(KEY_STORE.BYOK) === 'true'
   ST.auditEnabled = localStorage.getItem(KEY_STORE.AUDIT) !== 'false'
   ST.backendEnabled = localStorage.getItem(KEY_STORE.BACKEND) === 'true'
   ST.pipelineMode = localStorage.getItem(KEY_STORE.PIPELINE) || 'builder1'
@@ -154,6 +161,7 @@ export function saveKeys() {
   localStorage.setItem(KEY_STORE.SB_ANON, ST.sbAnon)
   localStorage.setItem(KEY_STORE.SB_API_KEY, ST.sbApiKey)
   localStorage.setItem(KEY_STORE.SB_ON, String(ST.sbEnabled))
+  localStorage.setItem(KEY_STORE.BYOK, String(ST.byokMode))
   localStorage.setItem(KEY_STORE.AUDIT, String(ST.auditEnabled))
   localStorage.setItem(KEY_STORE.BACKEND, String(ST.backendEnabled))
   localStorage.setItem(KEY_STORE.PIPELINE, ST.pipelineMode)

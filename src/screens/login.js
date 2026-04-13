@@ -3,6 +3,85 @@ import { $, toast, showScreen, validateKey } from '../lib/utils.js'
 import { saveKeys } from '../lib/state.js'
 import { testGitHub } from '../lib/github.js'
 import { renderGrid } from '../components/app-icon.js'
+import { getSupabase } from '../lib/supabase.js'
+
+// --- Auth login screen (Supabase) ---
+
+export function initLogin() {
+  var sb = getSupabase()
+  if (!sb) return // No Supabase configured — auth screen won't work
+
+  $('login-github').addEventListener('click', function () {
+    _clearError()
+    sb.auth
+      .signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin + window.location.pathname,
+        },
+      })
+      .then(function (result) {
+        if (result.error) _showError(result.error.message)
+      })
+  })
+
+  $('login-magic').addEventListener('click', function () {
+    _clearError()
+    var email = $('login-email').value.trim()
+    if (!email || email.indexOf('@') < 0) {
+      toast('Enter a valid email address')
+      return
+    }
+    $('login-magic').disabled = true
+    $('login-magic').textContent = 'Sending\u2026'
+    sb.auth
+      .signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: window.location.origin + window.location.pathname,
+        },
+      })
+      .then(function (result) {
+        $('login-magic').disabled = false
+        $('login-magic').textContent = 'Send Magic Link'
+        if (result.error) {
+          _showError(result.error.message)
+          return
+        }
+        $('login-options').style.display = 'none'
+        $('login-check-email').style.display = 'block'
+        $('login-sent-email').textContent = email
+      })
+  })
+
+  $('login-email').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $('login-magic').click()
+  })
+
+  $('login-back').addEventListener('click', function () {
+    $('login-check-email').style.display = 'none'
+    $('login-options').style.display = 'block'
+    _clearError()
+  })
+}
+
+function _showError(msg) {
+  var el = $('login-error')
+  if (!el) return
+  el.textContent = msg
+  el.style.display = 'block'
+}
+
+function _clearError() {
+  var el = $('login-error')
+  if (el) {
+    el.textContent = ''
+    el.style.display = 'none'
+  }
+}
+
+// --- Legacy onboarding (API key setup) ---
+// Kept for users who need to configure API keys after auth
 
 export function initOnboarding() {
   $('ob-gpt').addEventListener('input', function () {

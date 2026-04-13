@@ -1,11 +1,16 @@
 import { ST, persist } from './state.js'
 import { scrubKeys, toast } from './utils.js'
 import { renderGrid, renderGridSkeleton } from '../components/app-icon.js'
+import { getSupabase } from './supabase.js'
 
+// Push a single app to Supabase (upsert)
 export function pushToSupabase(app) {
-  if (!ST.sbEnabled || !ST.sbUrl || !ST.sbAnon || !app || !app.id) return
-  var safePayload = {
+  var sb = getSupabase()
+  if (!sb || !ST.userId || !app || !app.id) return Promise.resolve()
+
+  var payload = {
     id: app.id,
+    user_id: ST.userId,
     name: app.name,
     icon: app.icon,
     color_index: app.ci,
@@ -13,37 +18,39 @@ export function pushToSupabase(app) {
     code: app.code,
     prompts: app.prompts || [],
     gh_pushed: app.ghPushed || false,
+    published: app.published || false,
+    slug: app.slug || null,
     created_at: app.createdAt,
-    updated_at: app.updatedAt,
+    updated_at: app.updatedAt || new Date().toISOString(),
   }
-  fetch(ST.sbUrl + '/rest/v1/builder_apps', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: ST.sbAnon,
-      Authorization: 'Bearer ' + ST.sbAnon,
-      Prefer: 'resolution=merge-duplicates',
-    },
-    body: JSON.stringify(safePayload),
-  }).catch(function (e) {
-    console.warn('Supabase push failed:', scrubKeys(e.message))
-  })
+
+  return sb
+    .from('builder_apps')
+    .upsert(payload, { onConflict: 'id' })
+    .then(function (result) {
+      if (result.error) console.warn('Supabase push failed:', scrubKeys(result.error.message))
+    })
+    .catch(function (e) {
+      console.warn('Supabase push failed:', scrubKeys(e.message))
+    })
 }
 
+// Pull all apps for the current user from Supabase
 export function pullFromSupabase() {
-  if (!ST.sbUrl || !ST.sbAnon) {
-    toast('No Supabase credentials')
-    return
+  var sb = getSupabase()
+  if (!sb || !ST.userId) {
+    toast('Not signed in')
+    return Promise.resolve()
   }
+
   renderGridSkeleton(6)
-  fetch(ST.sbUrl + '/rest/v1/builder_apps?select=*&order=created_at.desc', {
-    headers: { apikey: ST.sbAnon, Authorization: 'Bearer ' + ST.sbAnon },
-  })
-    .then(function (r) {
-      return r.json()
-    })
-    .then(function (data) {
-      if (!Array.isArray(data)) throw new Error('Bad response')
+  return sb
+    .from('builder_apps')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .then(function (result) {
+      if (result.error) throw new Error(result.error.message)
+      var data = result.data || []
       var ids = {}
       data.forEach(function (a) {
         ids[a.id] = true
@@ -59,6 +66,8 @@ export function pullFromSupabase() {
           versions: [],
           prompts: d.prompts || [],
           ghPushed: d.gh_pushed || false,
+          published: d.published || false,
+          slug: d.slug || null,
           createdAt: d.created_at,
           updatedAt: d.updated_at,
         }
@@ -70,10 +79,27 @@ export function pullFromSupabase() {
       )
       persist()
       renderGrid()
-      toast('Pulled ' + data.length + ' apps \u2601\uFE0F')
+      toast('Pulled ' + data.length + ' apps')
     })
     .catch(function (e) {
       renderGrid()
       toast('Pull failed: ' + scrubKeys(e.message), 4000)
+    })
+}
+
+// Delete an app from Supabase
+export function deleteFromSupabase(appId) {
+  var sb = getSupabase()
+  if (!sb || !ST.userId || !appId) return Promise.resolve()
+
+  return sb
+    .from('builder_apps')
+    .delete()
+    .eq('id', appId)
+    .then(function (result) {
+      if (result.error) console.warn('Supabase delete failed:', scrubKeys(result.error.message))
+    })
+    .catch(function (e) {
+      console.warn('Supabase delete failed:', scrubKeys(e.message))
     })
 }
