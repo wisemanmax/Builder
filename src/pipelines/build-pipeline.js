@@ -43,6 +43,11 @@ import {
   smartReview,
   groqPreCheck,
   auditProviderLabel,
+  SYS_PATCH_EXECUTE,
+  generatePatchPlan,
+  validatePatchPlan,
+  validatePatchDiff,
+  formatPlanForFixPrompt,
   resetCostAccum,
   calculateBuildCost,
   ghCreateBranch,
@@ -459,6 +464,24 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
             .concat(result.bugs)
 
           if (allIssues.length > 0) {
+            // Generate patch plan in parallel with checkpoint (non-blocking)
+            var _auditTextForPlan = allIssues.map(function (b, i) {
+              return (i + 1) + '. [' + (b.severity || 'medium').toUpperCase() + '] ' + (b.issue || '') + ' \u2014 ' + (b.location || '')
+            }).join('\n')
+            var _patchPlanPromise = generatePatchPlan(allIssues, currentCode, specText, rulesText)
+              .then(function (plan) {
+                if (!plan) return null
+                var v = validatePatchPlan(plan, _auditTextForPlan, allIssues)
+                if (v.ok) return plan
+                return generatePatchPlan(allIssues, currentCode, specText, rulesText, v.reason)
+                  .then(function (plan2) {
+                    if (!plan2) return null
+                    var v2 = validatePatchPlan(plan2, _auditTextForPlan, allIssues)
+                    return v2.ok ? plan2 : null
+                  })
+              })
+              .catch(function () { return null })
+
             // Interactive checkpoint after first audit — let user decide
             var checkpointPromise = Promise.resolve('fix')
             if (passNum === 1 && allIssues.length > 0) {
@@ -520,95 +543,125 @@ export function runPipeline(prompt, existingApp, resumeSession, images) {
                       .join('\n')
                 }
 
-                // Always include full code so the model has complete context (like a chat conversation)
-                var fm =
-                  (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
-                  ':\n' +
-                  issueList +
-                  groqHint +
-                  '\n\nCURRENT CODE:\n' +
-                  currentCode +
-                  (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
-                repairHistory.push({ role: 'user', content: fm })
-
-                return retryStep(
-                  function () {
-                    return callClaudeMultiTurn(fixSys, repairHistory)
-                  },
-                  2,
-                  'Fix'
-                )
-                  .then(function (fixed) {
-                    repairHistory.push({ role: 'assistant', content: fixed })
-                    currentCode = fixed
-                    totalFixed += allIssues.length
-                    telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
-                    var _existingPasses = (_br && _br.fixPasses) || []
-                    _existingPasses.push({ passNum: passNum, issuesBefore: allIssues.length })
-                    telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
-                    if (passNum < MAX_FIX_PASSES) {
-                      updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
-                      return runValidationPass()
-                    } else {
-                      var finalChecks = runLocalChecks(currentCode)
-                      var finalFails = finalChecks.filter(function (c) {
-                        return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
-                      })
-                      if (finalFails.length > 0) {
-                        updatePS(
-                          pid,
-                          5,
-                          'warn',
-                          finalFails.length +
-                            ' issue' +
-                            (finalFails.length !== 1 ? 's' : '') +
-                            ' remain after ' +
-                            MAX_FIX_PASSES +
-                            ' passes'
-                        )
-                      } else {
-                        updatePS(
-                          pid,
-                          5,
-                          'done',
-                          'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
-                        )
-                      }
-                      v2 = currentCode
-                      addMsg({
-                        role: 'asst',
-                        type: 'text',
-                        text:
-                          'Validation summary: ' +
-                          totalFixed +
-                          ' issue' +
-                          (totalFixed !== 1 ? 's' : '') +
-                          ' addressed across ' +
-                          passNum +
-                          ' pass' +
-                          (passNum !== 1 ? 'es' : '') +
-                          '.' +
-                          (finalFails.length > 0
-                            ? ' ' +
-                              finalFails.length +
-                              ' minor issue' +
-                              (finalFails.length !== 1 ? 's' : '') +
-                              ' may remain.'
-                            : ''),
-                      })
-                    }
-                  })
-                  .catch(function (e) {
-                    v2 = currentCode
-                    var errMsg = scrubKeys(e.message || String(e))
-                    updatePS(
-                      pid,
-                      5,
-                      'error',
-                      'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
+                // Wait for patch plan (generated in parallel with checkpoint/groq)
+                return _patchPlanPromise.then(function (_currentPatchPlan) {
+                  // Build fix prompt — use patch-aware prompt if plan is available
+                  var effectiveFixSys = fixSys
+                  if (_currentPatchPlan) {
+                    effectiveFixSys = withContext(
+                      SYS_PATCH_EXECUTE
+                        .replace('{INTENT}', prompt)
+                        .replace('{PATCH_CONTRACT}', formatPlanForFixPrompt(_currentPatchPlan))
                     )
-                    addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
-                  })
+                    telemetry.emit('build.patchPlan', { planId: _currentPatchPlan.plan_id, changesCount: _currentPatchPlan.changes.length, risk: _currentPatchPlan.estimated_risk })
+                  }
+
+                  // Always include full code so the model has complete context (like a chat conversation)
+                  var planPrefix = _currentPatchPlan ? formatPlanForFixPrompt(_currentPatchPlan) + '\n\n' : ''
+                  var fm =
+                    planPrefix +
+                    (passNum > 1 ? 'REMAINING ISSUES after pass ' + (passNum - 1) : 'ISSUES TO FIX') +
+                    ':\n' +
+                    issueList +
+                    groqHint +
+                    '\n\nCURRENT CODE:\n' +
+                    currentCode +
+                    (passNum > 1 ? '\n\nFix these without reintroducing previously resolved issues.' : '')
+                  repairHistory.push({ role: 'user', content: fm })
+
+                  var _codeBeforeFix = currentCode
+                  return retryStep(
+                    function () {
+                      return callClaudeMultiTurn(effectiveFixSys, repairHistory)
+                    },
+                    2,
+                    'Fix'
+                  )
+                    .then(function (fixed) {
+                      // Validate the fix against patch plan (advisory only)
+                      if (_currentPatchPlan) {
+                        var diffResult = validatePatchDiff(_codeBeforeFix, fixed, _currentPatchPlan)
+                        telemetry.emit('build.patchContract', {
+                          ok: diffResult.ok,
+                          reason: diffResult.ok ? null : diffResult.reason,
+                          stats: diffResult.stats,
+                          planId: _currentPatchPlan.plan_id,
+                        })
+                        if (!diffResult.ok) {
+                          addMsg({ role: 'asst', type: 'text', text: 'Patch contract note: ' + diffResult.reason })
+                        }
+                      }
+                      repairHistory.push({ role: 'assistant', content: fixed })
+                      currentCode = fixed
+                      totalFixed += allIssues.length
+                      telemetry.emit('build.fix', { passNum: passNum, issuesFixed: allIssues.length })
+                      var _existingPasses = (_br && _br.fixPasses) || []
+                      _existingPasses.push({ passNum: passNum, issuesBefore: allIssues.length })
+                      telemetry.updateBuildRecord(_buildId, 'fixPasses', _existingPasses)
+                      if (passNum < MAX_FIX_PASSES) {
+                        updatePS(pid, 5, 'active', 'Re-validating fixes' + passLabel + '\u2026')
+                        return runValidationPass()
+                      } else {
+                        var finalChecks = runLocalChecks(currentCode)
+                        var finalFails = finalChecks.filter(function (c) {
+                          return !c.passed && ADVISORY_CHECK_IDS.indexOf(c.id) === -1
+                        })
+                        if (finalFails.length > 0) {
+                          updatePS(
+                            pid,
+                            5,
+                            'warn',
+                            finalFails.length +
+                              ' issue' +
+                              (finalFails.length !== 1 ? 's' : '') +
+                              ' remain after ' +
+                              MAX_FIX_PASSES +
+                              ' passes'
+                          )
+                        } else {
+                          updatePS(
+                            pid,
+                            5,
+                            'done',
+                            'All issues resolved after ' + passNum + ' pass' + (passNum !== 1 ? 'es' : '') + ' \u2713'
+                          )
+                        }
+                        v2 = currentCode
+                        addMsg({
+                          role: 'asst',
+                          type: 'text',
+                          text:
+                            'Validation summary: ' +
+                            totalFixed +
+                            ' issue' +
+                            (totalFixed !== 1 ? 's' : '') +
+                            ' addressed across ' +
+                            passNum +
+                            ' pass' +
+                            (passNum !== 1 ? 'es' : '') +
+                            '.' +
+                            (finalFails.length > 0
+                              ? ' ' +
+                                finalFails.length +
+                                ' minor issue' +
+                                (finalFails.length !== 1 ? 's' : '') +
+                                ' may remain.'
+                              : ''),
+                        })
+                      }
+                    })
+                    .catch(function (e) {
+                      v2 = currentCode
+                      var errMsg = scrubKeys(e.message || String(e))
+                      updatePS(
+                        pid,
+                        5,
+                        'error',
+                        'Fix pass failed \u2014 using ' + (passNum > 1 ? 'last good version' : 'original')
+                      )
+                      addMsg({ role: 'asst', type: 'text', text: 'Fix error: ' + errMsg })
+                    })
+                }) // end _patchPlanPromise.then
               }) // end groqPreCheck.then
             }) // end checkpointPromise.then
           } else {

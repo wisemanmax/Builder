@@ -48,7 +48,13 @@ import {
   callGroq,
   resetCostAccum,
 } from '../lib/ai.js'
-import { SYS_GROQ_PRECHECK } from '../config/prompts.js'
+import { SYS_GROQ_PRECHECK, SYS_PATCH_PLAN, SYS_PATCH_EXECUTE } from '../config/prompts.js'
+import {
+  generatePatchPlan,
+  validatePatchPlan,
+  validatePatchDiff,
+  formatPlanForFixPrompt,
+} from '../lib/patch-contract.js'
 import { calculateBuildCost } from '../lib/cost.js'
 import {
   ghCreateBranch,
@@ -1124,4 +1130,10 @@ export {
   getThoughtDesignOverrides,
   getTemplateSkeleton,
   customizeTemplateCss,
+  SYS_PATCH_PLAN,
+  SYS_PATCH_EXECUTE,
+  generatePatchPlan,
+  validatePatchPlan,
+  validatePatchDiff,
+  formatPlanForFixPrompt,
 }
