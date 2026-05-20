@@ -13,18 +13,28 @@
             --bg: #f8fafc;
             --bg-card: #ffffff;
             --bg-hover: #f1f5f9;
-            --text: #1e293b;
+            --bg-weekend: #fafbfc;
+            --text: #0f172a;
             --text-muted: #475569;
+            --text-faint: #94a3b8;
             --accent: #2563eb;
             --accent-hover: #1d4ed8;
             --accent-light: #dbeafe;
+            --accent-tint: #eff6ff;
             --border: #e2e8f0;
+            --border-strong: #cbd5e1;
             --success: #059669;
+            --success-light: #d1fae5;
             --warning: #d97706;
+            --warning-light: #fef3c7;
             --error: #dc2626;
+            --error-light: #fee2e2;
             --radius-sm: 6px;
             --radius-md: 10px;
             --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 2px 8px rgba(37, 99, 235, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.08);
         }
 
         * {
@@ -39,6 +49,7 @@
             color: var(--text);
             line-height: 1.6;
             font-size: 16px;
+            -webkit-font-smoothing: antialiased;
         }
 
         .app-container {
@@ -46,6 +57,7 @@
             margin: 0 auto;
             padding: 1rem;
             min-height: 100vh;
+            padding-bottom: 4rem;
         }
 
         @media (min-width: 768px) {
@@ -56,18 +68,12 @@
         }
 
         @media (prefers-reduced-motion: no-preference) {
-            .app-container {
-                animation: fadeIn 300ms ease-out;
-            }
-            
-            .quarter-card {
-                animation: slideUp 400ms ease-out;
-                animation-fill-mode: both;
-            }
-            
+            .app-container { animation: fadeIn 300ms ease-out; }
+            .quarter-card { animation: slideUp 400ms ease-out; animation-fill-mode: both; }
             .quarter-card:nth-child(1) { animation-delay: 50ms; }
             .quarter-card:nth-child(2) { animation-delay: 100ms; }
             .quarter-card:nth-child(3) { animation-delay: 150ms; }
+            .quarter-card:nth-child(4) { animation-delay: 200ms; }
         }
 
         @keyframes fadeIn {
@@ -80,50 +86,101 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+        }
+
         .header {
             text-align: center;
-            margin-bottom: 2rem;
-            padding: 1.5rem 0;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0 0.5rem;
         }
 
         .header h1 {
             font-size: clamp(1.5rem, 4vw, 2.25rem);
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
         }
 
         .header p {
             color: var(--text-muted);
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
-        .target-info {
+        /* Summary banner */
+        .summary-banner {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1rem;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem 1rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (min-width: 640px) {
+            .summary-banner {
+                grid-template-columns: repeat(4, 1fr);
+                padding: 1.5rem;
+            }
+        }
+
+        .summary-stat {
             text-align: center;
-            background: var(--accent-light);
-            border: 1px solid var(--accent);
-            border-radius: var(--radius-md);
-            padding: 1rem;
-            margin-bottom: 2rem;
-            font-size: 0.875rem;
-            color: var(--text);
         }
 
-        .target-info strong {
-            color: var(--accent);
+        .summary-value {
+            display: block;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .summary-label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.9;
+            margin-top: 0.25rem;
             font-weight: 600;
+        }
+
+        .summary-sub {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.75;
+            margin-top: 0.125rem;
+            font-weight: 500;
+        }
+
+        /* Quarter cards */
+        .section-heading {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            padding-left: 0.25rem;
         }
 
         .quarter-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.875rem;
+            margin-bottom: 1.5rem;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
             .quarter-cards {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -131,79 +188,357 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            transition: border-color 200ms ease, box-shadow 200ms ease;
+        }
+
+        .quarter-card.current {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-tint), var(--shadow-md);
+        }
+
+        .quarter-card.viewed:not(.current) {
+            border-color: var(--border-strong);
+        }
+
+        .quarter-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.875rem;
+            gap: 0.5rem;
         }
 
         .quarter-card h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-
-        .quarter-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.875rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            color: var(--accent);
-            display: block;
+            color: var(--text);
+            letter-spacing: -0.01em;
         }
 
-        .stat-label {
-            font-size: 0.875rem;
+        .quarter-status {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .quarter-status.on-track {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .quarter-status.met {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .quarter-status.behind {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .quarter-status.ahead {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .quarter-status.future {
+            background: var(--bg-hover);
             color: var(--text-muted);
-            margin-top: 0.25rem;
+        }
+
+        .quarter-breakdown {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.875rem;
+        }
+
+        .breakdown-item {
+            text-align: center;
+            padding: 0.5rem 0.25rem;
+            border-radius: var(--radius-md);
+            background: var(--bg-hover);
+        }
+
+        .breakdown-item.office {
+            background: var(--accent-tint);
+        }
+
+        .breakdown-item.pto {
+            background: var(--success-light);
+        }
+
+        .breakdown-value {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .breakdown-item.office .breakdown-value { color: var(--accent); }
+        .breakdown-item.pto .breakdown-value { color: var(--success); }
+        .breakdown-item.total .breakdown-value { color: var(--text); }
+
+        .breakdown-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .progress-bar {
             background: var(--bg-hover);
             border-radius: var(--radius-sm);
             height: 8px;
-            margin: 1rem 0 0.5rem;
+            margin: 0.75rem 0 0.5rem;
             overflow: hidden;
+            position: relative;
         }
 
         .progress-fill {
             background: linear-gradient(90deg, var(--accent), var(--accent-hover));
             height: 100%;
             border-radius: var(--radius-sm);
-            transition: width 300ms ease;
+            transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-fill.met {
+            background: linear-gradient(90deg, var(--success), #047857);
         }
 
         .progress-text {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
         }
 
+        .progress-text strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.55rem 1rem;
+            cursor: pointer;
+            color: var(--text);
+            transition: all 150ms ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: inherit;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .control-button:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .control-button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .control-button:active {
+            transform: scale(0.97);
+        }
+
+        .control-button.primary {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .control-button.primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .control-button.danger {
+            color: var(--error);
+            border-color: var(--error-light);
+        }
+
+        .control-button.danger:hover {
+            background: var(--error-light);
+            border-color: var(--error);
+        }
+
+        /* Settings panel */
+        .settings-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .settings-panel h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0.25rem;
+        }
+
+        .setting-label {
+            font-size: 0.9rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .setting-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 0.15rem;
+            font-weight: 400;
+        }
+
+        .setting-input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem 0.6rem;
+            font-size: 0.95rem;
+            width: 80px;
+            color: var(--text);
+            font-family: inherit;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .setting-input:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+            border-color: var(--accent);
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--border-strong);
+            border-radius: 999px;
+            transition: background 200ms ease;
+        }
+
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 200ms ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: var(--accent);
+        }
+
+        .toggle input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        .toggle input:focus-visible + .toggle-slider {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .danger-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Calendar */
         .calendar-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (min-width: 768px) {
+            .calendar-section { padding: 1.75rem; }
         }
 
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
+            gap: 0.5rem;
+        }
+
+        .calendar-nav-group {
+            display: flex;
+            gap: 0.25rem;
         }
 
         .calendar-nav {
-            background: none;
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 0.5rem;
@@ -213,28 +548,40 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 44px;
-            min-height: 44px;
+            min-width: 40px;
+            min-height: 40px;
+            font-size: 1.1rem;
+            line-height: 1;
+            font-family: inherit;
         }
 
         .calendar-nav:hover {
-            background: var(--bg-hover);
+            background: var(--accent-tint);
             border-color: var(--accent);
+            color: var(--accent);
         }
 
-        .calendar-nav:focus,
         .calendar-nav:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
         }
 
         .calendar-nav:active {
-            transform: scale(0.97);
+            transform: scale(0.94);
         }
 
         .calendar-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.15rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--text);
+            letter-spacing: -0.01em;
+            flex: 1;
+            min-width: 0;
+        }
+
+        @media (min-width: 640px) {
+            .calendar-title { font-size: 1.35rem; }
         }
 
         .calendar-grid {
@@ -244,26 +591,24 @@
             margin-bottom: 1rem;
         }
 
-        @media (min-width: 768px) {
-            .calendar-grid {
-                gap: 6px;
-            }
+        @media (min-width: 640px) {
+            .calendar-grid { gap: 6px; }
         }
 
         .calendar-day-header {
             text-align: center;
-            font-size: 0.875rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 700;
             color: var(--text-muted);
             padding: 0.5rem 0;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em;
         }
 
         .calendar-day {
             aspect-ratio: 1;
             border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -272,153 +617,302 @@
             background: var(--bg-card);
             font-weight: 500;
             position: relative;
-            min-height: 44px;
+            min-height: 42px;
+            font-size: 0.9rem;
+            color: var(--text);
         }
 
         @media (min-width: 480px) {
             .calendar-day {
-                min-height: 48px;
+                min-height: 50px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .calendar-day {
+                min-height: 60px;
             }
         }
 
         .calendar-day:hover {
             border-color: var(--accent);
-            background: var(--accent-light);
+            background: var(--accent-tint);
+            transform: translateY(-1px);
         }
 
-        .calendar-day:focus,
         .calendar-day:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
+            z-index: 2;
         }
 
         .calendar-day:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
+        }
+
+        .calendar-day.weekend {
+            background: var(--bg-weekend);
+            color: var(--text-faint);
         }
 
         .calendar-day.other-month {
-            color: var(--text-muted);
-            background: var(--bg-hover);
+            color: var(--text-faint);
+            background: transparent;
+            border-color: transparent;
             cursor: default;
+            opacity: 0.45;
         }
 
         .calendar-day.other-month:hover {
-            border-color: var(--border);
-            background: var(--bg-hover);
+            border-color: transparent;
+            background: transparent;
+            transform: none;
         }
 
         .calendar-day.today {
             border-color: var(--accent);
-            font-weight: 600;
+            border-width: 2px;
+            font-weight: 700;
+        }
+
+        .calendar-day.today::after {
+            content: "";
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .calendar-day.today.office::after,
+        .calendar-day.today.pto::after {
+            background: white;
         }
 
         .calendar-day.office {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .calendar-day.office:hover {
+            background: var(--accent-hover);
         }
 
         .calendar-day.pto {
             background: var(--success);
             color: white;
             border-color: var(--success);
+            font-weight: 600;
+        }
+
+        .calendar-day.pto:hover {
+            background: #047857;
         }
 
         .legend {
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            gap: 1.25rem;
             margin-top: 1rem;
             flex-wrap: wrap;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
         }
 
         .legend-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
         .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: var(--radius-sm);
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            flex-shrink: 0;
         }
 
         .legend-color.office { background: var(--accent); }
         .legend-color.pto { background: var(--success); }
+        .legend-color.today {
+            background: var(--bg-card);
+            border-color: var(--accent);
+            border-width: 2px;
+            position: relative;
+        }
+        .legend-color.today::after {
+            content: "";
+            position: absolute;
+            bottom: 1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
 
+        .calendar-help {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-faint);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        /* Forecast */
         .forecast-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
         }
 
         .forecast-section h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text);
+        }
+
+        .forecast-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
         }
 
         .forecast-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
             .forecast-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
         .forecast-month {
             background: var(--bg-hover);
             border-radius: var(--radius-md);
-            padding: 1rem;
+            padding: 1rem 0.875rem;
             text-align: center;
+            border: 1px solid transparent;
+            position: relative;
+            transition: all 200ms ease;
         }
 
         .forecast-month.current {
-            background: var(--accent-light);
-            border: 1px solid var(--accent);
+            background: var(--accent-tint);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-tint);
+        }
+
+        .forecast-month.past-met {
+            background: var(--success-light);
+        }
+
+        .forecast-month.past-short {
+            background: var(--warning-light);
         }
 
         .forecast-month-name {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text);
             margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
         .forecast-days {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--accent);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
         }
 
+        .forecast-month.past-met .forecast-days { color: var(--success); }
+        .forecast-month.past-short .forecast-days { color: var(--warning); }
+
         .forecast-label {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
+            margin-top: 0.35rem;
+            line-height: 1.3;
+        }
+
+        .forecast-sub {
+            font-size: 0.7rem;
+            color: var(--text-faint);
             margin-top: 0.25rem;
         }
 
+        /* Insights panel */
+        .insights-banner {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .insights-banner.warning { border-left: 4px solid var(--warning); }
+        .insights-banner.success { border-left: 4px solid var(--success); }
+        .insights-banner.info { border-left: 4px solid var(--accent); }
+
+        .insights-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .insights-content {
+            flex: 1;
+            font-size: 0.875rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .insights-content strong {
+            font-weight: 700;
+        }
+
+        /* Toast */
         .toast {
             position: fixed;
-            bottom: 2rem;
+            bottom: 1.5rem;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(1rem);
             background: var(--text);
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 1.25rem;
             border-radius: var(--radius-lg);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow-lg);
             z-index: 1000;
             opacity: 0;
-            transform: translateX(-50%) translateY(1rem);
-            transition: all 300ms ease;
+            transition: all 250ms ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+            pointer-events: none;
+            max-width: calc(100vw - 2rem);
+            text-align: center;
         }
 
         .toast.show {
@@ -426,49 +920,75 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .control-button {
+        /* Day picker popover */
+        .day-picker {
+            position: fixed;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            padding: 0.5rem 1rem;
+            box-shadow: var(--shadow-lg);
+            padding: 0.4rem;
+            display: none;
+            z-index: 100;
+            gap: 0.25rem;
+            flex-direction: row;
+        }
+
+        .day-picker.show {
+            display: flex;
+            animation: fadeIn 150ms ease-out;
+        }
+
+        .day-picker button {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
             color: var(--text);
-            transition: all 150ms ease;
-            font-size: 0.875rem;
+            transition: all 120ms ease;
+            font-family: inherit;
+            white-space: nowrap;
         }
 
-        .control-button:hover {
+        .day-picker button:hover { background: var(--bg-hover); }
+        .day-picker button.office-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        .day-picker button.pto-btn:hover { background: var(--success); color: white; border-color: var(--success); }
+        .day-picker button.clear-btn:hover { background: var(--error-light); color: var(--error); border-color: var(--error); }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-faint);
+            margin-top: 1rem;
+            padding: 0.5rem;
+        }
+
+        .footer-note kbd {
+            display: inline-block;
             background: var(--bg-hover);
-            border-color: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.1rem 0.35rem;
+            font-size: 0.7rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: var(--text-muted);
         }
 
-        .control-button:focus,
-        .control-button:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        .control-button.danger {
-            color: var(--error);
-            border-color: var(--error);
-        }
-
-        .control-button.danger:hover {
-            background: #fef2f2;
-        }
-
-        .control-button.danger:focus,
-        .control-button.danger:focus-visible {
-            outline: 2px solid var(--error);
-            outline-offset: 2px;
+        /* Visually hidden, available to screen readers */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
         }
     </style>
 </head>
@@ -476,64 +996,141 @@
     <div class="app-container">
         <header class="header">
             <h1>Attendance Target Planner</h1>
-            <p>Track your office days and PTO to meet your monthly target</p>
+            <p>Track office days and PTO to meet your monthly target</p>
         </header>
 
-        <div class="target-info">
-            Monthly Target: <strong id="targetDisplay">13 days</strong> | Quarterly Target: <strong id="quarterlyTargetDisplay">39 days</strong>
+        <div class="summary-banner" role="region" aria-label="At-a-glance summary">
+            <div class="summary-stat">
+                <span class="summary-value" id="summaryMonthCounted">0</span>
+                <span class="summary-label">This Month</span>
+                <span class="summary-sub" id="summaryMonthSub">of 0 target</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value" id="summaryQuarterCounted">0</span>
+                <span class="summary-label">This Quarter</span>
+                <span class="summary-sub" id="summaryQuarterSub">of 0 target</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value" id="summaryDaysLeft">0</span>
+                <span class="summary-label">Work Days Left</span>
+                <span class="summary-sub">this month</span>
+            </div>
+            <div class="summary-stat">
+                <span class="summary-value" id="summaryNeeded">0</span>
+                <span class="summary-label">Still Needed</span>
+                <span class="summary-sub">this month</span>
+            </div>
         </div>
 
-        <section class="quarter-cards" id="quarterCards" role="region" aria-label="Quarterly progress summary">
-            <!-- Quarter summary cards will be generated here -->
-        </section>
+        <div id="insightsContainer" aria-live="polite"></div>
+
+        <h2 class="section-heading">Quarterly Progress</h2>
+        <section class="quarter-cards" id="quarterCards" role="region" aria-label="Quarterly progress summary"></section>
 
         <div class="controls">
-            <button class="control-button" id="todayButton">Go to Today</button>
-            <button class="control-button danger" id="clearAllData">Clear All Data</button>
+            <button class="control-button primary" id="todayButton" type="button">Go to Today</button>
+            <button class="control-button" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel">Settings</button>
+            <button class="control-button" id="exportButton" type="button">Export CSV</button>
         </div>
+
+        <section class="settings-panel" id="settingsPanel" hidden>
+            <h3>Settings</h3>
+            <div class="setting-row">
+                <div>
+                    <span class="setting-label">Monthly target</span>
+                    <span class="setting-desc">Counted days needed per month (Office + PTO combined)</span>
+                </div>
+                <input type="number" id="targetInput" class="setting-input" min="0" max="31" step="1" aria-label="Monthly target in days">
+            </div>
+            <div class="setting-row">
+                <div>
+                    <span class="setting-label">PTO counts toward target</span>
+                    <span class="setting-desc">When off, only Office days count</span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="ptoToggle" aria-label="PTO counts toward target">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <span class="setting-label">Data</span>
+                    <span class="setting-desc">All data is stored locally on this device</span>
+                </div>
+                <div class="danger-row">
+                    <button class="control-button" id="restoreDemo" type="button">Load Demo</button>
+                    <button class="control-button danger" id="clearAllData" type="button">Clear All</button>
+                </div>
+            </div>
+        </section>
 
         <section class="calendar-section" role="region" aria-label="Monthly calendar">
             <div class="calendar-header">
-                <button class="calendar-nav" id="prevMonth" aria-label="Previous month">‹</button>
+                <div class="calendar-nav-group">
+                    <button class="calendar-nav" id="prevYear" type="button" aria-label="Previous year" title="Previous year">«</button>
+                    <button class="calendar-nav" id="prevMonth" type="button" aria-label="Previous month" title="Previous month">‹</button>
+                </div>
                 <h2 class="calendar-title" id="calendarTitle"></h2>
-                <button class="calendar-nav" id="nextMonth" aria-label="Next month">›</button>
+                <div class="calendar-nav-group">
+                    <button class="calendar-nav" id="nextMonth" type="button" aria-label="Next month" title="Next month">›</button>
+                    <button class="calendar-nav" id="nextYear" type="button" aria-label="Next year" title="Next year">»</button>
+                </div>
             </div>
-            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar days">
-                <!-- Calendar will be generated here -->
-            </div>
+            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar days"></div>
             <div class="legend">
                 <div class="legend-item">
-                    <div class="legend-color office"></div>
+                    <div class="legend-color office" aria-hidden="true"></div>
                     <span>Office</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color pto"></div>
+                    <div class="legend-color pto" aria-hidden="true"></div>
                     <span>PTO</span>
                 </div>
+                <div class="legend-item">
+                    <div class="legend-color today" aria-hidden="true"></div>
+                    <span>Today</span>
+                </div>
             </div>
+            <div class="calendar-help">Tap a day to cycle: empty → Office → PTO → empty. Long-press for direct pick.</div>
         </section>
 
         <section class="forecast-section" role="region" aria-label="Monthly forecast">
-            <h3>Monthly Progress Overview</h3>
-            <div class="forecast-grid" id="forecastGrid">
-                <!-- Forecast will be generated here -->
-            </div>
+            <h3 id="forecastTitle">Quarter Forecast</h3>
+            <p class="forecast-subtitle" id="forecastSubtitle"></p>
+            <div class="forecast-grid" id="forecastGrid"></div>
         </section>
+
+        <div class="footer-note">
+            Keyboard: <kbd>O</kbd> Office &nbsp; <kbd>P</kbd> PTO &nbsp; <kbd>X</kbd> Clear &nbsp; <kbd>←</kbd>/<kbd>→</kbd> Navigate days
+        </div>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="day-picker" id="dayPicker" role="menu"></div>
 
     <script>
-        // Application state
+        const DEFAULT_MONTHLY_TARGET = 13;
+        const MONTH_NAMES_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const MONTH_NAMES_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const DAY_HEADERS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const STORAGE_KEY = 'attendanceTargetPlanner';
+
+        const today = new Date();
         const state = {
-            attendanceData: {}, // { "2024-01-15": "Office", "2024-01-16": "PTO", ... }
-            currentMonth: new Date().getMonth(),
-            currentYear: new Date().getFullYear(),
-            monthlyTarget: 13,
-            hasInitializedDemo: false
+            attendanceData: {},
+            currentMonth: today.getMonth(),
+            currentYear: today.getFullYear(),
+            monthlyTarget: DEFAULT_MONTHLY_TARGET,
+            ptoCountsTowardTarget: true,
+            hasInitializedDemo: false,
+            settingsOpen: false,
+            focusedDateKey: null
         };
 
-        // Initialize app
+        let toastTimer = null;
+        let longPressTimer = null;
+        let longPressed = false;
+
         document.addEventListener('DOMContentLoaded', () => {
             loadState();
             initializeDemoData();
@@ -543,356 +1140,803 @@
 
         function loadState() {
             try {
-                const saved = localStorage.getItem('attendanceTargetPlanner');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    state.attendanceData = parsed.attendanceData || {};
-                    state.currentMonth = parsed.currentMonth !== undefined ? parsed.currentMonth : new Date().getMonth();
-                    state.currentYear = parsed.currentYear !== undefined ? parsed.currentYear : new Date().getFullYear();
-                    state.hasInitializedDemo = parsed.hasInitializedDemo || false;
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return;
+                const parsed = JSON.parse(saved);
+                if (parsed.attendanceData && typeof parsed.attendanceData === 'object') {
+                    state.attendanceData = parsed.attendanceData;
+                }
+                if (Number.isInteger(parsed.currentMonth) && parsed.currentMonth >= 0 && parsed.currentMonth <= 11) {
+                    state.currentMonth = parsed.currentMonth;
+                }
+                if (Number.isInteger(parsed.currentYear) && parsed.currentYear >= 1970 && parsed.currentYear <= 9999) {
+                    state.currentYear = parsed.currentYear;
+                }
+                if (Number.isInteger(parsed.monthlyTarget) && parsed.monthlyTarget >= 0 && parsed.monthlyTarget <= 31) {
+                    state.monthlyTarget = parsed.monthlyTarget;
+                }
+                if (typeof parsed.ptoCountsTowardTarget === 'boolean') {
+                    state.ptoCountsTowardTarget = parsed.ptoCountsTowardTarget;
+                }
+                if (typeof parsed.hasInitializedDemo === 'boolean') {
+                    state.hasInitializedDemo = parsed.hasInitializedDemo;
                 }
             } catch (error) {
                 console.error('Error loading state:', error);
-                // Continue with empty state
             }
         }
 
         function saveState() {
             try {
-                localStorage.setItem('attendanceTargetPlanner', JSON.stringify({
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     attendanceData: state.attendanceData,
                     currentMonth: state.currentMonth,
                     currentYear: state.currentYear,
+                    monthlyTarget: state.monthlyTarget,
+                    ptoCountsTowardTarget: state.ptoCountsTowardTarget,
                     hasInitializedDemo: state.hasInitializedDemo
                 }));
             } catch (error) {
                 console.error('Error saving state:', error);
-                showToast('Failed to save data');
+                showToast('Failed to save — storage may be full');
             }
         }
 
         function initializeDemoData() {
-            // Only add demo data if no existing data AND we haven't initialized demo before
-            if (Object.keys(state.attendanceData).length === 0 && !state.hasInitializedDemo) {
-                const today = new Date();
-                const currentMonth = today.getMonth();
-                const currentYear = today.getFullYear();
-                
-                // Add some demo office days and PTO
-                const demoEntries = [
-                    { offset: -20, type: 'Office' },
-                    { offset: -19, type: 'Office' },
-                    { offset: -18, type: 'PTO' },
-                    { offset: -15, type: 'Office' },
-                    { offset: -14, type: 'Office' },
-                    { offset: -13, type: 'Office' },
-                    { offset: -10, type: 'PTO' },
-                    { offset: -8, type: 'Office' },
-                    { offset: -7, type: 'Office' },
-                    { offset: -6, type: 'Office' },
-                    { offset: -3, type: 'Office' },
-                    { offset: -1, type: 'Office' }
-                ];
+            if (Object.keys(state.attendanceData).length > 0 || state.hasInitializedDemo) return;
+            loadDemoData(false);
+            state.hasInitializedDemo = true;
+            saveState();
+        }
 
-                demoEntries.forEach(entry => {
-                    const date = new Date(today);
-                    date.setDate(date.getDate() + entry.offset);
-                    const dateKey = formatDateKey(date);
-                    state.attendanceData[dateKey] = entry.type;
-                });
-                
-                state.hasInitializedDemo = true;
-                saveState();
+        function loadDemoData(showFeedback) {
+            const now = new Date();
+            const demoEntries = [
+                { offset: -20, type: 'Office' },
+                { offset: -19, type: 'Office' },
+                { offset: -18, type: 'PTO' },
+                { offset: -15, type: 'Office' },
+                { offset: -14, type: 'Office' },
+                { offset: -13, type: 'Office' },
+                { offset: -10, type: 'PTO' },
+                { offset: -8, type: 'Office' },
+                { offset: -7, type: 'Office' },
+                { offset: -6, type: 'Office' },
+                { offset: -3, type: 'Office' },
+                { offset: -1, type: 'Office' }
+            ];
+            demoEntries.forEach(entry => {
+                const date = new Date(now);
+                date.setDate(date.getDate() + entry.offset);
+                if (date.getDay() === 0 || date.getDay() === 6) return;
+                state.attendanceData[formatDateKey(date)] = entry.type;
+            });
+            saveState();
+            if (showFeedback) {
+                render();
+                showToast('Demo data loaded');
             }
         }
 
         function setupEventListeners() {
-            document.getElementById('prevMonth').addEventListener('click', () => {
-                state.currentMonth--;
-                if (state.currentMonth < 0) {
-                    state.currentMonth = 11;
-                    state.currentYear--;
-                }
-                saveState();
-                render();
-            });
+            document.getElementById('prevMonth').addEventListener('click', () => navMonth(-1));
+            document.getElementById('nextMonth').addEventListener('click', () => navMonth(1));
+            document.getElementById('prevYear').addEventListener('click', () => navYear(-1));
+            document.getElementById('nextYear').addEventListener('click', () => navYear(1));
 
-            document.getElementById('nextMonth').addEventListener('click', () => {
-                state.currentMonth++;
-                if (state.currentMonth > 11) {
-                    state.currentMonth = 0;
-                    state.currentYear++;
-                }
-                saveState();
-                render();
-            });
-
-            // Today button
             document.getElementById('todayButton').addEventListener('click', () => {
-                const today = new Date();
-                state.currentMonth = today.getMonth();
-                state.currentYear = today.getFullYear();
+                const now = new Date();
+                state.currentMonth = now.getMonth();
+                state.currentYear = now.getFullYear();
+                state.focusedDateKey = formatDateKey(now);
                 saveState();
                 render();
-                showToast('Navigated to current month');
+                focusDay(state.focusedDateKey);
             });
 
-            // Calendar day clicks and keyboard navigation
-            document.getElementById('calendarGrid').addEventListener('click', (e) => {
-                if (e.target.classList.contains('calendar-day') && !e.target.classList.contains('other-month')) {
-                    const date = e.target.dataset.date;
-                    if (date) {
-                        toggleDayStatus(date);
-                    }
-                }
+            document.getElementById('settingsToggle').addEventListener('click', () => {
+                state.settingsOpen = !state.settingsOpen;
+                const panel = document.getElementById('settingsPanel');
+                const btn = document.getElementById('settingsToggle');
+                panel.hidden = !state.settingsOpen;
+                btn.setAttribute('aria-expanded', String(state.settingsOpen));
+                btn.textContent = state.settingsOpen ? 'Hide Settings' : 'Settings';
             });
 
-            document.getElementById('calendarGrid').addEventListener('keydown', (e) => {
-                if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('calendar-day') && !e.target.classList.contains('other-month')) {
-                    e.preventDefault();
-                    const date = e.target.dataset.date;
-                    if (date) {
-                        toggleDayStatus(date);
-                    }
-                }
-            });
-
-            // Clear all data button
-            document.getElementById('clearAllData').addEventListener('click', () => {
-                if (confirm('Are you sure you want to clear all attendance data? This cannot be undone.')) {
-                    state.attendanceData = {};
+            document.getElementById('targetInput').addEventListener('change', (e) => {
+                const value = parseInt(e.target.value, 10);
+                if (Number.isInteger(value) && value >= 0 && value <= 31) {
+                    state.monthlyTarget = value;
                     saveState();
                     render();
-                    showToast('All data cleared');
+                    showToast(`Monthly target set to ${value} day${value === 1 ? '' : 's'}`);
+                } else {
+                    e.target.value = state.monthlyTarget;
+                    showToast('Target must be between 0 and 31');
+                }
+            });
+
+            document.getElementById('ptoToggle').addEventListener('change', (e) => {
+                state.ptoCountsTowardTarget = e.target.checked;
+                saveState();
+                render();
+                showToast(e.target.checked ? 'PTO now counts toward target' : 'Only Office days count toward target');
+            });
+
+            document.getElementById('clearAllData').addEventListener('click', () => {
+                if (!confirm('Clear all attendance data? This cannot be undone.')) return;
+                state.attendanceData = {};
+                state.hasInitializedDemo = true;
+                saveState();
+                render();
+                showToast('All attendance data cleared');
+            });
+
+            document.getElementById('restoreDemo').addEventListener('click', () => {
+                if (Object.keys(state.attendanceData).length > 0) {
+                    if (!confirm('Loading demo data will be added alongside your existing entries. Continue?')) return;
+                }
+                loadDemoData(true);
+            });
+
+            document.getElementById('exportButton').addEventListener('click', exportToCSV);
+
+            const grid = document.getElementById('calendarGrid');
+            grid.addEventListener('click', handleDayClick);
+            grid.addEventListener('keydown', handleGridKeydown);
+
+            // Long-press for day picker
+            grid.addEventListener('pointerdown', handlePointerDown);
+            grid.addEventListener('pointerup', cancelLongPress);
+            grid.addEventListener('pointerleave', cancelLongPress);
+            grid.addEventListener('pointercancel', cancelLongPress);
+            grid.addEventListener('contextmenu', handleContextMenu);
+
+            // Close day picker on outside click
+            document.addEventListener('click', (e) => {
+                const picker = document.getElementById('dayPicker');
+                if (!picker.contains(e.target) && !e.target.classList.contains('calendar-day')) {
+                    hideDayPicker();
+                }
+            });
+
+            // Global keyboard shortcuts (when not in an input)
+            document.addEventListener('keydown', (e) => {
+                const tag = (e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+                if (e.target.classList && e.target.classList.contains('calendar-day')) return;
+                if (e.altKey || e.ctrlKey || e.metaKey) return;
+
+                if (e.key === 'ArrowLeft') { navMonth(-1); e.preventDefault(); }
+                else if (e.key === 'ArrowRight') { navMonth(1); e.preventDefault(); }
+                else if (e.key === 't' || e.key === 'T') {
+                    document.getElementById('todayButton').click(); e.preventDefault();
                 }
             });
         }
 
-        function toggleDayStatus(dateKey) {
-            const current = state.attendanceData[dateKey];
-            
-            if (!current) {
-                state.attendanceData[dateKey] = 'Office';
-                showToast('Marked as Office day');
-            } else if (current === 'Office') {
-                state.attendanceData[dateKey] = 'PTO';
-                showToast('Marked as PTO day');
-            } else if (current === 'PTO') {
-                delete state.attendanceData[dateKey];
-                showToast('Attendance removed');
-            }
-            
+        function navMonth(delta) {
+            state.currentMonth += delta;
+            if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+            else if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
             saveState();
             render();
         }
 
+        function navYear(delta) {
+            state.currentYear += delta;
+            saveState();
+            render();
+        }
+
+        function handleDayClick(e) {
+            if (longPressed) { longPressed = false; return; }
+            const target = e.target.closest('.calendar-day');
+            if (!target || target.classList.contains('other-month')) return;
+            const date = target.dataset.date;
+            if (date) toggleDayStatus(date);
+        }
+
+        function handlePointerDown(e) {
+            const target = e.target.closest('.calendar-day');
+            if (!target || target.classList.contains('other-month')) return;
+            longPressed = false;
+            const date = target.dataset.date;
+            longPressTimer = setTimeout(() => {
+                longPressed = true;
+                showDayPicker(target, date);
+                if (navigator.vibrate) navigator.vibrate(10);
+            }, 450);
+        }
+
+        function cancelLongPress() {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        }
+
+        function handleContextMenu(e) {
+            const target = e.target.closest('.calendar-day');
+            if (!target || target.classList.contains('other-month')) return;
+            e.preventDefault();
+            const date = target.dataset.date;
+            showDayPicker(target, date);
+        }
+
+        function showDayPicker(anchor, dateKey) {
+            const picker = document.getElementById('dayPicker');
+            picker.innerHTML = `
+                <button type="button" class="office-btn" data-action="Office">Office</button>
+                <button type="button" class="pto-btn" data-action="PTO">PTO</button>
+                <button type="button" class="clear-btn" data-action="clear">Clear</button>
+            `;
+            picker.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const action = btn.dataset.action;
+                    if (action === 'clear') {
+                        delete state.attendanceData[dateKey];
+                        showToast('Attendance removed');
+                    } else {
+                        state.attendanceData[dateKey] = action;
+                        showToast(`Marked as ${action} day`);
+                    }
+                    saveState();
+                    hideDayPicker();
+                    render();
+                });
+            });
+            const rect = anchor.getBoundingClientRect();
+            picker.classList.add('show');
+            const pickerRect = picker.getBoundingClientRect();
+            let left = rect.left + rect.width / 2 - pickerRect.width / 2;
+            let top = rect.bottom + 6;
+            if (left < 8) left = 8;
+            if (left + pickerRect.width > window.innerWidth - 8) left = window.innerWidth - pickerRect.width - 8;
+            if (top + pickerRect.height > window.innerHeight - 8) top = rect.top - pickerRect.height - 6;
+            picker.style.left = `${left}px`;
+            picker.style.top = `${top}px`;
+        }
+
+        function hideDayPicker() {
+            document.getElementById('dayPicker').classList.remove('show');
+        }
+
+        function handleGridKeydown(e) {
+            const target = e.target.closest('.calendar-day');
+            if (!target) return;
+            const dateKey = target.dataset.date;
+            if (!dateKey || target.classList.contains('other-month')) return;
+
+            const date = parseDateKey(dateKey);
+
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleDayStatus(dateKey);
+            } else if (e.key === 'o' || e.key === 'O') {
+                e.preventDefault();
+                setDayStatus(dateKey, 'Office');
+            } else if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                setDayStatus(dateKey, 'PTO');
+            } else if (e.key === 'x' || e.key === 'X' || e.key === 'Delete' || e.key === 'Backspace') {
+                e.preventDefault();
+                setDayStatus(dateKey, null);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                moveFocusedDay(date, -1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                moveFocusedDay(date, 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                moveFocusedDay(date, -7);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                moveFocusedDay(date, 7);
+            }
+        }
+
+        function moveFocusedDay(date, days) {
+            const next = new Date(date);
+            next.setDate(next.getDate() + days);
+            if (next.getMonth() !== state.currentMonth || next.getFullYear() !== state.currentYear) {
+                state.currentMonth = next.getMonth();
+                state.currentYear = next.getFullYear();
+                saveState();
+            }
+            state.focusedDateKey = formatDateKey(next);
+            render();
+            focusDay(state.focusedDateKey);
+        }
+
+        function focusDay(dateKey) {
+            const el = document.querySelector(`.calendar-day[data-date="${dateKey}"]`);
+            if (el && !el.classList.contains('other-month')) el.focus();
+        }
+
+        function toggleDayStatus(dateKey) {
+            const current = state.attendanceData[dateKey];
+            if (!current) setDayStatus(dateKey, 'Office');
+            else if (current === 'Office') setDayStatus(dateKey, 'PTO');
+            else setDayStatus(dateKey, null);
+        }
+
+        function setDayStatus(dateKey, status) {
+            if (status === null) {
+                if (state.attendanceData[dateKey]) {
+                    delete state.attendanceData[dateKey];
+                    showToast('Attendance removed');
+                }
+            } else {
+                state.attendanceData[dateKey] = status;
+                showToast(`Marked as ${status} day`);
+            }
+            state.focusedDateKey = dateKey;
+            saveState();
+            render();
+            focusDay(dateKey);
+        }
+
+        function exportToCSV() {
+            const entries = Object.entries(state.attendanceData).sort((a, b) => a[0].localeCompare(b[0]));
+            if (entries.length === 0) {
+                showToast('No data to export');
+                return;
+            }
+            const rows = [['Date', 'Status']].concat(entries);
+            const csv = rows.map(row => row.map(cell => {
+                const s = String(cell);
+                if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+                return s;
+            }).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `attendance-${formatDateKey(new Date())}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`Exported ${entries.length} entries`);
+        }
+
         function render() {
             try {
-                renderTargetInfo();
+                renderSummaryBanner();
+                renderInsights();
                 renderQuarterCards();
                 renderCalendar();
                 renderForecast();
+                renderSettings();
             } catch (error) {
                 console.error('Render error:', error);
                 showToast('Display error occurred');
             }
         }
 
-        function renderTargetInfo() {
-            document.getElementById('targetDisplay').textContent = `${state.monthlyTarget} days`;
-            document.getElementById('quarterlyTargetDisplay').textContent = `${state.monthlyTarget * 3} days`;
+        function renderSettings() {
+            document.getElementById('targetInput').value = state.monthlyTarget;
+            document.getElementById('ptoToggle').checked = state.ptoCountsTowardTarget;
+        }
+
+        function renderSummaryBanner() {
+            const realToday = new Date();
+            const realMonth = realToday.getMonth();
+            const realYear = realToday.getFullYear();
+            const mb = getMonthlyBreakdown(realYear, realMonth);
+            const monthTarget = state.monthlyTarget;
+            const monthNeeded = Math.max(0, monthTarget - mb.counted);
+            const workDaysLeft = getWorkingDaysRemainingInMonth(realYear, realMonth, realToday);
+
+            const realQuarter = getQuarterForMonth(realMonth);
+            const qb = getQuarterBreakdown(realYear, realQuarter);
+            const quarterTarget = monthTarget * 3;
+
+            document.getElementById('summaryMonthCounted').textContent = mb.counted;
+            document.getElementById('summaryMonthSub').textContent = `of ${monthTarget} target`;
+            document.getElementById('summaryQuarterCounted').textContent = qb.counted;
+            document.getElementById('summaryQuarterSub').textContent = `of ${quarterTarget} target`;
+            document.getElementById('summaryDaysLeft').textContent = workDaysLeft;
+            document.getElementById('summaryNeeded').textContent = monthNeeded;
+        }
+
+        function renderInsights() {
+            const container = document.getElementById('insightsContainer');
+            const realToday = new Date();
+            const realMonth = realToday.getMonth();
+            const realYear = realToday.getFullYear();
+            const mb = getMonthlyBreakdown(realYear, realMonth);
+            const monthTarget = state.monthlyTarget;
+            const monthNeeded = Math.max(0, monthTarget - mb.counted);
+            const workDaysLeft = getWorkingDaysRemainingInMonth(realYear, realMonth, realToday);
+
+            let banner = '';
+            if (monthTarget === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            if (monthNeeded === 0) {
+                banner = `<div class="insights-banner success"><div class="insights-icon" aria-hidden="true">✓</div><div class="insights-content"><strong>Monthly target met!</strong> You've logged ${mb.counted} of ${monthTarget} counted day${monthTarget === 1 ? '' : 's'} this month.</div></div>`;
+            } else if (monthNeeded > workDaysLeft) {
+                banner = `<div class="insights-banner warning"><div class="insights-icon" aria-hidden="true">!</div><div class="insights-content"><strong>Target at risk.</strong> You need <strong>${monthNeeded}</strong> more day${monthNeeded === 1 ? '' : 's'}, but only <strong>${workDaysLeft}</strong> work day${workDaysLeft === 1 ? '' : 's'} remain this month.</div></div>`;
+            } else {
+                const pace = workDaysLeft > 0 ? Math.ceil((monthNeeded / workDaysLeft) * 10) / 10 : 0;
+                banner = `<div class="insights-banner info"><div class="insights-icon" aria-hidden="true">→</div><div class="insights-content">Need <strong>${monthNeeded}</strong> more day${monthNeeded === 1 ? '' : 's'} across <strong>${workDaysLeft}</strong> remaining work day${workDaysLeft === 1 ? '' : 's'} this month${pace > 0 ? ` — about ${formatRatio(monthNeeded, workDaysLeft)} of remaining work days` : ''}.</div></div>`;
+            }
+            container.innerHTML = banner;
+        }
+
+        function formatRatio(a, b) {
+            if (b === 0) return '0';
+            if (a === b) return 'all';
+            return `${a}/${b}`;
         }
 
         function renderQuarterCards() {
             const container = document.getElementById('quarterCards');
-            const quarters = getQuarterlyData();
-            
-            container.innerHTML = quarters.map((quarter, index) => {
-                const progressPercentage = quarter.target > 0 ? Math.min(100, (quarter.completed / quarter.target) * 100) : 0;
-                const progressRounded = quarter.target > 0 ? Math.round((quarter.completed / quarter.target) * 100) : 0;
-                
+            const realToday = new Date();
+            const realMonth = realToday.getMonth();
+            const realYear = realToday.getFullYear();
+            const realQuarterIdx = getQuarterForMonth(realMonth);
+
+            const quarters = [0, 1, 2, 3].map(idx => {
+                const months = [idx * 3, idx * 3 + 1, idx * 3 + 2];
+                const breakdown = getQuarterBreakdown(state.currentYear, idx);
+                return {
+                    name: `Q${idx + 1} ${state.currentYear}`,
+                    months,
+                    target: state.monthlyTarget * 3,
+                    breakdown,
+                    idx
+                };
+            });
+
+            container.innerHTML = quarters.map(quarter => {
+                const completed = quarter.breakdown.counted;
+                const target = quarter.target;
+                const progressPercentage = target > 0 ? Math.min(100, (completed / target) * 100) : 0;
+                const progressRounded = target > 0 ? Math.round(progressPercentage) : 0;
+                const isCurrentRealQuarter = (state.currentYear === realYear && quarter.idx === realQuarterIdx);
+                const viewedQuarter = getQuarterForMonth(state.currentMonth);
+                const isViewedQuarter = (quarter.idx === viewedQuarter);
+
+                const status = computeQuarterStatus(quarter, realYear, realMonth, realToday);
+                const isMet = completed >= target && target > 0;
+
+                const classes = ['quarter-card'];
+                if (isCurrentRealQuarter) classes.push('current');
+                if (isViewedQuarter) classes.push('viewed');
+
                 return `
-                    <div class="quarter-card">
-                        <h3>${quarter.name}</h3>
-                        <div class="quarter-stats">
-                            <div class="stat">
-                                <span class="stat-value">${quarter.completed}</span>
-                                <div class="stat-label">Completed Days</div>
+                    <div class="${classes.join(' ')}" role="group" aria-label="${escapeAttr(quarter.name)}">
+                        <div class="quarter-card-header">
+                            <h3>${escapeText(quarter.name)}</h3>
+                            <span class="quarter-status ${status.cls}">${escapeText(status.label)}</span>
+                        </div>
+                        <div class="quarter-breakdown">
+                            <div class="breakdown-item office">
+                                <span class="breakdown-value">${quarter.breakdown.office}</span>
+                                <span class="breakdown-label">Office</span>
                             </div>
-                            <div class="stat">
-                                <span class="stat-value">${quarter.target}</span>
-                                <div class="stat-label">Target Days</div>
+                            <div class="breakdown-item pto">
+                                <span class="breakdown-value">${quarter.breakdown.pto}</span>
+                                <span class="breakdown-label">PTO</span>
+                            </div>
+                            <div class="breakdown-item total">
+                                <span class="breakdown-value">${quarter.breakdown.counted}</span>
+                                <span class="breakdown-label">Counted</span>
                             </div>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="${progressRounded}" aria-valuemin="0" aria-valuemax="100" aria-label="${escapeAttr(quarter.name)} progress">
+                            <div class="progress-fill ${isMet ? 'met' : ''}" style="width: ${progressPercentage}%"></div>
                         </div>
-                        <div class="progress-text">${quarter.completed} / ${quarter.target} days (${progressRounded}%)</div>
+                        <div class="progress-text">
+                            <span><strong>${completed}</strong> / ${target} days</span>
+                            <span>${progressRounded}%</span>
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function computeQuarterStatus(quarter, realYear, realMonth, realToday) {
+            const target = quarter.target;
+            const completed = quarter.breakdown.counted;
+            const quarterEndYear = state.currentYear;
+            const quarterEndMonth = quarter.months[2];
+            const quarterStartMonth = quarter.months[0];
+
+            const isPastQuarter = quarterEndYear < realYear || (quarterEndYear === realYear && quarterEndMonth < realMonth);
+            const isFutureQuarter = quarterEndYear > realYear || (quarterEndYear === realYear && quarterStartMonth > realMonth);
+
+            if (target === 0) return { label: '—', cls: 'future' };
+
+            if (isPastQuarter) {
+                return completed >= target
+                    ? { label: 'Target met', cls: 'met' }
+                    : { label: `Short ${target - completed}`, cls: 'behind' };
+            }
+            if (isFutureQuarter) {
+                return { label: 'Upcoming', cls: 'future' };
+            }
+            // Current quarter — measure pace vs work-days-elapsed
+            const expectedSoFar = expectedAttendanceByNow(quarter, realYear, realMonth, realToday);
+            if (completed >= target) return { label: 'Target met', cls: 'met' };
+            if (completed >= expectedSoFar) return { label: 'On track', cls: 'on-track' };
+            return { label: `Behind ${Math.max(0, Math.ceil(expectedSoFar - completed))}`, cls: 'behind' };
+        }
+
+        function expectedAttendanceByNow(quarter, realYear, realMonth, realToday) {
+            // Estimate proportional progress through the quarter based on work-days elapsed.
+            let totalWorkDays = 0;
+            let elapsedWorkDays = 0;
+            quarter.months.forEach(m => {
+                const days = new Date(state.currentYear, m + 1, 0).getDate();
+                for (let d = 1; d <= days; d++) {
+                    const date = new Date(state.currentYear, m, d);
+                    const dow = date.getDay();
+                    if (dow === 0 || dow === 6) continue;
+                    totalWorkDays++;
+                    if (date <= realToday) elapsedWorkDays++;
+                }
+            });
+            if (totalWorkDays === 0) return 0;
+            return (elapsedWorkDays / totalWorkDays) * quarter.target;
         }
 
         function renderCalendar() {
             const title = document.getElementById('calendarTitle');
             const grid = document.getElementById('calendarGrid');
-            
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                              'July', 'August', 'September', 'October', 'November', 'December'];
-            
-            title.textContent = `${monthNames[state.currentMonth]} ${state.currentYear}`;
-            
+
+            title.textContent = `${MONTH_NAMES_LONG[state.currentMonth]} ${state.currentYear}`;
+
             const firstDay = new Date(state.currentYear, state.currentMonth, 1);
-            const lastDay = new Date(state.currentYear, state.currentMonth + 1, 0);
             const startDate = new Date(firstDay);
             startDate.setDate(startDate.getDate() - firstDay.getDay());
-            
-            const today = new Date();
-            const todayKey = formatDateKey(today);
-            
-            let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                .map(day => `<div class="calendar-day-header">${day}</div>`)
-                .join('');
-            
+
+            const realToday = new Date();
+            const todayKey = formatDateKey(realToday);
+
+            const focusKey = state.focusedDateKey;
+            let focusCandidate = null;
+
+            let html = DAY_HEADERS.map(day => `<div class="calendar-day-header">${day}</div>`).join('');
+
             for (let i = 0; i < 42; i++) {
                 const date = new Date(startDate);
                 date.setDate(date.getDate() + i);
                 const dateKey = formatDateKey(date);
-                const isCurrentMonth = date.getMonth() === state.currentMonth;
+                const isCurrentMonth = date.getMonth() === state.currentMonth && date.getFullYear() === state.currentYear;
                 const isToday = dateKey === todayKey;
                 const status = state.attendanceData[dateKey];
-                
-                let classes = ['calendar-day'];
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
+                const classes = ['calendar-day'];
                 if (!isCurrentMonth) classes.push('other-month');
+                if (isWeekend && isCurrentMonth && !status) classes.push('weekend');
                 if (isToday) classes.push('today');
                 if (status === 'Office') classes.push('office');
                 if (status === 'PTO') classes.push('pto');
-                
-                const tabindex = isCurrentMonth ? '0' : '-1';
-                const role = isCurrentMonth ? 'button' : '';
-                const statusText = status ? `${status} day` : 'click to mark attendance';
-                const ariaLabel = isCurrentMonth ? `${monthNames[date.getMonth()]} ${date.getDate()}, ${statusText}` : '';
-                
-                html += `<div class="${classes.join(' ')}" data-date="${dateKey}" tabindex="${tabindex}" role="${role}" aria-label="${ariaLabel}">${date.getDate()}</div>`;
+
+                let tabindex = '-1';
+                if (isCurrentMonth) {
+                    if (focusKey === dateKey) { tabindex = '0'; focusCandidate = dateKey; }
+                    else if (!focusCandidate && isToday) { focusCandidate = dateKey; }
+                }
+
+                const role = isCurrentMonth ? 'button' : 'presentation';
+                const statusText = status ? `marked as ${status}` : 'no attendance';
+                const ariaLabel = isCurrentMonth
+                    ? `${MONTH_NAMES_LONG[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}, ${statusText}${isToday ? ', today' : ''}`
+                    : '';
+
+                html += `<div class="${classes.join(' ')}" data-date="${dateKey}" tabindex="${tabindex}" role="${role}"${ariaLabel ? ` aria-label="${escapeAttr(ariaLabel)}"` : ''}${status ? ` aria-pressed="true"` : isCurrentMonth ? ' aria-pressed="false"' : ''}>${date.getDate()}</div>`;
             }
-            
+
             grid.innerHTML = html;
+
+            // Ensure exactly one focusable day cell exists
+            if (!focusCandidate) {
+                const first = grid.querySelector('.calendar-day:not(.other-month)');
+                if (first) {
+                    first.setAttribute('tabindex', '0');
+                    focusCandidate = first.dataset.date;
+                }
+            } else {
+                grid.querySelectorAll('.calendar-day').forEach(el => {
+                    if (el.classList.contains('other-month')) return;
+                    el.setAttribute('tabindex', el.dataset.date === focusCandidate ? '0' : '-1');
+                });
+            }
+            state.focusedDateKey = focusCandidate;
         }
 
         function renderForecast() {
             const container = document.getElementById('forecastGrid');
-            const currentQuarter = getCurrentQuarter();
-            const forecast = calculateForecast(currentQuarter);
-            
-            container.innerHTML = forecast.map(month => {
-                let label;
-                if (month.isRemaining) {
-                    label = month.needed > 0 ? 'to reach target' : 'target reached';
-                } else {
-                    label = month.needed > 0 ? 'behind target' : 'target met';
+            const title = document.getElementById('forecastTitle');
+            const subtitle = document.getElementById('forecastSubtitle');
+
+            const viewedQuarterIdx = getQuarterForMonth(state.currentMonth);
+            const quarterMonths = [viewedQuarterIdx * 3, viewedQuarterIdx * 3 + 1, viewedQuarterIdx * 3 + 2];
+            const quarterTarget = state.monthlyTarget * 3;
+            const realToday = new Date();
+            const realYear = realToday.getFullYear();
+            const realMonth = realToday.getMonth();
+
+            title.textContent = `Q${viewedQuarterIdx + 1} ${state.currentYear} Forecast`;
+
+            let quarterCompleted = 0;
+            quarterMonths.forEach(m => {
+                quarterCompleted += getMonthlyBreakdown(state.currentYear, m).counted;
+            });
+            const remainingForQuarter = Math.max(0, quarterTarget - quarterCompleted);
+
+            // Determine which months in this quarter are in the future (relative to real today)
+            const futureMonths = quarterMonths.filter(m =>
+                state.currentYear > realYear ||
+                (state.currentYear === realYear && m > realMonth)
+            );
+            const isCurrentMonthInQuarter = state.currentYear === realYear && quarterMonths.includes(realMonth);
+            const distributionMonths = [];
+            if (isCurrentMonthInQuarter) distributionMonths.push(realMonth);
+            futureMonths.forEach(m => distributionMonths.push(m));
+
+            // Distribute remaining quarter target across distributionMonths,
+            // respecting work-days available in each month (no negative, no overshoot).
+            const distribution = distributeRemaining(remainingForQuarter, distributionMonths, realToday);
+
+            subtitle.textContent = remainingForQuarter === 0
+                ? `Quarter target of ${quarterTarget} days already met.`
+                : `${remainingForQuarter} day${remainingForQuarter === 1 ? '' : 's'} still needed across the rest of Q${viewedQuarterIdx + 1}.`;
+
+            container.innerHTML = quarterMonths.map(month => {
+                const breakdown = getMonthlyBreakdown(state.currentYear, month);
+                const completed = breakdown.counted;
+                const isPast = state.currentYear < realYear || (state.currentYear === realYear && month < realMonth);
+                const isCurrentReal = state.currentYear === realYear && month === realMonth;
+                const isFuture = state.currentYear > realYear || (state.currentYear === realYear && month > realMonth);
+
+                let cls = '';
+                let bigNumber = 0;
+                let label = '';
+                let sub = '';
+
+                if (isPast) {
+                    bigNumber = completed;
+                    if (completed >= state.monthlyTarget) {
+                        cls = 'past-met';
+                        label = 'Target met';
+                        sub = `${completed}/${state.monthlyTarget} counted`;
+                    } else {
+                        cls = 'past-short';
+                        label = `Short by ${state.monthlyTarget - completed}`;
+                        sub = `${completed}/${state.monthlyTarget} counted`;
+                    }
+                } else if (isCurrentReal) {
+                    cls = 'current';
+                    const moreNeeded = distribution[month] != null ? distribution[month] : Math.max(0, state.monthlyTarget - completed);
+                    bigNumber = moreNeeded;
+                    label = moreNeeded === 0 ? 'On pace' : 'more days needed';
+                    const workLeft = getWorkingDaysRemainingInMonth(state.currentYear, month, realToday);
+                    sub = `${completed} done · ${workLeft} work day${workLeft === 1 ? '' : 's'} left`;
+                } else if (isFuture) {
+                    const moreNeeded = distribution[month] != null ? distribution[month] : state.monthlyTarget;
+                    bigNumber = moreNeeded;
+                    label = moreNeeded === 0 ? 'no days needed' : 'days needed';
+                    sub = 'upcoming month';
                 }
-                
+
                 return `
-                    <div class="forecast-month ${month.isCurrent ? 'current' : ''}">
-                        <div class="forecast-month-name">${month.name}</div>
-                        <div class="forecast-days">${month.needed}</div>
-                        <div class="forecast-label">${label}</div>
+                    <div class="forecast-month ${cls}">
+                        <div class="forecast-month-name">${MONTH_NAMES_SHORT[month]} ${state.currentYear}</div>
+                        <div class="forecast-days">${bigNumber}</div>
+                        <div class="forecast-label">${escapeText(label)}</div>
+                        <div class="forecast-sub">${escapeText(sub)}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        function getQuarterlyData() {
-            const quarters = [
-                { name: `Q1 ${state.currentYear}`, months: [0, 1, 2], target: state.monthlyTarget * 3 },
-                { name: `Q2 ${state.currentYear}`, months: [3, 4, 5], target: state.monthlyTarget * 3 },
-                { name: `Q3 ${state.currentYear}`, months: [6, 7, 8], target: state.monthlyTarget * 3 },
-                { name: `Q4 ${state.currentYear}`, months: [9, 10, 11], target: state.monthlyTarget * 3 }
-            ];
-            
-            return quarters.map(quarter => {
-                let completed = 0;
-                quarter.months.forEach(month => {
-                    completed += getMonthlyCount(state.currentYear, month);
-                });
-                
-                return {
-                    ...quarter,
-                    completed
-                };
-            });
-        }
+        function distributeRemaining(remaining, months, realToday) {
+            // Returns { monthIndex: daysAllocated } for each month in `months`,
+            // distributing `remaining` days across them, weighted by remaining work-days.
+            const result = {};
+            if (months.length === 0 || remaining <= 0) {
+                months.forEach(m => { result[m] = 0; });
+                return result;
+            }
 
-        function getCurrentQuarter() {
-            const currentMonth = state.currentMonth;
-            const quarterMonths = [
-                [0, 1, 2],   // Q1
-                [3, 4, 5],   // Q2
-                [6, 7, 8],   // Q3
-                [9, 10, 11]  // Q4
-            ];
-            
-            return quarterMonths.find(months => months.includes(currentMonth));
-        }
-
-        function calculateForecast(quarterMonths) {
-            const currentMonth = state.currentMonth;
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            
-            // Calculate total completed days in current quarter
-            let quarterCompleted = 0;
-            quarterMonths.forEach(month => {
-                quarterCompleted += getMonthlyCount(state.currentYear, month);
+            const capacities = months.map(m => {
+                const completedInMonth = getMonthlyBreakdown(state.currentYear, m).counted;
+                const monthTargetRemaining = Math.max(0, state.monthlyTarget - completedInMonth);
+                const workLeftInMonth = m === realToday.getMonth() && state.currentYear === realToday.getFullYear()
+                    ? getWorkingDaysRemainingInMonth(state.currentYear, m, realToday)
+                    : getTotalWorkingDaysInMonth(state.currentYear, m);
+                return { month: m, monthTargetRemaining, workLeftInMonth };
             });
-            
-            // Calculate remaining days needed for quarter
-            const quarterTarget = state.monthlyTarget * 3;
-            const remainingForQuarter = Math.max(0, quarterTarget - quarterCompleted);
-            
-            // Get remaining months in quarter
-            const remainingMonths = quarterMonths.filter(month => month >= currentMonth);
-            
-            // Distribute remaining days across remaining months
-            const daysPerMonth = remainingMonths.length > 0 ? 
-                Math.ceil(remainingForQuarter / remainingMonths.length) : 0;
-            
-            return quarterMonths.map(month => {
-                const isRemaining = month >= currentMonth;
-                const completed = getMonthlyCount(state.currentYear, month);
-                let needed;
-                
-                if (!isRemaining) {
-                    // Past months - show how much they're behind target
-                    needed = Math.max(0, state.monthlyTarget - completed);
-                } else {
-                    // Remaining months - distribute remaining quarter days
-                    needed = Math.max(0, daysPerMonth);
+
+            // Total weight = sum of remaining work days
+            const totalWeight = capacities.reduce((s, c) => s + c.workLeftInMonth, 0);
+            let allocated = 0;
+            const initial = capacities.map(c => {
+                const weight = totalWeight > 0 ? (c.workLeftInMonth / totalWeight) : (1 / capacities.length);
+                let alloc = Math.round(remaining * weight);
+                alloc = Math.min(alloc, c.workLeftInMonth);
+                allocated += alloc;
+                return { ...c, alloc };
+            });
+
+            // Adjust for rounding drift
+            let drift = remaining - allocated;
+            // Add or subtract one day at a time, biased toward earlier months
+            let i = 0;
+            while (drift !== 0 && i < initial.length * 4) {
+                const idx = drift > 0 ? i % initial.length : initial.length - 1 - (i % initial.length);
+                const c = initial[idx];
+                if (drift > 0 && c.alloc < c.workLeftInMonth) {
+                    c.alloc++;
+                    drift--;
+                } else if (drift < 0 && c.alloc > 0) {
+                    c.alloc--;
+                    drift++;
                 }
-                
-                return {
-                    name: monthNames[month],
-                    needed,
-                    isCurrent: month === currentMonth,
-                    isRemaining
-                };
-            });
+                i++;
+            }
+
+            initial.forEach(c => { result[c.month] = c.alloc; });
+            return result;
         }
 
-        function getMonthlyCount(year, month) {
+        function getMonthlyBreakdown(year, month) {
+            let office = 0;
+            let pto = 0;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = formatDateKey(new Date(year, month, day));
+                const status = state.attendanceData[dateKey];
+                if (status === 'Office') office++;
+                else if (status === 'PTO') pto++;
+            }
+            const counted = office + (state.ptoCountsTowardTarget ? pto : 0);
+            return { office, pto, total: office + pto, counted };
+        }
+
+        function getQuarterBreakdown(year, quarterIdx) {
+            const months = [quarterIdx * 3, quarterIdx * 3 + 1, quarterIdx * 3 + 2];
+            let office = 0, pto = 0, counted = 0;
+            months.forEach(m => {
+                const mb = getMonthlyBreakdown(year, m);
+                office += mb.office;
+                pto += mb.pto;
+                counted += mb.counted;
+            });
+            return { office, pto, total: office + pto, counted };
+        }
+
+        function getQuarterForMonth(month) {
+            return Math.floor(month / 3);
+        }
+
+        function getWorkingDaysRemainingInMonth(year, month, fromDate) {
             let count = 0;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dateKey = formatDateKey(date);
-                const status = state.attendanceData[dateKey];
-                
-                if (status === 'Office' || status === 'PTO') {
-                    count++;
-                }
+            const startDay = (fromDate && fromDate.getFullYear() === year && fromDate.getMonth() === month)
+                ? fromDate.getDate()
+                : 1;
+            for (let day = startDay; day <= daysInMonth; day++) {
+                const dow = new Date(year, month, day).getDay();
+                if (dow !== 0 && dow !== 6) count++;
             }
-            
+            return count;
+        }
+
+        function getTotalWorkingDaysInMonth(year, month) {
+            let count = 0;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dow = new Date(year, month, day).getDay();
+                if (dow !== 0 && dow !== 6) count++;
+            }
             return count;
         }
 
@@ -900,13 +1944,30 @@
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
 
+        function parseDateKey(key) {
+            const parts = key.split('-');
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+
+        function escapeText(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function escapeAttr(s) {
+            return escapeText(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            
-            setTimeout(() => {
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
+                toastTimer = null;
             }, 2000);
         }
     </script>
